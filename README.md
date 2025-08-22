@@ -351,3 +351,57 @@ If you prefer the implicit behaviour, simply delete the field – Typescript wil
 | `.pnp.cjs` & `.pnp.loader.mjs`    | Yarn           | PnP mapping & loader – **part of the lockfile**.                                   | **Yes** (already tracked via git).               |
 
 > **Advisory:** Always re-run `yarn install` after upgrading Yarn (it may regenerate `.pnp.cjs`). Commit the diff, then verify editors still resolve packages. For CI, no extra cache key is needed – Yarn's cache key already respects the lockfile hash.
+
+### Yarn PnP Future-Proofing & Maintenance Guide (June 2025)
+
+This section documents the process undertaken to upgrade the project's dependencies, resolve security vulnerabilities, and troubleshoot a series of complex local and Vercel deployment issues related to Yarn PnP.
+
+#### 1. Initial Successes
+
+The initial phase of the work was successful:
+
+- **Dependencies Updated:** All project dependencies were updated to their latest versions using `yarn up`.
+- **Vulnerabilities Resolved:** All Dependabot security alerts were resolved, confirmed by a clean `yarn npm audit`.
+- **`.gitignore` Optimized:** The `.gitignore` file was updated to correctly handle Yarn PnP's zero-install cache and to use glob patterns to ignore large SWC binaries.
+- **Tests Passed:** The Jest test suite was updated to reflect changes in the application's content, and all tests passed locally.
+- **Project Upgraded to Node.js 22:** The project was consistently updated across `package.json`, `.nvmrc`, and `vercel.json` to use the Node.js 22 runtime, aligning local and deployment environments.
+
+---
+
+#### 2. Vercel Deployment Troubleshooting Log
+
+Despite a healthy local state, the branch failed to deploy on Vercel, leading to an extensive troubleshooting process.
+
+- **Initial Failure:** The first Vercel builds failed with the error `Error: Cannot find module './.pnp.cjs'`. This occurred even though the `.pnp.cjs` file was confirmed to be present in the Git commit.
+
+- **Investigation & Theories:**
+  - **Vercel Cache:** Redeploying without the build cache did not resolve the issue.
+  - **`.gitignore` Conflict:** An outdated `/.pnp` rule in `.gitignore` was suspected of causing Vercel to prune the `.pnp.cjs` file. Removing this rule did not solve the problem.
+  - **Yarn Version Mismatch:** A key discovery was made when a build failed with `Unrecognized or legacy configuration settings found: pnpPath`. This error is specific to **Yarn v1 (Classic)**, proving that Vercel was using the wrong Yarn version, despite the `packageManager` field in `package.json`.
+
+- **Attempted Fixes:**
+  - **Forcing Corepack:** The `installCommand` in `vercel.json` was updated to `corepack enable && yarn install --immutable`. This successfully forced Vercel to use the correct Yarn v4 binary, but the build _still_ failed with `Cannot find module './.pnp.cjs'`.
+  - **Diagnostic Commands:** Diagnostic commands (`ls -la` and `ls -la .yarn`) were added to the `build` script. The logs from these commands confirmed that the `.pnp.cjs` file was inexplicably missing from the Vercel build container's filesystem at runtime, suggesting a deep, unresolved issue with Vercel's build environment for Yarn PnP projects.
+
+---
+
+#### 3. Local Environment Troubleshooting Log
+
+After upgrading to Node.js 22, the local environment began to mirror the CI failures.
+
+- **Symptom:** Running `yarn dev` failed with the `Unrecognized or legacy configuration...` error, indicating the local machine was also using Yarn v1.
+- **Fix:** Running `corepack enable` (with administrator privileges) was required to configure Corepack for the new Node.js v22 installation.
+- **Final Local Error:** After enabling Corepack, running `corepack yarn dev` resulted in a new error: `Qualified path resolution failed`. This error originates from within Yarn's PnP resolver and indicates that even when the correct Yarn version is running, it cannot locate the `next` executable.
+
+---
+
+#### 4. Current Status & Potential Next Steps
+
+The project is currently in a non-functional state, both locally and on Vercel. The troubleshooting has revealed a complex interaction between Yarn PnP's zero-install mode, Node.js 22, and the specific environments of both the local machine (Windows) and Vercel.
+
+**Potential next steps for investigation:**
+
+1.  **Rebuild PnP Files from Scratch:** The `.pnp.cjs` file and `yarn.lock` may have become corrupted. A potential next step is to delete both files and run a fresh `yarn install` to regenerate them.
+2.  **Investigate `unplugged` Packages:** The `dependenciesMeta` field in `package.json` "unplugs" `next` and `@next/swc-*`, writing them to a `node_modules`-like directory within `.yarn/unplugged`. This is sometimes a necessary workaround, but it can complicate module resolution and may be contributing to the `Qualified path resolution failed` error.
+3.  **Simplify Build Scripts:** As a test, temporarily remove the `node -r ./.pnp.cjs` prefix from the scripts in `package.json` and rely solely on `corepack yarn ...` to see if Corepack's shims can handle the resolution.
+4.  **Isolate the Problem with `node-modules`:** As a final diagnostic step, temporarily switch the `nodeLinker` in `.yarnrc.yml` to `node-modules` and run `yarn install`. If the project builds and runs successfully with `node_modules`, it would definitively prove that the issue lies within the Yarn PnP resolution mechanism itself.
