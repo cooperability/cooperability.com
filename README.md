@@ -381,3 +381,7 @@ To future-proof the project, the following configurations were applied:
     - `"installCommand": "yarn install --immutable"`: Ensures reproducible builds.
     - Caching and Corepack are enabled via `env` variables for faster deployments.
 3.  **Yarn PnP Script Compatibility:** The `dev`, `build`, and `start` scripts in `package.json` were updated to use `node -r ./.pnp.cjs next ...`. This ensures Node.js uses Yarn's PnP resolver, which is critical for correct module resolution.
+
+This will ensure Vercel has everything it needs to build your project.
+ 
+ <!-- This is a trivial comment to trigger a new Vercel deployment. -->
