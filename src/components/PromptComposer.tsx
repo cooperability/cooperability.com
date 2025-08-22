@@ -301,7 +301,7 @@ const promptComposerStyles = {
     'text-sm text-gray-800 group-hover:text-gray-900 font-bold mr-2',
   componentSubtitle: 'text-sm text-gray-600 font-normal',
 
-  // Live Preview styles (formerly rightPanel)
+  // Live Preview styles
   livePreviewHeader:
     'flex text-lg font-bold flex-row sm:flex-row sm:items-center justify-between',
   copyButton:
@@ -645,6 +645,16 @@ const COMPONENT_ARRAY: PromptComponent[] = [
 
   // Meta-Prompt Enhancements - Checkboxes (self-improvement)
   {
+    id: 'meta-online-tools',
+    category: 'meta',
+    label: 'Clarify > Assume',
+    description: 'Clarify unspecified instructions',
+    template:
+      'Ask any clarifying questions you need rather than assuming behavior where no instruction exists.',
+    priority: 7,
+    inputType: 'checkbox',
+  },
+  {
     id: 'meta-improvement',
     category: 'meta',
     label: 'Self-Improvement',
@@ -931,11 +941,11 @@ const PromptComposer: React.FC<PromptComposerProps> = ({ className }) => {
 
       {/* Main Layout */}
       <div className={promptComposerStyles.mainLayout}>
-        {/* Component Selector Panel (formerly Left Panel) */}
+        {/* Component Selector Panel */}
         <Card className={promptComposerStyles.componentGroup}>
           <CardHeader className={promptComposerStyles.cardHeader}>
             <CardTitle>
-              <h3 className="text-lg font-bold">Prompt Components</h3>
+              <h3 className="text-lg font-bold">Component Selector</h3>
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -1174,7 +1184,7 @@ const PromptComposer: React.FC<PromptComposerProps> = ({ className }) => {
           </CardContent>
         </Card>
 
-        {/* Live Preview Panel (formerly Right Panel) */}
+        {/* Compiled Prompt Panel */}
         <Card className={promptComposerStyles.componentGroup}>
           <CardHeader>
             <div className={promptComposerStyles.livePreviewHeader}>

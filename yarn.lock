@@ -4668,6 +4668,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/punycode@npm:^2":
+  version: 2.1.4
+  resolution: "@types/punycode@npm:2.1.4"
+  checksum: 10c0/0472cc871783a22859ad83fe7cb62d23226ff78694b9807d2a3ec37571d46b05409ca9282c8ccedfb59e58e4a4561b27463623ce95bcfd6bd9c11ac1ef3cd0d1
+  languageName: node
+  linkType: hard
+
 "@types/react-dom@npm:*, @types/react-dom@npm:^19.1.6":
   version: 19.1.6
   resolution: "@types/react-dom@npm:19.1.6"
@@ -13354,7 +13361,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"punycode@npm:^2.1.0, punycode@npm:^2.1.1, punycode@npm:^2.3.1":
+"punycode@npm:^2.3.1":
   version: 2.3.1
   resolution: "punycode@npm:2.3.1"
   checksum: 10c0/14f76a8206bc3464f794fb2e3d3cc665ae416c01893ad7a02b23766eb07159144ee612ad67af5e84fa4479ccfe67678c4feb126b0485651b302babf66f04f9e9
@@ -13989,6 +13996,7 @@ __metadata:
     "@types/jest": "npm:^29.5.14"
     "@types/next-pwa": "npm:^5"
     "@types/node": "npm:22.15.3"
+    "@types/punycode": "npm:^2"
     "@types/react": "npm:^19.1.8"
     "@types/react-dom": "npm:^19.1.6"
     "@vercel/analytics": "npm:^1.5.0"
@@ -14022,6 +14030,7 @@ __metadata:
     postcss-import: "npm:^16.1.0"
     prettier: "npm:^3.5.3"
     prop-types: "npm:^15.8.1"
+    punycode: "npm:^2.3.1"
     react: "npm:^19.1.0"
     react-dom: "npm:^19.1.0"
     remark: "npm:^14.0.1"

@@ -58,22 +58,23 @@ describe('Home', () => {
 
   it('renders navigation links with correct href attributes', () => {
     render(<Home initialQuote="Test quote for testing" />)
-    expect(screen.getByRole('link', { name: /code/i })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: /tools/i })).toHaveAttribute(
       'href',
-      'https://github.com/cooperability'
+      '/demos'
     )
-    expect(screen.getByRole('link', { name: /write/i })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: /learnings/i })).toHaveAttribute(
       'href',
-      'https://cooperability.substack.com/'
+      '/resources'
     )
-    expect(screen.getByRole('link', { name: /interview/i })).toHaveAttribute(
-      'href',
-      'https://www.youtube.com/@cooperability'
-    )
+    expect(
+      screen.getByRole('link', { name: /Prompt Composer/i })
+    ).toHaveAttribute('href', '/prompt-composer')
   })
 
   it('renders the profile image with correct alt text', () => {
     render(<Home initialQuote="Test quote for testing" />)
-    expect(screen.getByAltText('Cooper Reed')).toBeInTheDocument()
+    expect(
+      screen.getByAltText('Cooper Reed - Full Stack Engineer')
+    ).toBeInTheDocument()
   })
 })

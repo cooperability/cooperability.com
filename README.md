@@ -351,3 +351,33 @@ If you prefer the implicit behaviour, simply delete the field – Typescript wil
 | `.pnp.cjs` & `.pnp.loader.mjs`    | Yarn           | PnP mapping & loader – **part of the lockfile**.                                   | **Yes** (already tracked via git).               |
 
 > **Advisory:** Always re-run `yarn install` after upgrading Yarn (it may regenerate `.pnp.cjs`). Commit the diff, then verify editors still resolve packages. For CI, no extra cache key is needed – Yarn's cache key already respects the lockfile hash.
+
+### Yarn PnP Future-Proofing & Maintenance Guide (June 2025)
+
+This section documents the steps taken to resolve dependency vulnerabilities, future-proof the Yarn PnP setup, and establish a clear maintenance workflow.
+
+#### 1. Understanding the Zero-Install Workflow and Large Commits
+
+This project uses Yarn's **zero-install** strategy. This has several key implications:
+
+- **`.yarn/cache` is intentionally committed to Git:** Unlike traditional `node_modules` setups, the zipped package cache is part of the repository. This guarantees that every developer and the CI environment uses the exact same package versions, eliminating "works on my machine" issues.
+- **`yarn install` is not required after cloning:** You can run `yarn start` immediately after cloning the repository.
+- **Updating dependencies creates large commits:** When you run `yarn up`, it updates the packages in `.yarn/cache`. Since this directory is tracked by Git, all the updated package archives will appear as changed files. **This is expected behavior.** A large number of changed files after an update is not a mistake but a confirmation that the zero-install process is working correctly.
+
+#### 2. Core Setup & Vulnerability Management
+
+The following steps were taken to stabilize the project and address security alerts:
+
+1.  **Enabled Corepack:** `corepack enable` was run (as administrator on Windows) to ensure the Yarn version is managed consistently across environments, as defined in `package.json`'s `packageManager` field.
+2.  **Untracked and Rebuilt Cache:** To resolve git tracking issues and ensure `.gitignore` rules were applied correctly, the cache was temporarily untracked (`git rm -r --cached .yarn/cache`) and then rebuilt with `yarn install`.
+3.  **Resolved Vulnerabilities:** `yarn up` was run to update all dependencies to their latest safe versions, resolving all Dependabot alerts. This was confirmed with `yarn npm audit`, which now reports zero vulnerabilities.
+
+#### 3. Configuration for Performance and Compatibility
+
+To future-proof the project, the following configurations were applied:
+
+1.  **Optimized `.gitignore`:** The `.gitignore` file was updated to use glob patterns (`.yarn/cache/@next-swc-*.zip`) to exclude specific, large SWC binaries that can cause repository bloat, while still committing the rest of the package cache for the zero-install workflow.
+2.  **Vercel Deployment Optimization:** A `vercel.json` file was created to enforce best practices for Vercel deployments:
+    - `"installCommand": "yarn install --immutable"`: Ensures reproducible builds.
+    - Caching and Corepack are enabled via `env` variables for faster deployments.
+3.  **Yarn PnP Script Compatibility:** The `dev`, `build`, and `start` scripts in `package.json` were updated to use `node -r ./.pnp.cjs next ...`. This ensures Node.js uses Yarn's PnP resolver, which is critical for correct module resolution.
