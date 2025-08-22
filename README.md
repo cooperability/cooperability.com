@@ -359,6 +359,7 @@ This section documents the process undertaken to upgrade the project's dependenc
 #### 1. Initial Successes
 
 The initial phase of the work was successful:
+
 - **Dependencies Updated:** All project dependencies were updated to their latest versions using `yarn up`.
 - **Vulnerabilities Resolved:** All Dependabot security alerts were resolved, confirmed by a clean `yarn npm audit`.
 - **`.gitignore` Optimized:** The `.gitignore` file was updated to correctly handle Yarn PnP's zero-install cache and to use glob patterns to ignore large SWC binaries.
@@ -379,7 +380,7 @@ Despite a healthy local state, the branch failed to deploy on Vercel, leading to
   - **Yarn Version Mismatch:** A key discovery was made when a build failed with `Unrecognized or legacy configuration settings found: pnpPath`. This error is specific to **Yarn v1 (Classic)**, proving that Vercel was using the wrong Yarn version, despite the `packageManager` field in `package.json`.
 
 - **Attempted Fixes:**
-  - **Forcing Corepack:** The `installCommand` in `vercel.json` was updated to `corepack enable && yarn install --immutable`. This successfully forced Vercel to use the correct Yarn v4 binary, but the build *still* failed with `Cannot find module './.pnp.cjs'`.
+  - **Forcing Corepack:** The `installCommand` in `vercel.json` was updated to `corepack enable && yarn install --immutable`. This successfully forced Vercel to use the correct Yarn v4 binary, but the build _still_ failed with `Cannot find module './.pnp.cjs'`.
   - **Diagnostic Commands:** Diagnostic commands (`ls -la` and `ls -la .yarn`) were added to the `build` script. The logs from these commands confirmed that the `.pnp.cjs` file was inexplicably missing from the Vercel build container's filesystem at runtime, suggesting a deep, unresolved issue with Vercel's build environment for Yarn PnP projects.
 
 ---
