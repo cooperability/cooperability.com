@@ -1,9 +1,6 @@
 {
   "installCommand": "corepack enable && yarn install --immutable",
   "buildCommand": "yarn build",
-  "engines": {
-    "node": "22.x"
-  },
   "env": {
     "ENABLE_EXPERIMENTAL_COREPACK": "1",
     "YARN_CACHE_FOLDER": "./.next/cache/yarn"
