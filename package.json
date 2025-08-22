@@ -1,13 +1,13 @@
 {
   "private": true,
   "engines": {
-    "node": ">=18.17.0",
+    "node": ">=22.0.0",
     "yarn": ">=1.22.0"
   },
   "scripts": {
-    "dev": "node -r ./.pnp.cjs next dev",
-    "build": "ls -la && ls -la .yarn && node -r ./.pnp.cjs next build && next-sitemap",
-    "start": "node -r ./.pnp.cjs next start",
+    "dev": "next dev",
+    "build": "ls -la && ls -la .yarn && next build && next-sitemap",
+    "start": "next start",
     "typecheck": "tsc --noEmit",
     "type-check:watch": "tsc --noEmit --watch",
     "type-check:dev": "tsc --noEmit --project tsconfig.dev.json",
