@@ -395,13 +395,19 @@ After upgrading to Node.js 22, the local environment began to mirror the CI fail
 
 ---
 
-#### 4. Current Status & Potential Next Steps
+#### 4. Resolution & Current Status
 
-The project is currently in a non-functional state, both locally and on Vercel. The troubleshooting has revealed a complex interaction between Yarn PnP's zero-install mode, Node.js 22, and the specific environments of both the local machine (Windows) and Vercel.
+The project is now fully functional, both locally and on Vercel. The critical issues were resolved by systematically working through the potential next steps outlined previously.
 
-**Potential next steps for investigation:**
+- **Build Scripts Simplified:** The `node -r ./.pnp.cjs` prefix was removed from the `dev`, `build`, and `start` scripts in `package.json`. This resolved the `Qualified path resolution failed` error by allowing Corepack to manage the PnP environment without conflict.
 
-1.  **Rebuild PnP Files from Scratch:** The `.pnp.cjs` file and `yarn.lock` may have become corrupted. A potential next step is to delete both files and run a fresh `yarn install` to regenerate them.
-2.  **Investigate `unplugged` Packages:** The `dependenciesMeta` field in `package.json` "unplugs" `next` and `@next/swc-*`, writing them to a `node_modules`-like directory within `.yarn/unplugged`. This is sometimes a necessary workaround, but it can complicate module resolution and may be contributing to the `Qualified path resolution failed` error.
-3.  **Simplify Build Scripts:** As a test, temporarily remove the `node -r ./.pnp.cjs` prefix from the scripts in `package.json` and rely solely on `corepack yarn ...` to see if Corepack's shims can handle the resolution.
-4.  **Isolate the Problem with `node-modules`:** As a final diagnostic step, temporarily switch the `nodeLinker` in `.yarnrc.yml` to `node-modules` and run `yarn install`. If the project builds and runs successfully with `node_modules`, it would definitively prove that the issue lies within the Yarn PnP resolution mechanism itself.
+- **Vercel Configuration Fixed:**
+    - The simplified build scripts allowed the Vercel deployment to proceed past the initial PnP resolution error.
+    - A subsequent Vercel schema validation error (`should NOT have additional property 'engines'`) was fixed by removing the redundant `engines` block from `vercel.json`, as Vercel now infers this from `package.json`.
+
+- **Security Vulnerabilities Patched:** Persistent Dependabot alerts were fully resolved:
+    - The critical `form-data` vulnerability was patched by adding `"form-data": "4.0.4"` to the `resolutions` field in `package.json`.
+    - The low-severity `tmp` vulnerability was patched by adding `"tmp": "0.2.4"` to the `resolutions` field.
+    - All high and low-severity `Next.js` vulnerabilities were confirmed to be false positives, as the project's updated Next.js version (`15.4.1`) already contained the necessary patches.
+
+The project is now stable, secure, and successfully deployed on Vercel with the latest dependencies and Node.js 22.
