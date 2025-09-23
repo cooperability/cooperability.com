@@ -26,6 +26,7 @@ export const quotes = [
   '"No matter how far you have gone down a wrong road, turn back." -Turkish Proverb',
   '"It is impossible for a man to learn what he thinks he already knows." -Epictetus',
   'You do not rise to the level of your goals. You fall to the level of your systems." -James Clear, "Atomic Habits"',
+  'Dictators ride to and fro upon tigers which they dare not dismount. And the tigers are getting hungry." -Winston Churchill',
 ]
 
 export function getRandomQuote(): string {

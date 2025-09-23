@@ -21,6 +21,12 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
       {getLayout(<Component {...pageProps} />)}
       <Analytics />
       <SpeedInsights />
+      <script
+        dangerouslySetInnerHTML={{
+          __html:
+            "if ('serviceWorker' in navigator && window.location.protocol === 'https:') { window.addEventListener('load', () => { navigator.serviceWorker.register('/sw.js').catch(() => {}); }); }",
+        }}
+      />
     </ThemeProvider>
   )
 }
