@@ -273,9 +273,110 @@ This project aims to enhance the user experience by transforming the website and
 ### Current Progress
 
 - **✅ Iconography:** A comprehensive set of icons has been generated using `realfavicongenerator.net` to ensure proper display across iOS (apple-touch-icon), Android (adaptive icons), and modern browsers.
-- **✅ Web App Manifest:** A `site.webmanifest` file has been created to define the PWA's name, start URL, display mode (`standalone`), and theme colors.
-- **✅ Layout Integration:** The main `layout.tsx` has been updated to link the manifest and icons, enabling "Add to Home Screen" functionality.
-- **✅ Service Worker Setup:** The `next-pwa` package has been integrated to provide offline support by caching static assets, a core requirement for a reliable PWA experience.
+- **✅ Web App Manifest:** A `site.webmanifest` is linked from `src/components/layout.tsx` and lives at `public/icons/site.webmanifest`.
+- **✅ Service Worker (Serwist) & Offline:** Migrated from the deprecated `next-pwa` to community‑maintained **Serwist** (Workbox fork). We use an explicit service worker at `src/sw.js` and inject a precache manifest as a post‑build step via `@serwist/build` (see `scripts/build-sw.mjs`). This approach is robust under Yarn Plug’n’Play (PnP) and avoids plugin resolution pitfalls.
+- **✅ Registration:** The SW is registered in `_app.tsx` for production (HTTPS) only.
+- **✅ Build Integration:** `package.json` `build` script runs `next build`, then `node scripts/build-sw.mjs`, then `next-sitemap` (which writes sitemap files to `public/`).
+
+### Serwist Migration (from next-pwa)
+
+Rationale: `next-pwa` is deprecated. Serwist is the actively maintained successor to Workbox with feature parity and ongoing updates. We adopted a minimal, predictable setup that works cleanly with Yarn PnP:
+
+- Removed `next-pwa` and its wrappers from `next.config.js`.
+- Added `src/sw.js` using Serwist’s API to handle precaching and runtime behavior.
+- Injected the precache manifest after the Next build using `@serwist/build` (`scripts/build-sw.mjs`).
+- Registered the service worker in `src/pages/_app.tsx` for production only.
+- Left icon and manifest handling framework‑agnostic (linked in `layout.tsx`).
+
+References: Serwist docs `https://serwist.pages.dev/`
+
+### How `src/sw.js` and `public/sw.js` relate
+
+- `src/sw.js` is the JavaScript source of your service worker. It’s used at build time by Serwist’s `injectManifest` to analyze and inline the precache manifest and produce the runtime worker.
+- `public/sw.js` is the compiled, browser‑consumable service worker that the page actually registers (see `_app.tsx`). Browsers only ever download/execute `sw.js`.
+- Edit `src/sw.js` → rebuild → `scripts/build-sw.mjs` regenerates `public/sw.js`. In development, registration is disabled to avoid caching dev assets.
+
+### Per‑route installable experiences (turn a page into its own PWA)
+
+Browsers install URLs, not components. To “install just Prompt Composer,” point a manifest at the Prompt Composer page and load it on that page.
+
+Two practical patterns:
+
+1. Dedicated per‑page manifest (recommended for fully standalone feel)
+
+- Create `public/icons/prompt-composer.webmanifest`:
+
+```json
+{
+  "name": "Prompt Composer",
+  "short_name": "Composer",
+  "description": "Research-backed prompt builder",
+  "start_url": "/prompt-composer",
+  "scope": "/prompt-composer",
+  "display": "standalone",
+  "theme_color": "#ffffff",
+  "background_color": "#ffffff",
+  "icons": [
+    {
+      "src": "/icons/web-app-manifest-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/web-app-manifest-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable any"
+    }
+  ]
+}
+```
+
+- In `src/pages/prompt-composer.tsx`, add a page‑specific `<link rel="manifest" href="/icons/prompt-composer.webmanifest" />` inside its `<Head>` so that when that URL is opened, the browser associates that manifest with the page.
+- Keep the service worker at `/sw.js` (scope `/`) so it can cache all routes; the page‑level manifest only controls install UX (name, icon, start URL, display), not SW scope.
+
+2. One global manifest with shortcuts (good for launchers)
+
+- Add a `shortcuts` array to `public/icons/site.webmanifest` with entries pointing to applet URLs (e.g., `/prompt-composer`). This gives “jump to” actions from the installed app. Example:
+
+```json
+{
+  "shortcuts": [
+    {
+      "name": "Prompt Composer",
+      "url": "/prompt-composer",
+      "icons": [
+        {
+          "src": "/icons/web-app-manifest-192x192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    }
+  ]
+}
+```
+
+Notes
+
+- You can use both approaches: global default manifest site‑wide and a per‑page manifest to override on specific routes.
+- A component itself (e.g., `PromptComposer.tsx`) isn’t directly installable; its route (`/prompt-composer`) is.
+
+### Lighthouse for per‑page PWAs
+
+- No special configuration changes are needed. Run Lighthouse against the exact URL you want installable (e.g., `http://localhost:3000/prompt-composer`).
+- Ensure that page includes the intended `<link rel="manifest" …>` and is controlled by the SW (open DevTools → Application → Service Workers → check “This page is controlled by a service worker”).
+- Validate installability, manifest icons, display mode, and offline pass for each applet page you care about.
+
+### Build health & quick optimizations
+
+The sample log shows a healthy build (Next compiled, Serwist injected precache, sitemaps generated). Consider:
+
+- Bundle size: run `yarn analyze` and consider `next/dynamic` for heavy page‑only code (e.g., icon packs, MDX processing) to reduce First Load JS.
+- Precache scope: tune `scripts/build-sw.mjs` `globPatterns`/`maximumFileSizeToCacheInBytes` to avoid caching very large assets you don’t need offline.
+- Runtime caching: extend `src/sw.js` with image/cache strategies (e.g., Cache‑First for images, Stale‑While‑Revalidate for JS/CSS) for resilience and speed.
+- Images: prefer Next Image, modern formats (WebP/AVIF), and proper sizes for applet pages.
 
 ### Next Steps & Roadmap
 
@@ -290,8 +391,8 @@ The foundation is now in place. The next phase focuses on enhancing individual a
     - When a user adds a specific applet page (e.g., `cooperability.com/opioid-converter`) to their home screen, the `start_url` in the manifest will open the homepage. To launch the specific applet, we will need to explore solutions like dynamically setting the `start_url` or using a client-side router to redirect based on the launch URL.
 
 3.  **Enhance Offline Functionality:**
-    - While `next-pwa` handles static assets, the next step is to cache dynamic data or API calls used by applets. This will allow them to function even when the user is offline.
-    - Implement caching strategies within the service worker for resources specific to each applet.
+    - Extend Serwist runtime caching (in `src/sw.js`) for dynamic data/APIs used by applets so they continue to work offline.
+    - Tune strategies (e.g., Stale‑While‑Revalidate, Cache‑First) per route/asset type.
 
 4.  **Refine the "Standalone" Experience:**
     - Ensure that all navigation within an "app" stays within the PWA window. Links to external sites should open in a browser tab.
@@ -402,12 +503,12 @@ The project is now fully functional, both locally and on Vercel. The critical is
 - **Build Scripts Simplified:** The `node -r ./.pnp.cjs` prefix was removed from the `dev`, `build`, and `start` scripts in `package.json`. This resolved the `Qualified path resolution failed` error by allowing Corepack to manage the PnP environment without conflict.
 
 - **Vercel Configuration Fixed:**
-    - The simplified build scripts allowed the Vercel deployment to proceed past the initial PnP resolution error.
-    - A subsequent Vercel schema validation error (`should NOT have additional property 'engines'`) was fixed by removing the redundant `engines` block from `vercel.json`, as Vercel now infers this from `package.json`.
+  - The simplified build scripts allowed the Vercel deployment to proceed past the initial PnP resolution error.
+  - A subsequent Vercel schema validation error (`should NOT have additional property 'engines'`) was fixed by removing the redundant `engines` block from `vercel.json`, as Vercel now infers this from `package.json`.
 
 - **Security Vulnerabilities Patched:** Persistent Dependabot alerts were fully resolved:
-    - The critical `form-data` vulnerability was patched by adding `"form-data": "4.0.4"` to the `resolutions` field in `package.json`.
-    - The low-severity `tmp` vulnerability was patched by adding `"tmp": "0.2.4"` to the `resolutions` field.
-    - All high and low-severity `Next.js` vulnerabilities were confirmed to be false positives, as the project's updated Next.js version (`15.4.1`) already contained the necessary patches.
+  - The critical `form-data` vulnerability was patched by adding `"form-data": "4.0.4"` to the `resolutions` field in `package.json`.
+  - The low-severity `tmp` vulnerability was patched by adding `"tmp": "0.2.4"` to the `resolutions` field.
+  - All high and low-severity `Next.js` vulnerabilities were confirmed to be false positives, as the project's updated Next.js version (`15.4.1`) already contained the necessary patches.
 
 The project is now stable, secure, and successfully deployed on Vercel with the latest dependencies and Node.js 22.
