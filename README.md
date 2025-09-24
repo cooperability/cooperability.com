@@ -453,6 +453,25 @@ If you prefer the implicit behaviour, simply delete the field – Typescript wil
 
 > **Advisory:** Always re-run `yarn install` after upgrading Yarn (it may regenerate `.pnp.cjs`). Commit the diff, then verify editors still resolve packages. For CI, no extra cache key is needed – Yarn's cache key already respects the lockfile hash.
 
+### Quick Yarn upgrade (Corepack)
+
+To upgrade Yarn in this repo non-interactively and avoid Corepack prompts:
+
+```bash
+yarn set version 4.10.3
+corepack prepare yarn@4.10.3 --activate
+yarn install && yarn dedupe --strategy=highest
+```
+
+PnP tip: if `recma-jsx` complains about a missing `acorn` peer under PnP, add this to `.yarnrc.yml`:
+
+```yaml
+packageExtensions:
+  recma-jsx@*:
+    dependencies:
+      acorn: "*"
+```
+
 ### Yarn PnP Future-Proofing & Maintenance Guide (June 2025)
 
 This section documents the process undertaken to upgrade the project's dependencies, resolve security vulnerabilities, and troubleshoot a series of complex local and Vercel deployment issues related to Yarn PnP.
