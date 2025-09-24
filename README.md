@@ -469,7 +469,7 @@ PnP tip: if `recma-jsx` complains about a missing `acorn` peer under PnP, add th
 packageExtensions:
   recma-jsx@*:
     dependencies:
-      acorn: "*"
+      acorn: '*'
 ```
 
 ### Yarn PnP Future-Proofing & Maintenance Guide (June 2025)
