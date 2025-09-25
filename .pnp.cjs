@@ -3193,7 +3193,7 @@ const RAW_RUNTIME_STATE =
           ["progress", "npm:2.0.3"],\
           ["proxy-agent", "npm:6.5.0"],\
           ["semver", "npm:7.7.2"],\
-          ["tar-fs", "npm:3.1.0"],\
+          ["tar-fs", "npm:3.1.1"],\
           ["yargs", "npm:17.7.2"]\
         ],\
         "linkType": "HARD"\
@@ -6659,21 +6659,21 @@ const RAW_RUNTIME_STATE =
     ]],\
     ["bare-fs", [\
       ["npm:4.1.5", {\
-        "packageLocation": "./.yarn/unplugged/bare-fs-virtual-ad2ad1b47e/node_modules/bare-fs/",\
+        "packageLocation": "./.yarn/unplugged/bare-fs-virtual-640a51607c/node_modules/bare-fs/",\
         "packageDependencies": [\
           ["bare-fs", "npm:4.1.5"]\
         ],\
         "linkType": "SOFT"\
       }],\
-      ["virtual:e5689116716c901ae7c19991d60995bbea5c5b0b8d39d586ec3812aea0687288e81fee082d58f4e1931171ec4a80ff564dc236d8890dc3b57b99c21d1906e654#npm:4.1.5", {\
-        "packageLocation": "./.yarn/unplugged/bare-fs-virtual-ad2ad1b47e/node_modules/bare-fs/",\
+      ["virtual:2a32a81dd77232e5ff9b5028539a5b875259175c3e592c3e1213900d422f5a9b30cbc754be9222f190546618bf89b17e8b4632f94b73764cfdbcef3b6ef08a57#npm:4.1.5", {\
+        "packageLocation": "./.yarn/unplugged/bare-fs-virtual-640a51607c/node_modules/bare-fs/",\
         "packageDependencies": [\
           ["@types/bare-buffer", null],\
           ["bare-buffer", null],\
           ["bare-events", "npm:2.5.4"],\
-          ["bare-fs", "virtual:e5689116716c901ae7c19991d60995bbea5c5b0b8d39d586ec3812aea0687288e81fee082d58f4e1931171ec4a80ff564dc236d8890dc3b57b99c21d1906e654#npm:4.1.5"],\
+          ["bare-fs", "virtual:2a32a81dd77232e5ff9b5028539a5b875259175c3e592c3e1213900d422f5a9b30cbc754be9222f190546618bf89b17e8b4632f94b73764cfdbcef3b6ef08a57#npm:4.1.5"],\
           ["bare-path", "npm:3.0.0"],\
-          ["bare-stream", "virtual:ad2ad1b47ef2583e6cc3a362cc165388c8285779e6104e356b7fe700b8d26ca1547b1e8a0d8b249e61dafb11bd80870b23a206b132a564cb24dc9866b77e226d#npm:2.6.5"]\
+          ["bare-stream", "virtual:640a51607cd31e5096adb440b0522af7491906a7b60dbc4f67541df7a48da750b614af2053861dc26124dacfc5f1b82f5d53d4befab7bd3fa0ca4465045097d1#npm:2.6.5"]\
         ],\
         "packagePeers": [\
           "@types/bare-buffer",\
@@ -6709,14 +6709,14 @@ const RAW_RUNTIME_STATE =
         ],\
         "linkType": "SOFT"\
       }],\
-      ["virtual:ad2ad1b47ef2583e6cc3a362cc165388c8285779e6104e356b7fe700b8d26ca1547b1e8a0d8b249e61dafb11bd80870b23a206b132a564cb24dc9866b77e226d#npm:2.6.5", {\
-        "packageLocation": "./.yarn/__virtual__/bare-stream-virtual-dffff8a100/0/cache/bare-stream-npm-2.6.5-1977dd457e-1242286f8f.zip/node_modules/bare-stream/",\
+      ["virtual:640a51607cd31e5096adb440b0522af7491906a7b60dbc4f67541df7a48da750b614af2053861dc26124dacfc5f1b82f5d53d4befab7bd3fa0ca4465045097d1#npm:2.6.5", {\
+        "packageLocation": "./.yarn/__virtual__/bare-stream-virtual-0bd94d14bd/0/cache/bare-stream-npm-2.6.5-1977dd457e-1242286f8f.zip/node_modules/bare-stream/",\
         "packageDependencies": [\
           ["@types/bare-buffer", null],\
           ["@types/bare-events", null],\
           ["bare-buffer", null],\
           ["bare-events", "npm:2.5.4"],\
-          ["bare-stream", "virtual:ad2ad1b47ef2583e6cc3a362cc165388c8285779e6104e356b7fe700b8d26ca1547b1e8a0d8b249e61dafb11bd80870b23a206b132a564cb24dc9866b77e226d#npm:2.6.5"],\
+          ["bare-stream", "virtual:640a51607cd31e5096adb440b0522af7491906a7b60dbc4f67541df7a48da750b614af2053861dc26124dacfc5f1b82f5d53d4befab7bd3fa0ca4465045097d1#npm:2.6.5"],\
           ["streamx", "npm:2.22.1"]\
         ],\
         "packagePeers": [\
@@ -16408,13 +16408,13 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["tar-fs", [\
-      ["npm:3.1.0", {\
-        "packageLocation": "./.yarn/cache/tar-fs-npm-3.1.0-e568911671-7603096775.zip/node_modules/tar-fs/",\
+      ["npm:3.1.1", {\
+        "packageLocation": "./.yarn/cache/tar-fs-npm-3.1.1-2a32a81dd7-0c677d711c.zip/node_modules/tar-fs/",\
         "packageDependencies": [\
-          ["bare-fs", "virtual:e5689116716c901ae7c19991d60995bbea5c5b0b8d39d586ec3812aea0687288e81fee082d58f4e1931171ec4a80ff564dc236d8890dc3b57b99c21d1906e654#npm:4.1.5"],\
+          ["bare-fs", "virtual:2a32a81dd77232e5ff9b5028539a5b875259175c3e592c3e1213900d422f5a9b30cbc754be9222f190546618bf89b17e8b4632f94b73764cfdbcef3b6ef08a57#npm:4.1.5"],\
           ["bare-path", "npm:3.0.0"],\
           ["pump", "npm:3.0.3"],\
-          ["tar-fs", "npm:3.1.0"],\
+          ["tar-fs", "npm:3.1.1"],\
           ["tar-stream", "npm:3.1.7"]\
         ],\
         "linkType": "HARD"\
@@ -24254,6 +24254,7 @@ class ZipFS extends BasePortableFakeFS {
           return Object.assign(this.statImpl(`lstat`, ppath.join(p, name)), {
             name,
             path: PortablePath.dot,
+            parentPath: PortablePath.dot,
           })
         })
         for (const entry of entries) {
@@ -24267,6 +24268,7 @@ class ZipFS extends BasePortableFakeFS {
                 {
                   name: child,
                   path: subPath,
+                  parentPath: subPath,
                 }
               )
             )
@@ -24289,6 +24291,7 @@ class ZipFS extends BasePortableFakeFS {
         return Object.assign(this.statImpl(`lstat`, ppath.join(p, name)), {
           name,
           path: void 0,
+          parentPath: void 0,
         })
       })
     } else {
