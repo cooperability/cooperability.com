@@ -268,15 +268,23 @@ Historical "Untitled" listings and old paths (`/skills`, `/prompts`) have been r
 
 ## PWA & App-like Experience
 
-This project aims to enhance the user experience by transforming the website and its individual applets (e.g., Prompt Composer, Opioid Converter) into installable Progressive Web Apps (PWAs). This provides a more integrated, native-like feel when launched from a user's home screen or desktop.
+This project implements a **comprehensive PWA applet suite** - transforming individual tools into installable Progressive Web Apps with their own identities while sharing infrastructure. Each applet (Prompt Composer, Opioid Converter) can be added to a mobile home screen as a separate app with its own name, but they all share the same service worker and icon set for efficiency and brand consistency.
+
+**📚 Documentation:**
+- **Architecture Guide:** [`docs/PWA-APPLET-SUITE.md`](docs/PWA-APPLET-SUITE.md) - Complete technical explanation and how to add new applets
+- **Testing Guide:** [`docs/TESTING-PWA-APPLETS.md`](docs/TESTING-PWA-APPLETS.md) - Platform-specific testing procedures and troubleshooting
 
 ### Current Progress
 
 - **✅ Iconography:** A comprehensive set of icons has been generated using `realfavicongenerator.net` to ensure proper display across iOS (apple-touch-icon), Android (adaptive icons), and modern browsers.
-- **✅ Web App Manifest:** A `site.webmanifest` is linked from `src/components/layout.tsx` and lives at `public/icons/site.webmanifest`.
-- **✅ Service Worker (Serwist) & Offline:** Migrated from the deprecated `next-pwa` to community‑maintained **Serwist** (Workbox fork). We use an explicit service worker at `src/sw.js` and inject a precache manifest as a post‑build step via `@serwist/build` (see `scripts/build-sw.mjs`). This approach is robust under Yarn Plug’n’Play (PnP) and avoids plugin resolution pitfalls.
+- **✅ Web App Manifests:** Multiple manifests implemented:
+  - `site.webmanifest` - Main portfolio identity with shortcuts to applets
+  - `prompt-composer.webmanifest` - Prompt Composer applet identity
+  - `opioid-converter.webmanifest` - Opioid Converter applet identity
+- **✅ Service Worker (Serwist) & Offline:** Migrated from the deprecated `next-pwa` to community‑maintained **Serwist** (Workbox fork). We use an explicit service worker at `src/sw.js` and inject a precache manifest as a post‑build step via `@serwist/build` (see `scripts/build-sw.mjs`). This approach is robust under Yarn Plug'n'Play (PnP) and avoids plugin resolution pitfalls.
 - **✅ Registration:** The SW is registered in `_app.tsx` for production (HTTPS) only.
 - **✅ Build Integration:** `package.json` `build` script runs `next build`, then `node scripts/build-sw.mjs`, then `next-sitemap` (which writes sitemap files to `public/`).
+- **✅ Per-Applet Installation:** Each tool can be installed as a separate PWA with its own name, theme color, and start URL while sharing the same service worker and icon set.
 
 ### Serwist Migration (from next-pwa)
 
@@ -296,78 +304,113 @@ References: Serwist docs `https://serwist.pages.dev/`
 - `public/sw.js` is the compiled, browser‑consumable service worker that the page actually registers (see `_app.tsx`). Browsers only ever download/execute `sw.js`.
 - Edit `src/sw.js` → rebuild → `scripts/build-sw.mjs` regenerates `public/sw.js`. In development, registration is disabled to avoid caching dev assets.
 
-### Per‑route installable experiences (turn a page into its own PWA)
+### Per‑route installable experiences (PWA Applet Suite) ✅ IMPLEMENTED
 
-Browsers install URLs, not components. To “install just Prompt Composer,” point a manifest at the Prompt Composer page and load it on that page.
+**Status:** Fully implemented as of January 2025. Each applet now has its own installable PWA identity while sharing the same service worker infrastructure.
 
-Two practical patterns:
+**Implemented Applets:**
+- **Prompt Composer** (`/prompt-composer`) - Installs as "Prompt Composer"
+- **Opioid Converter** (`/opioid-converter`) - Installs as "Opioid Converter"  
+- **Main Portfolio** (`/`) - Installs as "Co-Operability" with shortcuts to applets
 
-1. Dedicated per‑page manifest (recommended for fully standalone feel)
+**Architecture:**
 
-- Create `public/icons/prompt-composer.webmanifest`:
+1. **Dedicated Per-Page Manifests** (Pattern #1)
 
-```json
-{
-  "name": "Prompt Composer",
-  "short_name": "Composer",
-  "description": "Research-backed prompt builder",
-  "start_url": "/prompt-composer",
-  "scope": "/prompt-composer",
-  "display": "standalone",
-  "theme_color": "#ffffff",
-  "background_color": "#ffffff",
-  "icons": [
-    {
-      "src": "/icons/web-app-manifest-192x192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "/icons/web-app-manifest-512x512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable any"
-    }
-  ]
-}
+Each applet has its own manifest file in `public/icons/`:
+- `prompt-composer.webmanifest` - Prompt Composer identity (theme: blue `#3b82f6`)
+- `opioid-converter.webmanifest` - Opioid Converter identity (theme: green `#10b981`)
+- `site.webmanifest` - Main portfolio identity (theme: white `#ffffff`)
+
+2. **Page-Level Manifest Links**
+
+Each page component includes its specific manifest in the `<Head>`:
+
+```tsx
+<Head>
+  {/* PWA-specific manifest for this applet */}
+  <link rel="manifest" href="/icons/prompt-composer.webmanifest" />
+  
+  {/* iOS-specific meta tags (Apple doesn't fully support manifests) */}
+  <meta name="apple-mobile-web-app-title" content="Prompt Composer" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#3b82f6" />
+</Head>
 ```
 
-- In `src/pages/prompt-composer.tsx`, add a page‑specific `<link rel="manifest" href="/icons/prompt-composer.webmanifest" />` inside its `<Head>` so that when that URL is opened, the browser associates that manifest with the page.
-- Keep the service worker at `/sw.js` (scope `/`) so it can cache all routes; the page‑level manifest only controls install UX (name, icon, start URL, display), not SW scope.
+3. **Global Shortcuts** (Pattern #2)
 
-2. One global manifest with shortcuts (good for launchers)
-
-- Add a `shortcuts` array to `public/icons/site.webmanifest` with entries pointing to applet URLs (e.g., `/prompt-composer`). This gives “jump to” actions from the installed app. Example:
+The main `site.webmanifest` includes a `shortcuts` array for quick access on Android:
 
 ```json
 {
   "shortcuts": [
     {
       "name": "Prompt Composer",
-      "url": "/prompt-composer",
-      "icons": [
-        {
-          "src": "/icons/web-app-manifest-192x192.png",
-          "sizes": "192x192",
-          "type": "image/png"
-        }
-      ]
+      "url": "/prompt-composer"
+    },
+    {
+      "name": "Opioid Converter",
+      "url": "/opioid-converter"
     }
   ]
 }
 ```
 
-Notes
+**How It Works:**
 
-- You can use both approaches: global default manifest site‑wide and a per‑page manifest to override on specific routes.
-- A component itself (e.g., `PromptComposer.tsx`) isn’t directly installable; its route (`/prompt-composer`) is.
+- **Manifest Precedence:** Page-specific `<link rel="manifest">` overrides the global layout manifest
+- **Shared Service Worker:** Single SW at `/sw.js` (scope `/`) caches all routes efficiently  
+- **Independent Installations:** Each applet can be added to home screen with its own name
+- **iOS Support:** Apple-specific meta tags ensure proper naming on Safari
+- **Brand Consistency:** All applets share the same icon set while having unique identities
 
-### Lighthouse for per‑page PWAs
+**User Experience:**
 
-- No special configuration changes are needed. Run Lighthouse against the exact URL you want installable (e.g., `http://localhost:3000/prompt-composer`).
-- Ensure that page includes the intended `<link rel="manifest" …>` and is controlled by the SW (open DevTools → Application → Service Workers → check “This page is controlled by a service worker”).
-- Validate installability, manifest icons, display mode, and offline pass for each applet page you care about.
+When a user visits `/prompt-composer` on mobile and taps "Add to Home Screen":
+- iOS Safari shows "Prompt Composer" as the app name (not "Co-Operability")
+- The installed app opens directly to `/prompt-composer`
+- It displays in standalone mode (no browser UI)
+- The status bar color matches the applet's theme
+
+**Comprehensive Documentation:**
+
+- **Architecture Guide:** `docs/PWA-APPLET-SUITE.md` - Complete technical explanation, step-by-step guide for adding new applets, troubleshooting
+- **Testing Guide:** `docs/TESTING-PWA-APPLETS.md` - Platform-specific testing checklists, debug commands, common issues
+
+**Adding New Applets:**
+
+See `docs/PWA-APPLET-SUITE.md` for the complete process. In brief:
+
+1. Create `public/icons/[applet-name].webmanifest` with unique name/theme
+2. Add page-specific manifest link and Apple meta tags to the page's `<Head>`
+3. Optionally add to shortcuts array in `site.webmanifest`
+4. Test with Chrome DevTools → Application → Manifest
+5. Verify on actual iOS/Android devices
+
+### Testing PWA Applets
+
+**Quick Validation:**
+- **Chrome DevTools:** Navigate to applet URL → DevTools (F12) → Application tab → Manifest section
+- **Verify:** Correct name, icons, start URL, theme color for each applet
+- **Service Worker:** Application → Service Workers → "This page is controlled by a service worker"
+
+**Lighthouse Audits:**
+- Run Lighthouse against the exact URL you want installable (e.g., `http://localhost:3000/prompt-composer`)
+- Validate installability, manifest icons, display mode, and offline functionality
+- Each applet should score high on PWA criteria
+
+**Mobile Device Testing:**
+- **Required:** Test on actual iOS (Safari) and Android (Chrome) devices
+- **iOS:** Visit applet URL → Share → Add to Home Screen → Verify correct app name
+- **Android:** Visit applet URL → Menu → Add to Home Screen → Test long-press shortcuts
+
+**Comprehensive Testing Guide:**
+See `docs/TESTING-PWA-APPLETS.md` for:
+- Platform-specific testing checklists (iOS/Android/Desktop)
+- Common issues and troubleshooting
+- Debug commands and validation scripts
+- Testing matrix with browser compatibility
 
 ### Build health & quick optimizations
 
@@ -380,23 +423,32 @@ The sample log shows a healthy build (Next compiled, Serwist injected precache, 
 
 ### Next Steps & Roadmap
 
-The foundation is now in place. The next phase focuses on enhancing individual applets to behave like true standalone applications.
+The PWA applet suite foundation is complete! Future enhancements to consider:
 
-1.  **Isolate Applet Layouts:**
-    - For components like `PromptComposer` and `OpioidConverter`, create dedicated page routes (e.g., `/prompt-composer`, `/opioid-converter`).
-    - These pages should use a minimal layout that removes the main site header and footer, creating an immersive, app-like view. Next.js's `getLayout` pattern is ideal for this.
+1.  **✅ COMPLETED: Per-Applet Installable Identities**
+    - Each applet (Prompt Composer, Opioid Converter) now has its own manifest with unique name/theme
+    - Users can install each tool as a separate app on their home screen
+    - Shared service worker provides efficient caching across all applets
 
-2.  **Deep Linking & Scope Control:**
-    - Adjust the `scope` in `site.webmanifest` to be `'/'`. This allows any page to be added to the home screen while retaining the same PWA context.
-    - When a user adds a specific applet page (e.g., `cooperability.com/opioid-converter`) to their home screen, the `start_url` in the manifest will open the homepage. To launch the specific applet, we will need to explore solutions like dynamically setting the `start_url` or using a client-side router to redirect based on the launch URL.
+2.  **Future: Custom Icons Per Applet**
+    - Currently all applets share the same icon set for brand consistency
+    - Could create unique icons for each tool to differentiate them visually on home screens
+    - See `docs/PWA-APPLET-SUITE.md` for implementation guidance
 
-3.  **Enhance Offline Functionality:**
-    - Extend Serwist runtime caching (in `src/sw.js`) for dynamic data/APIs used by applets so they continue to work offline.
-    - Tune strategies (e.g., Stale‑While‑Revalidate, Cache‑First) per route/asset type.
+3.  **Future: Enhanced Offline Functionality**
+    - Extend Serwist runtime caching (in `src/sw.js`) for dynamic data/APIs used by applets
+    - Tune strategies (e.g., Stale‑While‑Revalidate, Cache‑First) per route/asset type
+    - Add offline fallback pages for improved UX when network unavailable
 
-4.  **Refine the "Standalone" Experience:**
-    - Ensure that all navigation within an "app" stays within the PWA window. Links to external sites should open in a browser tab.
-    - For each applet, review and ensure that its design is fully responsive and feels seamless without the surrounding website chrome.
+4.  **Future: Deep Linking & Share Targets**
+    - Implement `share_target` in manifests to allow sharing content directly into applets
+    - Enable deep linking from external sources to specific applet states
+    - Add URL parameters to restore applet state on launch
+
+5.  **Future: App Store Distribution**
+    - PWAs can be submitted to Microsoft Store (Windows)
+    - Google Play Store supports TWA (Trusted Web Activities) for Android distribution
+    - Consider packaging for wider reach beyond web installation
 
 ## Internal Tooling & Architecture Updates (2025-06)
 

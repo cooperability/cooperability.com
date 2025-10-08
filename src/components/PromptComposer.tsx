@@ -245,7 +245,7 @@
 
 import React, { useState, useMemo } from 'react'
 import { useTheme } from 'next-themes'
-import { Copy, Check } from 'lucide-react'
+import { Copy, Check, RotateCcw } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import {
@@ -280,7 +280,6 @@ const promptComposerStyles = {
   // Expanded container styles
   expandedContainer: 'mt-1',
   componentContainer: 'border rounded-lg overflow-hidden',
-  verticalLine: 'absolute left-0 top-0 bottom-0 w-1',
   componentsWrapper: 'relative pl-4',
 
   // Component item styles - Updated for single line layout
@@ -288,7 +287,7 @@ const promptComposerStyles = {
   componentItem:
     'flex flex-row items-center p-3 hover:bg-white hover:bg-opacity-50 cursor-pointer transition-colors duration-150 group w-full',
   componentCheckbox:
-    'h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded mr-3 flex-shrink-0',
+    'h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 roundedflex-shrink-0',
 
   // Radio button styles (new)
   componentRadio:
@@ -296,7 +295,7 @@ const promptComposerStyles = {
 
   // Toggle switch styles (removed - now using styles from utils.module.css)
 
-  componentTextContainer: 'flex flex-row items-center flex-1 min-w-0',
+  componentTextContainer: 'flex flex-row items-center',
   componentTitle:
     'text-sm text-gray-800 group-hover:text-gray-900 font-bold mr-2',
   componentSubtitle: 'text-sm text-gray-600 font-normal',
@@ -304,6 +303,8 @@ const promptComposerStyles = {
   // Live Preview styles
   livePreviewHeader:
     'flex text-lg font-bold flex-row sm:flex-row sm:items-center justify-between',
+  buttonContainer: 'flex flex-row items-center justify-between',
+  clearButton: 'px-2py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors text-sm md:text-base font-medium',
   copyButton:
     'px-2py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors text-sm md:text-base font-medium',
 
@@ -359,13 +360,13 @@ const tw = {
     'text-sm font-medium text-gray-500 dark:text-gray-400 transition-colors',
 
   // Component styling
-  componentLabel: 'text-sm cursor-pointer',
+  componentLabel: 'text-sm cursor-pointer flex flex-col items-start pl-2',
   componentLabelTitle: 'font-bold text-gray-800 dark:text-gray-200',
   componentLabelDescription: 'font-normal text-gray-600 dark:text-gray-400',
 
   // Layout helpers
-  radioCheckboxContainer: 'p-3',
-  radioCheckboxItem: 'flex items-center space-x-2 mb-2',
+  radioCheckboxContainer: 'p-3 flex',
+  radioCheckboxItem: 'flex items-center space-x-2 mb-1 border-b border-gray-200',
 
   // Statistics
   statsGrid: 'grid grid-rows-3 gap-1 text-center font-bold',
@@ -703,8 +704,9 @@ interface PromptComposerProps {
 const PromptComposer: React.FC<PromptComposerProps> = ({ className }) => {
   const { theme } = useTheme()
   const isLightMode = theme === 'light'
-  // State to manage copy feedback
+  // State to manage copy and clear feedback
   const [copied, setCopied] = useState(false)
+  const [cleared, setCleared] = useState(false)
 
   const [selectedComponents, setSelectedComponents] = useState<Set<string>>(
     new Set()
@@ -755,6 +757,15 @@ const PromptComposer: React.FC<PromptComposerProps> = ({ className }) => {
     } catch (err) {
       console.error('Failed to copy text: ', err)
     }
+  }
+
+  const clearAll = () => {
+    // Reset all state to initial values
+    setSelectedComponents(new Set())
+    setAudienceToggle('general')
+    setCleared(true)
+    // Revert icon/text after a short delay
+    setTimeout(() => setCleared(false), 1500)
   }
 
   // Light theme category colors (for component selector and light mode preview)
@@ -992,12 +1003,6 @@ const PromptComposer: React.FC<PromptComposerProps> = ({ className }) => {
                             getCategoryBorderColor(category) + '40',
                         }}
                       >
-                        <div
-                          className={promptComposerStyles.verticalLine}
-                          style={{
-                            backgroundColor: getCurrentCategoryColor(category),
-                          }}
-                        />
                         <div className={promptComposerStyles.componentsWrapper}>
                           {/* Handle audience toggle separately */}
                           {category === 'audience' && (
@@ -1193,18 +1198,32 @@ const PromptComposer: React.FC<PromptComposerProps> = ({ className }) => {
           <CardHeader>
             <div className={promptComposerStyles.livePreviewHeader}>
               <CardTitle>Compiled Prompt</CardTitle>
-              <Button
-                onClick={copyToClipboard}
-                disabled={!compiledPrompt.trim()}
-                variant="outline"
-              >
-                {copied ? (
-                  <Check className="mr-2 h-4 w-4 text-green-600" />
-                ) : (
-                  <Copy className="mr-2 h-4 w-4" />
-                )}
-                {copied ? 'Copied!' : 'Copy'}
-              </Button>
+            </div>
+            <div className={promptComposerStyles.buttonContainer}>
+            <Button
+              onClick={clearAll}
+              disabled={selectedComponents.size === 0 && audienceToggle === 'general'}
+              variant="outline"
+            >
+              {cleared ? (
+                <Check className="mr-2 h-4 w-4 text-green-600" />
+              ) : (
+                <RotateCcw className="mr-2 h-4 w-4" />
+              )}
+              {cleared ? 'Cleared!' : 'Clear'}
+            </Button>
+            <Button
+              onClick={copyToClipboard}
+              disabled={!compiledPrompt.trim()}
+              variant="outline"
+            >
+              {copied ? (
+                <Check className="mr-2 h-4 w-4 text-green-600" />
+              ) : (
+                <Copy className="mr-2 h-4 w-4" />
+              )}
+              {copied ? 'Copied!' : 'Copy'}
+            </Button>
             </div>
           </CardHeader>
           <CardContent>
