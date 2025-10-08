@@ -1,7 +1,7 @@
 {
   "name": "Co-Operability",
   "short_name": "Co-Operability",
-  "description": "Cooper Reed’s portfolio and applets",
+  "description": "Cooper Reed's portfolio and applets",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
@@ -29,6 +29,34 @@
       "src": "/icons/apple-touch-icon.png",
       "sizes": "180x180",
       "type": "image/png"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Prompt Composer",
+      "short_name": "Composer",
+      "description": "Build research-backed AI prompts",
+      "url": "/prompt-composer",
+      "icons": [
+        {
+          "src": "/icons/web-app-manifest-192x192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Opioid Converter",
+      "short_name": "Opioid Calc",
+      "description": "Convert opioid dosages",
+      "url": "/opioid-converter",
+      "icons": [
+        {
+          "src": "/icons/web-app-manifest-192x192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
     }
   ]
 }
