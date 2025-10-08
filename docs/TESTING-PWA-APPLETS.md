@@ -5,11 +5,13 @@
 ### 🖥️ Desktop Testing (Chrome/Edge)
 
 #### 1. Test Prompt Composer Manifest
+
 ```
 ✅ Navigate to: http://localhost:3000/prompt-composer
 ```
 
 **In DevTools (F12):**
+
 1. Go to **Application** tab
 2. Click **Manifest** in left sidebar
 3. **Verify:**
@@ -20,11 +22,13 @@
    - [ ] Icons: All 4 icons visible in preview
 
 #### 2. Test Opioid Converter Manifest
+
 ```
 ✅ Navigate to: http://localhost:3000/opioid-converter
 ```
 
 **In DevTools:**
+
 1. Same steps as above
 2. **Verify:**
    - [ ] Name: "Opioid Converter"
@@ -34,24 +38,28 @@
    - [ ] Icons: All 4 icons visible
 
 #### 3. Test Main Site Manifest
+
 ```
 ✅ Navigate to: http://localhost:3000/
 ```
 
 **In DevTools:**
+
 1. Same steps
 2. **Verify:**
    - [ ] Name: "Co-Operability"
    - [ ] Shortcuts: Shows 2 shortcuts (Prompt Composer, Opioid Converter)
 
 #### 4. Service Worker Check (All Pages)
+
 ```
 ✅ Navigate to any page
 ```
 
 **In DevTools → Application → Service Workers:**
+
 - [ ] Status: "activated and is running" (or will be after build)
-- [ ] Scope: "/" 
+- [ ] Scope: "/"
 - [ ] Source: /sw.js
 
 ---
@@ -61,6 +69,7 @@
 #### Test on Actual iPhone (Required for true PWA testing)
 
 **Step 1: Test Prompt Composer**
+
 1. Open Safari on iPhone
 2. Navigate to: `https://cooperability.com/prompt-composer` (after deployment)
    - Or use ngrok/tunneling for localhost: `https://your-tunnel-url.ngrok.io/prompt-composer`
@@ -76,12 +85,14 @@
    - No Safari UI (true standalone mode)
 
 **Step 2: Test Opioid Converter**
+
 1. Same steps as above but with `/opioid-converter`
 2. **VERIFY:** Name shows "Opioid Converter"
 3. Install and launch
 4. **CHECK:** Different app from Prompt Composer
 
 **Step 3: Test Both Installed**
+
 - [ ] Both icons appear on home screen
 - [ ] Each has its own name
 - [ ] Each opens to its own URL
@@ -94,6 +105,7 @@
 #### Test on Android Device
 
 **Step 1: Test Prompt Composer**
+
 1. Open Chrome on Android
 2. Navigate to applet URL
 3. Look for "Add to Home screen" banner or:
@@ -104,6 +116,7 @@
 7. **CHECK:** Opens in standalone mode
 
 **Step 2: Long-Press Main App**
+
 1. Install main site first
 2. Long-press the "Co-Operability" icon
 3. **VERIFY:** Context menu shows shortcuts:
@@ -119,6 +132,7 @@
 ### Issue: DevTools shows wrong manifest
 
 **Fix:**
+
 1. Hard refresh: `Ctrl+Shift+R` (Windows) or `Cmd+Shift+R` (Mac)
 2. Clear cache: DevTools → Network tab → Check "Disable cache"
 3. Check manifest syntax: Run through JSON validator
@@ -126,12 +140,14 @@
 ### Issue: Icons not appearing
 
 **Check:**
+
 ```bash
 # Verify files exist
 ls -la public/icons/
 ```
 
 Should see:
+
 - `web-app-manifest-192x192.png`
 - `web-app-manifest-512x512.png`
 - `apple-touch-icon.png`
@@ -140,6 +156,7 @@ Should see:
 ### Issue: iOS still shows old name
 
 **Fix:**
+
 1. Delete the app from home screen
 2. Close Safari completely (swipe up from app switcher)
 3. Reopen Safari
@@ -148,7 +165,8 @@ Should see:
 
 ### Issue: Service worker not working
 
-**Remember:** 
+**Remember:**
+
 - Service workers require HTTPS (or localhost)
 - They don't work in incognito/private mode on some browsers
 - Changes require a full rebuild and redeployment
@@ -173,26 +191,28 @@ Before pushing to production:
 
 ## 📊 Testing Matrix
 
-| Feature | Chrome Desktop | Safari iOS | Chrome Android | Status |
-|---------|----------------|------------|----------------|--------|
-| Manifest loaded | ✅ | ✅ | ✅ | |
-| Correct name | ✅ | ✅ | ✅ | |
-| Icons display | ✅ | ✅ | ✅ | |
-| Standalone mode | ✅ | ✅ | ✅ | |
-| Theme color | ✅ | ⚠️ (Limited) | ✅ | |
-| Shortcuts | ✅ | ❌ (Not supported) | ✅ | |
-| Service worker | ✅ | ✅ | ✅ | |
+| Feature         | Chrome Desktop | Safari iOS         | Chrome Android | Status |
+| --------------- | -------------- | ------------------ | -------------- | ------ |
+| Manifest loaded | ✅             | ✅                 | ✅             |        |
+| Correct name    | ✅             | ✅                 | ✅             |        |
+| Icons display   | ✅             | ✅                 | ✅             |        |
+| Standalone mode | ✅             | ✅                 | ✅             |        |
+| Theme color     | ✅             | ⚠️ (Limited)       | ✅             |        |
+| Shortcuts       | ✅             | ❌ (Not supported) | ✅             |        |
+| Service worker  | ✅             | ✅                 | ✅             |        |
 
 ---
 
 ## 🎯 Quick Verification Commands
 
 ### Check manifest files exist
+
 ```bash
 ls -la public/icons/*.webmanifest
 ```
 
 Expected output:
+
 ```
 opioid-converter.webmanifest
 prompt-composer.webmanifest
@@ -200,6 +220,7 @@ site.webmanifest
 ```
 
 ### Validate JSON syntax
+
 ```bash
 # Install jq if not already installed
 # macOS: brew install jq
@@ -213,6 +234,7 @@ jq . public/icons/site.webmanifest
 If valid, they'll pretty-print. If invalid, you'll see syntax errors.
 
 ### Check page includes manifest link
+
 ```bash
 # Search for manifest links in page files
 grep -n "rel=\"manifest\"" src/pages/prompt-composer.tsx
@@ -237,12 +259,12 @@ Expected: Should find the links we added
 
 Add this to your page to debug manifest loading:
 
-```javascript
+```text
 // Temporary debug code - add to page component
 useEffect(() => {
   const manifestLink = document.querySelector('link[rel="manifest"]')
   console.log('Active manifest:', manifestLink?.getAttribute('href'))
-  
+
   if (navigator.serviceWorker) {
     navigator.serviceWorker.getRegistration().then(reg => {
       console.log('SW registered:', !!reg)
@@ -257,6 +279,7 @@ useEffect(() => {
 Happy testing! 🎉
 
 **Next Steps:**
+
 1. Start dev server: `yarn dev`
 2. Test each applet URL in Chrome DevTools
 3. Deploy to staging

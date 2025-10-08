@@ -1,6 +1,7 @@
 # PWA Applet Suite Architecture
 
 ## Overview
+
 This document explains how the Co-Operability portfolio website creates a **suite of installable PWA applets** - individual tools that can be added to a mobile home screen with their own names and identities while sharing the same icon set and service worker infrastructure.
 
 ---
@@ -8,11 +9,13 @@ This document explains how the Co-Operability portfolio website creates a **suit
 ## 🎯 The Goal
 
 Instead of having a single "Co-Operability" app, users can install:
+
 - **"Prompt Composer"** - from `/prompt-composer`
 - **"Opioid Converter"** - from `/opioid-converter`
 - **"Co-Operability"** - the main portfolio site from `/`
 
 Each appears as a separate app on the home screen with its own name, but they all:
+
 - ✅ Use the same icon set (shared brand identity)
 - ✅ Share the same service worker (efficient caching)
 - ✅ Maintain their specific identity when installed
@@ -34,56 +37,60 @@ public/icons/
 
 **What each manifest defines:**
 
-| Property | Purpose | Example |
-|----------|---------|---------|
-| `name` | Full app name shown during install | "Prompt Composer" |
-| `short_name` | Name shown under icon (limited space) | "Composer" |
-| `description` | What the app does | "Research-backed prompt builder" |
-| `start_url` | URL that opens when app launches | "/prompt-composer" |
-| `scope` | URLs considered "part of this app" | "/prompt-composer" |
-| `display` | How app appears | "standalone" (no browser UI) |
-| `theme_color` | Browser chrome color | "#3b82f6" (blue) |
-| `icons` | App icons (shared across all apps) | References to `/icons/*.png` |
+| Property      | Purpose                               | Example                          |
+| ------------- | ------------------------------------- | -------------------------------- |
+| `name`        | Full app name shown during install    | "Prompt Composer"                |
+| `short_name`  | Name shown under icon (limited space) | "Composer"                       |
+| `description` | What the app does                     | "Research-backed prompt builder" |
+| `start_url`   | URL that opens when app launches      | "/prompt-composer"               |
+| `scope`       | URLs considered "part of this app"    | "/prompt-composer"               |
+| `display`     | How app appears                       | "standalone" (no browser UI)     |
+| `theme_color` | Browser chrome color                  | "#3b82f6" (blue)                 |
+| `icons`       | App icons (shared across all apps)    | References to `/icons/*.png`     |
 
 ### 2. **Manifest Links** (The Connection)
 
 Each page includes a specific `<link rel="manifest">` in its `<Head>`:
 
 **In `src/pages/prompt-composer.tsx`:**
-```tsx
-<Head>
-  {/* This tells the browser: "Use the Prompt Composer identity for THIS page" */}
+
+```html
+<head>
+  {/* This tells the browser: "Use the Prompt Composer identity for THIS page"
+  */}
   <link rel="manifest" href="/icons/prompt-composer.webmanifest" />
-  
+
   {/* iOS-specific naming (Apple doesn't fully support manifest files) */}
   <meta name="apple-mobile-web-app-title" content="Prompt Composer" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="theme-color" content="#3b82f6" />
-</Head>
+</head>
 ```
 
 **In `src/pages/opioid-converter.tsx`:**
-```tsx
-<Head>
+
+```html
+<head>
   <link rel="manifest" href="/icons/opioid-converter.webmanifest" />
   <meta name="apple-mobile-web-app-title" content="Opioid Converter" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="theme-color" content="#10b981" />
-</Head>
+</head>
 ```
 
 ### 3. **Global Layout** (The Default)
 
 The main `Layout` component (`src/components/layout.tsx`) links to the default site manifest:
 
-```tsx
-<Head>
+```html
+<head>
   <link rel="manifest" href="/icons/site.webmanifest" />
   <meta name="apple-mobile-web-app-title" content="Co-Operability" />
-</Head>
+</head>
 ```
 
 **How manifest precedence works:**
+
 - When a page includes its own `<link rel="manifest">`, it **overrides** the global one
 - The browser uses the **last** manifest link it encounters
 - Page-specific manifests win over layout manifests
@@ -91,11 +98,13 @@ The main `Layout` component (`src/components/layout.tsx`) links to the default s
 ### 4. **Service Worker** (Shared Infrastructure)
 
 The service worker (`public/sw.js`) has a **scope of `/`** which means:
+
 - ✅ It caches ALL routes (`/`, `/prompt-composer`, `/opioid-converter`)
 - ✅ All applets benefit from offline capability
 - ✅ No duplication - one worker serves everything
 
 **Key insight:** Manifest scope and service worker scope are INDEPENDENT:
+
 - **Manifest scope** (`"/prompt-composer"`) controls app identity and what URLs open within the app
 - **Service worker scope** (`"/"`) controls what URLs can be cached and served offline
 
@@ -111,7 +120,7 @@ The main site manifest includes a `shortcuts` array:
       "url": "/prompt-composer"
     },
     {
-      "name": "Opioid Converter", 
+      "name": "Opioid Converter",
       "url": "/opioid-converter"
     }
   ]
@@ -119,6 +128,7 @@ The main site manifest includes a `shortcuts` array:
 ```
 
 **What this does:**
+
 - On Android: Long-press the main app icon → see shortcuts to jump directly to applets
 - On iOS: Not currently supported (as of iOS 17)
 - Acts as a launcher menu for your app suite
@@ -165,6 +175,7 @@ Want to add a new tool (e.g., "Task Tracker") to your suite? Follow these steps:
 ### Step 1: Create a manifest file
 
 **File:** `public/icons/task-tracker.webmanifest`
+
 ```json
 {
   "name": "Task Tracker",
@@ -195,6 +206,7 @@ Want to add a new tool (e.g., "Task Tracker") to your suite? Follow these steps:
 ### Step 2: Update the page component
 
 **File:** `src/pages/task-tracker.tsx`
+
 ```tsx
 import Head from 'next/head'
 import Layout from '@/src/components/layout'
@@ -206,17 +218,17 @@ const TaskTrackerPage = () => {
       <Head>
         <title>Task Tracker | Co-Operability</title>
         <meta name="description" content="Simple task management tool" />
-        
+
         {/* PWA-specific manifest */}
         <link rel="manifest" href="/icons/task-tracker.webmanifest" />
-        
+
         {/* iOS-specific meta tags */}
         <meta name="apple-mobile-web-app-title" content="Task Tracker" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="theme-color" content="#8b5cf6" />
       </Head>
-      
+
       <TaskTracker />
     </Layout>
   )
@@ -228,6 +240,7 @@ export default TaskTrackerPage
 ### Step 3: Add to shortcuts (optional)
 
 **File:** `public/icons/site.webmanifest`
+
 ```json
 {
   "shortcuts": [
@@ -309,16 +322,18 @@ Each applet manifest has a `theme_color` that controls the browser chrome:
 
 ```json
 {
-  "theme_color": "#3b82f6"  // This colors the status bar and browser UI
+  "theme_color": "#3b82f6" // This colors the status bar and browser UI
 }
 ```
 
 **Current theme colors:**
+
 - **Main site:** `#ffffff` (white) - neutral, professional
 - **Prompt Composer:** `#3b82f6` (blue-500) - matches AI/tech theme
 - **Opioid Converter:** `#10b981` (emerald-500) - medical/healthcare green
 
 **Best practices:**
+
 - Match your app's primary brand color
 - Ensure good contrast with white text (status bar readability)
 - Test on both iOS and Android
@@ -332,6 +347,7 @@ Each applet manifest has a `theme_color` that controls the browser chrome:
 **Cause:** Manifest not being read correctly
 
 **Solutions:**
+
 1. Check `<link rel="manifest">` is in the page's `<Head>`
 2. Verify manifest file exists at the specified path
 3. Clear browser cache and reload
@@ -342,6 +358,7 @@ Each applet manifest has a `theme_color` that controls the browser chrome:
 **Cause:** `display` mode not set or `scope` mismatch
 
 **Solutions:**
+
 1. Ensure manifest has `"display": "standalone"`
 2. Verify `start_url` is within `scope`
 3. Re-install the app (removing old one first)
@@ -351,6 +368,7 @@ Each applet manifest has a `theme_color` that controls the browser chrome:
 **Cause:** Icon paths incorrect or sizes missing
 
 **Solutions:**
+
 1. Verify icon paths start with `/` (e.g., `/icons/...`)
 2. Ensure at least 192x192 and 512x512 sizes are included
 3. Check icon files actually exist in `public/icons/`
@@ -360,6 +378,7 @@ Each applet manifest has a `theme_color` that controls the browser chrome:
 **Cause:** HTTPS required, or SW registration failed
 
 **Solutions:**
+
 1. PWAs require HTTPS (except localhost)
 2. Check console for SW registration errors
 3. DevTools → Application → Service Workers → check status
@@ -404,6 +423,7 @@ Service worker (scope: "/") handles caching
 Currently all applets share the same icon. To give each its own:
 
 1. Create applet-specific icons:
+
    ```
    public/icons/
    ├── prompt-composer-192.png

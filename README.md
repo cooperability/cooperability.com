@@ -271,6 +271,7 @@ Historical "Untitled" listings and old paths (`/skills`, `/prompts`) have been r
 This project implements a **comprehensive PWA applet suite** - transforming individual tools into installable Progressive Web Apps with their own identities while sharing infrastructure. Each applet (Prompt Composer, Opioid Converter) can be added to a mobile home screen as a separate app with its own name, but they all share the same service worker and icon set for efficiency and brand consistency.
 
 **📚 Documentation:**
+
 - **Architecture Guide:** [`docs/PWA-APPLET-SUITE.md`](docs/PWA-APPLET-SUITE.md) - Complete technical explanation and how to add new applets
 - **Testing Guide:** [`docs/TESTING-PWA-APPLETS.md`](docs/TESTING-PWA-APPLETS.md) - Platform-specific testing procedures and troubleshooting
 
@@ -309,8 +310,9 @@ References: Serwist docs `https://serwist.pages.dev/`
 **Status:** Fully implemented as of January 2025. Each applet now has its own installable PWA identity while sharing the same service worker infrastructure.
 
 **Implemented Applets:**
+
 - **Prompt Composer** (`/prompt-composer`) - Installs as "Prompt Composer"
-- **Opioid Converter** (`/opioid-converter`) - Installs as "Opioid Converter"  
+- **Opioid Converter** (`/opioid-converter`) - Installs as "Opioid Converter"
 - **Main Portfolio** (`/`) - Installs as "Co-Operability" with shortcuts to applets
 
 **Architecture:**
@@ -318,6 +320,7 @@ References: Serwist docs `https://serwist.pages.dev/`
 1. **Dedicated Per-Page Manifests** (Pattern #1)
 
 Each applet has its own manifest file in `public/icons/`:
+
 - `prompt-composer.webmanifest` - Prompt Composer identity (theme: blue `#3b82f6`)
 - `opioid-converter.webmanifest` - Opioid Converter identity (theme: green `#10b981`)
 - `site.webmanifest` - Main portfolio identity (theme: white `#ffffff`)
@@ -326,16 +329,16 @@ Each applet has its own manifest file in `public/icons/`:
 
 Each page component includes its specific manifest in the `<Head>`:
 
-```tsx
-<Head>
+```html
+<head>
   {/* PWA-specific manifest for this applet */}
   <link rel="manifest" href="/icons/prompt-composer.webmanifest" />
-  
+
   {/* iOS-specific meta tags (Apple doesn't fully support manifests) */}
   <meta name="apple-mobile-web-app-title" content="Prompt Composer" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="theme-color" content="#3b82f6" />
-</Head>
+</head>
 ```
 
 3. **Global Shortcuts** (Pattern #2)
@@ -360,7 +363,7 @@ The main `site.webmanifest` includes a `shortcuts` array for quick access on And
 **How It Works:**
 
 - **Manifest Precedence:** Page-specific `<link rel="manifest">` overrides the global layout manifest
-- **Shared Service Worker:** Single SW at `/sw.js` (scope `/`) caches all routes efficiently  
+- **Shared Service Worker:** Single SW at `/sw.js` (scope `/`) caches all routes efficiently
 - **Independent Installations:** Each applet can be added to home screen with its own name
 - **iOS Support:** Apple-specific meta tags ensure proper naming on Safari
 - **Brand Consistency:** All applets share the same icon set while having unique identities
@@ -368,6 +371,7 @@ The main `site.webmanifest` includes a `shortcuts` array for quick access on And
 **User Experience:**
 
 When a user visits `/prompt-composer` on mobile and taps "Add to Home Screen":
+
 - iOS Safari shows "Prompt Composer" as the app name (not "Co-Operability")
 - The installed app opens directly to `/prompt-composer`
 - It displays in standalone mode (no browser UI)
@@ -391,22 +395,26 @@ See `docs/PWA-APPLET-SUITE.md` for the complete process. In brief:
 ### Testing PWA Applets
 
 **Quick Validation:**
+
 - **Chrome DevTools:** Navigate to applet URL → DevTools (F12) → Application tab → Manifest section
 - **Verify:** Correct name, icons, start URL, theme color for each applet
 - **Service Worker:** Application → Service Workers → "This page is controlled by a service worker"
 
 **Lighthouse Audits:**
+
 - Run Lighthouse against the exact URL you want installable (e.g., `http://localhost:3000/prompt-composer`)
 - Validate installability, manifest icons, display mode, and offline functionality
 - Each applet should score high on PWA criteria
 
 **Mobile Device Testing:**
+
 - **Required:** Test on actual iOS (Safari) and Android (Chrome) devices
 - **iOS:** Visit applet URL → Share → Add to Home Screen → Verify correct app name
 - **Android:** Visit applet URL → Menu → Add to Home Screen → Test long-press shortcuts
 
 **Comprehensive Testing Guide:**
 See `docs/TESTING-PWA-APPLETS.md` for:
+
 - Platform-specific testing checklists (iOS/Android/Desktop)
 - Common issues and troubleshooting
 - Debug commands and validation scripts

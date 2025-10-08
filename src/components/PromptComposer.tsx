@@ -304,7 +304,8 @@ const promptComposerStyles = {
   livePreviewHeader:
     'flex text-lg font-bold flex-row sm:flex-row sm:items-center justify-between',
   buttonContainer: 'flex flex-row items-center justify-between',
-  clearButton: 'px-2py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors text-sm md:text-base font-medium',
+  clearButton:
+    'px-2py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors text-sm md:text-base font-medium',
   copyButton:
     'px-2py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors text-sm md:text-base font-medium',
 
@@ -366,7 +367,8 @@ const tw = {
 
   // Layout helpers
   radioCheckboxContainer: 'p-3 flex',
-  radioCheckboxItem: 'flex items-center space-x-2 mb-1 border-b border-gray-200',
+  radioCheckboxItem:
+    'flex items-center space-x-2 mb-1 border-b border-gray-200',
 
   // Statistics
   statsGrid: 'grid grid-rows-3 gap-1 text-center font-bold',
@@ -1200,30 +1202,32 @@ const PromptComposer: React.FC<PromptComposerProps> = ({ className }) => {
               <CardTitle>Compiled Prompt</CardTitle>
             </div>
             <div className={promptComposerStyles.buttonContainer}>
-            <Button
-              onClick={clearAll}
-              disabled={selectedComponents.size === 0 && audienceToggle === 'general'}
-              variant="outline"
-            >
-              {cleared ? (
-                <Check className="mr-2 h-4 w-4 text-green-600" />
-              ) : (
-                <RotateCcw className="mr-2 h-4 w-4" />
-              )}
-              {cleared ? 'Cleared!' : 'Clear'}
-            </Button>
-            <Button
-              onClick={copyToClipboard}
-              disabled={!compiledPrompt.trim()}
-              variant="outline"
-            >
-              {copied ? (
-                <Check className="mr-2 h-4 w-4 text-green-600" />
-              ) : (
-                <Copy className="mr-2 h-4 w-4" />
-              )}
-              {copied ? 'Copied!' : 'Copy'}
-            </Button>
+              <Button
+                onClick={clearAll}
+                disabled={
+                  selectedComponents.size === 0 && audienceToggle === 'general'
+                }
+                variant="outline"
+              >
+                {cleared ? (
+                  <Check className="mr-2 h-4 w-4 text-green-600" />
+                ) : (
+                  <RotateCcw className="mr-2 h-4 w-4" />
+                )}
+                {cleared ? 'Cleared!' : 'Clear'}
+              </Button>
+              <Button
+                onClick={copyToClipboard}
+                disabled={!compiledPrompt.trim()}
+                variant="outline"
+              >
+                {copied ? (
+                  <Check className="mr-2 h-4 w-4 text-green-600" />
+                ) : (
+                  <Copy className="mr-2 h-4 w-4" />
+                )}
+                {copied ? 'Copied!' : 'Copy'}
+              </Button>
             </div>
           </CardHeader>
           <CardContent>
