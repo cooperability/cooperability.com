@@ -19,7 +19,14 @@ const compat = new FlatCompat({
 
 export default defineConfig([
   {
-    ignores: ['.next/**', '.yarn/**', '.pnp.*', 'coverage/**', 'public/**'],
+    ignores: [
+      '.next/**',
+      '.yarn/**',
+      '.pnp.*',
+      'coverage/**',
+      'public/**',
+      'docs/**',
+    ],
   },
   { languageOptions: { globals: globals.browser } },
   pluginJs.configs.recommended,

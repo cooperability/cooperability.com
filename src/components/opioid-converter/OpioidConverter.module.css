@@ -1,5 +1,5 @@
 .converter {
-  padding: 2% 15%;
+  padding: 2% 2%;
   box-sizing: border-box;
   background-color: #e0e0e0;
   min-height: 100vh;
@@ -28,18 +28,18 @@
 
 .title {
   font-weight: 600;
+  font-style: italic !important;
+  text-decoration: underline;
   color: #800000;
-  margin-left: 1.5rem;
+  margin-left: 1rem;
   font-size: clamp(1rem, 4vw, 1.5rem);
-  @media (max-width: 768px) {
-    margin-left: 0.5rem;
-  }
 }
 
 .mdisplay {
   background-color: #800000;
   padding: 1rem 1.5rem;
   display: flex;
+  flex-direction: column;
   justify-content: space-between;
   align-items: center;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
@@ -59,18 +59,12 @@
 }
 
 .table {
-  width: 100%;
   background-color: white;
-  border-radius: 0 0 8px 8px;
+  border-radius: 8px;
   border-spacing: 0;
   border-collapse: collapse;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   align-items: stretch;
-  @media (max-width: 768px) {
-    font-size: 0.875rem;
-    grid-template-columns: 35% 35% 30%;
-    gap: 0.25rem;
-  }
 }
 
 .headerRow {
@@ -80,7 +74,7 @@
 }
 
 .headerRow th {
-  padding: 0.75rem 1rem;
+  padding: 0.5rem 0.5rem;
   text-align: left;
   font-weight: 700;
   font-size: clamp(0.875rem, 1.25vw, 1rem);
@@ -106,7 +100,7 @@
 }
 
 .row td {
-  padding: 0.75rem 1rem;
+  padding: 0.75rem 0.5rem;
 }
 
 .row:hover {
@@ -121,12 +115,10 @@
   color: #333;
   font-weight: 400;
   font-size: clamp(0.875rem, 1.25vw, 1rem);
-  width: 50%;
 }
 
 .doseCell {
   position: relative;
-  width: 25%;
 }
 
 .doseCell span {
@@ -138,7 +130,7 @@
 
 .doseInput {
   width: 100%;
-  padding: 0.5rem 2.5rem 0.5rem 0.5rem;
+  padding: 0.5rem 2.5rem;
   text-align: left;
   border: 2px solid #d1d1d1;
   border-radius: 4px;
@@ -165,23 +157,17 @@
 }
 
 .incrementCell {
-  width: 25%;
   display: inline-flex;
-  gap: 0.5rem;
-  margin-left: 1rem;
+  gap: 0.25rem;
   align-items: center;
   right: 4rem;
-  @media (max-width: 768px) {
-    margin-left: 0;
-    gap: 0.1rem;
-  }
 }
 
 .incrementValue {
   color: #333;
   font-weight: 500;
   font-size: clamp(0.875rem, 1.25vw, 1rem);
-  min-width: 2rem;
+  min-width: 1.5rem;
   text-align: center;
 }
 
