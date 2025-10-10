@@ -26,7 +26,7 @@ export default function Resources({ allPostsData }: ResourcesProps) {
   const { isMobile } = useResponsive()
 
   return (
-    <Layout home={false}>
+    <Layout>
       <Head>
         <title>Resources | Cooper Reed | Co-Operability</title>
         <meta

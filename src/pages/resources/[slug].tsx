@@ -29,7 +29,7 @@ const components = {
 
 export default function PostPage({ source, frontMatter }: Props) {
   return (
-    <Layout home>
+    <Layout>
       <Head>
         <title>{`${frontMatter.title} | Cooper Reed | Co-Operability`}</title>
         {frontMatter.description && (

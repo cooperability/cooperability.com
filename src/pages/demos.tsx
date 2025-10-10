@@ -8,7 +8,7 @@ import { GetStaticProps } from 'next'
 
 const Demos: React.FC = () => {
   return (
-    <Layout home={false}>
+    <Layout>
       <Head>
         <title>Demos | Cooper Reed | Co-Operability</title>
         <meta
