@@ -137,7 +137,7 @@ export default function Home({ initialQuote }: HomeProps) {
 }
 
 Home.getLayout = function getLayout(page: ReactElement) {
-  return <Layout home>{page}</Layout>
+  return <Layout>{page}</Layout>
 }
 
 export const getServerSideProps: GetServerSideProps<HomeProps> = async () => {
