@@ -1,11 +1,11 @@
 import OpioidConverter from '@/src/components/opioid-converter/OpioidConverter'
-import OpioidConverterLayout from '@/src/components/opioid-converter/OpioidConverterLayout'
+import Layout from '@/src/components/layout'
 import type { NextPageWithLayout } from './_app'
 import Head from 'next/head'
 
 const OpioidConverterPage: NextPageWithLayout = () => {
   return (
-    <OpioidConverterLayout>
+    <Layout skipManifest={true}>
       <Head>
         <title>Opioid Converter Tool</title>
         <meta
@@ -14,6 +14,7 @@ const OpioidConverterPage: NextPageWithLayout = () => {
         />
         {/* PWA-specific manifest for this applet */}
         <link rel="manifest" href="/icons/opioid-converter.webmanifest" />
+        <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
         {/* iOS-specific meta tags for standalone app */}
         <meta name="apple-mobile-web-app-title" content="Opioid Converter" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -23,7 +24,7 @@ const OpioidConverterPage: NextPageWithLayout = () => {
       <div className="page-container">
         <OpioidConverter />
       </div>
-    </OpioidConverterLayout>
+    </Layout>
   )
 }
 

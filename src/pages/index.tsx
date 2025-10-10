@@ -98,9 +98,9 @@ export default function Home({ initialQuote }: HomeProps) {
         </div>
         <p>
           Hi, I&apos;m <b>Cooper!</b> To me, <b>Co-Operability</b> means
-          long-term synergy between my ambitions and my morals. To
-          that end, I&apos;ve spent 5 years building web apps for carefully
-          selected organizations. I open-source my personal{' '}
+          long-term synergy between my ambitions and my morals. To that end,
+          I&apos;ve spent 5 years building web apps for carefully selected
+          organizations. I open-source my personal{' '}
           <Link href="/demos">tools</Link> and{' '}
           <Link href="/resources">learnings</Link>. My interviews follow the
           same spirit of independent creation, publication, and education.

@@ -5,7 +5,7 @@ import Head from 'next/head'
 
 const PromptComposerPage: NextPageWithLayout = () => {
   return (
-    <Layout home={false}>
+    <Layout skipManifest={true}>
       <Head>
         <title>Prompt Composer | Cooper Reed | Co-Operability</title>
         <meta
@@ -14,6 +14,7 @@ const PromptComposerPage: NextPageWithLayout = () => {
         />
         {/* PWA-specific manifest for this applet */}
         <link rel="manifest" href="/icons/prompt-composer.webmanifest" />
+        <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
         {/* iOS-specific meta tags for standalone app */}
         <meta name="apple-mobile-web-app-title" content="Prompt Composer" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
