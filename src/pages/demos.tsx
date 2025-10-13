@@ -92,6 +92,28 @@ const Demos: React.FC = () => {
                 </div>
               </div>
 
+                            {/* Mandelbrot Explorer */}
+                            <div className={styles.subProjectItem}>
+                <div className={styles.projectInfo}>
+                  <Link href="/mandelbrot-explorer/">Mandelbrot Explorer[💻📱]</Link>
+                  <span className={styles.projectStatus}>(2025)</span>
+                </div>
+                <div className={styles.techStackIcons}>
+                  <ActiveIcon
+                    href="https://www.typescriptlang.org/"
+                    imgSrc="/images/typescript.png"
+                    alt="TypeScript logo"
+                    size="small"
+                  />
+                  <ActiveIcon
+                    href="https://react.dev/"
+                    imgSrc="/images/react.png"
+                    alt="React logo"
+                    size="small"
+                  />
+                </div>
+              </div>
+
               {/* Opioid Converter */}
               <div className={styles.subProjectItem}>
                 <div className={styles.projectInfo}>
@@ -121,6 +143,7 @@ const Demos: React.FC = () => {
                   />
                 </div>
               </div>
+
             </div>
           </div>
           <div className={styles.projectItem}>
