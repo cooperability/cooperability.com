@@ -1,0 +1,269 @@
+.explorer {
+  padding: 2% 2%;
+  box-sizing: border-box;
+  background-color: #1a1a1a;
+  min-height: 100vh;
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  color: #e0e0e0;
+}
+
+@media (max-width: 768px) {
+  .explorer {
+    padding: 0.5rem;
+  }
+}
+
+.header {
+  text-align: center;
+  width: 100%;
+  max-width: 600px;
+  padding: 1rem;
+  background-color: #2a2a2a;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+.title {
+  font-size: clamp(1.5rem, 5vw, 2rem);
+  font-weight: 700;
+  color: #60a5fa;
+  margin: 0 0 0.5rem 0;
+}
+
+.subtitle {
+  font-size: clamp(0.875rem, 3vw, 1rem);
+  color: #9ca3af;
+  margin: 0;
+}
+
+.subtitle sub,
+.subtitle sup {
+  font-size: 0.75em;
+}
+
+.canvasContainer {
+  position: relative;
+  max-width: 100%;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.8);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.canvas {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  background-color: #000;
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+}
+
+@media (max-width: 768px) {
+  .canvas {
+    width: 100%;
+    height: auto;
+  }
+}
+
+.progressOverlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: rgba(0, 0, 0, 0.85);
+  padding: 1.5rem 2rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+  min-width: 250px;
+}
+
+.progressBar {
+  width: 100%;
+  height: 20px;
+  background-color: #374151;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+}
+
+.progressFill {
+  height: 100%;
+  background: linear-gradient(90deg, #3b82f6, #60a5fa);
+  transition: width 0.2s ease-out;
+  border-radius: 10px;
+}
+
+.progressText {
+  display: block;
+  text-align: center;
+  font-size: 0.875rem;
+  color: #e0e0e0;
+  font-weight: 600;
+}
+
+.controls {
+  width: 100%;
+  max-width: 600px;
+  padding: 1.5rem;
+  background-color: #2a2a2a;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1rem;
+  background-color: #1f1f1f;
+  border-radius: 4px;
+  border-left: 4px solid #60a5fa;
+}
+
+.infoRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.875rem;
+}
+
+@media (max-width: 768px) {
+  .infoRow {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+}
+
+.label {
+  font-weight: 600;
+  color: #9ca3af;
+}
+
+.value {
+  font-family: 'Courier New', monospace;
+  color: #e0e0e0;
+}
+
+.buttonGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.iterationControls {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: space-between;
+}
+
+@media (max-width: 768px) {
+  .iterationControls {
+    flex-direction: column;
+  }
+}
+
+.button {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+}
+
+.button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(96, 165, 250, 0.3);
+}
+
+.button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.resetButton {
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+}
+
+.resetButton:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(96, 165, 250, 0.3);
+}
+
+.instructions {
+  padding: 1rem;
+  background-color: #1f1f1f;
+  border-radius: 4px;
+  border-left: 4px solid #10b981;
+}
+
+.instructions p {
+  margin: 0.5rem 0;
+  font-size: 0.875rem;
+  color: #9ca3af;
+}
+
+.instructions p:first-child {
+  margin-top: 0;
+}
+
+.instructions p:last-child {
+  margin-bottom: 0;
+}
+
+.instructions b {
+  color: #e0e0e0;
+}
+
+/* Dark mode support (already dark by default, but ensure compatibility) */
+@media (prefers-color-scheme: light) {
+  .explorer {
+    background-color: #f5f5f5;
+    color: #1a1a1a;
+  }
+
+  .header,
+  .controls {
+    background-color: #ffffff;
+  }
+
+  .info,
+  .instructions {
+    background-color: #f9fafb;
+  }
+
+  .title {
+    color: #2563eb;
+  }
+
+  .subtitle {
+    color: #6b7280;
+  }
+
+  .label {
+    color: #6b7280;
+  }
+
+  .value {
+    color: #1a1a1a;
+  }
+
+  .instructions p {
+    color: #6b7280;
+  }
+
+  .instructions b {
+    color: #1a1a1a;
+  }
+}
+

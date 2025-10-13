@@ -29,6 +29,10 @@ public/sitemap.xml
 public/sitemap-*.xml
 public/robots.txt
 
+# Service worker build output (generated from src/sw.js)
+public/sw.js
+public/workbox-*.js
+
 # Cursor AI configuration
 .cursorrules
 
