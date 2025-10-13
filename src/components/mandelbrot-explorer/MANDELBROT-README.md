@@ -1,5 +1,11 @@
 # Mandelbrot Explorer: Interactive Fractal Visualization
 
+## Cooper's Comments - A HUMAN WROTE THIS PART
+I used Cursor's "Plan" feature running Claude 4.5 Sonnet to create an implementation plan for the project which could seamlessly mount to my portfolio's existing Next.js infrastructure. Using the plan, I generated the initial files for math calculations, core JS component logic and CSS styling, all of which are in this folder. After that, I iteratively refined several times to tweak the page's first contentful paint, run QA, and build extra features (zoom/reset) as I was able within my four hours allotted for this task. Finally, I used my portfolio's existing suite of linters, formatters, and tests to ensure this project's addition didn't affect site performance or UX for the rest of my site.
+
+
+
+##EVERYTHING BELOW THIS LINE WAS WRITTEN BY AI
 ## The Challenge
 
 The assignment was straightforward: create a webpage that visualizes the Mandelbrot set using the iterative equation **z₍ₙ₊₁₎ = z²ₙ + c**. Given a complex plane spanning from (-2, -2) to (2, 2) with at least 500×500 resolution, color each point based on whether it remains bounded (LIGHT) or diverges to infinity (DARK).
