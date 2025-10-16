@@ -11,7 +11,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 
 const resumeUrl =
-  'https://docs.google.com/document/d/15wtKG9juJMYQOI793LvNYMfmeu7hyErO4xWixkTrSHI/edit?usp=sharing'
+  'https://drive.google.com/file/d/1-mHF7SH3ym9QI8jKBtpKKzvbJM8L1Ovc/view?usp=sharing'
 const allLinksUrl = '/resources/linktree'
 const privacyStatementUrl = '/resources/PrivacyStatement'
 const accessibilityStatementUrl = '/resources/AccessibilityStatement'
