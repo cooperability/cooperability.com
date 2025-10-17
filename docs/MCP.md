@@ -44,17 +44,17 @@ Your portfolio website has a **unique combination of requirements** that make MC
 ### 1. **Accessibility-First Development**
 
 - **Current State**: You run comprehensive accessibility audits (`axe-core`, Lighthouse) manually via `yarn access`.
-- **MCP Opportunity**: Build an MCP server that integrates accessibility testing into your AI development workflow. Imagine asking Claude: *"Review the contrast ratios on my new landing page"* or *"Suggest ARIA improvements for this component"* and getting instant, context-aware feedback powered by your existing axe-core infrastructure.
+- **MCP Opportunity**: Build an MCP server that integrates accessibility testing into your AI development workflow. Imagine asking Claude: _"Review the contrast ratios on my new landing page"_ or _"Suggest ARIA improvements for this component"_ and getting instant, context-aware feedback powered by your existing axe-core infrastructure.
 
 ### 2. **Testing Infrastructure (Jest + Testing Library)**
 
 - **Current State**: Jest tests run on pre-commit and manually via `yarn test`.
-- **MCP Opportunity**: Create an MCP server that exposes your test suite to AI agents. Ask: *"Run tests for the PromptComposer component and explain failures"* or *"Generate test cases for the new OpioidConverter validation logic."* This enables AI-assisted test-driven development (TDD) without leaving your IDE.
+- **MCP Opportunity**: Create an MCP server that exposes your test suite to AI agents. Ask: _"Run tests for the PromptComposer component and explain failures"_ or _"Generate test cases for the new OpioidConverter validation logic."_ This enables AI-assisted test-driven development (TDD) without leaving your IDE.
 
 ### 3. **PWA & Service Worker Management (Serwist)**
 
 - **Current State**: Complex service worker setup with manual manifest management and multi-applet architecture.
-- **MCP Opportunity**: Develop an MCP server to validate PWA configurations, debug caching strategies, and simulate offline scenarios. Ask: *"Is my prompt-composer.webmanifest compliant with iOS Safari?"* and get instant validation against Apple's guidelines.
+- **MCP Opportunity**: Develop an MCP server to validate PWA configurations, debug caching strategies, and simulate offline scenarios. Ask: _"Is my prompt-composer.webmanifest compliant with iOS Safari?"_ and get instant validation against Apple's guidelines.
 
 ### 4. **Content Management (MDX + Gray Matter)**
 
@@ -64,7 +64,7 @@ Your portfolio website has a **unique combination of requirements** that make MC
 ### 5. **Performance & Bundle Optimization**
 
 - **Current State**: Manual bundle analysis via `yarn analyze` and Vercel Analytics.
-- **MCP Opportunity**: Create an MCP server that monitors bundle sizes, identifies tree-shaking opportunities, and suggests dynamic imports. Ask: *"Which components should I lazy-load to reduce First Load JS?"* and get data-driven recommendations.
+- **MCP Opportunity**: Create an MCP server that monitors bundle sizes, identifies tree-shaking opportunities, and suggests dynamic imports. Ask: _"Which components should I lazy-load to reduce First Load JS?"_ and get data-driven recommendations.
 
 ### 6. **Deployment Pipeline (Vercel + Yarn PnP)**
 
@@ -138,42 +138,42 @@ For production MCP servers that interact with external services (Vercel API, Git
 
 ```typescript
 // Example: Vercel API MCP Server with OAuth
-import { Server } from "@modelcontextprotocol/sdk/server/index.js";
-import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { OAuth2Client } from "google-auth-library";
+import { Server } from '@modelcontextprotocol/sdk/server/index.js'
+import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
+import { OAuth2Client } from 'google-auth-library'
 
 const server = new Server(
   {
-    name: "vercel-deployment-server",
-    version: "1.0.0",
+    name: 'vercel-deployment-server',
+    version: '1.0.0',
   },
   {
     capabilities: {
       tools: {
         vercel_deploy: {
-          description: "Trigger a Vercel deployment",
+          description: 'Trigger a Vercel deployment',
           inputSchema: {
-            type: "object",
+            type: 'object',
             properties: {
-              branch: { type: "string" },
-              force: { type: "boolean" },
+              branch: { type: 'string' },
+              force: { type: 'boolean' },
             },
-            required: ["branch"],
+            required: ['branch'],
           },
         },
       },
     },
   }
-);
+)
 
 // Validate OAuth token before executing any tool
-server.setRequestHandler("tools/call", async (request) => {
-  const token = request.params.auth?.token;
+server.setRequestHandler('tools/call', async (request) => {
+  const token = request.params.auth?.token
   if (!token || !(await verifyOAuthToken(token))) {
-    throw new Error("Unauthorized: Invalid OAuth token");
+    throw new Error('Unauthorized: Invalid OAuth token')
   }
   // Execute tool logic...
-});
+})
 ```
 
 #### Zero-Trust Principles (Local Development)
@@ -183,25 +183,23 @@ Even for local MCP servers, apply least-privilege access:
 ```typescript
 // Example: File system MCP server with scoped access
 const ALLOWED_DIRECTORIES = [
-  path.join(process.cwd(), "src"),
-  path.join(process.cwd(), "public"),
-  path.join(process.cwd(), "docs"),
-];
+  path.join(process.cwd(), 'src'),
+  path.join(process.cwd(), 'public'),
+  path.join(process.cwd(), 'docs'),
+]
 
 function validatePath(requestedPath: string): boolean {
-  const resolvedPath = path.resolve(requestedPath);
-  return ALLOWED_DIRECTORIES.some((allowed) =>
-    resolvedPath.startsWith(allowed)
-  );
+  const resolvedPath = path.resolve(requestedPath)
+  return ALLOWED_DIRECTORIES.some((allowed) => resolvedPath.startsWith(allowed))
 }
 
-server.setRequestHandler("resources/read", async (request) => {
-  const { uri } = request.params;
+server.setRequestHandler('resources/read', async (request) => {
+  const { uri } = request.params
   if (!validatePath(uri)) {
-    throw new Error(`Access denied: ${uri} is outside allowed directories`);
+    throw new Error(`Access denied: ${uri} is outside allowed directories`)
   }
   // Read file...
-});
+})
 ```
 
 ### 2. Input/Output Validation
@@ -209,29 +207,29 @@ server.setRequestHandler("resources/read", async (request) => {
 Enforce strict JSON schemas for all MCP tool inputs:
 
 ```typescript
-import Ajv from "ajv";
+import Ajv from 'ajv'
 
-const ajv = new Ajv();
+const ajv = new Ajv()
 
 const testRunnerSchema = {
-  type: "object",
+  type: 'object',
   properties: {
-    testPath: { type: "string", pattern: "^.*\\.test\\.(ts|tsx|js|jsx)$" },
-    coverage: { type: "boolean" },
-    timeout: { type: "number", minimum: 1000, maximum: 60000 }, // 1-60s
+    testPath: { type: 'string', pattern: '^.*\\.test\\.(ts|tsx|js|jsx)$' },
+    coverage: { type: 'boolean' },
+    timeout: { type: 'number', minimum: 1000, maximum: 60000 }, // 1-60s
   },
-  required: ["testPath"],
+  required: ['testPath'],
   additionalProperties: false, // Prevent injection attacks
-};
+}
 
-const validate = ajv.compile(testRunnerSchema);
+const validate = ajv.compile(testRunnerSchema)
 
-server.setRequestHandler("tools/run_tests", async (request) => {
+server.setRequestHandler('tools/run_tests', async (request) => {
   if (!validate(request.params)) {
-    throw new Error(`Invalid input: ${ajv.errorsText(validate.errors)}`);
+    throw new Error(`Invalid input: ${ajv.errorsText(validate.errors)}`)
   }
   // Run tests...
-});
+})
 ```
 
 ### 3. Metadata Sanitization
@@ -243,18 +241,18 @@ function sanitizeToolDescription(description: string): string {
   return (
     description
       // Remove hidden Unicode (zero-width, right-to-left override, etc.)
-      .replace(/[\u200B-\u200D\uFEFF\u202A-\u202E]/g, "")
+      .replace(/[\u200B-\u200D\uFEFF\u202A-\u202E]/g, '')
       // Remove excessive whitespace
-      .replace(/\s+/g, " ")
+      .replace(/\s+/g, ' ')
       .trim()
       // Cap length to prevent context pollution
       .slice(0, 500)
-  );
+  )
 }
 
 const toolDescription = sanitizeToolDescription(
   userProvidedDescription // From config or external source
-);
+)
 ```
 
 ### 4. Audit Logging
@@ -262,48 +260,45 @@ const toolDescription = sanitizeToolDescription(
 Log all MCP tool invocations for security analytics:
 
 ```typescript
-import { createLogger, format, transports } from "winston";
+import { createLogger, format, transports } from 'winston'
 
 const logger = createLogger({
-  level: "info",
-  format: format.combine(
-    format.timestamp(),
-    format.json()
-  ),
+  level: 'info',
+  format: format.combine(format.timestamp(), format.json()),
   transports: [
-    new transports.File({ filename: "mcp-audit.log" }),
+    new transports.File({ filename: 'mcp-audit.log' }),
     // Optional: Send to SIEM (Datadog, Splunk, etc.)
     // new transports.Http({ host: 'siem.example.com', path: '/logs' }),
   ],
-});
+})
 
-server.setRequestHandler("tools/call", async (request) => {
-  const startTime = Date.now();
-  const { name, arguments: args } = request.params;
+server.setRequestHandler('tools/call', async (request) => {
+  const startTime = Date.now()
+  const { name, arguments: args } = request.params
 
-  logger.info("MCP Tool Invocation", {
+  logger.info('MCP Tool Invocation', {
     tool: name,
     user: process.env.USER, // Or from OAuth token
     args: JSON.stringify(args), // Sanitize sensitive data (tokens, passwords)
     timestamp: new Date().toISOString(),
-  });
+  })
 
   try {
-    const result = await executeTool(name, args);
-    logger.info("MCP Tool Success", {
+    const result = await executeTool(name, args)
+    logger.info('MCP Tool Success', {
       tool: name,
       duration: Date.now() - startTime,
-    });
-    return result;
+    })
+    return result
   } catch (error) {
-    logger.error("MCP Tool Failure", {
+    logger.error('MCP Tool Failure', {
       tool: name,
       error: error.message,
       duration: Date.now() - startTime,
-    });
-    throw error;
+    })
+    throw error
   }
-});
+})
 ```
 
 ### 5. Rate Limiting
@@ -311,22 +306,22 @@ server.setRequestHandler("tools/call", async (request) => {
 Protect expensive operations (builds, deployments) with rate limits:
 
 ```typescript
-import rateLimit from "express-rate-limit";
+import rateLimit from 'express-rate-limit'
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 10, // Limit each IP to 10 requests per windowMs
-  message: "Too many deployment requests, please try again later.",
-});
+  message: 'Too many deployment requests, please try again later.',
+})
 
 // Apply to specific MCP tools
-server.setRequestHandler("tools/vercel_deploy", async (request) => {
+server.setRequestHandler('tools/vercel_deploy', async (request) => {
   // Check rate limit (pseudocode - adapt to your transport layer)
   if (!limiter.check(request.clientId)) {
-    throw new Error("Rate limit exceeded");
+    throw new Error('Rate limit exceeded')
   }
   // Execute deployment...
-});
+})
 ```
 
 ---
@@ -338,6 +333,7 @@ server.setRequestHandler("tools/vercel_deploy", async (request) => {
 **Purpose**: Integrate axe-core and Lighthouse directly into your AI workflow.
 
 **Capabilities**:
+
 - Run axe-core CLI against local or deployed URLs
 - Execute Lighthouse audits and parse JSON reports
 - Validate WCAG 2.1/2.2 AA compliance
@@ -385,12 +381,14 @@ server.setRequestHandler("tools/vercel_deploy", async (request) => {
 ```
 
 **Implementation Strategy**:
+
 - Wrap your existing `yarn access` script as MCP tools
 - Parse axe-core JSON reports and return structured violations
 - Use `jsdom` or `playwright` for component-level testing
 - Cache audit results to avoid redundant scans
 
 **Integration with Your Workflow**:
+
 ```bash
 # Before MCP
 $ yarn access
@@ -406,6 +404,7 @@ Claude uses MCP server → Runs axe-core → Parses results → Returns human-re
 **Purpose**: AI-assisted test writing, execution, and debugging.
 
 **Capabilities**:
+
 - Run Jest tests for specific files or patterns
 - Generate test cases based on component analysis
 - Explain test failures with stack traces
@@ -462,19 +461,21 @@ Claude uses MCP server → Runs axe-core → Parses results → Returns human-re
 ```
 
 **Implementation Strategy**:
+
 - Use Jest's programmatic API to run tests from Node.js
 - Parse JSON coverage reports (`coverage/coverage-final.json`)
 - Analyze component files with TypeScript AST to suggest test cases
 - Integrate with `@testing-library/react` best practices
 
 **Integration with Your Workflow**:
+
 ```typescript
 // Before MCP: Manually write tests
-describe("PromptComposer", () => {
-  it("should render input fields", () => {
+describe('PromptComposer', () => {
+  it('should render input fields', () => {
     // ... manual test writing
-  });
-});
+  })
+})
 
 // With MCP
 // Ask Claude: "Generate comprehensive test cases for src/components/PromptComposer.tsx"
@@ -486,6 +487,7 @@ describe("PromptComposer", () => {
 **Purpose**: Ensure your multi-applet PWA setup is correct and compliant.
 
 **Capabilities**:
+
 - Validate web app manifests against W3C spec
 - Check icon sizes and formats (iOS, Android, desktop)
 - Simulate service worker behavior (precache, runtime cache)
@@ -541,12 +543,14 @@ describe("PromptComposer", () => {
 ```
 
 **Implementation Strategy**:
+
 - Use `web-app-manifest-validator` npm package
 - Parse `src/sw.js` and `public/sw.js` to check Serwist configuration
 - Use `sharp` (already in your dependencies) for icon generation
 - Simulate offline with Playwright's network interception
 
 **Integration with Your Workflow**:
+
 ```bash
 # Before MCP
 # Manually check manifests, test on devices, review Chrome DevTools
@@ -563,6 +567,7 @@ Claude → Validates prompt-composer.webmanifest, opioid-converter.webmanifest, 
 **Purpose**: AI-powered content creation and maintenance.
 
 **Capabilities**:
+
 - Parse MDX files and extract frontmatter
 - Validate frontmatter schemas (date, title, tags)
 - Suggest SEO improvements (meta descriptions, keywords)
@@ -628,12 +633,14 @@ Claude → Validates prompt-composer.webmanifest, opioid-converter.webmanifest, 
 ```
 
 **Implementation Strategy**:
+
 - Use `gray-matter` (already in dependencies) to parse frontmatter
 - Validate against a JSON schema (define schemas for blog posts, resources, etc.)
 - Use `remark` and `remark-html` to analyze content structure
 - Check links with `next-mdx-remote` and `fs` to verify file existence
 
 **Integration with Your Workflow**:
+
 ```bash
 # Before MCP
 # Manually create MDX files, copy frontmatter, check links
@@ -652,6 +659,7 @@ Claude → Uses content server to:
 **Purpose**: Monitor and optimize your Next.js bundle.
 
 **Capabilities**:
+
 - Parse webpack stats and bundle analyzer JSON
 - Identify large dependencies (date-fns, heroicons, MDX libraries)
 - Suggest dynamic imports for code splitting
@@ -705,12 +713,14 @@ Claude → Uses content server to:
 ```
 
 **Implementation Strategy**:
+
 - Parse `.next/analyze/*.json` files (generated by `yarn analyze`)
 - Use `@next/bundle-analyzer` programmatically
 - Integrate with Vercel Analytics API (requires OAuth token)
 - Store historical bundle sizes in local JSON file or SQLite
 
 **Integration with Your Workflow**:
+
 ```bash
 # Before MCP
 $ yarn analyze
@@ -729,6 +739,7 @@ Claude → Runs bundle analyzer
 **Purpose**: Pre-deployment validation and Vercel integration.
 
 **Capabilities**:
+
 - Validate environment variables before deployment
 - Run pre-deploy checks (linting, type-checking, tests)
 - Trigger Vercel deployments via API
@@ -792,12 +803,14 @@ Claude → Runs bundle analyzer
 ```
 
 **Implementation Strategy**:
+
 - Use Vercel API with OAuth 2.1 token (store in environment variables)
 - Run `yarn lint`, `yarn typecheck`, `yarn test` programmatically
 - Parse `git diff` output and check for risky changes (config files, dependencies)
 - Validate `.env.local` against `.env.example` (if exists)
 
 **Integration with Your Workflow**:
+
 ```bash
 # Before MCP
 $ git push origin feature-branch
@@ -823,55 +836,56 @@ Claude → Validates env vars: ✓
 
 ```typescript
 // .mcp/servers/nextjs-dev-server.ts
-import { Server } from "@modelcontextprotocol/sdk/server/index.js";
-import { spawn } from "child_process";
-import { readFile } from "fs/promises";
-import path from "path";
+import { Server } from '@modelcontextprotocol/sdk/server/index.js'
+import { spawn } from 'child_process'
+import { readFile } from 'fs/promises'
+import path from 'path'
 
 const server = new Server({
-  name: "nextjs-dev-server",
-  version: "1.0.0",
-});
+  name: 'nextjs-dev-server',
+  version: '1.0.0',
+})
 
-server.setRequestHandler("tools/analyze_route", async (request) => {
-  const { routePath } = request.params as { routePath: string };
-  
+server.setRequestHandler('tools/analyze_route', async (request) => {
+  const { routePath } = request.params as { routePath: string }
+
   // Read the route file
-  const filePath = path.join(process.cwd(), "src/pages", routePath);
-  const content = await readFile(filePath, "utf-8");
-  
+  const filePath = path.join(process.cwd(), 'src/pages', routePath)
+  const content = await readFile(filePath, 'utf-8')
+
   // Analyze with TypeScript compiler API
   // Extract props, dependencies, dynamic imports, etc.
-  
+
   return {
     analysis: {
-      hasGetServerSideProps: content.includes("getServerSideProps"),
-      hasGetStaticProps: content.includes("getStaticProps"),
+      hasGetServerSideProps: content.includes('getServerSideProps'),
+      hasGetStaticProps: content.includes('getStaticProps'),
       dependencies: extractImports(content),
       potentialIssues: checkForCommonIssues(content),
     },
-  };
-});
+  }
+})
 
-server.setRequestHandler("tools/optimize_image", async (request) => {
-  const { imagePath } = request.params as { imagePath: string };
-  
+server.setRequestHandler('tools/optimize_image', async (request) => {
+  const { imagePath } = request.params as { imagePath: string }
+
   // Check if using Next.js Image component
   // Suggest optimizations (webp, sizes, priority)
-  
+
   return {
     recommendations: [
-      "Use <Image> component instead of <img>",
+      'Use <Image> component instead of <img>',
       'Add sizes="(max-width: 768px) 100vw, 50vw" for responsive loading',
     ],
-  };
-});
+  }
+})
 ```
 
 **Usage Example**:
+
 ```
 User: "Analyze src/pages/prompt-composer.tsx and suggest performance improvements"
-Claude (via MCP): 
+Claude (via MCP):
   → Reads file
   → Checks for getServerSideProps (none found - good for static export)
   → Analyzes dependencies (PromptComposer component, layout)
@@ -886,34 +900,34 @@ Claude (via MCP):
 
 ```typescript
 // .mcp/schemas/tools.ts
-import { z } from "zod";
+import { z } from 'zod'
 
 // Define schemas that mirror your TypeScript types
 export const ComponentAnalysisSchema = z.object({
   componentPath: z.string().regex(/\.tsx?$/),
   includeTests: z.boolean().default(true),
-});
+})
 
 export const AccessibilityAuditSchema = z.object({
   url: z.string().url(),
-  tags: z.array(z.enum(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"])),
-  theme: z.enum(["light", "dark"]).optional(),
-});
+  tags: z.array(z.enum(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa'])),
+  theme: z.enum(['light', 'dark']).optional(),
+})
 
 // Generate JSON schemas for MCP
 export const toolSchemas = {
   analyze_component: ComponentAnalysisSchema.toJsonSchema(),
   run_accessibility_audit: AccessibilityAuditSchema.toJsonSchema(),
-};
+}
 
 // Type-safe validation in MCP handlers
-server.setRequestHandler("tools/analyze_component", async (request) => {
-  const params = ComponentAnalysisSchema.parse(request.params); // Throws if invalid
-  
+server.setRequestHandler('tools/analyze_component', async (request) => {
+  const params = ComponentAnalysisSchema.parse(request.params) // Throws if invalid
+
   // Now params is type-safe!
-  const { componentPath, includeTests } = params;
+  const { componentPath, includeTests } = params
   // ...
-});
+})
 ```
 
 ### Pattern 3: MCP + Accessibility Testing (axe-core + Lighthouse)
@@ -924,39 +938,39 @@ server.setRequestHandler("tools/analyze_component", async (request) => {
 
 ```typescript
 // .mcp/servers/accessibility-server.ts
-import { Server } from "@modelcontextprotocol/sdk/server/index.js";
-import { execFile } from "child_process";
-import { promisify } from "util";
-import { readFile } from "fs/promises";
-import path from "path";
+import { Server } from '@modelcontextprotocol/sdk/server/index.js'
+import { execFile } from 'child_process'
+import { promisify } from 'util'
+import { readFile } from 'fs/promises'
+import path from 'path'
 
-const execFileAsync = promisify(execFile);
+const execFileAsync = promisify(execFile)
 
 const server = new Server({
-  name: "accessibility-server",
-  version: "1.0.0",
-});
+  name: 'accessibility-server',
+  version: '1.0.0',
+})
 
-server.setRequestHandler("tools/run_axe_audit", async (request) => {
-  const { url, tags } = request.params as { url: string; tags: string[] };
-  
+server.setRequestHandler('tools/run_axe_audit', async (request) => {
+  const { url, tags } = request.params as { url: string; tags: string[] }
+
   // Use your existing axe-core CLI setup
-  const { stdout } = await execFileAsync("axe", [
+  const { stdout } = await execFileAsync('axe', [
     url,
-    "--tags",
-    tags.join(","),
-    "--save",
-    "./accessibility-reports/mcp-axe-report.json",
-    "--exit",
-  ]);
-  
+    '--tags',
+    tags.join(','),
+    '--save',
+    './accessibility-reports/mcp-axe-report.json',
+    '--exit',
+  ])
+
   // Parse the JSON report
   const reportPath = path.join(
     process.cwd(),
-    "accessibility-reports/mcp-axe-report.json"
-  );
-  const report = JSON.parse(await readFile(reportPath, "utf-8"));
-  
+    'accessibility-reports/mcp-axe-report.json'
+  )
+  const report = JSON.parse(await readFile(reportPath, 'utf-8'))
+
   // Return structured violations
   return {
     url,
@@ -970,27 +984,27 @@ server.setRequestHandler("tools/run_axe_audit", async (request) => {
       helpUrl: v.helpUrl,
     })),
     summary: generateSummary(report),
-  };
-});
+  }
+})
 
-server.setRequestHandler("tools/run_lighthouse_audit", async (request) => {
-  const { url } = request.params as { url: string };
-  
+server.setRequestHandler('tools/run_lighthouse_audit', async (request) => {
+  const { url } = request.params as { url: string }
+
   // Use Lighthouse programmatic API
-  const { stdout } = await execFileAsync("lighthouse", [
+  const { stdout } = await execFileAsync('lighthouse', [
     url,
-    "--output=json",
-    "--output-path=./accessibility-reports/mcp-lighthouse-report.json",
-    "--only-categories=accessibility",
+    '--output=json',
+    '--output-path=./accessibility-reports/mcp-lighthouse-report.json',
+    '--only-categories=accessibility',
     "--chrome-flags='--headless --no-sandbox'",
-  ]);
-  
+  ])
+
   const reportPath = path.join(
     process.cwd(),
-    "accessibility-reports/mcp-lighthouse-report.json"
-  );
-  const report = JSON.parse(await readFile(reportPath, "utf-8"));
-  
+    'accessibility-reports/mcp-lighthouse-report.json'
+  )
+  const report = JSON.parse(await readFile(reportPath, 'utf-8'))
+
   return {
     score: report.categories.accessibility.score * 100,
     audits: Object.entries(report.audits)
@@ -1001,19 +1015,20 @@ server.setRequestHandler("tools/run_lighthouse_audit", async (request) => {
         description: audit.description,
         score: audit.score,
       })),
-  };
-});
+  }
+})
 
 function generateSummary(report: any): string {
-  const { violations, passes, incomplete } = report;
+  const { violations, passes, incomplete } = report
   return `
     Found ${violations.length} violations, ${passes.length} passes, ${incomplete.length} incomplete checks.
-    Most critical: ${violations.filter((v: any) => v.impact === "critical").length} critical issues.
-  `.trim();
+    Most critical: ${violations.filter((v: any) => v.impact === 'critical').length} critical issues.
+  `.trim()
 }
 ```
 
 **Usage Example**:
+
 ```
 User: "Run accessibility audits on localhost:3000/prompt-composer in both light and dark themes"
 Claude (via MCP):
@@ -1033,24 +1048,24 @@ Claude (via MCP):
 
 ```typescript
 // .mcp/servers/testing-server.ts
-import { Server } from "@modelcontextprotocol/sdk/server/index.js";
-import { runCLI } from "@jest/core";
-import { readFile } from "fs/promises";
-import path from "path";
+import { Server } from '@modelcontextprotocol/sdk/server/index.js'
+import { runCLI } from '@jest/core'
+import { readFile } from 'fs/promises'
+import path from 'path'
 
 const server = new Server({
-  name: "testing-server",
-  version: "1.0.0",
-});
+  name: 'testing-server',
+  version: '1.0.0',
+})
 
-server.setRequestHandler("tools/run_tests", async (request) => {
+server.setRequestHandler('tools/run_tests', async (request) => {
   const { testPath, coverage } = request.params as {
-    testPath: string;
-    coverage: boolean;
-  };
-  
+    testPath: string
+    coverage: boolean
+  }
+
   // Run Jest programmatically
-  const projectRootPath = process.cwd();
+  const projectRootPath = process.cwd()
   const { results } = await runCLI(
     {
       testPathPattern: testPath,
@@ -1059,8 +1074,8 @@ server.setRequestHandler("tools/run_tests", async (request) => {
       runInBand: true, // Sequential execution for predictable logs
     },
     [projectRootPath]
-  );
-  
+  )
+
   return {
     success: results.success,
     numFailedTests: results.numFailedTests,
@@ -1072,19 +1087,19 @@ server.setRequestHandler("tools/run_tests", async (request) => {
       duration: test.duration,
     })),
     coverageSummary: coverage ? parseCoverage() : null,
-  };
-});
+  }
+})
 
-server.setRequestHandler("tools/generate_test_cases", async (request) => {
-  const { componentPath } = request.params as { componentPath: string };
-  
+server.setRequestHandler('tools/generate_test_cases', async (request) => {
+  const { componentPath } = request.params as { componentPath: string }
+
   // Read the component file
-  const filePath = path.join(process.cwd(), componentPath);
-  const componentCode = await readFile(filePath, "utf-8");
-  
+  const filePath = path.join(process.cwd(), componentPath)
+  const componentCode = await readFile(filePath, 'utf-8')
+
   // Parse with TypeScript AST
-  const analysis = analyzeComponent(componentCode);
-  
+  const analysis = analyzeComponent(componentCode)
+
   // Generate test boilerplate
   const testCases = generateTestTemplate({
     componentName: analysis.componentName,
@@ -1092,13 +1107,13 @@ server.setRequestHandler("tools/generate_test_cases", async (request) => {
     state: analysis.useState,
     effects: analysis.useEffect,
     interactions: analysis.eventHandlers,
-  });
-  
+  })
+
   return {
     suggestedTests: testCases,
-    testFilePath: componentPath.replace(/\.tsx$/, ".test.tsx"),
-  };
-});
+    testFilePath: componentPath.replace(/\.tsx$/, '.test.tsx'),
+  }
+})
 
 function analyzeComponent(code: string) {
   // Use TypeScript compiler API to extract:
@@ -1109,12 +1124,12 @@ function analyzeComponent(code: string) {
   // - Event handlers
   // This is complex - consider using ts-morph library
   return {
-    componentName: "PromptComposer",
-    props: { initialPrompt: "string", onSubmit: "function" },
-    useState: ["prompt", "setPrompt"],
-    useEffect: ["fetch data on mount"],
-    eventHandlers: ["handleSubmit", "handleChange"],
-  };
+    componentName: 'PromptComposer',
+    props: { initialPrompt: 'string', onSubmit: 'function' },
+    useState: ['prompt', 'setPrompt'],
+    useEffect: ['fetch data on mount'],
+    eventHandlers: ['handleSubmit', 'handleChange'],
+  }
 }
 
 function generateTestTemplate(analysis: any): string {
@@ -1128,25 +1143,34 @@ describe('${analysis.componentName}', () => {
     expect(screen.getByRole('main')).toBeInTheDocument();
   });
 
-  ${Object.keys(analysis.props).map((prop) => `
+  ${Object.keys(analysis.props)
+    .map(
+      (prop) => `
   it('should handle ${prop} prop', () => {
     // TODO: Test ${prop} behavior
   });
-  `).join('\n')}
+  `
+    )
+    .join('\n')}
 
-  ${analysis.eventHandlers.map((handler: string) => `
+  ${analysis.eventHandlers
+    .map(
+      (handler: string) => `
   it('should call ${handler} when triggered', () => {
     const mock${handler} = jest.fn();
     render(<${analysis.componentName} ${handler}={mock${handler}} />);
     // TODO: Trigger ${handler} and verify mock was called
   });
-  `).join('\n')}
+  `
+    )
+    .join('\n')}
 });
-  `.trim();
+  `.trim()
 }
 ```
 
 **Usage Example**:
+
 ```
 User: "Generate test cases for src/components/PromptComposer.tsx"
 Claude (via MCP):
@@ -1164,73 +1188,73 @@ Claude (via MCP):
 
 ```typescript
 // .mcp/servers/pwa-server.ts
-import { Server } from "@modelcontextprotocol/sdk/server/index.js";
-import { readFile } from "fs/promises";
-import path from "path";
+import { Server } from '@modelcontextprotocol/sdk/server/index.js'
+import { readFile } from 'fs/promises'
+import path from 'path'
 
 const server = new Server({
-  name: "pwa-server",
-  version: "1.0.0",
-});
+  name: 'pwa-server',
+  version: '1.0.0',
+})
 
 interface Manifest {
-  name: string;
-  short_name: string;
-  start_url: string;
-  display: string;
-  theme_color: string;
-  background_color: string;
+  name: string
+  short_name: string
+  start_url: string
+  display: string
+  theme_color: string
+  background_color: string
   icons: Array<{
-    src: string;
-    sizes: string;
-    type: string;
-    purpose?: string;
-  }>;
+    src: string
+    sizes: string
+    type: string
+    purpose?: string
+  }>
   shortcuts?: Array<{
-    name: string;
-    url: string;
-  }>;
+    name: string
+    url: string
+  }>
 }
 
-server.setRequestHandler("tools/validate_manifest", async (request) => {
+server.setRequestHandler('tools/validate_manifest', async (request) => {
   const { manifestPath, platform } = request.params as {
-    manifestPath: string;
-    platform: "ios" | "android" | "windows" | "all";
-  };
-  
+    manifestPath: string
+    platform: 'ios' | 'android' | 'windows' | 'all'
+  }
+
   // Read manifest file
-  const filePath = path.join(process.cwd(), manifestPath);
-  const manifest: Manifest = JSON.parse(await readFile(filePath, "utf-8"));
-  
-  const issues: string[] = [];
-  const recommendations: string[] = [];
-  
+  const filePath = path.join(process.cwd(), manifestPath)
+  const manifest: Manifest = JSON.parse(await readFile(filePath, 'utf-8'))
+
+  const issues: string[] = []
+  const recommendations: string[] = []
+
   // Validate required fields
-  if (!manifest.name) issues.push("Missing required field: name");
+  if (!manifest.name) issues.push('Missing required field: name')
   if (!manifest.icons || manifest.icons.length === 0) {
-    issues.push("Missing icons array");
+    issues.push('Missing icons array')
   }
-  
+
   // Platform-specific validation
-  if (platform === "ios" || platform === "all") {
-    validateIOS(manifest, issues, recommendations);
+  if (platform === 'ios' || platform === 'all') {
+    validateIOS(manifest, issues, recommendations)
   }
-  
-  if (platform === "android" || platform === "all") {
-    validateAndroid(manifest, issues, recommendations);
+
+  if (platform === 'android' || platform === 'all') {
+    validateAndroid(manifest, issues, recommendations)
   }
-  
-  if (platform === "windows" || platform === "all") {
-    validateWindows(manifest, issues, recommendations);
+
+  if (platform === 'windows' || platform === 'all') {
+    validateWindows(manifest, issues, recommendations)
   }
-  
+
   return {
     valid: issues.length === 0,
     issues,
     recommendations,
     summary: `Found ${issues.length} issues and ${recommendations.length} recommendations`,
-  };
-});
+  }
+})
 
 function validateIOS(
   manifest: Manifest,
@@ -1239,20 +1263,24 @@ function validateIOS(
 ) {
   // Check for iOS-specific requirements
   const hasAppleTouchIcon = manifest.icons.some(
-    (icon) => icon.sizes === "180x180"
-  );
+    (icon) => icon.sizes === '180x180'
+  )
   if (!hasAppleTouchIcon) {
-    issues.push("Missing 180x180 apple-touch-icon for iOS");
+    issues.push('Missing 180x180 apple-touch-icon for iOS')
   }
-  
+
   // Check start_url
-  if (manifest.start_url && !manifest.start_url.endsWith("/")) {
-    recommendations.push("iOS Safari works better with trailing slash in start_url");
+  if (manifest.start_url && !manifest.start_url.endsWith('/')) {
+    recommendations.push(
+      'iOS Safari works better with trailing slash in start_url'
+    )
   }
-  
+
   // Check display mode
-  if (manifest.display === "browser") {
-    recommendations.push("Consider 'standalone' display for better app-like experience on iOS");
+  if (manifest.display === 'browser') {
+    recommendations.push(
+      "Consider 'standalone' display for better app-like experience on iOS"
+    )
   }
 }
 
@@ -1262,16 +1290,18 @@ function validateAndroid(
   recommendations: string[]
 ) {
   // Check for maskable icons
-  const hasMaskableIcon = manifest.icons.some(
-    (icon) => icon.purpose?.includes("maskable")
-  );
+  const hasMaskableIcon = manifest.icons.some((icon) =>
+    icon.purpose?.includes('maskable')
+  )
   if (!hasMaskableIcon) {
-    recommendations.push("Add maskable icon for adaptive icon support on Android");
+    recommendations.push(
+      'Add maskable icon for adaptive icon support on Android'
+    )
   }
-  
+
   // Check shortcuts (Android only)
   if (manifest.shortcuts && manifest.shortcuts.length > 4) {
-    issues.push("Android only supports max 4 shortcuts");
+    issues.push('Android only supports max 4 shortcuts')
   }
 }
 
@@ -1282,51 +1312,54 @@ function validateWindows(
 ) {
   // Check for large icons (Windows tiles)
   const hasLargeIcon = manifest.icons.some((icon) =>
-    ["512x512", "1024x1024"].includes(icon.sizes)
-  );
+    ['512x512', '1024x1024'].includes(icon.sizes)
+  )
   if (!hasLargeIcon) {
-    recommendations.push("Add 512x512 icon for Windows tile support");
+    recommendations.push('Add 512x512 icon for Windows tile support')
   }
 }
 
-server.setRequestHandler("tools/check_service_worker", async (request) => {
-  const { swPath } = request.params as { swPath: string };
-  
+server.setRequestHandler('tools/check_service_worker', async (request) => {
+  const { swPath } = request.params as { swPath: string }
+
   // Read service worker file
-  const filePath = path.join(process.cwd(), swPath);
-  const swCode = await readFile(filePath, "utf-8");
-  
+  const filePath = path.join(process.cwd(), swPath)
+  const swCode = await readFile(filePath, 'utf-8')
+
   const analysis = {
-    hasPrecaching: swCode.includes("precacheAndRoute"),
-    hasRuntimeCaching: swCode.includes("registerRoute"),
+    hasPrecaching: swCode.includes('precacheAndRoute'),
+    hasRuntimeCaching: swCode.includes('registerRoute'),
     cacheStrategies: extractCacheStrategies(swCode),
     issues: [] as string[],
-  };
-  
+  }
+
   // Check for common issues
   if (!analysis.hasPrecaching) {
-    analysis.issues.push("No precaching detected - offline functionality may be limited");
+    analysis.issues.push(
+      'No precaching detected - offline functionality may be limited'
+    )
   }
-  
-  if (!swCode.includes("skipWaiting")) {
-    analysis.issues.push("Consider adding skipWaiting() for immediate updates");
+
+  if (!swCode.includes('skipWaiting')) {
+    analysis.issues.push('Consider adding skipWaiting() for immediate updates')
   }
-  
-  return analysis;
-});
+
+  return analysis
+})
 
 function extractCacheStrategies(swCode: string): string[] {
-  const strategies = [];
-  if (swCode.includes("CacheFirst")) strategies.push("CacheFirst");
-  if (swCode.includes("NetworkFirst")) strategies.push("NetworkFirst");
-  if (swCode.includes("StaleWhileRevalidate")) {
-    strategies.push("StaleWhileRevalidate");
+  const strategies = []
+  if (swCode.includes('CacheFirst')) strategies.push('CacheFirst')
+  if (swCode.includes('NetworkFirst')) strategies.push('NetworkFirst')
+  if (swCode.includes('StaleWhileRevalidate')) {
+    strategies.push('StaleWhileRevalidate')
   }
-  return strategies;
+  return strategies
 }
 ```
 
 **Usage Example**:
+
 ```
 User: "Validate all PWA manifests for iOS compatibility"
 Claude (via MCP):
@@ -1344,122 +1377,119 @@ Claude (via MCP):
 
 ```typescript
 // .mcp/servers/deployment-server.ts
-import { Server } from "@modelcontextprotocol/sdk/server/index.js";
-import { execFile } from "child_process";
-import { promisify } from "util";
-import fetch from "node-fetch";
+import { Server } from '@modelcontextprotocol/sdk/server/index.js'
+import { execFile } from 'child_process'
+import { promisify } from 'util'
+import fetch from 'node-fetch'
 
-const execFileAsync = promisify(execFile);
+const execFileAsync = promisify(execFile)
 
 const server = new Server({
-  name: "deployment-server",
-  version: "1.0.0",
-});
+  name: 'deployment-server',
+  version: '1.0.0',
+})
 
-server.setRequestHandler("tools/run_pre_deploy_checks", async (request) => {
-  const checks = [];
-  
+server.setRequestHandler('tools/run_pre_deploy_checks', async (request) => {
+  const checks = []
+
   // 1. Run linting
   try {
-    await execFileAsync("yarn", ["lint"]);
-    checks.push({ name: "Linting", status: "passed" });
+    await execFileAsync('yarn', ['lint'])
+    checks.push({ name: 'Linting', status: 'passed' })
   } catch (error) {
-    checks.push({ name: "Linting", status: "failed", error: error.message });
+    checks.push({ name: 'Linting', status: 'failed', error: error.message })
   }
-  
+
   // 2. Run type-checking
   try {
-    await execFileAsync("yarn", ["typecheck"]);
-    checks.push({ name: "Type-checking", status: "passed" });
+    await execFileAsync('yarn', ['typecheck'])
+    checks.push({ name: 'Type-checking', status: 'passed' })
   } catch (error) {
     checks.push({
-      name: "Type-checking",
-      status: "failed",
+      name: 'Type-checking',
+      status: 'failed',
       error: error.message,
-    });
+    })
   }
-  
+
   // 3. Run tests
   try {
-    await execFileAsync("yarn", ["test", "--passWithNoTests"]);
-    checks.push({ name: "Tests", status: "passed" });
+    await execFileAsync('yarn', ['test', '--passWithNoTests'])
+    checks.push({ name: 'Tests', status: 'passed' })
   } catch (error) {
-    checks.push({ name: "Tests", status: "failed", error: error.message });
+    checks.push({ name: 'Tests', status: 'failed', error: error.message })
   }
-  
+
   // 4. Check environment variables
-  const envCheck = await validateEnvironmentVariables();
-  checks.push(envCheck);
-  
-  const allPassed = checks.every((check) => check.status === "passed");
-  
+  const envCheck = await validateEnvironmentVariables()
+  checks.push(envCheck)
+
+  const allPassed = checks.every((check) => check.status === 'passed')
+
   return {
     allPassed,
     checks,
     recommendation: allPassed
-      ? "All checks passed. Safe to deploy."
-      : "Fix failing checks before deploying.",
-  };
-});
+      ? 'All checks passed. Safe to deploy.'
+      : 'Fix failing checks before deploying.',
+  }
+})
 
 async function validateEnvironmentVariables() {
   const requiredVars = [
-    "NEXT_PUBLIC_SITE_URL",
+    'NEXT_PUBLIC_SITE_URL',
     // Add other required vars
-  ];
-  
-  const missing = requiredVars.filter((varName) => !process.env[varName]);
-  
+  ]
+
+  const missing = requiredVars.filter((varName) => !process.env[varName])
+
   return {
-    name: "Environment Variables",
-    status: missing.length === 0 ? "passed" : "failed",
+    name: 'Environment Variables',
+    status: missing.length === 0 ? 'passed' : 'failed',
     missing,
-  };
+  }
 }
 
-server.setRequestHandler("tools/trigger_vercel_deploy", async (request) => {
-  const { branch } = request.params as { branch: string };
-  
-  const VERCEL_TOKEN = process.env.VERCEL_TOKEN;
-  const VERCEL_PROJECT_ID = process.env.VERCEL_PROJECT_ID;
-  
+server.setRequestHandler('tools/trigger_vercel_deploy', async (request) => {
+  const { branch } = request.params as { branch: string }
+
+  const VERCEL_TOKEN = process.env.VERCEL_TOKEN
+  const VERCEL_PROJECT_ID = process.env.VERCEL_PROJECT_ID
+
   if (!VERCEL_TOKEN || !VERCEL_PROJECT_ID) {
-    throw new Error("Missing Vercel credentials in environment variables");
+    throw new Error('Missing Vercel credentials in environment variables')
   }
-  
-  const response = await fetch(
-    `https://api.vercel.com/v13/deployments`,
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${VERCEL_TOKEN}`,
-        "Content-Type": "application/json",
+
+  const response = await fetch(`https://api.vercel.com/v13/deployments`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${VERCEL_TOKEN}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      name: 'cooperability.com',
+      project: VERCEL_PROJECT_ID,
+      gitSource: {
+        type: 'github',
+        ref: branch,
       },
-      body: JSON.stringify({
-        name: "cooperability.com",
-        project: VERCEL_PROJECT_ID,
-        gitSource: {
-          type: "github",
-          ref: branch,
-        },
-      }),
-    }
-  );
-  
-  const deployment = await response.json();
-  
+    }),
+  })
+
+  const deployment = await response.json()
+
   return {
     deploymentId: deployment.id,
     url: deployment.url,
     status: deployment.readyState,
-  };
-});
+  }
+})
 
-server.setRequestHandler("tools/get_deployment_status", async (request) => {
-  const { deploymentId } = request.params as { deploymentId: string };
-  
-  const VERCEL_TOKEN = process.env.VERCEL_TOKEN;
-  
+server.setRequestHandler('tools/get_deployment_status', async (request) => {
+  const { deploymentId } = request.params as { deploymentId: string }
+
+  const VERCEL_TOKEN = process.env.VERCEL_TOKEN
+
   const response = await fetch(
     `https://api.vercel.com/v13/deployments/${deploymentId}`,
     {
@@ -1467,19 +1497,20 @@ server.setRequestHandler("tools/get_deployment_status", async (request) => {
         Authorization: `Bearer ${VERCEL_TOKEN}`,
       },
     }
-  );
-  
-  const deployment = await response.json();
-  
+  )
+
+  const deployment = await response.json()
+
   return {
     status: deployment.readyState,
     url: deployment.url,
-    buildLogs: deployment.meta?.githubCommitMessage || "N/A",
-  };
-});
+    buildLogs: deployment.meta?.githubCommitMessage || 'N/A',
+  }
+})
 ```
 
 **Usage Example**:
+
 ```
 User: "Run pre-deploy checks and deploy to Vercel if everything passes"
 Claude (via MCP):
@@ -1597,11 +1628,15 @@ Since you're using Cursor (based on your prompt), configure MCP in Cursor's sett
   "mcp.servers": {
     "accessibility": {
       "command": "node",
-      "args": ["c:/Users/coope/Documents/GitHub/cooperability.com/.mcp/servers/accessibility-server.js"]
+      "args": [
+        "c:/Users/coope/Documents/GitHub/cooperability.com/.mcp/servers/accessibility-server.js"
+      ]
     },
     "testing": {
       "command": "node",
-      "args": ["c:/Users/coope/Documents/GitHub/cooperability.com/.mcp/servers/testing-server.js"]
+      "args": [
+        "c:/Users/coope/Documents/GitHub/cooperability.com/.mcp/servers/testing-server.js"
+      ]
     }
     // Add other servers...
   }
@@ -1613,6 +1648,7 @@ Since you're using Cursor (based on your prompt), configure MCP in Cursor's sett
 Ask Claude in Cursor: "List available MCP tools"
 
 Expected response:
+
 ```
 Available MCP Tools:
 - accessibility.run_axe_audit
@@ -1707,31 +1743,31 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup Node.js 22
         uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: 'yarn'
-      
+
       - name: Enable Corepack
         run: corepack enable
-      
+
       - name: Install Dependencies
         run: yarn install --immutable
-      
+
       - name: Build MCP Servers
         run: |
           cd .mcp/servers
           yarn build # Or tsc if using TypeScript
-      
+
       - name: Run MCP Pre-Deploy Checks
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
         run: |
           node .mcp/servers/deployment-server.js run_pre_deploy_checks
-      
+
       - name: Run Accessibility Audits
         run: |
           yarn dev &
@@ -1741,12 +1777,12 @@ jobs:
             --url http://localhost:3000 \
             --tags wcag2aa
           kill $DEV_PID
-      
+
       - name: Analyze Bundle Size
         run: |
           yarn build
           node .mcp/servers/performance-server.js analyze_bundle
-      
+
       - name: Upload MCP Reports
         uses: actions/upload-artifact@v4
         with:
@@ -1800,24 +1836,24 @@ MCP_LOG_LEVEL=debug
 Create `.mcp/lib/logger.ts`:
 
 ```typescript
-import winston from "winston";
+import winston from 'winston'
 
 export const logger = winston.createLogger({
-  level: process.env.MCP_LOG_LEVEL || "info",
+  level: process.env.MCP_LOG_LEVEL || 'info',
   format: winston.format.combine(
     winston.format.timestamp(),
     winston.format.errors({ stack: true }),
     winston.format.json()
   ),
-  defaultMeta: { service: "mcp-servers" },
+  defaultMeta: { service: 'mcp-servers' },
   transports: [
-    new winston.transports.File({ filename: "mcp-error.log", level: "error" }),
-    new winston.transports.File({ filename: "mcp-combined.log" }),
+    new winston.transports.File({ filename: 'mcp-error.log', level: 'error' }),
+    new winston.transports.File({ filename: 'mcp-combined.log' }),
     new winston.transports.Console({
       format: winston.format.simple(),
     }),
   ],
-});
+})
 
 // Middleware for MCP tool calls
 export function logToolCall(
@@ -1826,26 +1862,26 @@ export function logToolCall(
   duration: number,
   success: boolean
 ) {
-  logger.info("MCP Tool Call", {
+  logger.info('MCP Tool Call', {
     tool: toolName,
     params: sanitizeParams(params), // Remove sensitive data
     duration,
     success,
     timestamp: new Date().toISOString(),
-  });
+  })
 }
 
 function sanitizeParams(params: any): any {
-  const sanitized = { ...params };
-  const sensitiveKeys = ["token", "password", "apiKey", "secret"];
-  
+  const sanitized = { ...params }
+  const sensitiveKeys = ['token', 'password', 'apiKey', 'secret']
+
   for (const key of sensitiveKeys) {
     if (key in sanitized) {
-      sanitized[key] = "[REDACTED]";
+      sanitized[key] = '[REDACTED]'
     }
   }
-  
-  return sanitized;
+
+  return sanitized
 }
 ```
 
@@ -1856,52 +1892,52 @@ function sanitizeParams(params: any): any {
 Create `.mcp/scripts/generate-metrics.js`:
 
 ```javascript
-const fs = require("fs");
-const path = require("path");
+const fs = require('fs')
+const path = require('path')
 
 // Parse mcp-combined.log and generate metrics
-const logPath = path.join(__dirname, "../mcp-combined.log");
-const logs = fs.readFileSync(logPath, "utf-8").split("\n").filter(Boolean);
+const logPath = path.join(__dirname, '../mcp-combined.log')
+const logs = fs.readFileSync(logPath, 'utf-8').split('\n').filter(Boolean)
 
 const metrics = {
   totalCalls: 0,
   callsByTool: {},
   averageDuration: 0,
   errorRate: 0,
-};
+}
 
-let totalDuration = 0;
-let errorCount = 0;
+let totalDuration = 0
+let errorCount = 0
 
 for (const line of logs) {
   try {
-    const log = JSON.parse(line);
+    const log = JSON.parse(line)
     if (log.tool) {
-      metrics.totalCalls++;
-      metrics.callsByTool[log.tool] = (metrics.callsByTool[log.tool] || 0) + 1;
-      totalDuration += log.duration || 0;
-      if (!log.success) errorCount++;
+      metrics.totalCalls++
+      metrics.callsByTool[log.tool] = (metrics.callsByTool[log.tool] || 0) + 1
+      totalDuration += log.duration || 0
+      if (!log.success) errorCount++
     }
   } catch (e) {
     // Skip invalid JSON lines
   }
 }
 
-metrics.averageDuration = totalDuration / metrics.totalCalls || 0;
-metrics.errorRate = (errorCount / metrics.totalCalls) * 100 || 0;
+metrics.averageDuration = totalDuration / metrics.totalCalls || 0
+metrics.errorRate = (errorCount / metrics.totalCalls) * 100 || 0
 
-console.log("MCP Metrics Report");
-console.log("==================");
-console.log(`Total Tool Calls: ${metrics.totalCalls}`);
-console.log(`Average Duration: ${metrics.averageDuration.toFixed(2)}ms`);
-console.log(`Error Rate: ${metrics.errorRate.toFixed(2)}%`);
-console.log("\nMost Used Tools:");
+console.log('MCP Metrics Report')
+console.log('==================')
+console.log(`Total Tool Calls: ${metrics.totalCalls}`)
+console.log(`Average Duration: ${metrics.averageDuration.toFixed(2)}ms`)
+console.log(`Error Rate: ${metrics.errorRate.toFixed(2)}%`)
+console.log('\nMost Used Tools:')
 Object.entries(metrics.callsByTool)
   .sort(([, a], [, b]) => b - a)
   .slice(0, 5)
   .forEach(([tool, count]) => {
-    console.log(`  ${tool}: ${count} calls`);
-  });
+    console.log(`  ${tool}: ${count} calls`)
+  })
 ```
 
 **Run Metrics**:
@@ -1929,18 +1965,18 @@ If you want cloud-based monitoring, send MCP metrics to Vercel Analytics:
 
 ```typescript
 // .mcp/lib/analytics.ts
-import { track } from "@vercel/analytics/server";
+import { track } from '@vercel/analytics/server'
 
 export async function trackMCPTool(
   toolName: string,
   duration: number,
   success: boolean
 ) {
-  await track("mcp_tool_call", {
+  await track('mcp_tool_call', {
     tool: toolName,
     duration,
     success,
-  });
+  })
 }
 ```
 
@@ -1957,11 +1993,13 @@ Then in your Vercel Analytics dashboard, you can filter by `mcp_tool_call` event
 **Tasks**:
 
 1. **Install MCP SDK**
+
    ```bash
    yarn add @modelcontextprotocol/sdk --dev
    ```
 
 2. **Create Directory Structure**
+
    ```bash
    mkdir -p .mcp/{servers,schemas,config,lib,scripts}
    ```
@@ -1981,6 +2019,7 @@ Then in your Vercel Analytics dashboard, you can filter by `mcp_tool_call` event
    - Document tool schemas in `.mcp/schemas/`
 
 **Success Criteria**:
+
 - ✅ Can run accessibility audits via Claude in Cursor
 - ✅ Audit results match manual `yarn access` output
 - ✅ Logs are captured in `mcp-audit.log`
@@ -2013,6 +2052,7 @@ Then in your Vercel Analytics dashboard, you can filter by `mcp_tool_call` event
    - Add rate limiting for expensive operations
 
 **Success Criteria**:
+
 - ✅ Can generate test cases for React components
 - ✅ Can validate all PWA manifests and get actionable feedback
 - ✅ Can parse MDX files and check frontmatter
@@ -2047,6 +2087,7 @@ Then in your Vercel Analytics dashboard, you can filter by `mcp_tool_call` event
    - Implement rollback detection
 
 **Success Criteria**:
+
 - ✅ GitHub Actions runs MCP checks on every PR
 - ✅ Failed checks block merge
 - ✅ Can trigger Vercel deployments via Claude
@@ -2080,6 +2121,7 @@ Then in your Vercel Analytics dashboard, you can filter by `mcp_tool_call` event
    - Share learnings in a blog post (MDX file)
 
 **Success Criteria**:
+
 - ✅ MCP servers respond in < 2s for 95% of requests
 - ✅ Advanced AI features (test generation, auto-fix) work reliably
 - ✅ Comprehensive metrics dashboard available
@@ -2093,53 +2135,53 @@ Then in your Vercel Analytics dashboard, you can filter by `mcp_tool_call` event
 
 ```typescript
 // .mcp/servers/hello-world-server.ts
-import { Server } from "@modelcontextprotocol/sdk/server/index.js";
-import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import { Server } from '@modelcontextprotocol/sdk/server/index.js'
+import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 
 const server = new Server(
   {
-    name: "hello-world",
-    version: "1.0.0",
+    name: 'hello-world',
+    version: '1.0.0',
   },
   {
     capabilities: {
       tools: {
         greet: {
-          description: "Returns a greeting message",
+          description: 'Returns a greeting message',
           inputSchema: {
-            type: "object",
+            type: 'object',
             properties: {
-              name: { type: "string" },
+              name: { type: 'string' },
             },
-            required: ["name"],
+            required: ['name'],
           },
         },
       },
     },
   }
-);
+)
 
-server.setRequestHandler("tools/call", async (request) => {
-  if (request.params.name === "greet") {
-    const { name } = request.params.arguments as { name: string };
+server.setRequestHandler('tools/call', async (request) => {
+  if (request.params.name === 'greet') {
+    const { name } = request.params.arguments as { name: string }
     return {
       content: [
         {
-          type: "text",
+          type: 'text',
           text: `Hello, ${name}! Welcome to MCP.`,
         },
       ],
-    };
+    }
   }
-  
-  throw new Error(`Unknown tool: ${request.params.name}`);
-});
+
+  throw new Error(`Unknown tool: ${request.params.name}`)
+})
 
 // Start server
-const transport = new StdioServerTransport();
-await server.connect(transport);
+const transport = new StdioServerTransport()
+await server.connect(transport)
 
-console.error("Hello World MCP Server running on stdio");
+console.error('Hello World MCP Server running on stdio')
 ```
 
 **Build & Run**:
@@ -2159,24 +2201,25 @@ $ node .mcp/dist/servers/hello-world-server.js
 ### Resources for Building MCP Servers
 
 **Official Documentation**:
+
 - MCP Specification: https://modelcontextprotocol.io/
 - SDK Documentation: https://github.com/modelcontextprotocol/sdk
 - Community Examples: https://github.com/modelcontextprotocol/servers
 
 **Recommended Libraries for Your Stack**:
 
-| Use Case | Library | Purpose |
-|----------|---------|---------|
-| TypeScript Parsing | `ts-morph` | AST analysis for test generation |
-| JSON Schema Validation | `ajv` | Validate tool inputs/outputs |
-| Logging | `winston` | Structured logging & audit trails |
-| Testing (Jest) | `@jest/core` | Programmatic Jest execution |
-| Accessibility | `axe-core` | A11y testing (already installed) |
-| PWA Validation | `web-app-manifest-validator` | Manifest validation |
-| Image Processing | `sharp` | Icon generation (already installed) |
-| MDX Parsing | `gray-matter` | Frontmatter extraction (already installed) |
-| Git Operations | `simple-git` | Analyze commits, diffs |
-| HTTP Requests | `node-fetch` | Vercel API calls |
+| Use Case               | Library                      | Purpose                                    |
+| ---------------------- | ---------------------------- | ------------------------------------------ |
+| TypeScript Parsing     | `ts-morph`                   | AST analysis for test generation           |
+| JSON Schema Validation | `ajv`                        | Validate tool inputs/outputs               |
+| Logging                | `winston`                    | Structured logging & audit trails          |
+| Testing (Jest)         | `@jest/core`                 | Programmatic Jest execution                |
+| Accessibility          | `axe-core`                   | A11y testing (already installed)           |
+| PWA Validation         | `web-app-manifest-validator` | Manifest validation                        |
+| Image Processing       | `sharp`                      | Icon generation (already installed)        |
+| MDX Parsing            | `gray-matter`                | Frontmatter extraction (already installed) |
+| Git Operations         | `simple-git`                 | Analyze commits, diffs                     |
+| HTTP Requests          | `node-fetch`                 | Vercel API calls                           |
 
 **Example: Installing Additional Dependencies**:
 
@@ -2199,6 +2242,7 @@ yarn add --dev ts-morph ajv winston simple-git web-app-manifest-validator
 ### Measure Impact
 
 Track these metrics:
+
 - **Time saved**: Before MCP vs. After MCP for common tasks
   - Example: "Running accessibility audit" - Manual: 5 min → MCP: 30 sec
 - **Error reduction**: Did MCP catch issues before deployment?
@@ -2207,11 +2251,13 @@ Track these metrics:
 ### Avoid Over-Engineering
 
 **Don't build**:
+
 - MCP servers for tasks you rarely do (e.g., if you only analyze bundles once a month, manual is fine)
 - Complex AI features before validating basic tools work
 - Public-facing MCP endpoints (security risk) - keep them local or CI-only
 
 **Do build**:
+
 - MCP servers for repetitive tasks (accessibility checks, test runs)
 - Tools that benefit from AI context (explaining test failures, suggesting fixes)
 - Integrations that reduce context switching (Vercel API, GitHub Actions)
@@ -2227,6 +2273,7 @@ Track these metrics:
 ### Share Your Learnings
 
 Once you've implemented MCP:
+
 1. Write a blog post (MDX file in `src/resources/`)
 2. Add to your portfolio as a case study
 3. Share on GitHub (open-source your MCP servers if applicable)
@@ -2267,4 +2314,3 @@ If you encounter issues implementing MCP:
 4. **Start a discussion**: Open a GitHub issue in your repo for future reference
 
 **Next Steps**: Choose Phase 1 from the Implementation Roadmap and start building!
-

@@ -26,7 +26,7 @@ const MandelbrotExplorer = () => {
   /**
    * Renders the Mandelbrot set to the canvas using progressive rendering.
    * Processes 10 rows at a time via requestAnimationFrame to keep the UI responsive.
-   * 
+   *
    * For each pixel:
    * 1. Map (x, y) pixel coordinates to complex plane (real, imaginary)
    * 2. Iterate z = z² + c until divergence or max iterations reached
@@ -174,7 +174,8 @@ const MandelbrotExplorer = () => {
       <div className={styles.header}>
         <h1 className={styles.title}>Mandelbrot Explorer</h1>
         <p className={styles.subtitle}>
-          Interactive visualization of the equation: z<sub>n+1</sub> = z<sub>n</sub>
+          Interactive visualization of the equation: z<sub>n+1</sub> = z
+          <sub>n</sub>
           <sup>2</sup> + c
         </p>
       </div>
@@ -225,7 +226,9 @@ const MandelbrotExplorer = () => {
           <div className={styles.iterationControls}>
             <Button
               variant="dark"
-              onClick={() => setMaxIterations((prev) => Math.max(50, prev - 50))}
+              onClick={() =>
+                setMaxIterations((prev) => Math.max(50, prev - 50))
+              }
               disabled={isRendering || maxIterations <= 50}
               className={styles.button}
             >
@@ -233,7 +236,9 @@ const MandelbrotExplorer = () => {
             </Button>
             <Button
               variant="dark"
-              onClick={() => setMaxIterations((prev) => Math.min(1000, prev + 50))}
+              onClick={() =>
+                setMaxIterations((prev) => Math.min(1000, prev + 50))
+              }
               disabled={isRendering || maxIterations >= 1000}
               className={styles.button}
             >
@@ -265,4 +270,3 @@ const MandelbrotExplorer = () => {
 }
 
 export default MandelbrotExplorer
-

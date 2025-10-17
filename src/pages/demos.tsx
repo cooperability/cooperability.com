@@ -1,7 +1,12 @@
 import Layout from '../components/layout'
 import Link from 'next/link'
 import styles from '../styles/utils.module.css'
-import ToggleDropdown from '../components/ToggleDropdown'
+import {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+} from '../../components/ui/accordion'
 import ActiveIcon from '../components/ActiveIcon'
 import Head from 'next/head'
 import { GetStaticProps } from 'next'
@@ -92,10 +97,12 @@ const Demos: React.FC = () => {
                 </div>
               </div>
 
-                            {/* Mandelbrot Explorer */}
-                            <div className={styles.subProjectItem}>
+              {/* Mandelbrot Explorer */}
+              <div className={styles.subProjectItem}>
                 <div className={styles.projectInfo}>
-                  <Link href="/mandelbrot-explorer/">Mandelbrot Explorer[💻📱]</Link>
+                  <Link href="/mandelbrot-explorer/">
+                    Mandelbrot Explorer[💻📱]
+                  </Link>
                   <span className={styles.projectStatus}>(2025)</span>
                 </div>
                 <div className={styles.techStackIcons}>
@@ -143,7 +150,6 @@ const Demos: React.FC = () => {
                   />
                 </div>
               </div>
-
             </div>
           </div>
           <div className={styles.projectItem}>
@@ -259,42 +265,55 @@ const Demos: React.FC = () => {
             />
           </div>
         </div>
-        <ToggleDropdown title="Academic Papers to which I contributed Software">
-          <p>
-            <a href="https://www.nber.org/papers/w33662">
-              Measuring Human Leadership Skills with AI Agents
-            </a>
-            <span className={styles.projectStatus}>(2025)</span>
-          </p>
-          <br />
-          <p>
-            <a href="https://purl.stanford.edu/fh631qn1220">
-              One Face, Many Names: An Investigation into Fake NGOs and Media
-              Outlets Linked to Harouna Douamba on and off Facebook
-            </a>
-            <span className={styles.projectStatus}>(2022)</span>
-          </p>
-        </ToggleDropdown>
-        <ToggleDropdown title="Other Stack Elements I've Worked With">
-          <p>
-            <b>Lang:</b>
-            <br />
-            C++, Rust, Redis, Neo4j
-            <br />
-            <b>Web3:</b>
-            <br />
-            Solidity, Web3.js, Ethers.js, crypto.js, Lit Protocol, IPFS/Pinata
-            <br />
-            <b>Data Sci, ML/AI:</b>
-            <br />
-            TensorFlow, PyTorch, Keras, NumPy, Pandas, Scikit-learn, LangChain,
-            SpaCy, NLTK
-            <br />
-            <b>DevOps:</b>
-            <br />
-            Kubernetes, Heroku, CircleCI, GitLab CI, Linear
-          </p>
-        </ToggleDropdown>
+        <Accordion type="single" collapsible className="w-full">
+          <AccordionItem value="academic-papers">
+            <AccordionTrigger>
+              Academic Papers to which I contributed Software
+            </AccordionTrigger>
+            <AccordionContent>
+              <p>
+                <a href="https://www.nber.org/papers/w33662">
+                  Measuring Human Leadership Skills with AI Agents
+                </a>
+                <span className={styles.projectStatus}>(2025)</span>
+              </p>
+              <br />
+              <p>
+                <a href="https://purl.stanford.edu/fh631qn1220">
+                  One Face, Many Names: An Investigation into Fake NGOs and
+                  Media Outlets Linked to Harouna Douamba on and off Facebook
+                </a>
+                <span className={styles.projectStatus}>(2022)</span>
+              </p>
+            </AccordionContent>
+          </AccordionItem>
+          <AccordionItem value="other-stack">
+            <AccordionTrigger>
+              Other Stack Elements I`&apos;`ve Worked With
+            </AccordionTrigger>
+            <AccordionContent>
+              <p>
+                <b>Lang:</b>
+                <br />
+                C++, Rust, Redis, Neo4j
+                <br />
+                <b>Web3:</b>
+                <br />
+                Solidity, Web3.js, Ethers.js, crypto.js, Lit Protocol,
+                IPFS/Pinata
+                <br />
+                <b>Data Sci, ML/AI:</b>
+                <br />
+                TensorFlow, PyTorch, Keras, NumPy, Pandas, Scikit-learn,
+                LangChain, SpaCy, NLTK
+                <br />
+                <b>DevOps:</b>
+                <br />
+                Kubernetes, Heroku, CircleCI, GitLab CI, Linear
+              </p>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
       </section>
     </Layout>
   )

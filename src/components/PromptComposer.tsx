@@ -495,6 +495,17 @@ const COMPONENT_ARRAY: PromptComponent[] = [
     priority: 3,
     inputType: 'checkbox',
   },
+  {
+    id: 'context-best-practices',
+    category: 'context',
+    label: 'Best Practices',
+    description: 'Follow research-backed best practices',
+    template:
+      'Thoroughly supplement your logical context with research-backed best practices.',
+    priority: 3,
+    inputType: 'radio',
+    radioGroup: 'context',
+  },
 
   // Reasoning Strategy - Radio buttons (single approach)
   {
@@ -653,7 +664,7 @@ const COMPONENT_ARRAY: PromptComponent[] = [
     label: 'Clarify > Assume',
     description: 'Clarify unspecified instructions',
     template:
-      'Ask any clarifying questions you need rather than assuming behavior where no instruction exists.',
+      'Ask any clarifying questions you need rather than assuming behavior where no specific instruction exists.',
     priority: 7,
     inputType: 'checkbox',
   },
@@ -716,6 +727,7 @@ const PromptComposer: React.FC<PromptComposerProps> = ({ className }) => {
   const [audienceToggle, setAudienceToggle] = useState<'technical' | 'general'>(
     'general'
   )
+  const [editedPrompt, setEditedPrompt] = useState('')
 
   const toggleComponent = (
     id: string,
@@ -752,7 +764,7 @@ const PromptComposer: React.FC<PromptComposerProps> = ({ className }) => {
 
   const copyToClipboard = async () => {
     try {
-      await navigator.clipboard.writeText(compiledPrompt)
+      await navigator.clipboard.writeText(editedPrompt)
       setCopied(true)
       // Revert icon/text after a short delay
       setTimeout(() => setCopied(false), 1500)
@@ -765,6 +777,7 @@ const PromptComposer: React.FC<PromptComposerProps> = ({ className }) => {
     // Reset all state to initial values
     setSelectedComponents(new Set())
     setAudienceToggle('general')
+    setEditedPrompt('')
     setCleared(true)
     // Revert icon/text after a short delay
     setTimeout(() => setCleared(false), 1500)
@@ -891,6 +904,11 @@ const PromptComposer: React.FC<PromptComposerProps> = ({ className }) => {
     return parts.join('\n\n')
   }, [selectedComponents, audienceToggle])
 
+  // Sync edited prompt with compiled prompt
+  React.useEffect(() => {
+    setEditedPrompt(compiledPrompt)
+  }, [compiledPrompt])
+
   const categoryLabels = {
     role: 'Role Specification',
     audience: 'Audience Targeting',
@@ -930,7 +948,7 @@ const PromptComposer: React.FC<PromptComposerProps> = ({ className }) => {
 
   const statistics = {
     components: selectedComponents.size + 1,
-    wordCount: countWords(compiledPrompt),
+    wordCount: countWords(editedPrompt),
     categories: Object.keys(categoryLabels).filter(
       (cat) =>
         groupedComponents[cat]?.some((comp) =>
@@ -1218,7 +1236,7 @@ const PromptComposer: React.FC<PromptComposerProps> = ({ className }) => {
               </Button>
               <Button
                 onClick={copyToClipboard}
-                disabled={!compiledPrompt.trim()}
+                disabled={!editedPrompt.trim()}
                 variant="outline"
               >
                 {copied ? (
@@ -1232,69 +1250,13 @@ const PromptComposer: React.FC<PromptComposerProps> = ({ className }) => {
           </CardHeader>
           <CardContent>
             <div className={promptComposerStyles.previewContainer}>
-              {compiledPrompt.trim() ? (
-                <div className={promptComposerStyles.previewContent}>
-                  {/* Show organized sections by category */}
-                  {Object.entries(categoryLabels).map(([category, label]) => {
-                    const categoryComponents = COMPONENT_ARRAY.filter(
-                      (comp) =>
-                        comp.category === category &&
-                        selectedComponents.has(comp.id)
-                    )
-
-                    const hasAudienceContent =
-                      category === 'audience' &&
-                      (audienceToggle === 'technical' ||
-                        audienceToggle === 'general')
-
-                    if (categoryComponents.length === 0 && !hasAudienceContent)
-                      return null
-
-                    return (
-                      <div
-                        key={category}
-                        className={promptComposerStyles.previewSection}
-                        style={{
-                          borderLeftColor: getCategoryBorderColor(category),
-                          backgroundColor: getCurrentCategoryColor(category),
-                        }}
-                      >
-                        <div
-                          className={promptComposerStyles.previewCategoryHeader}
-                          style={{ color: getCategoryBorderColor(category) }}
-                        >
-                          {
-                            categoryIcons[
-                              category as keyof typeof categoryIcons
-                            ]
-                          }{' '}
-                          {label}
-                        </div>
-                        {hasAudienceContent && (
-                          <div
-                            className={
-                              promptComposerStyles.previewComponentText
-                            }
-                          >
-                            {audienceToggle === 'technical'
-                              ? 'Assume your audience has strong technical background and can handle detailed, specialized explanations.'
-                              : 'Explain concepts in accessible language suitable for a general audience without extensive technical background.'}
-                          </div>
-                        )}
-                        {categoryComponents.map((comp) => (
-                          <div
-                            key={comp.id}
-                            className={
-                              promptComposerStyles.previewComponentText
-                            }
-                          >
-                            {comp.template}
-                          </div>
-                        ))}
-                      </div>
-                    )
-                  })}
-                </div>
+              {editedPrompt.trim() ? (
+                <textarea
+                  value={editedPrompt}
+                  onChange={(e) => setEditedPrompt(e.target.value)}
+                  className="w-full min-h-[400px] p-4 bg-transparent text-gray-200 border-none outline-none resize-none font-mono text-sm leading-relaxed"
+                  placeholder="Your compiled prompt will appear here..."
+                />
               ) : (
                 <div className={promptComposerStyles.emptyState}>
                   <div className={promptComposerStyles.emptyStateTitle}>

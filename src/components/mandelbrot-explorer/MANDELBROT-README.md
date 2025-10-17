@@ -1,11 +1,11 @@
 # Mandelbrot Explorer: Interactive Fractal Visualization
 
 ## Cooper's Comments - A HUMAN WROTE THIS PART
+
 I used Cursor's "Plan" feature running Claude 4.5 Sonnet to create an implementation plan for the project which could seamlessly mount to my portfolio's existing Next.js infrastructure. Using the plan, I generated the initial files for math calculations, core JS component logic and CSS styling, all of which are in this folder. After that, I iteratively refined several times to tweak the page's first contentful paint, run QA, and build extra features (zoom/reset) as I was able within my four hours allotted for this task. Finally, I used my portfolio's existing suite of linters, formatters, and tests to ensure this project's addition didn't affect site performance or UX for the rest of my site.
 
-
-
 ##EVERYTHING BELOW THIS LINE WAS WRITTEN BY AI
+
 ## The Challenge
 
 The assignment was straightforward: create a webpage that visualizes the Mandelbrot set using the iterative equation **z₍ₙ₊₁₎ = z²ₙ + c**. Given a complex plane spanning from (-2, -2) to (2, 2) with at least 500×500 resolution, color each point based on whether it remains bounded (LIGHT) or diverges to infinity (DARK).
@@ -17,6 +17,7 @@ What emerged was something more: an interactive explorer that lets you dive into
 ### Core Visualization ✓
 
 The foundation meets all assignment requirements:
+
 - **500×500 pixel grid** rendering 250,000 complex points
 - **Complex plane mapping** from (-2, -2) to (2, 2)
 - **Iterative calculation** implementing z₍ₙ₊₁₎ = z²ₙ + c
@@ -25,6 +26,7 @@ The foundation meets all assignment requirements:
 ### Interactive Features
 
 Beyond the requirements, the implementation includes:
+
 - **Click-to-zoom**: Click anywhere to zoom 2× into that region
 - **Iteration control**: Adjust max iterations (50-1000) to balance detail vs. speed
 - **Progress indicator**: Real-time rendering progress with visual feedback
@@ -36,22 +38,26 @@ Beyond the requirements, the implementation includes:
 ### Architecture
 
 **Component**: `src/components/mandelbrot-explorer/MandelbrotExplorer.tsx`
+
 - React component with Canvas API for pixel-perfect rendering
 - Progressive rendering in 10-row chunks via `requestAnimationFrame`
 - Prevents UI blocking while processing 250K+ calculations
 
 **Calculation Engine**: `src/components/mandelbrot-explorer/utils/calculations.ts`
+
 - Pure functions for Mandelbrot iteration logic
 - Complex number arithmetic: (zx + zy·i)² = zx² - zy² + 2·zx·zy·i
 - Coordinate mapping between pixel space and complex plane
 - Optimized divergence detection using magnitude² < 4
 
 **Styling**: `src/components/mandelbrot-explorer/MandelbrotExplorer.module.css`
+
 - Dark-first design with light mode support
 - Fully responsive (mobile through desktop)
 - Accessible controls with proper focus states
 
 **Page Route**: `src/pages/mandelbrot-explorer.tsx`
+
 - SEO metadata and OpenGraph tags
 - Integrated into existing site layout
 
@@ -76,6 +82,7 @@ Result: DIVERGES → Rendered as DARK ✓
 ```
 
 Testing known bounded points:
+
 - **(0, 0)**: Center of the set → LIGHT ✓
 - **(-1, 0)**: On the main bulb → LIGHT ✓
 - **(0.25, 0)**: Near the edge → LIGHT (after many iterations) ✓
@@ -83,16 +90,19 @@ Testing known bounded points:
 ### Performance Strategy
 
 **Progressive Rendering**
+
 - Processes 10 rows per animation frame
 - Maintains 60fps UI responsiveness
 - Users see gradual reveal rather than frozen screen
 
 **Canvas Optimization**
+
 - Direct `ImageData` manipulation
 - Single `putImageData` call per chunk
 - Avoids expensive drawing operations
 
 **Efficient Calculation**
+
 - Magnitude comparison using z² < 4 (avoids sqrt)
 - Early termination on divergence
 - Tight inner loop for the 250K pixel calculations
@@ -118,12 +128,14 @@ Total: ~660 lines of production code
 **Time Investment**: ~2.5 hours (within the 4-hour guideline)
 
 **Technology Choices**:
+
 - TypeScript for type safety and self-documenting code
 - React hooks for clean state management
 - Canvas API for pixel-level control and performance
 - CSS Modules for scoped styling
 
 **Design Decisions**:
+
 1. **Progressive rendering**: Prevents "frozen" UI during long calculations
 2. **Interactive zoom**: Makes the fractal's infinite detail explorable
 3. **Iteration controls**: Demonstrates the trade-off between detail and computation time
@@ -138,23 +150,26 @@ Total: ~660 lines of production code
 ✅ **Color coding** - LIGHT for bounded, DARK for diverging  
 ✅ **Frontend technology** - TypeScript + React + Canvas  
 ✅ **Hosted visualization** - Integrated at `/mandelbrot-explorer`  
-✅ **Code sharing** - In repository with clear structure  
+✅ **Code sharing** - In repository with clear structure
 
 ## Usage
 
 **Local Development**:
+
 ```bash
 yarn dev
 # Navigate to http://localhost:3000/mandelbrot-explorer
 ```
 
 **Production**:
+
 ```bash
 yarn build
 # Deployed via Vercel at https://cooperability.com/mandelbrot-explorer
 ```
 
 **Interacting with the Visualization**:
+
 1. Wait for initial render to complete
 2. Click anywhere to zoom 2× into that point
 3. Adjust iterations to see more/less detail
