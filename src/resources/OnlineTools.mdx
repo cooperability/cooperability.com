@@ -3,9 +3,17 @@ title: '🛠️Huge List of Online Tools'
 date: '2025-07-03'
 ---
 
-import ToggleDropdown from '../../components/ToggleDropdown'
+import {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+} from '../../../components/ui/accordion'
 
-<ToggleDropdown title="Tools I use AT LEAST once every day">
+<Accordion type="single" collapsible className="w-full">
+<AccordionItem value="daily-tools">
+<AccordionTrigger>Tools I use AT LEAST once every day</AccordionTrigger>
+<AccordionContent>
 
 [**Bitwarden** - my favorite password manager](https://bitwarden.com/)
 
@@ -17,9 +25,12 @@ import ToggleDropdown from '../../components/ToggleDropdown'
 
 [**FireShot** - full-webpage screenshot tool](https://chromewebstore.google.com/detail/take-webpage-screenshots/mcbpblocgmgfnpjjppndjkmgjaogfceg)
 
-</ToggleDropdown>
+</AccordionContent>
+</AccordionItem>
 
-<ToggleDropdown title="AI">
+<AccordionItem value="ai">
+<AccordionTrigger>AI</AccordionTrigger>
+<AccordionContent>
 [**Google Talk to Books** - limited but _fun_ and _useful_](https://books.google.com/talktobooks/)
 
 [**AI Attack Surface Map** - elegant breakdown of AI Attack Surface](https://danielmiessler.com/blog/the-ai-attack-surface-map-v1-0)
@@ -34,9 +45,12 @@ import ToggleDropdown from '../../components/ToggleDropdown'
 
 [**DoNotPay** - AI-powered legal assistant](https://www.donotpay.com/)
 
-</ToggleDropdown>
+</AccordionContent>
+</AccordionItem>
 
-<ToggleDropdown title="Archives, Repositories, and OSInt">
+<AccordionItem value="archives">
+<AccordionTrigger>Archives, Repositories, and OSInt</AccordionTrigger>
+<AccordionContent>
 [**roadmap.sh** - Plot a software engineering career path](https://roadmap.sh/)
 
 [**The Black Vault** - largest declassified government documents archive](https://www.theblackvault.com/documentarchive/)
@@ -73,9 +87,12 @@ import ToggleDropdown from '../../components/ToggleDropdown'
 
 [**Open Observatory of Network Interference** - monitor network interference & censorship](https://ooni.org/)
 
-</ToggleDropdown>
+</AccordionContent>
+</AccordionItem>
 
-<ToggleDropdown title="Blockchain">
+<AccordionItem value="blockchain">
+<AccordionTrigger>Blockchain</AccordionTrigger>
+<AccordionContent>
 [**L2 Beat** - the state of the layer two ecosystem dashboard](https://l2beat.com/)
 
 [**Stealth Drop** - a stealth address generator](https://stealthdrop.xyz/)
@@ -92,9 +109,12 @@ import ToggleDropdown from '../../components/ToggleDropdown'
 
 [**OpenGSN** - open source gasless transactions; pay gas in any token/fiat](https://opengsn.org/)
 
-</ToggleDropdown>
+</AccordionContent>
+</AccordionItem>
 
-<ToggleDropdown title="Content Creation & WebDev">
+<AccordionItem value="content-webdev">
+<AccordionTrigger>Content Creation & WebDev</AccordionTrigger>
+<AccordionContent>
 [**ContentIdeas** - curate and analyze trending content](https://www.contentideas.io/)
 
 [**Buffer** - social media scheduling](https://buffer.com/)
@@ -113,9 +133,12 @@ import ToggleDropdown from '../../components/ToggleDropdown'
 
 [**Streamlit** - turn data science scripts into shareable web apps](https://streamlit.io/)
 
-</ToggleDropdown>
+</AccordionContent>
+</AccordionItem>
 
-<ToggleDropdown title="Data Manipulation">
+<AccordionItem value="data-manipulation">
+<AccordionTrigger>Data Manipulation</AccordionTrigger>
+<AccordionContent>
 [**LibreOffice Online** - free online office suite](https://www.libreoffice.org/download/download-libreoffice/)
 
 [**YouTube Transcript** - get video transcript from a YouTube URL](https://youtubetranscript.com/)
@@ -128,9 +151,12 @@ import ToggleDropdown from '../../components/ToggleDropdown'
 
 [**Vocal Remover** - extract vocal stems from a song](https://vocalremover.org/)
 
-</ToggleDropdown>
+</AccordionContent>
+</AccordionItem>
 
-<ToggleDropdown title="Privacy & Security">
+<AccordionItem value="privacy-security">
+<AccordionTrigger>Privacy & Security</AccordionTrigger>
+<AccordionContent>
 [**Bitwarden** - my favoritepassword manager](https://bitwarden.com/)
 
 [**JustDeleteMe** - links/info to delete your account from many companies](https://backgroundchecks.org/justdeleteme/)
@@ -157,9 +183,12 @@ import ToggleDropdown from '../../components/ToggleDropdown'
 
 [**EFF's Atlas of Surveillance**](https://atlasofsurveillance.org/)
 
-</ToggleDropdown>
+</AccordionContent>
+</AccordionItem>
 
-<ToggleDropdown title="Finance & eCommerce">
+<AccordionItem value="finance-ecommerce">
+<AccordionTrigger>Finance & eCommerce</AccordionTrigger>
+<AccordionContent>
 [**FreeTaxUSA** - free tax filing, online return prep, E-file Income Tax service](https://www.freetaxusa.com/)
 
 [**IRA Rollover Calculator** - calculate your IRA rollover](https://www.ameriprise.com/financial-news-research/financial-calculators/ira-rollover-calculator)
@@ -176,4 +205,6 @@ import ToggleDropdown from '../../components/ToggleDropdown'
 
 [**TicketsForLess** - ticket reseller](https://www.ticketsforless.com/)
 
-</ToggleDropdown>
+</AccordionContent>
+</AccordionItem>
+</Accordion>

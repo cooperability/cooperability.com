@@ -32,4 +32,3 @@ const MandelbrotExplorerPage: NextPageWithLayout = () => {
 }
 
 export default MandelbrotExplorerPage
-

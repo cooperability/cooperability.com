@@ -8,7 +8,12 @@ import Layout from '../../components/layout'
 import Head from 'next/head'
 import Date from '../../components/date'
 import utilStyles from '../../styles/utils.module.css'
-import ToggleDropdown from '../../components/ToggleDropdown'
+import {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+} from '../../../components/ui/accordion'
 
 interface MdxFrontMatterData {
   title: string
@@ -24,7 +29,10 @@ type Props = {
 }
 
 const components = {
-  ToggleDropdown,
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
 }
 
 export default function PostPage({ source, frontMatter }: Props) {

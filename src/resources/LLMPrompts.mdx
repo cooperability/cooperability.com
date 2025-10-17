@@ -1,20 +1,19 @@
 ---
 title: '📝 LLM Prompts'
-date: '2025-07-03'
+date: '2025-10-03'
 ---
 
-import ToggleDropdown from '../../components/ToggleDropdown'
+import {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+} from '../../../components/ui/accordion'
 
-<ToggleDropdown title="I use this for every prompt">
-  Before you do anything, tell me how my prompt could be improved. If you are
-  unclear on task specifics, rather than do guesswork, ask me any clarifying
-  questions to complete your understanding. Then do deep current research and
-  thinking to complete your specific understanding of the task. Using your
-  research, make an end-to-end, granular design implementation plan. Return this
-  to me for approval before executing the task.
-</ToggleDropdown>
-
-<ToggleDropdown title="Format output for Google Docs">
+<Accordion type="single" collapsible className="w-full">
+<AccordionItem value="google-docs">
+<AccordionTrigger>Format output for Google Docs</AccordionTrigger>
+<AccordionContent>
 **Objective:** Generate a response formatted as a clean, hierarchical outline, optimized for direct copy-pasting into Google Docs. The ENTIRE response containing the outline must be delivered within a single, unstyled, copyable text block.
 
 **Formatting Guidelines (within the copyable text block):**
@@ -79,12 +78,12 @@ lines should align under the 'T' of 'This' in its own first line.
 **II. Main Section Heading Two** B. Another Sub-Section Heading - A bullet point
 here.
 
-````
-</ToggleDropdown>
+</AccordionContent>
+</AccordionItem>
 
-<ToggleDropdown title="Exemplary .cursorrules Configuration">
-
-```text
+<AccordionItem value="cursorrules">
+<AccordionTrigger>Exemplary .cursorrules Configuration</AccordionTrigger>
+<AccordionContent>
 # Project Context & Personality
 
 You are an expert full-stack developer working on a Next.js TypeScript portfolio
@@ -167,12 +166,12 @@ ACT immediately for:
 - Include relevant file paths and line numbers
 - Explain WHY, not just WHAT to change
 - Offer to verify fixes worked after implementation
+</AccordionContent>
+</AccordionItem>
 
-````
-
-</ToggleDropdown>
-
-<ToggleDropdown title="Synthesize Report from Long Transcript">
+<AccordionItem value="synthesize-transcript">
+<AccordionTrigger>Synthesize Report from Long Transcript</AccordionTrigger>
+<AccordionContent>
 These are full transcripts of a long lecture.
 Please condense and summarize them into a single document with the following structure:
 
@@ -196,9 +195,12 @@ transcript when the transcript mentions:
 - iii. Some of this course material will be old, so if your training set
   includes more recent material, you should use that instead.
 
-</ToggleDropdown>
+</AccordionContent>
+</AccordionItem>
 
-<ToggleDropdown title="Generate Product-Market Research">
+<AccordionItem value="market-research">
+<AccordionTrigger>Generate Product-Market Research</AccordionTrigger>
+<AccordionContent>
 
 Act as a product manager, browse the web, and perform market research in the
 [enter your niche] niche as well as the specific [vertical] vertical.
@@ -217,9 +219,12 @@ Act as a product manager, browse the web, and perform market research in the
 - A score for how easy it is to enter the market, plus rationale
 - A list of potential MVPs, with a pseudo-PRD for each
 
-</ToggleDropdown>
+</AccordionContent>
+</AccordionItem>
 
-<ToggleDropdown title="Compose PRD from Source Codebase">
+<AccordionItem value="compose-prd">
+<AccordionTrigger>Compose PRD from Source Codebase</AccordionTrigger>
+<AccordionContent>
 Based on the code/details here, compose a PRD for this project:
 
 1. The application's purpose, broadly, and how each component contributes. One
@@ -237,9 +242,12 @@ Based on the code/details here, compose a PRD for this project:
 This PRD should have both broad topic coverage and extreme specificity where
 possible, as I will use it as a jumping-off point for countless new chats.
 
-</ToggleDropdown>
+</AccordionContent>
+</AccordionItem>
 
-<ToggleDropdown title="Summarize this chat as a new prompt">
+<AccordionItem value="summarize-chat">
+<AccordionTrigger>Summarize this chat as a new prompt</AccordionTrigger>
+<AccordionContent>
 
 Distill the insights from this chat into a condensed, organized and informative
 summary which could be seamlessly appended to this project's documentation, or
@@ -270,9 +278,12 @@ sections:<br />
    focusing on connecting reasoning logic to resulting actions taken, and
    justifications for design decisions in the final summary.
 
-</ToggleDropdown>
+</AccordionContent>
+</AccordionItem>
 
-<ToggleDropdown title="Summarize a Book">
+<AccordionItem value="summarize-book">
+<AccordionTrigger>Summarize a Book</AccordionTrigger>
+<AccordionContent>
 **Summarize Book (best with self-help, advice, or knowledge-based books.**
 
 I have uploaded [XY Author]'s [XY Text]. I need an extracted summary from you
@@ -330,5 +341,6 @@ A few final ABSOLUTE RULES:
    prompts which would allow me to further investigate the depth of the text
    using your (the LLM's) help.<br />
 
-</ToggleDropdown>
-```
+</AccordionContent>
+</AccordionItem>
+</Accordion>
