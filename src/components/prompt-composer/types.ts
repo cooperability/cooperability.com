@@ -24,10 +24,3 @@ export interface PromptComposerProps {
   className?: string
 }
 
-export interface Viewport {
-  minReal: number
-  maxReal: number
-  minImag: number
-  maxImag: number
-}
-
