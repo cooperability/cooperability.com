@@ -1,4 +1,4 @@
-import PromptComposer from '@/src/components/PromptComposer'
+import PromptComposer from '@/src/components/prompt-composer/PromptComposer'
 import Layout from '@/src/components/layout'
 import type { NextPageWithLayout } from './_app'
 import Head from 'next/head'
