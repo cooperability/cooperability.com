@@ -13,7 +13,9 @@
     "type-check:dev": "tsc --noEmit --project tsconfig.dev.json",
     "test-types": "tsc --noEmit --project tsconfig.dev.json",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx,.mdx",
+    "lint:mdx": "eslint . --ext .mdx",
     "format": "prettier --write .",
+    "format:mdx": "prettier --write '**/*.mdx'",
     "test": "jest --watch",
     "prepare": "husky",
     "analyze": "cross-env ANALYZE=true next build",
@@ -113,6 +115,10 @@
       "prettier --write",
       "eslint --fix",
       "jest --bail --findRelatedTests --passWithNoTests"
+    ],
+    "*.mdx": [
+      "prettier --write",
+      "eslint --fix"
     ]
   },
   "packageManager": "yarn@4.10.3",
