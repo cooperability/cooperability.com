@@ -54,9 +54,18 @@ const Header = () => {
             className="w-full"
           >
             <TabsList aria-label="Primary navigation">
-              <TabsTrigger value="/">Home</TabsTrigger>
-              <TabsTrigger value="/demos">Demos</TabsTrigger>
-              <TabsTrigger value="/resources">Resources</TabsTrigger>
+              <TabsTrigger value="/" onClick={() => push('/')}>
+                Home
+              </TabsTrigger>
+              <TabsTrigger value="/demos" onClick={() => push('/demos')}>
+                Demos
+              </TabsTrigger>
+              <TabsTrigger
+                value="/resources"
+                onClick={() => push('/resources')}
+              >
+                Resources
+              </TabsTrigger>
             </TabsList>
           </Tabs>
         </div>
