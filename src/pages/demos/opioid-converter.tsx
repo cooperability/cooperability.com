@@ -1,6 +1,6 @@
 import OpioidConverter from '@/src/components/opioid-converter/OpioidConverter'
 import Layout from '@/src/components/layout'
-import type { NextPageWithLayout } from './_app'
+import type { NextPageWithLayout } from '../_app'
 import Head from 'next/head'
 
 const OpioidConverterPage: NextPageWithLayout = () => {

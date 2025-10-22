@@ -1,11 +1,11 @@
 import MandelbrotExplorer from '@/src/components/mandelbrot-explorer/MandelbrotExplorer'
 import Layout from '@/src/components/layout'
-import type { NextPageWithLayout } from './_app'
+import type { NextPageWithLayout } from '../_app'
 import Head from 'next/head'
 
 const MandelbrotExplorerPage: NextPageWithLayout = () => {
   return (
-    <Layout>
+    <Layout skipManifest={true}>
       <Head>
         <title>Mandelbrot Explorer | Cooper Reed</title>
         <meta
@@ -22,6 +22,13 @@ const MandelbrotExplorerPage: NextPageWithLayout = () => {
           content="Interactive fractal visualization - click to zoom into the infinite complexity of the Mandelbrot set"
         />
         <meta property="og:type" content="website" />
+        {/* PWA-specific manifest for this applet */}
+        <link rel="manifest" href="/icons/mandelbrot-explorer.webmanifest" />
+        <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+        {/* iOS-specific meta tags for standalone app */}
+        <meta name="apple-mobile-web-app-title" content="Mandelbrot Explorer" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="theme-color" content="#60a5fa" />
       </Head>
       <div className="page-container">

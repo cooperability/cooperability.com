@@ -23,6 +23,22 @@ const nextConfig = {
         destination: '/resources',
         permanent: true,
       },
+      // Redirect old demo paths to new /demos/ structure
+      {
+        source: '/prompt-composer',
+        destination: '/demos/prompt-composer',
+        permanent: true,
+      },
+      {
+        source: '/mandelbrot-explorer',
+        destination: '/demos/mandelbrot-explorer',
+        permanent: true,
+      },
+      {
+        source: '/opioid-converter',
+        destination: '/demos/opioid-converter',
+        permanent: true,
+      },
     ]
   },
 }

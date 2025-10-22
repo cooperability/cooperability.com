@@ -71,6 +71,7 @@ The component is built on several key research findings:
 ## Component Categories
 
 ### 1. Role Specification (Radio Buttons - Mutually Exclusive)
+
 - Subject Matter Expert
 - Patient Educator
 - Critical Analyst
@@ -78,9 +79,11 @@ The component is built on several key research findings:
 - Research Specialist
 
 ### 2. Audience Targeting (Toggle Switch - Binary)
+
 - General vs. Technical audience
 
 ### 3. Context Provision (Checkboxes - Combinable)
+
 - Example-Based Context
 - Domain Background
 - Constraint Awareness
@@ -88,12 +91,14 @@ The component is built on several key research findings:
 - Best Practices
 
 ### 4. Reasoning Strategy (Radio Buttons - Single Approach)
+
 - Chain-of-Thought
 - Problem Decomposition
 - Comparative Analysis
 - First Principles
 
 ### 5. Output Instructions (Checkboxes - Combinable)
+
 - Structured Format
 - Probabilistic Assessment
 - Actionable Steps
@@ -102,12 +107,14 @@ The component is built on several key research findings:
 - Executive Summary
 
 ### 6. Constraint Specifications (Checkboxes - Multiple Constraints)
+
 - Concise Response
 - Word Count Limit
 - Accessibility Focus
 - Neutral Tone
 
 ### 7. Meta-Prompt Enhancements (Checkboxes - Self-Improvement)
+
 - Clarify > Assume
 - Self-Improvement
 - Confidence Assessment
@@ -161,4 +168,3 @@ Potential areas for expansion based on emerging research:
 - Color schemes can be modified in `utils/helpers.ts`
 - New component categories can be added by extending the `PromptComponent` interface and updating the constants
 - The component follows React best practices with hooks and memoization for performance
-

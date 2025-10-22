@@ -106,7 +106,10 @@ export default function Home({ initialQuote }: HomeProps) {
           same spirit of independent creation, publication, and education.
         </p>
 
-        <Link href="/prompt-composer" className={styles.promptComposerLink}>
+        <Link
+          href="/demos/prompt-composer"
+          className={styles.promptComposerLink}
+        >
           <div className={styles.promptComposerWrapper}>
             Try 🧩 Prompt Composer →
           </div>

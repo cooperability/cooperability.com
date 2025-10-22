@@ -68,7 +68,7 @@ describe('Home', () => {
     )
     expect(
       screen.getByRole('link', { name: /Prompt Composer/i })
-    ).toHaveAttribute('href', '/prompt-composer')
+    ).toHaveAttribute('href', '/demos/prompt-composer')
   })
 
   it('renders the profile image with correct alt text', () => {
