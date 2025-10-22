@@ -1,11 +1,11 @@
 {
-  "name": "Opioid Converter",
-  "short_name": "Converter",
-  "description": "Medical opioid dosage converter and morphine equivalence calculator",
-  "start_url": "/demos/opioid-converter",
-  "scope": "/demos/opioid-converter",
+  "name": "Mandelbrot Explorer",
+  "short_name": "Mandelbrot",
+  "description": "Interactive visualization of the Mandelbrot set fractal",
+  "start_url": "/demos/mandelbrot-explorer",
+  "scope": "/demos/mandelbrot-explorer",
   "display": "standalone",
-  "theme_color": "#10b981",
+  "theme_color": "#60a5fa",
   "background_color": "#ffffff",
   "icons": [
     {

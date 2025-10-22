@@ -2,13 +2,14 @@
 import { useState } from 'react'
 import { Bars3Icon } from '@heroicons/react/24/solid'
 import { Button } from '@/components/ui/button'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import styles from '../styles/utils.module.css'
 import Sidebar from './Sidebar'
-import ActiveLink from '../components/activeLink'
 import ThemeSwitch from '../components/ThemeSwitch'
 import { useResponsive } from '../hooks/useResponsive'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useRouter } from 'next/router'
 
 const resumeUrl =
   'https://drive.google.com/file/d/1-mHF7SH3ym9QI8jKBtpKKzvbJM8L1Ovc/view?usp=sharing'
@@ -19,6 +20,17 @@ const accessibilityStatementUrl = '/resources/AccessibilityStatement'
 const Header = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const { isMobile } = useResponsive()
+  const { asPath, push } = useRouter()
+
+  const currentPath = (asPath || '/').split('?')[0]
+  const currentTab =
+    currentPath === '/'
+      ? '/'
+      : currentPath.startsWith('/demos')
+        ? '/demos'
+        : currentPath.startsWith('/resources')
+          ? '/resources'
+          : '/'
 
   const navigator = () => {
     if (isMobile) {
@@ -36,27 +48,17 @@ const Header = () => {
     } else {
       return (
         <div className="flex flex-row space-between">
-          <ActiveLink
-            className={styles.navLink}
-            href="/"
-            activeClassName={styles.boldLink}
+          <Tabs
+            value={currentTab}
+            onValueChange={(v: string) => push(v)}
+            className="w-full"
           >
-            | Home |
-          </ActiveLink>
-          <ActiveLink
-            className={styles.navLink}
-            href="/demos"
-            activeClassName={styles.boldLink}
-          >
-            | Demos |
-          </ActiveLink>
-          <ActiveLink
-            className={styles.navLink}
-            href="/resources"
-            activeClassName={styles.boldLink}
-          >
-            | Resources |
-          </ActiveLink>
+            <TabsList aria-label="Primary navigation">
+              <TabsTrigger value="/">Home</TabsTrigger>
+              <TabsTrigger value="/demos">Demos</TabsTrigger>
+              <TabsTrigger value="/resources">Resources</TabsTrigger>
+            </TabsList>
+          </Tabs>
         </div>
       )
     }

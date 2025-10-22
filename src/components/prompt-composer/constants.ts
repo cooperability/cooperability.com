@@ -457,4 +457,3 @@ export const categoryIcons = {
   constraints: '⚡',
   meta: '🔄',
 }
-

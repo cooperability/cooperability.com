@@ -70,7 +70,9 @@ const Demos: React.FC = () => {
               {/* Prompt Composer */}
               <div className={styles.subProjectItem}>
                 <div className={styles.projectInfo}>
-                  <Link href="/prompt-composer/">Prompt Composer[💻📱]</Link>
+                  <Link href="/demos/prompt-composer">
+                    Prompt Composer[💻📱]
+                  </Link>
                   <span className={styles.projectStatus}>(Ongoing)</span>
                 </div>
                 <div className={styles.techStackIcons}>
@@ -100,7 +102,7 @@ const Demos: React.FC = () => {
               {/* Mandelbrot Explorer */}
               <div className={styles.subProjectItem}>
                 <div className={styles.projectInfo}>
-                  <Link href="/mandelbrot-explorer/">
+                  <Link href="/demos/mandelbrot-explorer">
                     Mandelbrot Explorer[💻📱]
                   </Link>
                   <span className={styles.projectStatus}>(2025)</span>
@@ -124,7 +126,9 @@ const Demos: React.FC = () => {
               {/* Opioid Converter */}
               <div className={styles.subProjectItem}>
                 <div className={styles.projectInfo}>
-                  <Link href="/opioid-converter/">Opioid Converter[💻📱]</Link>
+                  <Link href="/demos/opioid-converter">
+                    Opioid Converter[💻📱]
+                  </Link>
                   <span className={styles.projectStatus}>(2021)</span>
                 </div>
                 <div className={styles.techStackIcons}>

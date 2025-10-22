@@ -23,4 +23,3 @@ export interface PromptComponent {
 export interface PromptComposerProps {
   className?: string
 }
-

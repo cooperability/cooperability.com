@@ -1013,4 +1013,3 @@ const PromptComposer: React.FC<PromptComposerProps> = ({ className }) => {
 }
 
 export default PromptComposer
-
