@@ -42,25 +42,6 @@ function TabsTrigger({
 }: React.ComponentProps<typeof TabsPrimitive.Trigger>) {
   const [isHovered, setIsHovered] = React.useState(false)
   const triggerRef = React.useRef<HTMLButtonElement>(null)
-  const [isActive, setIsActive] = React.useState(false)
-
-  React.useEffect(() => {
-    const element = triggerRef.current
-    if (!element) return
-
-    const checkActive = () => {
-      setIsActive(element.getAttribute('data-state') === 'active')
-    }
-
-    checkActive()
-    const observer = new MutationObserver(checkActive)
-    observer.observe(element, {
-      attributes: true,
-      attributeFilter: ['data-state'],
-    })
-
-    return () => observer.disconnect()
-  }, [])
 
   return (
     <TabsPrimitive.Trigger
@@ -80,15 +61,12 @@ function TabsTrigger({
     >
       <span className={styles.linkTextWrapper}>
         {children}
-        {/* Show animated underline only when hovering and not active */}
-        {!isActive && (
-          <div
-            className={cn(
-              styles.animatedUnderline,
-              isHovered && styles.animatedUnderlineHover
-            )}
-          />
-        )}
+        <div
+          className={cn(
+            styles.animatedUnderline,
+            isHovered && styles.animatedUnderlineHover
+          )}
+        />
       </span>
     </TabsPrimitive.Trigger>
   )

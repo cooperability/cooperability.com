@@ -293,7 +293,7 @@ const Demos: React.FC = () => {
           </AccordionItem>
           <AccordionItem value="other-stack">
             <AccordionTrigger>
-              Other Stack Elements I`&apos;`ve Worked With
+              Other Stack Elements I&apos;ve Worked With
             </AccordionTrigger>
             <AccordionContent>
               <p>

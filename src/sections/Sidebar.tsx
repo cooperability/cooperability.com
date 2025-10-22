@@ -1,6 +1,7 @@
-import React from 'react'
+import React, { useState } from 'react'
 import styles from '../styles/utils.module.css'
-import ActiveLink from '../components/activeLink'
+import Link from 'next/link'
+import { useRouter } from 'next/router'
 import { useTheme } from 'next-themes'
 import { XMarkIcon } from '@heroicons/react/24/solid'
 import { Button } from '@/components/ui/button'
@@ -14,6 +15,80 @@ interface SidebarProps {
   accessibilityStatementUrl?: string
 }
 
+interface SidebarLinkProps {
+  href: string
+  children: React.ReactNode
+  isActive: boolean
+  external?: boolean
+  onClick?: () => void
+}
+
+const SidebarLink: React.FC<SidebarLinkProps> = ({
+  href,
+  children,
+  isActive,
+  external = false,
+  onClick,
+}) => {
+  const [isHovered, setIsHovered] = useState(false)
+
+  const handleClick = () => {
+    if (onClick) {
+      onClick()
+    }
+  }
+
+  const content = (
+    <div
+      className={`${styles.sidebarLinkWrapper} ${isActive ? styles.sidebarLinkActive : ''}`}
+      style={
+        isActive
+          ? ({
+              '--sidebar-active-bg': 'var(--inverse-bg)',
+              '--sidebar-active-text': 'var(--inverse-text)',
+            } as React.CSSProperties)
+          : {}
+      }
+    >
+      {children}
+      {/* Vertical slider appears on hover (only when not active) */}
+      {isHovered && !isActive && (
+        <div
+          className={`${styles.verticalSlider} ${styles.verticalSliderHover}`}
+        />
+      )}
+    </div>
+  )
+
+  const commonProps = {
+    className: styles.navLink,
+    onMouseEnter: () => setIsHovered(true),
+    onMouseLeave: () => setIsHovered(false),
+    onClick: handleClick,
+    style: {
+      textDecoration: 'none',
+      width: '100%',
+      display: 'block',
+    },
+  }
+
+  // Use regular anchor tag for external links
+  if (external) {
+    return (
+      <a href={href} target="_blank" rel="noopener noreferrer" {...commonProps}>
+        {content}
+      </a>
+    )
+  }
+
+  // Use Next.js Link for internal navigation
+  return (
+    <Link href={href} {...commonProps}>
+      {content}
+    </Link>
+  )
+}
+
 const Sidebar = ({
   isOpen,
   toggleSidebar,
@@ -23,13 +98,35 @@ const Sidebar = ({
   accessibilityStatementUrl,
 }: SidebarProps) => {
   const { theme } = useTheme()
+  const { asPath } = useRouter()
 
   const sidebarThemeClass =
     theme === 'dark' ? styles.sidebarDark : styles.sidebarLight
 
+  // Helper to check if a route is active
+  const isRouteActive = (href: string) => {
+    // For root, require exact match
+    if (href === '/') {
+      return asPath === href
+    }
+    // For /resources parent page, only match exactly (not sub-pages)
+    if (href === '/resources') {
+      return asPath === '/resources'
+    }
+    // For all other paths (like /resources/PrivacyStatement), use startsWith
+    return asPath.startsWith(href)
+  }
+
+  // Set inverse color CSS variables based on theme
+  const inverseColors =
+    theme === 'dark'
+      ? { '--inverse-bg': '#ffffff', '--inverse-text': '#000000' }
+      : { '--inverse-bg': '#000000', '--inverse-text': '#ffffff' }
+
   return (
     <div
       className={`${styles.sidebar} ${isOpen ? styles.open : ''} ${sidebarThemeClass}`}
+      style={inverseColors as React.CSSProperties}
     >
       {isOpen && (
         <Button
@@ -42,71 +139,66 @@ const Sidebar = ({
       )}
 
       <nav className={styles.sidebarNav} aria-label="Sidebar navigation">
-        <ActiveLink
-          className={styles.navLink}
-          activeClassName={styles.boldLink}
+        <SidebarLink
           href="/"
+          isActive={isRouteActive('/')}
+          onClick={toggleSidebar}
         >
           | Home |
-        </ActiveLink>
-        <ActiveLink
-          className={styles.navLink}
-          activeClassName={styles.boldLink}
+        </SidebarLink>
+        <SidebarLink
           href="/demos"
+          isActive={isRouteActive('/demos')}
+          onClick={toggleSidebar}
         >
           | Demos |
-        </ActiveLink>
-        <ActiveLink
-          className={styles.navLink}
-          activeClassName={styles.boldLink}
+        </SidebarLink>
+        <SidebarLink
           href="/resources"
+          isActive={isRouteActive('/resources')}
+          onClick={toggleSidebar}
         >
           | Resources |
-        </ActiveLink>
+        </SidebarLink>
 
-        {(resumeUrl ||
-          allLinksUrl ||
-          privacyStatementUrl ||
-          accessibilityStatementUrl) && (
-          <div className={styles.horizLine} style={{ margin: '1rem 0' }} />
-        )}
+        <div className={styles.horizLine} />
 
         {resumeUrl && (
-          <a
+          <SidebarLink
             href={resumeUrl}
-            className={styles.navLink}
-            target="_blank"
-            rel="noopener noreferrer"
+            isActive={false}
+            external
+            onClick={toggleSidebar}
           >
             <span aria-hidden="true">📄 </span>Resume
-          </a>
+          </SidebarLink>
         )}
         {allLinksUrl && (
-          <ActiveLink
+          <SidebarLink
             href={allLinksUrl}
-            className={styles.navLink}
-            activeClassName={styles.boldLink}
+            isActive={isRouteActive(allLinksUrl)}
+            onClick={toggleSidebar}
           >
             <span aria-hidden="true">🔗 </span>All Links
-          </ActiveLink>
+          </SidebarLink>
         )}
         {privacyStatementUrl && (
-          <ActiveLink
+          <SidebarLink
             href={privacyStatementUrl}
-            className={styles.navLink}
-            activeClassName={styles.boldLink}
+            isActive={isRouteActive(privacyStatementUrl)}
+            onClick={toggleSidebar}
           >
             🔒Privacy
-          </ActiveLink>
+          </SidebarLink>
         )}
         {accessibilityStatementUrl && (
-          <ActiveLink
+          <SidebarLink
             href={accessibilityStatementUrl}
-            className={styles.navLink}
-            activeClassName={styles.boldLink}
+            isActive={isRouteActive(accessibilityStatementUrl)}
+            onClick={toggleSidebar}
           >
             ♿Accessibility
-          </ActiveLink>
+          </SidebarLink>
         )}
       </nav>
     </div>
