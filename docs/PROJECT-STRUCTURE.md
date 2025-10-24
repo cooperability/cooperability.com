@@ -6,37 +6,38 @@
 
 These files MUST remain in root per tool/framework conventions:
 
-| File | Purpose | Required in Root? |
-|------|---------|-------------------|
-| `package.json` | Project dependencies & scripts | ✅ Yes |
-| `yarn.lock` | Dependency lockfile | ✅ Yes |
-| `.yarnrc.yml` | Yarn configuration | ✅ Yes |
-| `.pnp.cjs` | Yarn PnP manifest | ✅ Yes |
-| `.pnp.loader.mjs` | Yarn PnP ESM loader | ✅ Yes |
-| `next.config.js` | Next.js configuration | ✅ Yes |
-| `next-env.d.ts` | Next.js type definitions (auto-generated) | ✅ Yes |
-| `tsconfig.json` | TypeScript base config | ✅ Yes |
-| `tsconfig.tsbuildinfo` | TypeScript build cache (auto-generated) | ✅ Yes |
-| `tailwind.config.js` | Tailwind CSS config | ✅ Yes |
-| `postcss.config.js` | PostCSS config (Tailwind dependency) | ✅ Yes |
-| `eslint.config.mjs` | ESLint configuration | ✅ Yes |
-| `jest.config.js` | Jest configuration | ✅ Yes |
-| `jest.setup.js` | Jest setup/initialization | ✅ Yes |
-| `components.json` | shadcn/ui configuration | ✅ Yes |
-| `next-sitemap.config.js` | Sitemap generation config | ✅ Yes |
-| `vercel.json` | Vercel deployment config | ✅ Yes |
-| `.gitignore` | Git ignore rules | ✅ Yes |
-| `.gitattributes` | Git attributes (line endings, etc.) | ✅ Yes |
-| `.prettierrc.json` | Prettier configuration | ✅ Yes |
-| `.prettierignore` | Prettier ignore rules | ✅ Yes |
-| `.nvmrc` | Node version specification | ✅ Yes |
-| `README.md` | Project overview | ✅ Yes |
+| File                     | Purpose                                   | Required in Root? |
+| ------------------------ | ----------------------------------------- | ----------------- |
+| `package.json`           | Project dependencies & scripts            | ✅ Yes            |
+| `yarn.lock`              | Dependency lockfile                       | ✅ Yes            |
+| `.yarnrc.yml`            | Yarn configuration                        | ✅ Yes            |
+| `.pnp.cjs`               | Yarn PnP manifest                         | ✅ Yes            |
+| `.pnp.loader.mjs`        | Yarn PnP ESM loader                       | ✅ Yes            |
+| `next.config.js`         | Next.js configuration                     | ✅ Yes            |
+| `next-env.d.ts`          | Next.js type definitions (auto-generated) | ✅ Yes            |
+| `tsconfig.json`          | TypeScript base config                    | ✅ Yes            |
+| `tsconfig.tsbuildinfo`   | TypeScript build cache (auto-generated)   | ✅ Yes            |
+| `tailwind.config.js`     | Tailwind CSS config                       | ✅ Yes            |
+| `postcss.config.js`      | PostCSS config (Tailwind dependency)      | ✅ Yes            |
+| `eslint.config.mjs`      | ESLint configuration                      | ✅ Yes            |
+| `jest.config.js`         | Jest configuration                        | ✅ Yes            |
+| `jest.setup.js`          | Jest setup/initialization                 | ✅ Yes            |
+| `components.json`        | shadcn/ui configuration                   | ✅ Yes            |
+| `next-sitemap.config.js` | Sitemap generation config                 | ✅ Yes            |
+| `vercel.json`            | Vercel deployment config                  | ✅ Yes            |
+| `.gitignore`             | Git ignore rules                          | ✅ Yes            |
+| `.gitattributes`         | Git attributes (line endings, etc.)       | ✅ Yes            |
+| `.prettierrc.json`       | Prettier configuration                    | ✅ Yes            |
+| `.prettierignore`        | Prettier ignore rules                     | ✅ Yes            |
+| `.nvmrc`                 | Node version specification                | ✅ Yes            |
+| `README.md`              | Project overview                          | ✅ Yes            |
 
 **Total: 23 files** - All correctly placed ✅
 
 ---
 
 ## 📋 Recommended Cleanup Actions
+
 ### **Optional Actions (Nice-to-Have)**
 
 #### 1. **Create `.editorconfig` for consistency**
@@ -66,6 +67,7 @@ EOF
 ```
 
 **Benefits:**
+
 - Ensures consistent formatting across editors
 - Complements Prettier configuration
 
@@ -77,6 +79,7 @@ echo "engine-strict=true" > .npmrc
 ```
 
 **Benefits:**
+
 - Prevents mixing npm and yarn
 - Enforces package manager consistency
 
@@ -110,3 +113,4 @@ cooperability.com/
 ├── README.md
 ├── tsconfig.json
 └── yarn.lock
+```

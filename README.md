@@ -3,6 +3,7 @@
 My Next.js portfolio website on Vercel. Several smaller projects within.
 
 ## TODO:
+
 - OC input fields block numbers but should pop up numpad on mobile
 - SEO; site:cooperability.com
 - Create `.editorconfig` for consistency

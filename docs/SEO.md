@@ -1,4 +1,3 @@
-
 - **SEO**: Invisible h1 headers
 
 ## SEO Strategy & Implementation
