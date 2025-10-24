@@ -7,9 +7,8 @@ import styles from '../styles/utils.module.css'
 import Sidebar from './Sidebar'
 import ThemeSwitch from '../components/ThemeSwitch'
 import { useResponsive } from '../hooks/useResponsive'
-import Image from 'next/image'
-import Link from 'next/link'
 import { useRouter } from 'next/router'
+import ActiveIcon from '../components/ActiveIcon'
 
 const resumeUrl =
   'https://drive.google.com/file/d/1-mHF7SH3ym9QI8jKBtpKKzvbJM8L1Ovc/view?usp=sharing'
@@ -94,14 +93,14 @@ const Header = () => {
             isMobile ? accessibilityStatementUrl : undefined
           }
         />
-        <Link href="/">
-          <Image
-            src="/images/operamini.png"
-            alt="Logo"
-            height={50}
-            width={50}
-          />
-        </Link>
+        <ActiveIcon
+          href="/"
+          imgSrc="/images/operamini.png"
+          width={50}
+          height={50}
+          alt="Logo"
+          external={false}
+        />
         {isMobile ? (
           <>
             <div className="flex flex-row gap-3">

@@ -1,4 +1,5 @@
 import Image from 'next/image'
+import Link from 'next/link'
 import styles from '../styles/utils.module.css'
 
 export interface ActiveIconProps {
@@ -9,6 +10,7 @@ export interface ActiveIconProps {
   size?: 'default' | 'small'
   width?: number
   height?: number
+  external?: boolean
 }
 
 const ActiveIcon: React.FC<ActiveIconProps> = ({
@@ -19,6 +21,7 @@ const ActiveIcon: React.FC<ActiveIconProps> = ({
   size = 'default',
   width,
   height,
+  external = true,
 }) => {
   // Determine alt text
   const descriptiveAltText = alt
@@ -43,15 +46,25 @@ const ActiveIcon: React.FC<ActiveIconProps> = ({
     imageClassName = `${imageClassName} ${styles.socialsLink}`
   }
 
+  const imageElement = (
+    <Image
+      src={imgSrc}
+      alt={descriptiveAltText}
+      className={imageClassName}
+      width={imageWidth}
+      height={imageHeight}
+    />
+  )
+
+  // For internal links, use Next.js Link
+  if (!external) {
+    return <Link href={href}>{imageElement}</Link>
+  }
+
+  // For external links, use regular anchor with target="_blank"
   return (
     <a href={href} target="_blank" rel="noopener noreferrer">
-      <Image
-        src={imgSrc}
-        alt={descriptiveAltText}
-        className={imageClassName}
-        width={imageWidth}
-        height={imageHeight}
-      />
+      {imageElement}
     </a>
   )
 }
