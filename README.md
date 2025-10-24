@@ -1,27 +1,44 @@
 # [Co-Operability.com](https://www.cooperability.com)
 
-My Next.js portfolio website, running on Vercel. I'm parting with IPFS because it's too expensive to keep a responsive page there.
+My Next.js portfolio website on Vercel. Several smaller projects within.
 
 ## TODO:
-
 - OC input fields block numbers but should pop up numpad on mobile
 - SEO; site:cooperability.com
+- Create `.editorconfig` for consistency
+- Add `.npmrc` for Yarn users
 
-## Linting, Formatting, and Testing
+## Developer Tooling
 
-- **Automation**: `husky` and `lint-staged` automatically run a pre-commit lint, format, and test of staged files.
-- **Available Scripts:**
-- `yarn dev`: Runs `next dev`, starting the local server
-- `yarn lint`: Runs **ESLint** (See `eslint.config.mjs`), extending `next/core-web-vitals`, checking for Next.js errors and style issues.
-- `yarn format`: Runs **Prettier** (See `.prettierrc.json`) to automatically format all project files. Integrated with ESLint via `eslint-config-prettier` to avoid conflicting rules.
-- `yarn test`: Runs **Jest** to automatically test; Jest also automatically tests during the pre-commit hook.
-- `yarn analyze`: Runs `cross-env ANALYZE=true next build` to build the project and open an interactive bundle analyzer to inspect bundle sizes.
-- `yarn run access`: Starts the development server, then runs a series of accessibility checks: ESLint for static analysis, Axe-core for runtime WCAG checks, and Lighthouse for an accessibility audit. Reports are saved to the `./accessibility-reports/` directory. You should review these reports and update the `src/resources/AccessibilityStatement.mdx` file accordingly.
+This project uses a comprehensive suite of quality control tools. For complete documentation, see **[docs/Tooling.md](docs/Tooling.md)**.
+
+**Quick Reference:**
+
+- `yarn dev` - Start development server
+- `yarn lint` / `yarn lint:mdx` - ESLint checking (includes MDX validation)
+- `yarn format` / `yarn format:mdx` - Prettier formatting
+- `yarn test` - Jest + React Testing Library
+- `yarn typecheck` - TypeScript validation
+- `yarn analyze` - Webpack bundle analysis
+- `yarn access` - Accessibility audits (ESLint + Axe-core + Lighthouse)
+
+**Key Technologies:**
+
+- **Linting:** ESLint with TypeScript, Next.js, and MDX support
+- **Formatting:** Prettier with automatic MDX prose wrapping
+- **Testing:** Jest with @testing-library/react and jest-dom matchers
+- **Automation:** Husky + lint-staged for pre-commit quality checks
+- **Package Management:** Yarn Plug'n'Play (PnP) for zero-install, deterministic dependencies
+- **UI Components:** shadcn/ui (Tailwind + Radix UI primitives)
+- **Bundle Analysis:** Webpack Bundle Analyzer for optimization
+- **Accessibility:** Automated testing with axe-core CLI and Lighthouse
+
+See **[docs/Tooling.md](docs/Tooling.md)** for setup instructions, troubleshooting, and best practices.
 
 ## Privacy Policy, SEO, Analytics
 
 - **Privacy**: Privacy-forward Next Analytics is used instead of Google Analytics for better anonymization.
-- **SEO**: Invisible h1 headers
+- **SEO**: See **[docs/SEO.md](docs/SEO.md)**
 
 ## Project Dependencies
 
@@ -115,410 +132,100 @@ My Next.js portfolio website, running on Vercel. I'm parting with IPFS because i
 7. **Unified Link Components and External Navigation Patterns:**
    - When refactoring navigation components for visual consistency (adding inverse-color active states and hover animations to the mobile Sidebar), a seemingly simple task—converting the Resume external link to use the new `SidebarLink` component—revealed an important architectural decision point. The component needed substantial enhancement to support both internal navigation (using Next.js `Link` for client-side routing and prefetching) and external links (using standard `<a>` tags with security attributes like `rel="noopener noreferrer"`). This is architecturally significant because it establishes a **single source of truth** for all navigation styling and behavior while respecting the fundamental distinction between internal and external navigation. Mixing these concerns carelessly can lead to SEO penalties (external links without proper `rel` attributes), broken prefetching (Next.js Link wrapping external URLs), or inconsistent UX (some links behaving differently despite appearing identical). The solution—a conditional render based on an `external` prop—ensures that every link in the sidebar receives identical visual treatment (inverse backgrounds, vertical sliding selectors, theme-aware colors) while maintaining semantic correctness and framework-specific optimizations. This pattern is now reusable across the application wherever unified link presentation is needed, demonstrating how **design system consistency requirements can drive meaningful architectural improvements** rather than superficial styling changes.
 
-### Advanced Jest Setup and TypeScript Learnings
+## Accessibility
 
-Setting up Jest with Next.js, TypeScript, and ESLint involved several key insights, particularly for ensuring correct type checking for test utilities and robustly testing dynamic components:
+This project follows WCAG 2.1 AA standards with automated testing via ESLint, Axe-core, and Lighthouse.
 
-1.  **Jest-DOM Matcher Types (`toBeInTheDocument`, etc.):**
-    - While `@testing-library/jest-dom` provides its own types, and `jest.setup.js` (with `import '@testing-library/jest-dom';`) correctly extends Jest's matchers at runtime, TypeScript's static type checking (especially within IDEs and ESLint) can be tricky.
-    - **Solution:** The most reliable fix for `Property 'toBeInTheDocument' does not exist...` type errors was to explicitly add `"types": ["jest", "@testing-library/jest-dom"]` to the `compilerOptions` in the **root `tsconfig.json`**. While a `tsconfig.jest.json` can specify these, ensuring they are in the root `tsconfig.json` helps IDEs and ESLint consistently pick them up.
-    - Remember to restart your IDE/TypeScript server and sometimes even clear `node_modules` (followed by a reinstall) after significant TypeScript configuration changes if type errors persist unexpectedly.
+**Run audits:** `yarn access` (saves reports to `./accessibility-reports/`)
 
-2.  **Mocking `Math.random` for Component State:**
-    - When testing components that use `Math.random()` in their `useState` initializer (e.g., to pick a random initial quote), directly mocking `global.Math.random` needs to be active _before_ the component's first render in a test.
-    - **Testing Strategy:** For increased robustness and simpler test logic, instead of asserting exact random outputs, consider a strategy that:
-      1.  Captures the initial state's rendered value.
-      2.  Simulates an interaction that should change the state.
-      3.  Captures the new state's rendered value.
-      4.  Asserts that the new value is different from the initial value.
-          This tests the change mechanism effectively. A simplified `Math.random` mock (e.g., returning distinct values like 0.1 then 0.8 on subsequent calls) can still be useful to ensure different values are generated by the component.
+**Completed Features:**
 
-3.  **ESLint and `jest.config.js`:**
-    - The `jest.config.js` file, especially when using `next/jest`, typically uses `require()`. If your ESLint setup (e.g., with `@typescript-eslint`) disallows `require()`, add `// eslint-disable-next-line @typescript-eslint/no-require-imports` above the specific `require()` line in `jest.config.js`.
+- ✅ Semantic HTML5 and proper heading hierarchy
+- ✅ Keyboard navigation and focus management
+- ✅ ARIA attributes for screen readers
+- ✅ WCAG AA color contrast (light and dark themes)
+- ✅ Automated testing suite integrated into development workflow
 
-4.  **Integrating Jest with `lint-staged`:**
-    - To run Jest tests on staged files during pre-commit, add the following to your `lint-staged` configuration (e.g., in `package.json`):
-      ```json
-      "*.{js,jsx,ts,tsx}": [
-        // ... other commands like prettier, eslint ...
-        "jest --bail --findRelatedTests --passWithNoTests"
-      ]
-      ```
-    - `--bail`: Exits on the first test failure.
-    - `--findRelatedTests`: Runs tests related to changed files.
-    - `--passWithNoTests`: Prevents an error if no tests are found for the staged files, which is crucial for `lint-staged`.
+**Maintenance Tasks:**
 
-## Bundle Analysis & Optimization
+- [ ] Explore Playwright + Axe-core for CI-integrated theme testing
+- [ ] Ensure all iconic buttons have discernible screen reader text
+- [ ] Regular WCAG compliance reviews
 
-### How to Interpret Bundle Analyzer Results
-
-Run `yarn analyze` to generate bundle visualization reports in `.next/analyze/`:
-
-- **nodejs.html**: Server-side bundle analysis
-- **edge.html**: Edge runtime bundle analysis
-
-#### What to Look For:
-
-**🟢 Good Signs:**
-
-- Balanced rectangle sizes (no single massive dependencies)
-- Clear separation between vendor code and application code
-- Efficient code splitting across routes
-
-**🟡 Monitor These:**
-
-- **Large Dependencies**:
-  - `date-fns`: Ensure tree-shaking with specific imports: `import { format } from 'date-fns'`
-  - `@heroicons/react`: Should only include used icons
-  - MDX processing libraries: Necessary but watch for bloat
-
-**🔴 Red Flags:**
-
-- Duplicate dependencies across bundles
-- Disproportionately large rectangles
-- Unused code from large libraries
-
-#### Bundle Optimization Checklist:
-
-- [ ] **Import Optimization**: Use specific imports instead of entire libraries
-- [ ] **Dynamic Imports**: Use `React.lazy()` or `next/dynamic` for code splitting
-- [ ] **Image Optimization**: Leverage Next.js `Image` component (already using)
-- [ ] **Dependency Audit**: Regular review of bundle impact before adding new dependencies
-- [ ] **Tree Shaking**: Verify webpack is eliminating unused code
-
-#### Current Bundle Health Status:
-
-- ✅ **Lean Runtime Dependencies**: Well-curated dependency list
-- ✅ **Modern Stack**: React 19 + Next.js 15 optimizations
-- ✅ **Tree-Shakable Libraries**: Most dependencies support tree-shaking
-- ⚠️ **Monitor**: MDX stack and date-fns usage patterns
-
-### Performance Monitoring
-
-Combined with Vercel Analytics and Speed Insights, use bundle analysis to:
-
-1. **Identify bottlenecks** before they impact users
-2. **Track bundle size over time** as features are added
-3. **Optimize critical paths** for better Core Web Vitals
-
-## SEO Strategy & Implementation
-
-### Completed SEO Tasks
-
-- **✅ Google Search Console (GSC) Integration:** Monitoring search performance and indexing
-- **✅ Meta Descriptions:** Compelling descriptions for search results
-- **✅ Header Tags:** Hierarchical structure with accessible H1 tags
-- **✅ Image Alt Text:** Descriptive text for accessibility and SEO
-- **✅ Technical SEO:**
-  - HTTPS security (standard with Vercel)
-  - Mobile-responsive design
-  - Site speed optimization (monitored via Vercel Speed Insights)
-  - 301 redirects implemented in `next.config.js` for old URLs (`/skills` → `/demos`, `/prompts` → `/resources`)
-- **✅ Internal Linking:** Strategic cross-page linking for navigation and SEO
-- **✅ Sitemap Submission:** Up-to-date XML sitemap submitted to GSC
-
-### SEO Maintenance Tasks
-
-- **[ ] Content Strategy:** Continue incorporating "Cooper Reed" and "cooperability.com" naturally in content
-- **[ ] Regular GSC Audits:** Monitor for indexing issues and optimization opportunities
-- **[ ] Content Freshness:** Keep content updated and relevant
-
-### Quick Guide: Google Search Console Setup
-
-1. **Access GSC:** [Google Search Console](https://search.google.com/search-console)
-2. **Add Property:** Select "Domain" property type, enter `cooperability.com`
-3. **DNS Verification:** Add TXT record from GSC to domain registrar DNS settings
-4. **Submit Sitemap:** Add `sitemap.xml` in GSC Sitemaps section
-5. **Monitor:** Review performance and indexing status regularly
-
-### Addressing Search Result Issues
-
-Historical "Untitled" listings and old paths (`/skills`, `/prompts`) have been resolved with:
-
-- Proper `<title>` tags on all pages
-- 301 redirects in `next.config.js`
-- Updated sitemap submission
-- GSC monitoring for re-indexing progress
-
-## Accessibility Implementation & Testing
-
-### Completed Accessibility Features
-
-- **✅ Semantic HTML5:** Proper structural elements and heading hierarchy
-- **✅ Keyboard Navigation:** All interactive elements accessible via keyboard
-- **✅ ARIA Attributes:** Enhanced screen reader support for navigation
-- **✅ Responsive Design:** Tested across devices and screen sizes
-- **✅ Color Contrast:** WCAG AA compliance in light and dark themes
-- **✅ Automated Testing Suite:**
-  - `eslint-plugin-jsx-a11y`: Static analysis during development
-  - `axe-core-cli`: Runtime WCAG testing
-  - Lighthouse: Comprehensive accessibility audits
-  - Combined in `yarn access` command with reports saved to `./accessibility-reports/`
-- **✅ Manual Testing:** Browser dev tools (Axe DevTools) and keyboard navigation testing
-
-### Accessibility Maintenance Tasks
-
-- **[ ] Advanced Testing:** Explore Playwright + Axe-core for CI-integrated theme testing
-- **[ ] Button Enhancement:** Ensure all iconic buttons have discernible screen reader text
-- **[ ] User Feedback Integration:** Process accessibility feedback for continuous improvement
-- **[ ] WCAG Compliance Review:** Regular audits against WCAG 2.1 AA standards
-
-##Known Testing Limitations
-
-- Axe CLI sometimes reports false positives for contrast on dynamically themed content
-- Pre-hydration testing doesn't always capture themed states accurately
-- Manual browser testing remains the most reliable method for theme-specific accessibility
+See **[docs/Tooling.md#accessibility-testing](docs/Tooling.md#accessibility-testing)** for detailed testing procedures.
 
 ## PWA & App-like Experience
 
-This project implements a **comprehensive PWA applet suite** - transforming individual tools into installable Progressive Web Apps with their own identities while sharing infrastructure. Each applet (Prompt Composer, Opioid Converter) can be added to a mobile home screen as a separate app with its own name, but they all share the same service worker and icon set for efficiency and brand consistency.
+This project implements a **comprehensive PWA applet suite** - transforming individual tools into installable Progressive Web Apps with their own identities while sharing infrastructure. Each applet (Prompt Composer, Opioid Converter) can be added to a mobile home screen as a separate app with its own name.
 
-**📚 Documentation:**
+**📚 Complete Documentation:** **[docs/PWA.md](docs/PWA.md)**
 
-- **Architecture Guide:** [`docs/PWA-APPLET-SUITE.md`](docs/PWA-APPLET-SUITE.md) - Complete technical explanation and how to add new applets
-- **Testing Guide:** [`docs/TESTING-PWA-APPLETS.md`](docs/TESTING-PWA-APPLETS.md) - Platform-specific testing procedures and troubleshooting
+This comprehensive guide covers everything from PWA basics to advanced implementation:
 
-### Current Progress
+- What PWAs are and how they work
+- The applet suite architecture and philosophy
+- Step-by-step implementation guide
+- Testing procedures (iOS, Android, desktop)
+- Troubleshooting common issues
+- Advantages, disadvantages, and trade-offs
+- Future enhancement opportunities
 
-- **✅ Iconography:** A comprehensive set of icons has been generated using `realfavicongenerator.net` to ensure proper display across iOS (apple-touch-icon), Android (adaptive icons), and modern browsers.
-- **✅ Web App Manifests:** Multiple manifests implemented:
-  - `site.webmanifest` - Main portfolio identity with shortcuts to applets
-  - `prompt-composer.webmanifest` - Prompt Composer applet identity
-  - `opioid-converter.webmanifest` - Opioid Converter applet identity
-- **✅ Service Worker (Serwist) & Offline:** Migrated from the deprecated `next-pwa` to community‑maintained **Serwist** (Workbox fork). We use an explicit service worker at `src/sw.js` and inject a precache manifest as a post‑build step via `@serwist/build` (see `scripts/build-sw.mjs`). This approach is robust under Yarn Plug'n'Play (PnP) and avoids plugin resolution pitfalls.
-- **✅ Registration:** The SW is registered in `_app.tsx` for production (HTTPS) only.
-- **✅ Build Integration:** `package.json` `build` script runs `next build`, then `node scripts/build-sw.mjs`, then `next-sitemap` (which writes sitemap files to `public/`).
-- **✅ Per-Applet Installation:** Each tool can be installed as a separate PWA with its own name, theme color, and start URL while sharing the same service worker and icon set.
+### Quick Overview
 
-### Serwist Migration (from next-pwa)
-
-Rationale: `next-pwa` is deprecated. Serwist is the actively maintained successor to Workbox with feature parity and ongoing updates. We adopted a minimal, predictable setup that works cleanly with Yarn PnP:
-
-- Removed `next-pwa` and its wrappers from `next.config.js`.
-- Added `src/sw.js` using Serwist’s API to handle precaching and runtime behavior.
-- Injected the precache manifest after the Next build using `@serwist/build` (`scripts/build-sw.mjs`).
-- Registered the service worker in `src/pages/_app.tsx` for production only.
-- Left icon and manifest handling framework‑agnostic (linked in `layout.tsx`).
-
-References: Serwist docs `https://serwist.pages.dev/`
-
-### How `src/sw.js` and `public/sw.js` relate
-
-- `src/sw.js` is the JavaScript source of your service worker. It’s used at build time by Serwist’s `injectManifest` to analyze and inline the precache manifest and produce the runtime worker.
-- `public/sw.js` is the compiled, browser‑consumable service worker that the page actually registers (see `_app.tsx`). Browsers only ever download/execute `sw.js`.
-- Edit `src/sw.js` → rebuild → `scripts/build-sw.mjs` regenerates `public/sw.js`. In development, registration is disabled to avoid caching dev assets.
-
-### Per‑route installable experiences (PWA Applet Suite) ✅ IMPLEMENTED
-
-**Status:** Fully implemented as of January 2025. Each applet now has its own installable PWA identity while sharing the same service worker infrastructure.
+**Status:** ✅ Fully implemented (January 2025)
 
 **Implemented Applets:**
 
-- **Prompt Composer** (`/prompt-composer`) - Installs as "Prompt Composer"
-- **Opioid Converter** (`/opioid-converter`) - Installs as "Opioid Converter"
-- **Main Portfolio** (`/`) - Installs as "Co-Operability" with shortcuts to applets
+- **"Prompt Composer"** - Installs as standalone app from `/prompt-composer`
+- **"Opioid Converter"** - Installs as standalone app from `/opioid-converter`
+- **"Co-Operability"** - Main portfolio with shortcuts to applets
 
-**Architecture:**
+**Key Features:**
 
-1. **Dedicated Per-Page Manifests** (Pattern #1)
+- ✅ Each applet has unique installable identity
+- ✅ Shared service worker (efficient caching)
+- ✅ Same icon set (brand consistency)
+- ✅ iOS and Android support
+- ✅ Offline-capable via Serwist (Workbox successor)
 
-Each applet has its own manifest file in `public/icons/`:
+**Technology Stack:**
 
-- `prompt-composer.webmanifest` - Prompt Composer identity (theme: blue `#3b82f6`)
-- `opioid-converter.webmanifest` - Opioid Converter identity (theme: green `#10b981`)
-- `site.webmanifest` - Main portfolio identity (theme: white `#ffffff`)
+- **Service Worker:** Serwist (migrated from deprecated `next-pwa`)
+- **Build Process:** `next build` → `build-sw.mjs` → `next-sitemap`
+- **Files:** `src/sw.js` (source) → `public/sw.js` (compiled)
 
-2. **Page-Level Manifest Links**
+**Next Steps:**
 
-Each page component includes its specific manifest in the `<Head>`:
+- Custom icons per applet
+- Enhanced offline functionality
+- Deep linking & share targets
+- App store distribution (Microsoft Store, Google Play via TWA)
 
-```html
-<head>
-  {/* PWA-specific manifest for this applet */}
-  <link rel="manifest" href="/icons/prompt-composer.webmanifest" />
+See **[docs/PWA.md](docs/PWA.md)** for complete implementation guide, testing procedures, and troubleshooting.
 
-  {/* iOS-specific meta tags (Apple doesn't fully support manifests) */}
-  <meta name="apple-mobile-web-app-title" content="Prompt Composer" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="theme-color" content="#3b82f6" />
-</head>
+## Package Management (Yarn PnP)
+
+This project uses **Yarn Plug'n'Play (PnP)** for zero-install, deterministic dependency resolution.
+
+**Benefits:**
+
+- ✅ Faster CI (smaller checkouts)
+- ✅ Deterministic resolution (no phantom packages)
+- ✅ Better editor integration via Yarn SDKs
+
+**One-time setup after cloning:**
+
+```bash
+yarn dlx @yarnpkg/sdks vscode  # or vim, intellij, etc.
 ```
 
-3. **Global Shortcuts** (Pattern #2)
+**Important Files:**
 
-The main `site.webmanifest` includes a `shortcuts` array for quick access on Android:
+- `.pnp.cjs` - PnP manifest (commit to git)
+- `.yarn/sdks/**` - Editor wrappers (commit to git)
+- `.yarnrc.yml` - Yarn configuration
 
-```json
-{
-  "shortcuts": [
-    {
-      "name": "Prompt Composer",
-      "url": "/prompt-composer"
-    },
-    {
-      "name": "Opioid Converter",
-      "url": "/opioid-converter"
-    }
-  ]
-}
-```
-
-**How It Works:**
-
-- **Manifest Precedence:** Page-specific `<link rel="manifest">` overrides the global layout manifest
-- **Shared Service Worker:** Single SW at `/sw.js` (scope `/`) caches all routes efficiently
-- **Independent Installations:** Each applet can be added to home screen with its own name
-- **iOS Support:** Apple-specific meta tags ensure proper naming on Safari
-- **Brand Consistency:** All applets share the same icon set while having unique identities
-
-**User Experience:**
-
-When a user visits `/prompt-composer` on mobile and taps "Add to Home Screen":
-
-- iOS Safari shows "Prompt Composer" as the app name (not "Co-Operability")
-- The installed app opens directly to `/prompt-composer`
-- It displays in standalone mode (no browser UI)
-- The status bar color matches the applet's theme
-
-**Comprehensive Documentation:**
-
-- **Architecture Guide:** `docs/PWA-APPLET-SUITE.md` - Complete technical explanation, step-by-step guide for adding new applets, troubleshooting
-- **Testing Guide:** `docs/TESTING-PWA-APPLETS.md` - Platform-specific testing checklists, debug commands, common issues
-
-**Adding New Applets:**
-
-See `docs/PWA-APPLET-SUITE.md` for the complete process. In brief:
-
-1. Create `public/icons/[applet-name].webmanifest` with unique name/theme
-2. Add page-specific manifest link and Apple meta tags to the page's `<Head>`
-3. Optionally add to shortcuts array in `site.webmanifest`
-4. Test with Chrome DevTools → Application → Manifest
-5. Verify on actual iOS/Android devices
-
-### Testing PWA Applets
-
-**Quick Validation:**
-
-- **Chrome DevTools:** Navigate to applet URL → DevTools (F12) → Application tab → Manifest section
-- **Verify:** Correct name, icons, start URL, theme color for each applet
-- **Service Worker:** Application → Service Workers → "This page is controlled by a service worker"
-
-**Lighthouse Audits:**
-
-- Run Lighthouse against the exact URL you want installable (e.g., `http://localhost:3000/prompt-composer`)
-- Validate installability, manifest icons, display mode, and offline functionality
-- Each applet should score high on PWA criteria
-
-**Mobile Device Testing:**
-
-- **Required:** Test on actual iOS (Safari) and Android (Chrome) devices
-- **iOS:** Visit applet URL → Share → Add to Home Screen → Verify correct app name
-- **Android:** Visit applet URL → Menu → Add to Home Screen → Test long-press shortcuts
-
-**Comprehensive Testing Guide:**
-See `docs/TESTING-PWA-APPLETS.md` for:
-
-- Platform-specific testing checklists (iOS/Android/Desktop)
-- Common issues and troubleshooting
-- Debug commands and validation scripts
-- Testing matrix with browser compatibility
-
-### Build health & quick optimizations
-
-The sample log shows a healthy build (Next compiled, Serwist injected precache, sitemaps generated). Consider:
-
-- Bundle size: run `yarn analyze` and consider `next/dynamic` for heavy page‑only code (e.g., icon packs, MDX processing) to reduce First Load JS.
-- Precache scope: tune `scripts/build-sw.mjs` `globPatterns`/`maximumFileSizeToCacheInBytes` to avoid caching very large assets you don’t need offline.
-- Runtime caching: extend `src/sw.js` with image/cache strategies (e.g., Cache‑First for images, Stale‑While‑Revalidate for JS/CSS) for resilience and speed.
-- Images: prefer Next Image, modern formats (WebP/AVIF), and proper sizes for applet pages.
-
-### Next Steps & Roadmap
-
-The PWA applet suite foundation is complete! Future enhancements to consider:
-
-1.  **✅ COMPLETED: Per-Applet Installable Identities**
-    - Each applet (Prompt Composer, Opioid Converter) now has its own manifest with unique name/theme
-    - Users can install each tool as a separate app on their home screen
-    - Shared service worker provides efficient caching across all applets
-
-2.  **Future: Custom Icons Per Applet**
-    - Currently all applets share the same icon set for brand consistency
-    - Could create unique icons for each tool to differentiate them visually on home screens
-    - See `docs/PWA-APPLET-SUITE.md` for implementation guidance
-
-3.  **Future: Enhanced Offline Functionality**
-    - Extend Serwist runtime caching (in `src/sw.js`) for dynamic data/APIs used by applets
-    - Tune strategies (e.g., Stale‑While‑Revalidate, Cache‑First) per route/asset type
-    - Add offline fallback pages for improved UX when network unavailable
-
-4.  **Future: Deep Linking & Share Targets**
-    - Implement `share_target` in manifests to allow sharing content directly into applets
-    - Enable deep linking from external sources to specific applet states
-    - Add URL parameters to restore applet state on launch
-
-5.  **Future: App Store Distribution**
-    - PWAs can be submitted to Microsoft Store (Windows)
-    - Google Play Store supports TWA (Trusted Web Activities) for Android distribution
-    - Consider packaging for wider reach beyond web installation
-
-## Internal Tooling & Architecture Updates (2025-06)
-
-### Tailwind CSS housekeeping
-
-- Added an explicit `/* eslint-disable @typescript-eslint/no-require-imports */` directive at the top of `tailwind.config.js`.
-  - Rationale: the config file is intentionally written in CommonJS (`module.exports = …`) per Tailwind's own docs; disabling the rule locally keeps ESLint happy without weakening project-wide TypeScript import safety.
-- Removed a redundant `border` + `rounded-full` utility combo that was accidentally bloating the Prompt Composer layout.
-
-### Migrating from _node_modules_ → Yarn Plug'n'Play (PnP)
-
-- The repo is now **zero-install**: dependencies are resolved straight from `.pnp.cjs` instead of a `node_modules` tree.
-  - ✅ Smaller checkouts & faster CI.
-  - ✅ Deterministic resolution – no phantom packages hiding in sub-folders.
-  - ✅ Improved Editor integration via Yarn SDKs.
-- **One-time post-clone step for contributors:**  
-  `yarn dlx @yarnpkg/sdks vscode` (or `vim`, `intellij`, etc.) – this generates helper wrappers in `.yarn/sdks/` so your IDE's TypeScript server & ESLint can traverse the PnP map.
-- The legacy `node_modules` directory is no longer created; remove any editor-level exclusions that targeted it.
-
-### `tsconfig.json → compilerOptions.types` – explicit vs implicit
-
-| Scenario          | What happens when **`types` is _present_**                                                                                                                | What happens when it is **omitted**                                                   |
-| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
-| IDE / tsc startup | Only the packages listed are injected into the global namespace (plus `@types/node` which TS always adds).                                                | **All** `.d.ts` files found under `@types/*` + dependency packages are auto-included. |
-| Pros              | ‑ Guarantees deterministic globals.<br>- Prevents polluting the IntelliSense autocomplete with irrelevant libraries.                                      | ‑ Zero maintenance – add a library and its types "just work".                         |
-| Cons              | You must remember to list _every_ global type you rely on (React, Jest, Next, etc.) or you'll see "JSX.IntrinsicElements missing" / "Cannot find name X". | Potential for hidden conflicts if two libraries declare the same global symbol.       |
-
-**Project decision:** we keep an _explicit_ list so that test-only helpers (e.g. `jest-dom`) don't leak into production builds, while adding the _required_ runtime globals:
-
-```jsonc
-"types": [
-  "react", "react-dom", "next",
-  "jest", "@testing-library/jest-dom",
-  "node"
-]
-```
-
-If you prefer the implicit behaviour, simply delete the field – Typescript will fall back gracefully. **Never** leave the field half-populated (e.g. only Jest) or JSX support vanishes.
-
-### shadcn/ui adoption
-
-- Added `@/components/ui/*` generated via [`shadcn/ui`](https://ui.shadcn.com).
-  - Components are tailwind-powered and live inside `components/ui/`.
-  - Style tokens were merged into `tailwind.config.js` under the `extend.colors` section – no runtime CSS needed.
-- If you scaffold new components, run `npx shadcn-ui@latest add <component>` and commit the generated files.
-
-### New JSON artefacts & Git hygiene
-
-| Path                              | Generated by   | Purpose                                                                            | **Commit?**                                      |
-| --------------------------------- | -------------- | ---------------------------------------------------------------------------------- | ------------------------------------------------ |
-| `.yarn/sdks/**`                   | `yarn sdks`    | Editor wrappers that load the PnP runtime before launching TS / ESLint / Prettier. | **Yes** – required for other contributors' IDEs. |
-| `.next/analyze/*.json` & `*.html` | `yarn analyze` | Bundle-size snapshots. Safe to commit if you want the history, otherwise ignore.   | _Optional_ (currently **gitignored**).           |
-| `.pnp.cjs` & `.pnp.loader.mjs`    | Yarn           | PnP mapping & loader – **part of the lockfile**.                                   | **Yes** (already tracked via git).               |
-
-> **Advisory:** Always re-run `yarn install` after upgrading Yarn (it may regenerate `.pnp.cjs`). Commit the diff, then verify editors still resolve packages. For CI, no extra cache key is needed – Yarn's cache key already respects the lockfile hash.
-
-### Quick Yarn upgrade (Corepack)
-
-To upgrade Yarn in this repo non-interactively and avoid Corepack prompts:
+**Upgrading Yarn:**
 
 ```bash
 yarn set version 4.10.3
@@ -526,71 +233,4 @@ corepack prepare yarn@4.10.3 --activate
 yarn install && yarn dedupe --strategy=highest
 ```
 
-PnP tip: if `recma-jsx` complains about a missing `acorn` peer under PnP, add this to `.yarnrc.yml`:
-
-```yaml
-packageExtensions:
-  recma-jsx@*:
-    dependencies:
-      acorn: '*'
-```
-
-### Yarn PnP Future-Proofing & Maintenance Guide (June 2025)
-
-This section documents the process undertaken to upgrade the project's dependencies, resolve security vulnerabilities, and troubleshoot a series of complex local and Vercel deployment issues related to Yarn PnP.
-
-#### 1. Initial Successes
-
-The initial phase of the work was successful:
-
-- **Dependencies Updated:** All project dependencies were updated to their latest versions using `yarn up`.
-- **Vulnerabilities Resolved:** All Dependabot security alerts were resolved, confirmed by a clean `yarn npm audit`.
-- **`.gitignore` Optimized:** The `.gitignore` file was updated to correctly handle Yarn PnP's zero-install cache and to use glob patterns to ignore large SWC binaries.
-- **Tests Passed:** The Jest test suite was updated to reflect changes in the application's content, and all tests passed locally.
-- **Project Upgraded to Node.js 22:** The project was consistently updated across `package.json`, `.nvmrc`, and `vercel.json` to use the Node.js 22 runtime, aligning local and deployment environments.
-
----
-
-#### 2. Vercel Deployment Troubleshooting Log
-
-Despite a healthy local state, the branch failed to deploy on Vercel, leading to an extensive troubleshooting process.
-
-- **Initial Failure:** The first Vercel builds failed with the error `Error: Cannot find module './.pnp.cjs'`. This occurred even though the `.pnp.cjs` file was confirmed to be present in the Git commit.
-
-- **Investigation & Theories:**
-  - **Vercel Cache:** Redeploying without the build cache did not resolve the issue.
-  - **`.gitignore` Conflict:** An outdated `/.pnp` rule in `.gitignore` was suspected of causing Vercel to prune the `.pnp.cjs` file. Removing this rule did not solve the problem.
-  - **Yarn Version Mismatch:** A key discovery was made when a build failed with `Unrecognized or legacy configuration settings found: pnpPath`. This error is specific to **Yarn v1 (Classic)**, proving that Vercel was using the wrong Yarn version, despite the `packageManager` field in `package.json`.
-
-- **Attempted Fixes:**
-  - **Forcing Corepack:** The `installCommand` in `vercel.json` was updated to `corepack enable && yarn install --immutable`. This successfully forced Vercel to use the correct Yarn v4 binary, but the build _still_ failed with `Cannot find module './.pnp.cjs'`.
-  - **Diagnostic Commands:** Diagnostic commands (`ls -la` and `ls -la .yarn`) were added to the `build` script. The logs from these commands confirmed that the `.pnp.cjs` file was inexplicably missing from the Vercel build container's filesystem at runtime, suggesting a deep, unresolved issue with Vercel's build environment for Yarn PnP projects.
-
----
-
-#### 3. Local Environment Troubleshooting Log
-
-After upgrading to Node.js 22, the local environment began to mirror the CI failures.
-
-- **Symptom:** Running `yarn dev` failed with the `Unrecognized or legacy configuration...` error, indicating the local machine was also using Yarn v1.
-- **Fix:** Running `corepack enable` (with administrator privileges) was required to configure Corepack for the new Node.js v22 installation.
-- **Final Local Error:** After enabling Corepack, running `corepack yarn dev` resulted in a new error: `Qualified path resolution failed`. This error originates from within Yarn's PnP resolver and indicates that even when the correct Yarn version is running, it cannot locate the `next` executable.
-
----
-
-#### 4. Resolution & Current Status
-
-The project is now fully functional, both locally and on Vercel. The critical issues were resolved by systematically working through the potential next steps outlined previously.
-
-- **Build Scripts Simplified:** The `node -r ./.pnp.cjs` prefix was removed from the `dev`, `build`, and `start` scripts in `package.json`. This resolved the `Qualified path resolution failed` error by allowing Corepack to manage the PnP environment without conflict.
-
-- **Vercel Configuration Fixed:**
-  - The simplified build scripts allowed the Vercel deployment to proceed past the initial PnP resolution error.
-  - A subsequent Vercel schema validation error (`should NOT have additional property 'engines'`) was fixed by removing the redundant `engines` block from `vercel.json`, as Vercel now infers this from `package.json`.
-
-- **Security Vulnerabilities Patched:** Persistent Dependabot alerts were fully resolved:
-  - The critical `form-data` vulnerability was patched by adding `"form-data": "4.0.4"` to the `resolutions` field in `package.json`.
-  - The low-severity `tmp` vulnerability was patched by adding `"tmp": "0.2.4"` to the `resolutions` field.
-  - All high and low-severity `Next.js` vulnerabilities were confirmed to be false positives, as the project's updated Next.js version (`15.4.1`) already contained the necessary patches.
-
-The project is now stable, secure, and successfully deployed on Vercel with the latest dependencies and Node.js 22.
+See **[docs/Tooling.md#yarn-plugnplay-pnp](docs/Tooling.md#yarn-plugnplay-pnp)** for troubleshooting and Vercel deployment details.
