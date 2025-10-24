@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import styles from './MandelbrotExplorer.module.css'
-import { Button } from '../Button'
+import { Button } from '@/components/ui/button'
 import {
   mandelbrotIterations,
   pixelToComplex,
@@ -225,7 +225,6 @@ const MandelbrotExplorer = () => {
         <div className={styles.buttonGroup}>
           <div className={styles.iterationControls}>
             <Button
-              variant="dark"
               onClick={() =>
                 setMaxIterations((prev) => Math.max(50, prev - 50))
               }
@@ -235,7 +234,6 @@ const MandelbrotExplorer = () => {
               <b>- Iterations</b>
             </Button>
             <Button
-              variant="dark"
               onClick={() =>
                 setMaxIterations((prev) => Math.min(1000, prev + 50))
               }
@@ -246,7 +244,6 @@ const MandelbrotExplorer = () => {
             </Button>
           </div>
           <Button
-            variant="dark"
             onClick={handleReset}
             disabled={isRendering}
             className={styles.resetButton}

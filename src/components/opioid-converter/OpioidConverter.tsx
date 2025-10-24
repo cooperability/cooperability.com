@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect } from 'react'
 import styles from './OpioidConverter.module.css'
 import { MedicationItem } from './types'
 import Image from 'next/image'
-import { Button } from '../Button'
+import { Button } from '@/components/ui/button'
 
 const MEDICATION_ARRAY: MedicationItem[] = [
   {
@@ -188,7 +188,7 @@ const OpioidConverter = () => {
             Methadone Equivalence: {methadoneEq} mg
           </h2>
         </div>
-        <Button variant="dark" className={styles.clearAll} onClick={clearAll}>
+        <Button className={styles.clearAll} onClick={clearAll}>
           <b>
             <u>Clear All</u>
           </b>
@@ -220,7 +220,6 @@ const OpioidConverter = () => {
               </td>
               <td className={styles.incrementCell}>
                 <Button
-                  variant="dark"
                   disabled={med.dailyDose < med.increment}
                   onClick={() => handleIncrement(index, false)}
                   className={styles.button}
@@ -230,7 +229,6 @@ const OpioidConverter = () => {
                 </Button>
                 <span className={styles.incrementValue}>{med.increment}</span>
                 <Button
-                  variant="dark"
                   onClick={() => handleIncrement(index, true)}
                   className={styles.button}
                   aria-label={`Increase ${med.display} dose by ${med.increment} ${med.unit}`}
