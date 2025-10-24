@@ -26,6 +26,7 @@ export default defineConfig([
       'coverage/**',
       'public/**',
       'docs/**',
+      'docs/**',
     ],
   },
   { languageOptions: { globals: globals.browser } },
