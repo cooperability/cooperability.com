@@ -17,11 +17,43 @@ interface Viewport {
 
 const MandelbrotExplorer = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const offscreenCanvasRef = useRef<HTMLCanvasElement | null>(null)
   const [viewport, setViewport] = useState<Viewport>(DEFAULT_VIEWPORT)
   const [isRendering, setIsRendering] = useState(false)
   const [maxIterations, setMaxIterations] = useState(256)
   const [canvasSize] = useState(500)
   const [progress, setProgress] = useState(0)
+  const [isDragging, setIsDragging] = useState(false)
+  const [dragStart, setDragStart] = useState<{ x: number; y: number } | null>(
+    null
+  )
+  const [dragOffset, setDragOffset] = useState<{ x: number; y: number }>({
+    x: 0,
+    y: 0,
+  })
+  const [lastTapTime, setLastTapTime] = useState(0)
+  const [pinchDistance, setPinchDistance] = useState<number | null>(null)
+
+  /**
+   * Redraws the canvas with the current drag offset (without re-rendering the fractal)
+   */
+  const redrawWithOffset = useCallback(
+    (offsetX: number, offsetY: number) => {
+      const canvas = canvasRef.current
+      const offscreenCanvas = offscreenCanvasRef.current
+      if (!canvas || !offscreenCanvas) return
+
+      const ctx = canvas.getContext('2d')
+      if (!ctx) return
+
+      // Clear the canvas
+      ctx.clearRect(0, 0, canvasSize, canvasSize)
+
+      // Draw the offscreen canvas with offset
+      ctx.drawImage(offscreenCanvas, offsetX, offsetY)
+    },
+    [canvasSize]
+  )
 
   /**
    * Renders the Mandelbrot set to the canvas using progressive rendering.
@@ -36,14 +68,22 @@ const MandelbrotExplorer = () => {
     const canvas = canvasRef.current
     if (!canvas) return
 
-    const ctx = canvas.getContext('2d')
-    if (!ctx) return
+    // Create offscreen canvas if it doesn't exist
+    if (!offscreenCanvasRef.current) {
+      offscreenCanvasRef.current = document.createElement('canvas')
+      offscreenCanvasRef.current.width = canvasSize
+      offscreenCanvasRef.current.height = canvasSize
+    }
+
+    const offscreenCanvas = offscreenCanvasRef.current
+    const offscreenCtx = offscreenCanvas.getContext('2d')
+    if (!offscreenCtx) return
 
     setIsRendering(true)
     setProgress(0)
 
     // Create ImageData for direct pixel manipulation (more efficient than drawing operations)
-    const imageData = ctx.createImageData(canvasSize, canvasSize)
+    const imageData = offscreenCtx.createImageData(canvasSize, canvasSize)
     const data = imageData.data
 
     let pixelsProcessed = 0
@@ -87,8 +127,15 @@ const MandelbrotExplorer = () => {
         }
       }
 
-      // Update canvas with current progress
-      ctx.putImageData(imageData, 0, 0)
+      // Update offscreen canvas with current progress
+      offscreenCtx.putImageData(imageData, 0, 0)
+
+      // Copy to visible canvas
+      const ctx = canvas.getContext('2d')
+      if (ctx) {
+        ctx.clearRect(0, 0, canvasSize, canvasSize)
+        ctx.drawImage(offscreenCanvas, 0, 0)
+      }
 
       // Update progress
       const currentProgress = Math.floor((pixelsProcessed / totalPixels) * 100)
@@ -108,10 +155,104 @@ const MandelbrotExplorer = () => {
   }, [viewport, maxIterations, canvasSize])
 
   /**
-   * Handles canvas clicks to zoom into the Mandelbrot set.
+   * Handles mouse down event to start panning.
+   * Records the starting position for drag calculation.
+   */
+  const handleMouseDown = useCallback(
+    (event: React.MouseEvent<HTMLCanvasElement>) => {
+      if (isRendering) return
+
+      const canvas = canvasRef.current
+      if (!canvas) return
+
+      const rect = canvas.getBoundingClientRect()
+      const x = event.clientX - rect.left
+      const y = event.clientY - rect.top
+
+      setIsDragging(true)
+      setDragStart({ x, y })
+      setDragOffset({ x: 0, y: 0 })
+    },
+    [isRendering]
+  )
+
+  /**
+   * Handles mouse move event to visually pan the canvas.
+   * Only updates the visual offset without re-rendering the fractal.
+   */
+  const handleMouseMove = useCallback(
+    (event: React.MouseEvent<HTMLCanvasElement>) => {
+      if (!isDragging || !dragStart) return
+
+      const canvas = canvasRef.current
+      if (!canvas) return
+
+      const rect = canvas.getBoundingClientRect()
+      const x = event.clientX - rect.left
+      const y = event.clientY - rect.top
+
+      // Calculate drag offset in pixels
+      const offsetX = x - dragStart.x
+      const offsetY = y - dragStart.y
+
+      // Update drag offset state and redraw with offset
+      setDragOffset({ x: offsetX, y: offsetY })
+      redrawWithOffset(offsetX, offsetY)
+    },
+    [isDragging, dragStart, redrawWithOffset]
+  )
+
+  /**
+   * Handles mouse up event to end panning.
+   * Calculates the new viewport based on the drag and triggers re-render.
+   * Only updates viewport if there was significant movement (not a click).
+   */
+  const handleMouseUp = useCallback(() => {
+    if (!isDragging || !dragStart) {
+      setIsDragging(false)
+      setDragStart(null)
+      return
+    }
+
+    const canvas = canvasRef.current
+    if (!canvas) return
+
+    // Check if this was a significant drag (threshold: 5 pixels)
+    const dragDistance = Math.sqrt(dragOffset.x ** 2 + dragOffset.y ** 2)
+    const isSignificantDrag = dragDistance > 5
+
+    if (isSignificantDrag) {
+      const rect = canvas.getBoundingClientRect()
+
+      // Convert pixel offset to complex plane delta
+      const rangeReal = viewport.maxReal - viewport.minReal
+      const rangeImag = viewport.maxImag - viewport.minImag
+      const deltaReal = -(dragOffset.x / rect.width) * rangeReal
+      const deltaImag = -(dragOffset.y / rect.height) * rangeImag
+
+      // Update viewport by shifting it based on drag
+      setViewport({
+        minReal: viewport.minReal + deltaReal,
+        maxReal: viewport.maxReal + deltaReal,
+        minImag: viewport.minImag + deltaImag,
+        maxImag: viewport.maxImag + deltaImag,
+      })
+    } else {
+      // Was just a click, redraw without offset
+      redrawWithOffset(0, 0)
+    }
+
+    // Reset drag state
+    setIsDragging(false)
+    setDragStart(null)
+    setDragOffset({ x: 0, y: 0 })
+  }, [isDragging, dragStart, dragOffset, viewport, redrawWithOffset])
+
+  /**
+   * Handles double-click to zoom into the Mandelbrot set.
    * Zooms 2× centered on the clicked point, revealing more detail.
    */
-  const handleCanvasClick = useCallback(
+  const handleDoubleClick = useCallback(
     (event: React.MouseEvent<HTMLCanvasElement>) => {
       if (isRendering) return
 
@@ -155,6 +296,199 @@ const MandelbrotExplorer = () => {
   )
 
   /**
+   * Handles touch start - supports both single-finger pan and two-finger pinch
+   */
+  const handleTouchStart = useCallback(
+    (event: React.TouchEvent<HTMLCanvasElement>) => {
+      if (isRendering) return
+
+      const canvas = canvasRef.current
+      if (!canvas) return
+
+      const rect = canvas.getBoundingClientRect()
+      const touches = event.touches
+
+      if (touches.length === 1) {
+        // Single finger - check for double-tap
+        const now = Date.now()
+        const timeSinceLastTap = now - lastTapTime
+
+        const touch = touches[0]
+        const x = touch.clientX - rect.left
+        const y = touch.clientY - rect.top
+
+        if (timeSinceLastTap < 300 && timeSinceLastTap > 0) {
+          // Double-tap detected - zoom in
+          const px = (x / rect.width) * canvasSize
+          const py = (y / rect.height) * canvasSize
+
+          const clickReal = pixelToComplex(
+            px,
+            canvasSize,
+            viewport.minReal,
+            viewport.maxReal
+          )
+          const clickImag = pixelToComplex(
+            py,
+            canvasSize,
+            viewport.minImag,
+            viewport.maxImag
+          )
+
+          const rangeReal = viewport.maxReal - viewport.minReal
+          const rangeImag = viewport.maxImag - viewport.minImag
+
+          setViewport({
+            minReal: clickReal - rangeReal / 4,
+            maxReal: clickReal + rangeReal / 4,
+            minImag: clickImag - rangeImag / 4,
+            maxImag: clickImag + rangeImag / 4,
+          })
+
+          setLastTapTime(0) // Reset to prevent triple-tap
+        } else {
+          // Single tap - start drag
+          setIsDragging(true)
+          setDragStart({ x, y })
+          setDragOffset({ x: 0, y: 0 })
+          setLastTapTime(now)
+        }
+      } else if (touches.length === 2) {
+        // Two fingers - start pinch
+        const dx = touches[0].clientX - touches[1].clientX
+        const dy = touches[0].clientY - touches[1].clientY
+        const distance = Math.sqrt(dx * dx + dy * dy)
+        setPinchDistance(distance)
+        setIsDragging(false)
+      }
+    },
+    [isRendering, lastTapTime, viewport, canvasSize]
+  )
+
+  /**
+   * Handles touch move - supports pan and pinch-to-zoom
+   */
+  const handleTouchMove = useCallback(
+    (event: React.TouchEvent<HTMLCanvasElement>) => {
+      event.preventDefault() // Prevent scrolling while touching canvas
+
+      if (isRendering) return
+
+      const canvas = canvasRef.current
+      if (!canvas) return
+
+      const rect = canvas.getBoundingClientRect()
+      const touches = event.touches
+
+      if (touches.length === 1 && isDragging && dragStart) {
+        // Single finger drag
+        const touch = touches[0]
+        const x = touch.clientX - rect.left
+        const y = touch.clientY - rect.top
+
+        const offsetX = x - dragStart.x
+        const offsetY = y - dragStart.y
+
+        setDragOffset({ x: offsetX, y: offsetY })
+        redrawWithOffset(offsetX, offsetY)
+      } else if (touches.length === 2 && pinchDistance !== null) {
+        // Two finger pinch
+        const dx = touches[0].clientX - touches[1].clientX
+        const dy = touches[0].clientY - touches[1].clientY
+        const distance = Math.sqrt(dx * dx + dy * dy)
+
+        const scale = distance / pinchDistance
+
+        // Only apply zoom if significant change (> 10%)
+        if (Math.abs(scale - 1) > 0.1) {
+          // Calculate center point between fingers
+          const centerX =
+            (touches[0].clientX + touches[1].clientX) / 2 - rect.left
+          const centerY =
+            (touches[0].clientY + touches[1].clientY) / 2 - rect.top
+          const px = (centerX / rect.width) * canvasSize
+          const py = (centerY / rect.height) * canvasSize
+
+          const centerReal = pixelToComplex(
+            px,
+            canvasSize,
+            viewport.minReal,
+            viewport.maxReal
+          )
+          const centerImag = pixelToComplex(
+            py,
+            canvasSize,
+            viewport.minImag,
+            viewport.maxImag
+          )
+
+          // Zoom in if pinching out (scale > 1), zoom out if pinching in (scale < 1)
+          const rangeReal = viewport.maxReal - viewport.minReal
+          const rangeImag = viewport.maxImag - viewport.minImag
+          const zoomFactor = 1 / scale
+
+          setViewport({
+            minReal: centerReal - (rangeReal * zoomFactor) / 2,
+            maxReal: centerReal + (rangeReal * zoomFactor) / 2,
+            minImag: centerImag - (rangeImag * zoomFactor) / 2,
+            maxImag: centerImag + (rangeImag * zoomFactor) / 2,
+          })
+
+          setPinchDistance(distance)
+        }
+      }
+    },
+    [
+      isDragging,
+      dragStart,
+      pinchDistance,
+      viewport,
+      canvasSize,
+      isRendering,
+      redrawWithOffset,
+    ]
+  )
+
+  /**
+   * Handles touch end - finalizes pan or pinch
+   */
+  const handleTouchEnd = useCallback(() => {
+    if (isDragging && dragStart) {
+      // Check if this was a significant drag
+      const dragDistance = Math.sqrt(dragOffset.x ** 2 + dragOffset.y ** 2)
+      const isSignificantDrag = dragDistance > 5
+
+      if (isSignificantDrag) {
+        const canvas = canvasRef.current
+        if (canvas) {
+          const rect = canvas.getBoundingClientRect()
+
+          const rangeReal = viewport.maxReal - viewport.minReal
+          const rangeImag = viewport.maxImag - viewport.minImag
+          const deltaReal = -(dragOffset.x / rect.width) * rangeReal
+          const deltaImag = -(dragOffset.y / rect.height) * rangeImag
+
+          setViewport({
+            minReal: viewport.minReal + deltaReal,
+            maxReal: viewport.maxReal + deltaReal,
+            minImag: viewport.minImag + deltaImag,
+            maxImag: viewport.maxImag + deltaImag,
+          })
+        }
+      } else {
+        // Was just a tap, redraw without offset
+        redrawWithOffset(0, 0)
+      }
+    }
+
+    // Reset drag and pinch state
+    setIsDragging(false)
+    setDragStart(null)
+    setDragOffset({ x: 0, y: 0 })
+    setPinchDistance(null)
+  }, [isDragging, dragStart, dragOffset, viewport, redrawWithOffset])
+
+  /**
    * Resets the viewport to show the classic Mandelbrot set view.
    */
   const handleReset = useCallback(() => {
@@ -178,6 +512,18 @@ const MandelbrotExplorer = () => {
           <sub>n</sub>
           <sup>2</sup> + c
         </p>
+        <div className={styles.instructions}>
+          <p>
+            <b>Desktop:</b> Click and drag to pan, double-click to zoom in 2×.
+            <br />
+            <b>Mobile:</b> Drag to pan, double-tap zooms 2x, pinch to zoom
+            in/out.
+          </p>
+          <p>
+            <b>White pixels</b> are bounded (in the set), <b>dark pixels</b>{' '}
+            diverge to infinity.
+          </p>
+        </div>
       </div>
 
       <div className={styles.canvasContainer}>
@@ -186,8 +532,18 @@ const MandelbrotExplorer = () => {
           width={canvasSize}
           height={canvasSize}
           className={styles.canvas}
-          onClick={handleCanvasClick}
-          style={{ cursor: isRendering ? 'wait' : 'crosshair' }}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={handleMouseUp}
+          onDoubleClick={handleDoubleClick}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+          style={{
+            cursor: isRendering ? 'wait' : isDragging ? 'grabbing' : 'grab',
+            touchAction: 'none', // Prevent default touch behaviors
+          }}
         />
         {isRendering && (
           <div className={styles.progressOverlay}>
@@ -250,16 +606,6 @@ const MandelbrotExplorer = () => {
           >
             <b>Reset View</b>
           </Button>
-        </div>
-
-        <div className={styles.instructions}>
-          <p>
-            <b>Click</b> on the canvas to zoom in 2x at that point.
-          </p>
-          <p>
-            <b>White pixels</b> are bounded (in the set), <b>dark pixels</b>{' '}
-            diverge to infinity.
-          </p>
         </div>
       </div>
     </div>
