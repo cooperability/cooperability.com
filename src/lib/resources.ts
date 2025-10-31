@@ -6,7 +6,7 @@ const RESOURCES_PATH = path.join(process.cwd(), 'src/resources')
 
 export interface ResourceData {
   id: string
-  date: string
+  date?: string
   title: string
 }
 
@@ -26,7 +26,7 @@ export function getAllResourcesData(): ResourceData[] {
     // Combine the data with the id
     return {
       id,
-      ...(data as { date: string; title: string }),
+      ...(data as { date?: string; title: string }),
     }
   })
 

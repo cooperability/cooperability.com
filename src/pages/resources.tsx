@@ -11,11 +11,20 @@ interface ResourcesProps {
 }
 
 export default function Resources({ allPostsData }: ResourcesProps) {
-  const statementSlugsToExclude = ['PrivacyStatement', 'AccessibilityStatement']
+  const statementSlugsToExclude = [
+    'PrivacyStatement',
+    'AccessibilityStatement',
+    'PriorInventions',
+  ]
 
   const displayedPosts = allPostsData
     .filter((post) => !statementSlugsToExclude.includes(post.id))
     .sort((a, b) => {
+      // Posts without dates go to the end
+      if (!a.date && !b.date) return 0
+      if (!a.date) return 1
+      if (!b.date) return -1
+      // Sort by date descending (newest first)
       if (a.date < b.date) {
         return 1
       } else {
@@ -62,11 +71,13 @@ export default function Resources({ allPostsData }: ResourcesProps) {
               >
                 {title}
               </a>
-              <div style={isMobile ? {} : {}}>
-                <small className={styles.lightText}>
-                  <Date dateString={date} />
-                </small>
-              </div>
+              {date && (
+                <div style={isMobile ? {} : {}}>
+                  <small className={styles.lightText}>
+                    <Date dateString={date} />
+                  </small>
+                </div>
+              )}
             </li>
           ))}
         </ul>
