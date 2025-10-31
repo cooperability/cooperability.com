@@ -245,7 +245,7 @@
 
 import React, { useState, useMemo } from 'react'
 import { useTheme } from 'next-themes'
-import { Copy, Check, RotateCcw } from 'lucide-react'
+import { Copy, Check, RotateCcw, Circle, CheckCircle2 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import {
@@ -408,6 +408,51 @@ const PromptComposer: React.FC<PromptComposerProps> = ({ className }) => {
     {} as { [key: string]: typeof COMPONENT_ARRAY }
   )
 
+  // Helper function to get the selection indicator for each category
+  const getCategoryIndicator = (category: string) => {
+    // Special handling for audience category (uses Switch)
+    if (category === 'audience') {
+      return (
+        <CheckCircle2 className="h-4 w-4 text-gray-900 dark:text-gray-100" />
+      )
+    }
+
+    const categoryComponents = groupedComponents[category] || []
+
+    if (categoryComponents.length === 0) return null
+
+    // Check if this category uses radio buttons
+    const hasRadioButtons = categoryComponents.some(
+      (comp) => comp.inputType === 'radio'
+    )
+
+    if (hasRadioButtons) {
+      // For radio buttons: show filled check if any selected, empty circle if none
+      const hasSelection = categoryComponents.some((comp) =>
+        selectedComponents.has(comp.id)
+      )
+      return hasSelection ? (
+        <CheckCircle2 className="h-4 w-4 text-gray-900 dark:text-gray-100" />
+      ) : (
+        <Circle className="h-4 w-4 text-gray-900 dark:text-gray-100 opacity-40" />
+      )
+    }
+
+    // For checkboxes: show fraction
+    const totalCheckboxes = categoryComponents.filter(
+      (comp) => comp.inputType === 'checkbox'
+    ).length
+    const selectedCheckboxes = categoryComponents.filter(
+      (comp) => comp.inputType === 'checkbox' && selectedComponents.has(comp.id)
+    ).length
+
+    return (
+      <span className="text-xs font-semibold text-gray-900 dark:text-gray-100 min-w-[2rem] text-right">
+        {selectedCheckboxes}/{totalCheckboxes}
+      </span>
+    )
+  }
+
   const statistics = {
     components: selectedComponents.size + 1,
     wordCount: countWords(editedPrompt),
@@ -458,21 +503,30 @@ const PromptComposer: React.FC<PromptComposerProps> = ({ className }) => {
                         '--bg': getCurrentCategoryColor(category, isLightMode),
                         '--bc': getCategoryBorderColor(category),
                         width: '100%',
-                        padding: '10px 0 5px 0',
+                        padding: '10px 5px',
                         display: 'flex',
                       } as React.CSSProperties
                     }
                   >
-                    <div className="flex items-center">
-                      <span className={promptComposerStyles.categoryIcon}>
-                        {categoryIcons[category as keyof typeof categoryIcons]}
-                      </span>
-                      <span
-                        className={promptComposerStyles.categoryLabel}
-                        style={{ fontSize: '1rem', fontWeight: 'bold' }}
-                      >
-                        {label}
-                      </span>
+                    <div className="flex items-center justify-between w-full pr-2">
+                      <div className="flex items-center">
+                        <span className={promptComposerStyles.categoryIcon}>
+                          {
+                            categoryIcons[
+                              category as keyof typeof categoryIcons
+                            ]
+                          }
+                        </span>
+                        <span
+                          className={promptComposerStyles.categoryLabel}
+                          style={{ fontSize: '1rem', fontWeight: 'bold' }}
+                        >
+                          {label}
+                        </span>
+                      </div>
+                      <div className="flex items-center">
+                        {getCategoryIndicator(category)}
+                      </div>
                     </div>
                   </AccordionTrigger>
                   <AccordionContent>

@@ -29,7 +29,7 @@ export const promptComposerStyles = {
   componentsWrapper: 'relative pl-4',
 
   // Component item styles - Updated for single line layout
-  componentWrapper: 'border-b border-gray-200 last:border-b-0 ',
+  componentWrapper: 'border-b last:border-b-0 ',
   componentItem:
     'flex flex-row items-center p-3 hover:bg-white hover:bg-opacity-50 cursor-pointer transition-colors duration-150 group w-full',
   componentCheckbox:
@@ -100,7 +100,7 @@ export const tw = {
     'text-gray-600 dark:text-gray-400 mb-4 md:mb-6 text-sm md:text-base',
 
   // Interactive elements
-  audienceToggle: 'flex items-center justify-center space-x-2 p-3',
+  audienceToggle: 'flex items-center justify-center p-3',
   audienceLabelActive:
     'text-sm font-medium text-blue-600 dark:text-blue-400 transition-colors',
   audienceLabelInactive:
@@ -113,8 +113,7 @@ export const tw = {
 
   // Layout helpers
   radioCheckboxContainer: 'p-3 flex',
-  radioCheckboxItem:
-    'flex items-center space-x-2 mb-1 border-b border-gray-200',
+  radioCheckboxItem: 'flex items-center mb-1 border-b',
 
   // Statistics
   statsGrid: 'grid grid-rows-3 gap-1 text-center font-bold',
@@ -199,7 +198,7 @@ export const COMPONENT_ARRAY: PromptComponent[] = [
     label: 'Domain Background',
     description: 'Consider broader domain knowledge',
     template:
-      'Consider the broader domain context, industry standards, and established best practices when analyzing the provided information.',
+      'Consider the domain context, industry standards, and established best practices when analyzing the provided information.',
     priority: 3,
     inputType: 'checkbox',
   },
@@ -222,17 +221,6 @@ export const COMPONENT_ARRAY: PromptComponent[] = [
       'Consider the perspectives and needs of different stakeholders who might be affected by or involved in the topic.',
     priority: 3,
     inputType: 'checkbox',
-  },
-  {
-    id: 'context-best-practices',
-    category: 'context',
-    label: 'Best Practices',
-    description: 'Follow research-backed best practices',
-    template:
-      'Thoroughly supplement your logical context with research-backed best practices.',
-    priority: 3,
-    inputType: 'radio',
-    radioGroup: 'context',
   },
 
   // Reasoning Strategy - Radio buttons (single approach)
@@ -439,13 +427,13 @@ export const COMPONENT_ARRAY: PromptComponent[] = [
 ]
 
 export const categoryLabels = {
-  role: 'Role Specification',
-  audience: 'Audience Targeting',
-  context: 'Context Provision',
-  reasoning: 'Reasoning Strategy',
-  output: 'Output Instructions',
-  constraints: 'Constraint Specifications',
-  meta: 'Meta-Prompt Enhancements',
+  role: 'Role',
+  audience: 'Audience',
+  context: 'Context',
+  reasoning: 'Reasoning',
+  output: 'Output',
+  constraints: 'Constraints',
+  meta: 'Meta-Prompts',
 }
 
 export const categoryIcons = {
