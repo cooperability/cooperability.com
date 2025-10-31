@@ -44,6 +44,7 @@ export default defineConfig([
     }),
     rules: {
       'react/no-unescaped-entities': 'off',
+      'react/jsx-no-undef': 'off', // Components are provided via MDXRemote components prop
     },
   },
   {
