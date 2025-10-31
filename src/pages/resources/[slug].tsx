@@ -8,6 +8,7 @@ import Layout from '../../components/layout'
 import Head from 'next/head'
 import Date from '../../components/date'
 import utilStyles from '../../styles/utils.module.css'
+import Link from 'next/link'
 import {
   Accordion,
   AccordionItem,
@@ -17,7 +18,7 @@ import {
 
 interface MdxFrontMatterData {
   title: string
-  date: string
+  date?: string
   description?: string
   contentHtml?: string
   [key: string]: unknown // Allow other fields safely
@@ -29,6 +30,7 @@ type Props = {
 }
 
 const components = {
+  Link,
   Accordion,
   AccordionItem,
   AccordionTrigger,
@@ -46,9 +48,11 @@ export default function PostPage({ source, frontMatter }: Props) {
       </Head>
       <article>
         <h1 className={utilStyles.headingXl}>{frontMatter.title}</h1>
-        <div className={utilStyles.lightText}>
-          <Date dateString={frontMatter.date} />
-        </div>
+        {frontMatter.date && (
+          <div className={utilStyles.lightText}>
+            <Date dateString={frontMatter.date} />
+          </div>
+        )}
         {source ? (
           <MDXRemote {...source} components={components} />
         ) : (
