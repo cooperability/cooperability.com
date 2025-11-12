@@ -1,10 +1,13 @@
 import Image from 'next/image'
 import Link from 'next/link'
+import { useTheme } from 'next-themes'
+import { useState, useEffect } from 'react'
 import styles from '../styles/utils.module.css'
 
 export interface ActiveIconProps {
   href: string
-  imgSrc: string
+  imgSrc?: string
+  iconName?: string
   alt?: string
   variant?: 'default' | 'social'
   size?: 'default' | 'small'
@@ -16,6 +19,7 @@ export interface ActiveIconProps {
 const ActiveIcon: React.FC<ActiveIconProps> = ({
   href,
   imgSrc,
+  iconName,
   alt,
   variant = 'default',
   size = 'default',
@@ -23,10 +27,35 @@ const ActiveIcon: React.FC<ActiveIconProps> = ({
   height,
   external = true,
 }) => {
+  const { systemTheme, theme } = useTheme()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  // Determine the current theme
+  const currentTheme = theme === 'system' ? systemTheme : theme
+
+  // Construct the image source URL
+  let imageSource = imgSrc
+  if (iconName && mounted) {
+    // Use skillicons.dev with theme support
+    const themeParam = currentTheme === 'dark' ? 'dark' : 'light'
+    imageSource = `https://skillicons.dev/icons?i=${iconName}&theme=${themeParam}`
+  } else if (iconName && !mounted) {
+    // During SSR/initial render, use light theme as default
+    imageSource = `https://skillicons.dev/icons?i=${iconName}&theme=light`
+  }
+
   // Determine alt text
   const descriptiveAltText = alt
     ? alt
-    : `Logo for ${imgSrc.substring(imgSrc.lastIndexOf('/') + 1).replace(/\.[^/.]+$/, '')}`
+    : iconName
+      ? `${iconName} logo`
+      : imageSource
+        ? `Logo for ${imageSource.substring(imageSource.lastIndexOf('/') + 1).replace(/\.[^/.]+$/, '')}`
+        : 'Logo'
 
   // Base class is always hoverImage
   let imageClassName = styles.hoverImage
@@ -48,7 +77,7 @@ const ActiveIcon: React.FC<ActiveIconProps> = ({
 
   const imageElement = (
     <Image
-      src={imgSrc}
+      src={imageSource || ''}
       alt={descriptiveAltText}
       className={imageClassName}
       width={imageWidth}

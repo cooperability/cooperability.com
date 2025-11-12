@@ -115,25 +115,27 @@ export default function Home({ initialQuote }: HomeProps) {
           </div>
         </Link>
 
-        <div className={styles.socialIconRow}>
-          <b>This spoke to me:</b>
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => {
-              const availableQuotes = quotes.filter((q) => q !== quote)
-              setQuote(
-                availableQuotes[
-                  Math.floor(Math.random() * availableQuotes.length)
-                ]
-              )
-            }}
-            aria-label="Get new random quote"
-          >
-            <ArrowPathIcon />
-          </Button>
+        <div className="rounded-lg border border-current p-4 space-y-3">
+          <div className={styles.socialIconRow}>
+            <b>This spoke to me:</b>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => {
+                const availableQuotes = quotes.filter((q) => q !== quote)
+                setQuote(
+                  availableQuotes[
+                    Math.floor(Math.random() * availableQuotes.length)
+                  ]
+                )
+              }}
+              aria-label="Get new random quote"
+            >
+              <ArrowPathIcon />
+            </Button>
+          </div>
+          <span suppressHydrationWarning>{quote}</span>
         </div>
-        <span suppressHydrationWarning>{quote}</span>
       </section>
     </React.Fragment>
   )

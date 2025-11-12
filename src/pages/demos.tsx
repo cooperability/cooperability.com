@@ -34,23 +34,21 @@ const Demos: React.FC = () => {
             <div className={styles.techStackIcons}>
               <ActiveIcon
                 href="https://www.typescriptlang.org/"
-                imgSrc="/images/typescript.png"
+                iconName="ts"
                 alt="TypeScript logo"
                 size="small"
               />
               <ActiveIcon
                 href="https://nextjs.org/"
-                imgSrc="/images/nextjs.png"
+                iconName="nextjs"
                 alt="Next.js logo"
                 size="small"
               />
               <ActiveIcon
                 href="https://tailwindcss.com/"
-                imgSrc="/images/tailwind.png"
+                iconName="tailwind"
                 alt="Tailwind CSS logo"
                 size="small"
-                height={25}
-                width={40}
               />
               <ActiveIcon
                 href="https://ui.shadcn.com/"
@@ -60,7 +58,7 @@ const Demos: React.FC = () => {
               />
               <ActiveIcon
                 href="https://vercel.com/"
-                imgSrc="/images/vercel.png"
+                iconName="vercel"
                 alt="Vercel logo"
                 size="small"
               />
@@ -78,17 +76,15 @@ const Demos: React.FC = () => {
                 <div className={styles.techStackIcons}>
                   <ActiveIcon
                     href="https://www.typescriptlang.org/"
-                    imgSrc="/images/typescript.png"
+                    iconName="ts"
                     alt="TypeScript logo"
                     size="small"
                   />
                   <ActiveIcon
                     href="https://tailwindcss.com/"
-                    imgSrc="/images/tailwind.png"
+                    iconName="tailwind"
                     alt="Tailwind CSS logo"
                     size="small"
-                    height={25}
-                    width={40}
                   />
                   <ActiveIcon
                     href="https://ui.shadcn.com/"
@@ -110,13 +106,13 @@ const Demos: React.FC = () => {
                 <div className={styles.techStackIcons}>
                   <ActiveIcon
                     href="https://www.typescriptlang.org/"
-                    imgSrc="/images/typescript.png"
+                    iconName="ts"
                     alt="TypeScript logo"
                     size="small"
                   />
                   <ActiveIcon
                     href="https://react.dev/"
-                    imgSrc="/images/react.png"
+                    iconName="react"
                     alt="React logo"
                     size="small"
                   />
@@ -134,21 +130,19 @@ const Demos: React.FC = () => {
                 <div className={styles.techStackIcons}>
                   <ActiveIcon
                     href="https://www.typescriptlang.org/"
-                    imgSrc="/images/typescript.png"
+                    iconName="ts"
                     alt="TypeScript logo"
                     size="small"
                   />
                   <ActiveIcon
                     href="https://tailwindcss.com/"
-                    imgSrc="/images/tailwind.png"
+                    iconName="tailwind"
                     alt="Tailwind CSS logo"
                     size="small"
-                    height={25}
-                    width={40}
                   />
                   <ActiveIcon
                     href="https://nodejs.org/en"
-                    imgSrc="/images/njs.png"
+                    iconName="nodejs"
                     alt="Node.js logo"
                     size="small"
                   />
@@ -166,21 +160,19 @@ const Demos: React.FC = () => {
             <div className={styles.techStackIcons}>
               <ActiveIcon
                 href="https://www.docker.com/"
-                imgSrc="/images/docker.png"
+                iconName="docker"
                 alt="Docker logo"
                 size="small"
-                width={31.7}
-                height={25}
               />
               <ActiveIcon
                 href="https://svelte.dev/"
-                imgSrc="/images/svelte.png"
+                iconName="svelte"
                 alt="Svelte logo"
                 size="small"
               />
               <ActiveIcon
                 href="https://www.python.org/"
-                imgSrc="/images/python.png"
+                iconName="py"
                 alt="Python logo"
                 size="small"
               />
@@ -192,19 +184,19 @@ const Demos: React.FC = () => {
               />
               <ActiveIcon
                 href="https://www.djangoproject.com/"
-                imgSrc="/images/django.png"
+                iconName="django"
                 alt="Django logo"
                 size="small"
               />
               <ActiveIcon
                 href="https://www.postgresql.org/"
-                imgSrc="/images/postgresql.png"
+                iconName="postgres"
                 alt="PostgreSQL logo"
                 size="small"
               />
               <ActiveIcon
                 href="https://nodejs.org/en"
-                imgSrc="/images/njs.png"
+                iconName="nodejs"
                 alt="Node.js logo"
                 size="small"
               />
@@ -220,7 +212,7 @@ const Demos: React.FC = () => {
             <div className={styles.techStackIcons}>
               <ActiveIcon
                 href="https://www.python.org/"
-                imgSrc="/images/python.png"
+                iconName="py"
                 alt="Python logo"
                 size="small"
               />
@@ -243,27 +235,25 @@ const Demos: React.FC = () => {
           <div className={styles.techStackIcons}>
             <ActiveIcon
               href="https://redux.js.org/"
-              imgSrc="/images/redux.png"
+              iconName="redux"
               alt="Redux logo"
               size="small"
             />
             <ActiveIcon
               href="https://react.dev/"
-              imgSrc="/images/react.png"
+              iconName="react"
               alt="React logo"
               size="small"
             />
             <ActiveIcon
               href="https://tailwindcss.com/"
-              imgSrc="/images/tailwind.png"
+              iconName="tailwind"
               alt="Tailwind CSS logo"
               size="small"
-              height={25}
-              width={40}
             />
             <ActiveIcon
               href="https://nodejs.org/en"
-              imgSrc="/images/njs.png"
+              iconName="nodejs"
               alt="Node.js logo"
               size="small"
             />
