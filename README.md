@@ -33,8 +33,55 @@ This project uses a comprehensive suite of quality control tools. For complete d
 - **UI Components:** shadcn/ui (Tailwind + Radix UI primitives)
 - **Bundle Analysis:** Webpack Bundle Analyzer for optimization
 - **Accessibility:** Automated testing with axe-core CLI and Lighthouse
+- **Icons:** skillicons.dev (theme-aware tech stack icons via simple-icons.org)
 
 See **[docs/Tooling.md](docs/Tooling.md)** for setup instructions, troubleshooting, and best practices.
+
+## Tech Stack Icons & SVG Configuration
+
+This project uses **[skillicons.dev](https://skillicons.dev)** for theme-aware technology stack icons on the demos page. These icons automatically adapt to light/dark theme and provide consistent, professional styling.
+
+**Implementation:**
+
+- Icons source from [simple-icons.org](https://simpleicons.org) via skillicons.dev API
+- Dynamic theme switching via `next-themes` integration
+- Fallback to custom PNGs for unavailable icons (shadcn/ui, Poetry)
+
+**Security Configuration (`next.config.js`):**
+
+```javascript
+// next.config.js
+module.exports = {
+  images: {
+    remotePatterns: [
+      { protocol: 'https', hostname: 'skillicons.dev', pathname: '/icons/**' },
+    ],
+    dangerouslyAllowSVG: true,
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
+  },
+}
+```
+
+**Security Measures:**
+
+- ✅ `dangerouslyAllowSVG` enables external SVG loading (required for skillicons.dev)
+- ✅ CSP blocks script execution: `script-src 'none'` prevents XSS attacks
+- ✅ Sandbox environment limits SVG capabilities
+- ✅ Trusted source only (skillicons.dev domain restriction)
+- ✅ Follows [Vercel's official security recommendations](https://vercel.com/docs/conformance/rules/NEXTJS_SAFE_SVG_IMAGES)
+
+**Benefits:**
+
+- Automatic light/dark theme adaptation
+- Consistent color grading across all tech icons
+- Professional, scalable vector graphics
+- Single source of truth for icon styling
+
+**Trade-offs:**
+
+- Requires external domain allowlist for SVGs
+- Minor dependency on third-party service (skillicons.dev)
+- Some icons unavailable (resolved with custom fallbacks)
 
 ## Privacy Policy, SEO, Analytics
 
