@@ -116,6 +116,12 @@ const Demos: React.FC = () => {
                     alt="React logo"
                     size="small"
                   />
+                  <ActiveIcon
+                    href="https://ui.shadcn.com/"
+                    imgSrc="/images/shadcn.png"
+                    alt="Shadcn logo"
+                    size="small"
+                  />
                 </div>
               </div>
 

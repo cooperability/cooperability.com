@@ -1,5 +1,4 @@
 import Link from 'next/link'
-import styles from '../styles/utils.module.css'
 import ActiveIcon from '../components/ActiveIcon'
 import { useResponsive } from '../hooks/useResponsive'
 
@@ -7,100 +6,111 @@ const Footer = () => {
   const { isMobile } = useResponsive()
 
   return (
-    <footer>
-      <section className={styles.headingMd}>
-        <div className={styles.horizLine} />
+    <footer className="text-lg leading-normal">
+      <section className="space-y-2">
+        {/* Horizontal divider line */}
+        <div className="w-full border-t border-current my-2.5" />
 
-        {/* Social Icons */}
-        <div
-          className={styles.socialIconRow}
-          style={{ marginBottom: '0.25rem' }}
-        >
-          <ActiveIcon
-            href="https://www.linkedin.com/in/cooper-reed/"
-            imgSrc="/images/linkedin.png"
-            variant="social"
-          />
-          <ActiveIcon
-            href="https://github.com/cooperability"
-            imgSrc="/images/github.png"
-            variant="social"
-          />
-          <ActiveIcon
-            href="https://bsky.app/profile/cooperability.com"
-            imgSrc="/images/bluesky.png"
-            variant="social"
-          />
-          <ActiveIcon
-            href="https://cooperability.substack.com/"
-            imgSrc="/images/substack.png"
-            variant="social"
-          />
-          <ActiveIcon
-            href="https://www.youtube.com/@cooperability"
-            imgSrc="/images/youtube.png"
-            variant="social"
-          />
-        </div>
+        {/* Desktop Layout: Side-by-side social icons + vertical links column */}
+        {!isMobile ? (
+          <div className="flex flex-col gap-1">
+            {/* Social Icons Row */}
+            <div className="flex flex-row flex-wrap justify-between">
+              <ActiveIcon
+                href="https://www.linkedin.com/in/cooper-reed/"
+                imgSrc="/images/linkedin.png"
+                variant="social"
+              />
+              <ActiveIcon
+                href="https://github.com/cooperability"
+                imgSrc="/images/github.png"
+                variant="social"
+              />
+              <ActiveIcon
+                href="https://bsky.app/profile/cooperability.com"
+                imgSrc="/images/bluesky.png"
+                variant="social"
+              />
+              <ActiveIcon
+                href="https://cooperability.substack.com/"
+                imgSrc="/images/substack.png"
+                variant="social"
+              />
+              <ActiveIcon
+                href="https://www.youtube.com/@cooperability"
+                imgSrc="/images/youtube.png"
+                variant="social"
+              />
+            </div>
 
-        {/* Footer Links - Desktop only */}
-        {!isMobile && (
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              gap: '2rem',
-              marginBottom: '1rem',
-            }}
-          >
-            <a
-              href="https://drive.google.com/file/d/1-mHF7SH3ym9QI8jKBtpKKzvbJM8L1Ovc/view?usp=sharing"
-              style={{
-                textDecoration: 'underline',
-                textUnderlineOffset: '2px',
-              }}
+            {/* Footer Links Column */}
+            <nav
+              className="flex justify-center items-center gap-8"
+              aria-label="Footer navigation"
             >
-              Resume
-            </a>
-            <Link
-              href="/resources/linktree"
-              style={{
-                textDecoration: 'underline',
-                textUnderlineOffset: '2px',
-              }}
-            >
-              All Links
-            </Link>
-            <Link
-              href="/resources/PrivacyStatement"
-              style={{
-                textDecoration: 'underline',
-                textUnderlineOffset: '2px',
-              }}
-            >
-              Privacy
-            </Link>
-            <Link
-              href="/resources/AccessibilityStatement"
-              style={{
-                textDecoration: 'underline',
-                textUnderlineOffset: '2px',
-              }}
-            >
-              Accessibility
-            </Link>
+              <a
+                href="https://drive.google.com/file/d/1-mHF7SH3ym9QI8jKBtpKKzvbJM8L1Ovc/view?usp=sharing"
+                className="underline underline-offset-2 hover:opacity-80 transition-opacity"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Resume
+              </a>
+              <Link
+                href="/resources/linktree"
+                className="underline underline-offset-2 hover:opacity-80 transition-opacity"
+              >
+                All Links
+              </Link>
+              <Link
+                href="/resources/PrivacyStatement"
+                className="underline underline-offset-2 hover:opacity-80 transition-opacity"
+              >
+                Privacy
+              </Link>
+              <Link
+                href="/resources/AccessibilityStatement"
+                className="underline underline-offset-2 hover:opacity-80 transition-opacity"
+              >
+                Accessibility
+              </Link>
+            </nav>
+          </div>
+        ) : (
+          /* Mobile Layout: Only centered social icons */
+          <div className="flex justify-center">
+            <div className="flex flex-row flex-wrap justify-center gap-4">
+              <ActiveIcon
+                href="https://www.linkedin.com/in/cooper-reed/"
+                imgSrc="/images/linkedin.png"
+                variant="social"
+              />
+              <ActiveIcon
+                href="https://github.com/cooperability"
+                imgSrc="/images/github.png"
+                variant="social"
+              />
+              <ActiveIcon
+                href="https://bsky.app/profile/cooperability.com"
+                imgSrc="/images/bluesky.png"
+                variant="social"
+              />
+              <ActiveIcon
+                href="https://cooperability.substack.com/"
+                imgSrc="/images/substack.png"
+                variant="social"
+              />
+              <ActiveIcon
+                href="https://www.youtube.com/@cooperability"
+                imgSrc="/images/youtube.png"
+                variant="social"
+              />
+            </div>
           </div>
         )}
 
-        {/* Copyright */}
-        <div
-          className={styles.footerText}
-          style={{
-            textAlign: 'center',
-            marginTop: isMobile ? '1rem' : '0',
-          }}
-        >
+        {/* Copyright - Always visible */}
+        <div className="flex justify-center text-center">
           Cooper Reed &copy; {new Date().getFullYear()}
         </div>
       </section>
