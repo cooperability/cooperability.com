@@ -33,6 +33,22 @@ const MandelbrotExplorer = () => {
   })
   const [lastTapTime, setLastTapTime] = useState(0)
   const [pinchDistance, setPinchDistance] = useState<number | null>(null)
+  const [isNarrowScreen, setIsNarrowScreen] = useState(false)
+
+  /**
+   * Check if screen width is below 375px threshold (matches iteration controls breakpoint)
+   */
+  useEffect(() => {
+    const checkScreenWidth = () => {
+      setIsNarrowScreen(window.innerWidth <= 375)
+    }
+
+    if (typeof window !== 'undefined') {
+      checkScreenWidth() // Initial check
+      window.addEventListener('resize', checkScreenWidth)
+      return () => window.removeEventListener('resize', checkScreenWidth)
+    }
+  }, [])
 
   /**
    * Redraws the canvas with the current drag offset (without re-rendering the fractal)
@@ -513,12 +529,18 @@ const MandelbrotExplorer = () => {
           <sup>2</sup> + c
         </p>
         <div className={styles.instructions}>
-          <p>
-            <b>Desktop:</b> Click and drag to pan, double-click to zoom in 2×.
-            <br />
-            <b>Mobile:</b> Drag to pan, double-tap zooms 2x, pinch to zoom
-            in/out.
-          </p>
+          {!isNarrowScreen ? (
+            /* Desktop Instructions (above 375px) */
+            <p>
+              <b>Desktop:</b> Click and drag to pan, double-click to zoom in 2×.
+            </p>
+          ) : (
+            /* Mobile Instructions (375px and below) */
+            <p>
+              <b>Mobile:</b> Drag to pan, double-tap zooms 2x, pinch to zoom
+              in/out.
+            </p>
+          )}
           <p>
             <b>White pixels</b> are bounded (in the set), <b>dark pixels</b>{' '}
             diverge to infinity.

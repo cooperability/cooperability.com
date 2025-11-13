@@ -468,11 +468,11 @@
 }
 
 .promptComposerWrapper {
-  @apply mb-5 rounded-[30px] border border-current px-2.5;
+  @apply my-2.5 rounded-[30px] border border-current px-2.5;
 }
 
 .promptComposerLink {
-  @apply inline-block rounded-md py-2.5;
+  @apply inline-block rounded-md;
 }
 
 .arrowRight,

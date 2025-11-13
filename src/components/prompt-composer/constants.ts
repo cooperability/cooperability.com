@@ -11,7 +11,7 @@ export const promptComposerStyles = {
   container: 'container mx-auto p-1',
   title: 'text-2xl md:text-3xl font-bold mb-2 text-gray-800',
   subtitle: 'text-gray-600 mb-4 md:mb-6 text-sm md:text-base',
-  mainLayout: 'flex flex-col md:flex-row gap-3 h-full',
+  mainLayout: 'flex flex-col sm:flex-row gap-3 h-full',
   componentGroup: 'border rounded-lg py-3 gap-1',
 
   // Card styles

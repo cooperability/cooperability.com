@@ -37,6 +37,17 @@ This project uses a comprehensive suite of quality control tools. For complete d
 
 See **[docs/Tooling.md](docs/Tooling.md)** for setup instructions, troubleshooting, and best practices.
 
+## Responsive Design & Breakpoints
+
+This project uses a **content-first responsive design strategy** with clearly defined breakpoints:
+
+- **Primary breakpoint:** 525px (`useResponsive` hook) for site-wide mobile/desktop splits
+- **Component-specific breakpoints:** Used when components have unique layout requirements (e.g., 375px for Mandelbrot Explorer)
+
+**Philosophy:** Break where content naturally requires it, not at arbitrary device widths.
+
+See **[docs/ResponsiveDesign.md](docs/ResponsiveDesign.md)** for complete breakpoint strategy, implementation guidelines, and best practices.
+
 ## Tech Stack Icons & SVG Configuration
 
 This project uses **[skillicons.dev](https://skillicons.dev)** for theme-aware technology stack icons on the demos page. These icons automatically adapt to light/dark theme and provide consistent, professional styling.
