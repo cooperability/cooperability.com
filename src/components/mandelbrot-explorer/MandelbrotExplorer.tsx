@@ -33,22 +33,6 @@ const MandelbrotExplorer = () => {
   })
   const [lastTapTime, setLastTapTime] = useState(0)
   const [pinchDistance, setPinchDistance] = useState<number | null>(null)
-  const [isNarrowScreen, setIsNarrowScreen] = useState(false)
-
-  /**
-   * Check if screen width is below 375px threshold (matches iteration controls breakpoint)
-   */
-  useEffect(() => {
-    const checkScreenWidth = () => {
-      setIsNarrowScreen(window.innerWidth <= 375)
-    }
-
-    if (typeof window !== 'undefined') {
-      checkScreenWidth() // Initial check
-      window.addEventListener('resize', checkScreenWidth)
-      return () => window.removeEventListener('resize', checkScreenWidth)
-    }
-  }, [])
 
   /**
    * Redraws the canvas with the current drag offset (without re-rendering the fractal)
@@ -523,27 +507,10 @@ const MandelbrotExplorer = () => {
     <div className={styles.explorer}>
       <div className={styles.header}>
         <h1 className={styles.title}>Mandelbrot Explorer</h1>
-        <p className={styles.subtitle}>
-          Interactive visualization of the equation: z<sub>n+1</sub> = z
-          <sub>n</sub>
-          <sup>2</sup> + c
-        </p>
         <div className={styles.instructions}>
-          {!isNarrowScreen ? (
-            /* Desktop Instructions (above 375px) */
-            <p>
-              <b>Desktop:</b> Click and drag to pan, double-click to zoom in 2×.
-            </p>
-          ) : (
-            /* Mobile Instructions (375px and below) */
-            <p>
-              <b>Mobile:</b> Drag to pan, double-tap zooms 2x, pinch to zoom
-              in/out.
-            </p>
-          )}
           <p>
-            <b>White pixels</b> are bounded (in the set), <b>dark pixels</b>{' '}
-            diverge to infinity.
+            <b>Click or tap</b> + <b>drag</b> to pan, <b>double-click</b> to
+            zoom 2×.
           </p>
         </div>
       </div>
@@ -581,25 +548,6 @@ const MandelbrotExplorer = () => {
       </div>
 
       <div className={styles.controls}>
-        <div className={styles.info}>
-          <div className={styles.infoRow}>
-            <span className={styles.label}>Real:</span>
-            <span className={styles.value}>
-              [{viewport.minReal.toFixed(4)}, {viewport.maxReal.toFixed(4)}]
-            </span>
-          </div>
-          <div className={styles.infoRow}>
-            <span className={styles.label}>Imaginary:</span>
-            <span className={styles.value}>
-              [{viewport.minImag.toFixed(4)}, {viewport.maxImag.toFixed(4)}]
-            </span>
-          </div>
-          <div className={styles.infoRow}>
-            <span className={styles.label}>Max Iterations:</span>
-            <span className={styles.value}>{maxIterations}</span>
-          </div>
-        </div>
-
         <div className={styles.buttonGroup}>
           <div className={styles.iterationControls}>
             <Button
@@ -629,6 +577,32 @@ const MandelbrotExplorer = () => {
             <b>Reset View</b>
           </Button>
         </div>
+        <div className={styles.info}>
+          <div className={styles.infoRow}>
+            <span className={styles.label}>Real:</span>
+            <span className={styles.value}>
+              [{viewport.minReal.toFixed(4)}, {viewport.maxReal.toFixed(4)}]
+            </span>
+          </div>
+          <div className={styles.infoRow}>
+            <span className={styles.label}>Imaginary:</span>
+            <span className={styles.value}>
+              [{viewport.minImag.toFixed(4)}, {viewport.maxImag.toFixed(4)}]
+            </span>
+          </div>
+          <div className={styles.infoRow}>
+            <span className={styles.label}>Max Iterations:</span>
+            <span className={styles.value}>{maxIterations}</span>
+          </div>
+        </div>
+
+        <p>
+          This visualizes the equation: z<sub>n+1</sub> = z<sub>n</sub>
+          <sup>2</sup> + c
+          <br />
+          <b>White pixels</b> are bounded (in the set), <b>dark pixels</b>{' '}
+          diverge to infinity.
+        </p>
       </div>
     </div>
   )
