@@ -35,21 +35,6 @@ const MandelbrotExplorer = () => {
   const [pinchDistance, setPinchDistance] = useState<number | null>(null)
 
   /**
-   * Check if screen width is below 375px threshold (matches iteration controls breakpoint)
-   */
-  useEffect(() => {
-    const checkScreenWidth = () => {
-      setIsNarrowScreen(window.innerWidth <= 431)
-    }
-
-    if (typeof window !== 'undefined') {
-      checkScreenWidth() // Initial check
-      window.addEventListener('resize', checkScreenWidth)
-      return () => window.removeEventListener('resize', checkScreenWidth)
-    }
-  }, [])
-
-  /**
    * Redraws the canvas with the current drag offset (without re-rendering the fractal)
    */
   const redrawWithOffset = useCallback(
