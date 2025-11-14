@@ -25,6 +25,7 @@ This document establishes the **source of truth** for responsive design breakpoi
 ### Common Framework Breakpoints (2024-2025)
 
 **Tailwind CSS (Default):**
+
 ```
 xs:   (not included by default - can add custom)
 sm:   640px   (tablets, large phones in landscape)
@@ -35,6 +36,7 @@ xl:   1280px  (large desktops)
 ```
 
 **Bootstrap 5:**
+
 ```
 xs:   <576px  (extra small - phones)
 sm:   ≥576px  (small - phones in landscape)
@@ -45,6 +47,7 @@ xxl:  ≥1400px (extra extra large)
 ```
 
 **Material Design:**
+
 ```
 Mobile (Portrait):  0-599px
 Mobile (Landscape): 600-839px
@@ -53,6 +56,7 @@ Desktop:            1280px+
 ```
 
 **Modern Device Reality:**
+
 ```
 Small phones:     320px - 375px  (iPhone SE, older Android)
 Standard phones:  375px - 414px  (iPhone 12-15, most Android)
@@ -71,18 +75,21 @@ Desktops:         1024px+        (laptops and desktops)
 **Location:** `src/hooks/useResponsive.ts`
 
 **Rationale:**
+
 - Sits between phone (< 480px) and small tablet (600px+)
 - Captures most modern smartphones in portrait mode
 - Provides breathing room above standard phone widths
 - Aligns with our content layout requirements across most pages
 
 **Usage:** General mobile vs. desktop differentiation for:
+
 - Header navigation
 - Footer layout
 - Section layouts
 - General page structure
 
 **Example:**
+
 ```typescript
 const { isMobile } = useResponsive() // true if ≤ 525px
 ```
@@ -92,17 +99,20 @@ const { isMobile } = useResponsive() // true if ≤ 525px
 **Location:** `src/components/mandelbrot-explorer/MandelbrotExplorer.tsx`
 
 **Rationale:**
+
 - Matches CSS media query for iteration controls: `@media (max-width: 375px)`
 - Targets very narrow screens where UI components need vertical stacking
 - Aligns with iPhone SE / small Android phones (320px - 375px range)
 - Prevents instruction overflow on smallest devices
 
 **Usage:** Ultra-narrow screen adaptations when 525px is too generous:
+
 - Complex interactive components with dense controls
 - Components that need additional layout shifts for tiny screens
 - When CSS and React need synchronized breakpoints
 
 **Example:**
+
 ```typescript
 const [isNarrowScreen, setIsNarrowScreen] = useState(false)
 
@@ -121,6 +131,7 @@ useEffect(() => {
 ### When to Use Global Breakpoint (525px)
 
 ✅ **Use `useResponsive` hook for:**
+
 - Page-level layout changes (header, footer, sections)
 - Navigation behavior (hamburger menu vs. horizontal nav)
 - Content reflow that affects multiple components
@@ -130,12 +141,14 @@ useEffect(() => {
 ### When to Use Component-Specific Breakpoint
 
 ✅ **Create custom breakpoint logic when:**
+
 - Component has unique layout requirements that break earlier/later than global breakpoint
 - CSS media query already exists and React needs to match it (maintain parity)
 - Component is self-contained and won't affect other layouts
 - Design requires multiple breakpoint tiers within a single component
 
 ⚠️ **Guidelines for custom breakpoints:**
+
 1. **Document the reason** in component comments
 2. **Align with CSS** if media queries exist (avoid drift)
 3. **Use meaningful names** (e.g., `isNarrowScreen` not `isMobile2`)
@@ -202,6 +215,7 @@ const Footer = () => {
 **File:** `src/components/mandelbrot-explorer/MandelbrotExplorer.tsx`
 
 **CSS:** `src/components/mandelbrot-explorer/MandelbrotExplorer.module.css`
+
 ```css
 @media (max-width: 375px) {
   .iterationControls {
@@ -211,6 +225,7 @@ const Footer = () => {
 ```
 
 **React:**
+
 ```typescript
 const [isNarrowScreen, setIsNarrowScreen] = useState(false)
 
@@ -229,7 +244,8 @@ useEffect(() => {
 )}
 ```
 
-**Why 375px?** 
+**Why 375px?**
+
 1. CSS already defines 375px for iteration control layout
 2. Very small screens need different instructions (double-tap vs double-click)
 3. Maintains React/CSS parity for this complex interactive component
@@ -320,7 +336,7 @@ module.exports = {
   theme: {
     extend: {
       screens: {
-        'xs': '525px',  // Matches useResponsive threshold
+        xs: '525px', // Matches useResponsive threshold
         // Tailwind defaults still available: sm, md, lg, xl, 2xl
       },
     },
@@ -330,6 +346,7 @@ module.exports = {
 ```
 
 **Usage after adding:**
+
 ```tsx
 <div className="hidden xs:block">
   {/* Visible above 525px */}
@@ -368,6 +385,7 @@ When implementing responsive changes:
 ### If the project grows significantly:
 
 1. **Centralized breakpoint constants:**
+
    ```typescript
    // src/constants/breakpoints.ts
    export const BREAKPOINTS = {
@@ -379,6 +397,7 @@ When implementing responsive changes:
    ```
 
 2. **Enhanced useResponsive:**
+
    ```typescript
    export function useResponsive() {
      return {
@@ -408,5 +427,4 @@ When implementing responsive changes:
 
 ---
 
-*Last Updated: November 2025*
-
+_Last Updated: November 2025_
