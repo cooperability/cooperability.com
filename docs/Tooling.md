@@ -7,6 +7,7 @@ This document covers all the developer tooling, automation, and quality control 
 - [Linting & Formatting](#linting--formatting)
 - [Testing](#testing)
 - [Automation & Git Hooks](#automation--git-hooks)
+- [Security Auditing](#security-auditing)
 - [Bundle Analysis](#bundle-analysis)
 - [Accessibility Testing](#accessibility-testing)
 - [Yarn Plug'n'Play (PnP)](#yarn-plugnplay-pnp)
@@ -165,6 +166,75 @@ Automatically runs quality checks on staged files before allowing a commit.
 - Ensures consistent code style across the team
 - Prevents committing broken tests
 - Zero configuration needed for contributors
+
+### Pre-push Security Hook
+
+A security audit runs automatically before every `git push`:
+
+**Configuration:**
+
+- `.husky/pre-push` - macOS / Linux / Git Bash
+- `.husky/pre-push.bat` - Windows CMD / PowerShell
+
+**Behavior:**
+
+- Runs `yarn npm audit --severity critical`
+- Blocks push if critical vulnerabilities exist
+- Bypass with `git push --no-verify` (emergencies only)
+
+---
+
+## Security Auditing
+
+### Overview
+
+Security auditing runs at multiple layers to catch vulnerabilities early:
+
+| Layer | When | Purpose |
+|-------|------|---------|
+| **Pre-push hook** | Before `git push` | Local feedback |
+| **GitHub Actions (PR)** | Every pull request | Gate vulnerable code |
+| **GitHub Actions (Cron)** | Weekly (Sunday 2 AM UTC) | Catch newly disclosed vulns |
+| **Dependabot** | Continuous | Auto-create fix PRs |
+
+### Commands
+
+```bash
+yarn audit              # Full vulnerability report
+yarn audit:critical     # Critical severity only (used by CI)
+yarn audit:fix          # Attempt automatic fixes
+```
+
+### GitHub Actions Workflow
+
+**Configuration:** `.github/workflows/security-audit.yml`
+
+**Triggers:**
+
+- Pull requests to `main`/`master`
+- Pushes to `main`/`master`
+- Weekly cron schedule (catches newly disclosed vulnerabilities)
+- Manual dispatch from GitHub UI
+
+**On failure:** Creates a GitHub issue (scheduled runs only) to alert maintainers.
+
+### Dependabot
+
+**Configuration:** `.github/dependabot.yml`
+
+**Features:**
+
+- Weekly dependency updates (Monday 9 AM ET)
+- Groups patch updates to reduce PR noise
+- Separate tracking for GitHub Actions dependencies
+- Auto-labels PRs with `dependencies` tag
+
+### Responding to Vulnerabilities
+
+1. **Check severity:** `yarn audit`
+2. **Update affected package:** Edit `package.json`, run `yarn install`
+3. **Verify fix:** `yarn audit:critical` (should show no suggestions)
+4. **Push:** Pre-push hook confirms fix before code leaves your machine
 
 ---
 
@@ -572,7 +642,9 @@ yarn access           # Run accessibility audits
 ```bash
 yarn up               # Update all dependencies
 yarn dedupe           # Remove duplicate packages
-yarn npm audit        # Check for security vulnerabilities
+yarn audit            # Full security vulnerability report
+yarn audit:critical   # Critical vulnerabilities only
+yarn audit:fix        # Attempt automatic fixes
 ```
 
 ### Troubleshooting
@@ -607,29 +679,11 @@ yarn dlx @yarnpkg/sdks vscode  # Regenerate editor SDKs
 - Node.js 22.x (specified in `package.json` `engines`)
 - Vercel automatically respects `packageManager` field after Corepack is enabled
 
-### GitHub Actions (Future)
+### GitHub Actions
 
-Recommended workflow for CI:
+**Security Audit Workflow:** `.github/workflows/security-audit.yml`
 
-```yaml
-- name: Enable Corepack
-  run: corepack enable
-
-- name: Install dependencies
-  run: yarn install --immutable
-
-- name: Lint
-  run: yarn lint
-
-- name: Type check
-  run: yarn typecheck
-
-- name: Test
-  run: yarn test --ci --coverage
-
-- name: Build
-  run: yarn build
-```
+Runs on PRs, pushes to main, weekly cron, and manual dispatch. See [Security Auditing](#security-auditing) for details.
 
 ---
 
@@ -637,18 +691,20 @@ Recommended workflow for CI:
 
 ### Commands Cheat Sheet
 
-| Command           | Purpose                  |
-| ----------------- | ------------------------ |
-| `yarn dev`        | Start development server |
-| `yarn build`      | Build for production     |
-| `yarn lint`       | Lint all files           |
-| `yarn lint:mdx`   | Lint only MDX files      |
-| `yarn format`     | Format all files         |
-| `yarn format:mdx` | Format only MDX files    |
-| `yarn typecheck`  | Check TypeScript types   |
-| `yarn test`       | Run tests in watch mode  |
-| `yarn analyze`    | Analyze bundle size      |
-| `yarn access`     | Run accessibility audits |
+| Command             | Purpose                        |
+| ------------------- | ------------------------------ |
+| `yarn dev`          | Start development server       |
+| `yarn build`        | Build for production           |
+| `yarn lint`         | Lint all files                 |
+| `yarn lint:mdx`     | Lint only MDX files            |
+| `yarn format`       | Format all files               |
+| `yarn format:mdx`   | Format only MDX files          |
+| `yarn typecheck`    | Check TypeScript types         |
+| `yarn test`         | Run tests in watch mode        |
+| `yarn analyze`      | Analyze bundle size            |
+| `yarn access`       | Run accessibility audits       |
+| `yarn audit`        | Full security audit            |
+| `yarn audit:critical` | Critical vulnerabilities only |
 
 ### File Locations
 

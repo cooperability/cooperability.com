@@ -22,13 +22,16 @@ This project uses a comprehensive suite of quality control tools. For complete d
 - `yarn typecheck` - TypeScript validation
 - `yarn analyze` - Webpack bundle analysis
 - `yarn access` - Accessibility audits (ESLint + Axe-core + Lighthouse)
+- `yarn audit` / `yarn audit:critical` - Security vulnerability scanning
+
+**Security:** Pre-push hooks and GitHub Actions block vulnerable code. See [docs/Tooling.md#security-auditing](docs/Tooling.md#security-auditing).
 
 **Key Technologies:**
 
 - **Linting:** ESLint with TypeScript, Next.js, and MDX support
 - **Formatting:** Prettier with automatic MDX prose wrapping
 - **Testing:** Jest with @testing-library/react and jest-dom matchers
-- **Automation:** Husky + lint-staged for pre-commit quality checks
+- **Automation:** Husky (pre-commit + pre-push security), lint-staged, GitHub Actions
 - **Package Management:** Yarn Plug'n'Play (PnP) for zero-install, deterministic dependencies
 - **UI Components:** shadcn/ui (Tailwind + Radix UI primitives)
 - **Bundle Analysis:** Webpack Bundle Analyzer for optimization
