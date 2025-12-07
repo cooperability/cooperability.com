@@ -1,0 +1,59 @@
+# Dependabot configuration for automatic security updates
+# https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+
+version: 2
+updates:
+  # JavaScript/npm ecosystem
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "America/New_York"
+    
+    # Limit open PRs to avoid noise
+    open-pull-requests-limit: 10
+    
+    # Group minor/patch updates to reduce PR noise
+    groups:
+      # Group all patch updates together
+      patch-updates:
+        patterns:
+          - "*"
+        update-types:
+          - "patch"
+      
+      # Group dev dependencies
+      dev-dependencies:
+        patterns:
+          - "*"
+        dependency-type: "development"
+        update-types:
+          - "minor"
+          - "patch"
+    
+    # Reviewers for dependency PRs (add your GitHub username)
+    # reviewers:
+    #   - "your-username"
+    
+    # Labels for PRs
+    labels:
+      - "dependencies"
+      - "automated"
+    
+    # Commit message format
+    commit-message:
+      prefix: "chore(deps)"
+      include: "scope"
+
+  # GitHub Actions updates
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    labels:
+      - "dependencies"
+      - "ci"
+
