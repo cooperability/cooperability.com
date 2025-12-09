@@ -232,9 +232,21 @@ yarn audit:fix          # Attempt automatic fixes
 ### Responding to Vulnerabilities
 
 1. **Check severity:** `yarn audit`
-2. **Update affected package:** Edit `package.json`, run `yarn install`
+2. **Update affected package:**
+   - **Direct dependency:** Update version in `package.json`, run `yarn install`
+   - **Transitive dependency:** Add to `resolutions` field in `package.json`:
+     ```json
+     {
+       "resolutions": {
+         "vulnerable-package": "^patched.version"
+       }
+     }
+     ```
+     This forces all packages to use the patched version, even if they request older versions.
 3. **Verify fix:** `yarn audit:critical` (should show no suggestions)
 4. **Push:** Pre-push hook confirms fix before code leaves your machine
+
+**Note:** Dependabot alerts show the dependency chain (e.g., `tailwindcss → ... → glob 10.4.5`). Use `resolutions` when upstream packages haven't updated yet.
 
 ---
 
