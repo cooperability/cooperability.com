@@ -118,6 +118,16 @@ img {
 }
 
 :root {
+  /* Responsive breakpoints - aligned with Tailwind defaults */
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1536px;
+
+  /* Component spacing - scales responsively */
+  --spacing-container: clamp(0.5rem, 2vw, 2rem);
+
   --radius: 0.625rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.129 0.042 264.695);

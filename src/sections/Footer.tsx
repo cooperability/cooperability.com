@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import ActiveIcon from '../components/ActiveIcon'
 import { useResponsive } from '../hooks/useResponsive'
+import styles from '../styles/utils.module.css'
 
 const Footer = () => {
   const { isMobile } = useResponsive()
@@ -8,8 +9,7 @@ const Footer = () => {
   return (
     <footer className="text-lg leading-normal">
       <section className="space-y-2">
-        {/* Horizontal divider line */}
-        <div className="w-full border-t border-current my-2.5" />
+        <div className={styles.horizLine} />
 
         {/* Desktop Layout: Side-by-side social icons + vertical links column */}
         {!isMobile ? (
@@ -60,7 +60,7 @@ const Footer = () => {
                 href="/resources/linktree"
                 className="underline underline-offset-2 hover:opacity-80 transition-opacity"
               >
-                All Links
+                Linktree
               </Link>
               <Link
                 href="/resources/PrivacyStatement"

@@ -24,7 +24,7 @@ export default function Home({ initialQuote }: HomeProps) {
         <title>Cooper Reed | Full Stack Engineer | Co-Operability</title>
         <meta
           name="description"
-          content="Cooper Reed - 7+ years building web applications with React, Next.js, TypeScript. Full stack engineer who codes, writes, and interviews."
+          content="Cooper Reed - 5+ years building web applications with React, Next.js, TypeScript. Full stack engineer who codes, writes, and interviews."
         />
         <meta
           name="keywords"
@@ -37,7 +37,7 @@ export default function Home({ initialQuote }: HomeProps) {
         />
         <meta
           property="og:description"
-          content="7+ years building web applications. Creator of open-source tools. Full stack developer who codes, writes, and interviews."
+          content="5+ years building web applications. Creator of open-source tools. Full stack developer who codes, writes, and interviews."
         />
         <meta property="og:type" content="website" />
         <meta property="og:image" content="/images/profile.jpg" />
@@ -97,12 +97,13 @@ export default function Home({ initialQuote }: HomeProps) {
           />
         </div>
         <p>
-          Hi, I&apos;m <b>Cooper!</b> To me, <b>Co-Operability</b> means long-term 
-          synergy between my ambitions and my morals. To that end, I&apos;ve spent 
-          5 years writing software with real-world impact. I open-source my {' '}
-          <Link href="/demos">tools</Link> and publish my{' '}
-          <Link href="/resources">knowledge</Link>. My interviews follow the
-          same spirit.
+          Hi, I&apos;m <b>Cooper!</b> To me, <b>Co-Operability</b> means
+          long-term synergy between my ambitions and morals. I&apos;ve spent 5
+          years writing software with real-world impact. I open-source my{' '}
+          <Link href="/demos">tools</Link> and{' '}
+          <Link href="/resources">knowledge</Link>. My{' '}
+          <a href="https://www.youtube.com/@cooperability">interviews</a> follow
+          the same spirit.
         </p>
 
         <Link

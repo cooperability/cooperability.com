@@ -190,12 +190,12 @@ A security audit runs automatically before every `git push`:
 
 Security auditing runs at multiple layers to catch vulnerabilities early:
 
-| Layer | When | Purpose |
-|-------|------|---------|
-| **Pre-push hook** | Before `git push` | Local feedback |
-| **GitHub Actions (PR)** | Every pull request | Gate vulnerable code |
+| Layer                     | When                     | Purpose                     |
+| ------------------------- | ------------------------ | --------------------------- |
+| **Pre-push hook**         | Before `git push`        | Local feedback              |
+| **GitHub Actions (PR)**   | Every pull request       | Gate vulnerable code        |
 | **GitHub Actions (Cron)** | Weekly (Sunday 2 AM UTC) | Catch newly disclosed vulns |
-| **Dependabot** | Continuous | Auto-create fix PRs |
+| **Dependabot**            | Continuous               | Auto-create fix PRs         |
 
 ### Commands
 
@@ -703,19 +703,19 @@ Runs on PRs, pushes to main, weekly cron, and manual dispatch. See [Security Aud
 
 ### Commands Cheat Sheet
 
-| Command             | Purpose                        |
-| ------------------- | ------------------------------ |
-| `yarn dev`          | Start development server       |
-| `yarn build`        | Build for production           |
-| `yarn lint`         | Lint all files                 |
-| `yarn lint:mdx`     | Lint only MDX files            |
-| `yarn format`       | Format all files               |
-| `yarn format:mdx`   | Format only MDX files          |
-| `yarn typecheck`    | Check TypeScript types         |
-| `yarn test`         | Run tests in watch mode        |
-| `yarn analyze`      | Analyze bundle size            |
-| `yarn access`       | Run accessibility audits       |
-| `yarn audit`        | Full security audit            |
+| Command               | Purpose                       |
+| --------------------- | ----------------------------- |
+| `yarn dev`            | Start development server      |
+| `yarn build`          | Build for production          |
+| `yarn lint`           | Lint all files                |
+| `yarn lint:mdx`       | Lint only MDX files           |
+| `yarn format`         | Format all files              |
+| `yarn format:mdx`     | Format only MDX files         |
+| `yarn typecheck`      | Check TypeScript types        |
+| `yarn test`           | Run tests in watch mode       |
+| `yarn analyze`        | Analyze bundle size           |
+| `yarn access`         | Run accessibility audits      |
+| `yarn audit`          | Full security audit           |
 | `yarn audit:critical` | Critical vulnerabilities only |
 
 ### File Locations
@@ -732,6 +732,83 @@ Runs on PRs, pushes to main, weekly cron, and manual dispatch. See [Security Aud
 | `vercel.json`        | Vercel deployment configuration   |
 | `.yarnrc.yml`        | Yarn configuration (PnP settings) |
 | `package.json`       | Dependencies and scripts          |
+
+---
+
+## Development Gotchas & Learnings
+
+### Case Sensitivity in File Names (Windows vs. Linux)
+
+**Problem:** Assets work locally on Windows (case-insensitive) but fail in production on Vercel/Linux (case-sensitive).
+
+**Symptoms:** Files load in development but return 404 errors in production.
+
+**Solution:** Use `git mv oldName.png newName.png` to rename files to match code references exactly.
+
+```bash
+# Example: Code references linkedin.png but git tracks Linkedin.png
+git mv public/images/Linkedin.png public/images/linkedin.png
+```
+
+**Prevention:** Use consistent lowercase naming for all assets.
+
+### CSS Modules and Theming (next-themes)
+
+**Problem:** Defining global theme styles with `:root` or `[data-theme='dark']` in CSS Module files causes build errors.
+
+**Solution:** Define theme-specific classes within CSS Modules (e.g., `.dropdownLight`, `.dropdownDark`), then conditionally apply them in React:
+
+```tsx
+const { theme } = useTheme()
+const isDark = theme === 'dark'
+
+<div className={`${styles.dropdown} ${isDark ? styles.dropdownDark : styles.dropdownLight}`}>
+```
+
+### Tailwind CSS Classes Not Applying
+
+**Problem:** Tailwind classes appear in HTML but styles don't apply.
+
+**Causes & Fixes:**
+
+1. **`content` array missing paths:** Ensure `tailwind.config.js` includes all directories:
+
+   ```javascript
+   content: ['./src/**/*.{js,ts,jsx,tsx}', './components/**/*.{js,ts,jsx,tsx}']
+   ```
+
+2. **Missing directives:** Verify `global.css` contains:
+
+   ```css
+   @tailwind base;
+   @tailwind components;
+   @tailwind utilities;
+   ```
+
+3. **PostCSS conflict:** Modern Next.js handles Tailwind without `postcss.config.js`. Remove it if encountering issues.
+
+### MDX Component Integration
+
+**Problem:** Components imported in `.mdx` files don't render.
+
+**Solution:** When using `next-mdx-remote`, components must be passed to `<MDXRemote />` via the `components` prop:
+
+```tsx
+// pages/resources/[slug].tsx
+import { CustomComponent } from '@/components/CustomComponent'
+
+;<MDXRemote {...source} components={{ CustomComponent }} />
+```
+
+### Date Sorting with ISO 8601
+
+**Tip:** For dates in `YYYY-MM-DD` format, use `localeCompare()` directly:
+
+```typescript
+posts.sort((a, b) => b.date.localeCompare(a.date)) // Descending
+```
+
+Avoid creating `new Date()` objects—string comparison is reliable and avoids TypeScript signature errors.
 
 ---
 

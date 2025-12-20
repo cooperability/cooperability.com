@@ -85,6 +85,41 @@ echo "engine-strict=true" > .npmrc
 
 ---
 
+## Architectural Patterns
+
+### Unified Link Components
+
+When building navigation components requiring visual consistency across both internal and external links, use a **conditional render pattern**:
+
+```tsx
+interface LinkProps {
+  href: string
+  external?: boolean
+  children: React.ReactNode
+}
+
+function UnifiedLink({ href, external, children }: LinkProps) {
+  if (external) {
+    return (
+      <a href={href} target="_blank" rel="noopener noreferrer">
+        {children}
+      </a>
+    )
+  }
+  return <Link href={href}>{children}</Link>
+}
+```
+
+**Why This Matters:**
+
+- **SEO**: External links need `rel="noopener noreferrer"` to avoid penalties
+- **Performance**: Next.js `Link` provides prefetching for internal routes only
+- **Consistency**: Single source of truth for all link styling and behavior
+
+**Implementation**: See `src/sections/Sidebar.tsx` for the `SidebarLink` component.
+
+---
+
 ## 📁 Ideal Long-Term Structure
 
 ```
