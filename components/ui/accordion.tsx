@@ -38,7 +38,7 @@ function AccordionTrigger({
       <AccordionPrimitive.Trigger
         data-slot="accordion-trigger"
         className={cn(
-          'focus-visible:border-ring focus-visible:ring-ring/50 flex flex-1 justify-between rounded-md py-4 px-4 text-left text-sm font-medium transition-all outline-none hover:underline focus-visible:ring-[3px] disabled:pointer-events-none disabled:opacity-50 [&[data-state=open]>svg]:rotate-180',
+          'focus-visible:border-ring focus-visible:ring-ring/50 flex flex-1 justify-between rounded-md data-[state=open]:rounded-b-none data-[state=open]:rounded-t-md py-4 px-4 text-left text-sm font-medium transition-all outline-none hover:underline focus-visible:ring-[3px] disabled:pointer-events-none disabled:opacity-50 [&[data-state=open]>svg]:rotate-180',
           isDark
             ? 'bg-gray-800 text-gray-100 hover:bg-gray-700'
             : 'bg-gray-100 text-gray-900 hover:bg-gray-200',
@@ -66,7 +66,9 @@ function AccordionContent({
     <AccordionPrimitive.Content
       data-slot="accordion-content"
       className={cn(
-        'data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down overflow-hidden text-sm',
+        'data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down overflow-hidden rounded-b-md rounded-t-none text-sm',
+        // Ensure bottom corners are preserved even with custom rounded classes
+        '[&>div]:rounded-none',
         isDark ? 'bg-gray-900 text-gray-300' : 'bg-white text-gray-700'
       )}
       {...props}

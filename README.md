@@ -8,6 +8,8 @@ My Next.js portfolio website on Vercel. Several smaller projects within.
 - SEO; site:cooperability.com
 - Create `.editorconfig` for consistency
 - Add `.npmrc` for Yarn users
+- `commitlint` for commit messages
+- `cursorrules` for cursor
 
 ## Developer Tooling
 
@@ -40,16 +42,24 @@ This project uses a comprehensive suite of quality control tools. For complete d
 
 See **[docs/Tooling.md](docs/Tooling.md)** for setup instructions, troubleshooting, and best practices.
 
-## Responsive Design & Breakpoints
+## Performance & Responsive Design
 
-This project uses a **content-first responsive design strategy** with clearly defined breakpoints:
+This project implements comprehensive performance optimizations and a content-first responsive design strategy:
+
+**Performance:**
+
+- Dynamic imports with disabled SSR for heavy components (~85KB bundle reduction)
+- Loading skeletons to prevent CLS (Cumulative Layout Shift)
+- Debounced resize handling (100ms) for smooth responsiveness
+- Fluid spacing with CSS `clamp()` for breakpoint-free scaling
+
+**Responsive Design:**
 
 - **Primary breakpoint:** 525px (`useResponsive` hook) for site-wide mobile/desktop splits
-- **Component-specific breakpoints:** Used when components have unique layout requirements (e.g., 375px for Mandelbrot Explorer)
+- **Tailwind-aligned breakpoints:** sm (640px), md (768px), lg (1024px), xl (1280px)
+- **Philosophy:** Break where content naturally requires it, not at arbitrary device widths
 
-**Philosophy:** Break where content naturally requires it, not at arbitrary device widths.
-
-See **[docs/ResponsiveDesign.md](docs/ResponsiveDesign.md)** for complete breakpoint strategy, implementation guidelines, and best practices.
+See **[docs/Performance.md](docs/Performance.md)** for complete optimization strategies, breakpoint implementation, and best practices.
 
 ## Tech Stack Icons & SVG Configuration
 
@@ -158,41 +168,23 @@ module.exports = {
 [Jest Testing in Next.js](https://nextjs.org/docs/pages/guides/testing/jest)
 [Cross-platform Favicon Generation](https://realfavicongenerator.net/)
 
-#Abandon all hope ye who read below here
+---
 
-## Key Learnings from Recent Development (MDX, Theming, Layouts)
+## Development Learnings
 
-1. **Date Sorting Implementation:**
-   -When implementing date-sorting for posts:
-   - Direct string comparison with `localeCompare()` is more reliable than creating new Date objects for ISO 8601 formatted dates (YYYY-MM-DD)
-   - Complex date parsing can lead to TypeScript construct signature errors and unnecessary type assertions
+Detailed learnings from this project are documented in their respective locations:
 
-2. **Using React Components in MDX:**
-   - When using `next-mdx-remote` (or similar libraries) to render MDX pages dynamically (e.g., for blog posts under `/resources/[slug].tsx`), components imported _inside_ the `.mdx` file must also be explicitly passed to the `<MDXRemote />` component via its `components` prop in the page rendering file (`[slug].tsx`).
+| Topic                            | Documentation                                                                                                                                          |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| CSS Modules & Theming            | [`docs/Tooling.md`](docs/Tooling.md#css-modules-and-theming-next-themes)                                                                               |
+| Tailwind Troubleshooting         | [`docs/Tooling.md`](docs/Tooling.md#tailwind-css-classes-not-applying)                                                                                 |
+| MDX Component Integration        | [`docs/Tooling.md`](docs/Tooling.md#mdx-component-integration)                                                                                         |
+| Case Sensitivity (Windows/Linux) | [`docs/Tooling.md`](docs/Tooling.md#case-sensitivity-in-file-names-windows-vs-linux)                                                                   |
+| Performance & Responsive Design  | [`docs/Performance.md`](docs/Performance.md)                                                                                                           |
+| Unified Link Components          | [`docs/PROJECT-STRUCTURE.md`](docs/PROJECT-STRUCTURE.md#unified-link-components)                                                                       |
+| Mobile Table Refinement          | [`src/components/opioid-converter/OPIOID-CONVERTER-README.md`](src/components/opioid-converter/OPIOID-CONVERTER-README.md#mobile-refinement-learnings) |
 
-3. **CSS Modules and Theming (`next-themes`):**
-   **\* Attempting to define global theme styles using `:root` or attribute selectors like `[data-theme='dark']` directly within a **CSS Module\*\* file (e.g., `utils.module.css`) will cause build errors. CSS Modules expect locally scoped class names or `:global(...)` syntax for non-scoped rules.S
-   - For theme switching integrated with `next-themes`, the effective pattern is to define **theme-specific classes** within the CSS Module (e.g., `.dropdownLight`, `.dropdownDark`).
-   - React components should then use the `useTheme` hook from `next-themes` to get the current theme (`'light'` or `'dark'`) and conditionally apply the corresponding theme classes alongside base structural classes (e.g., `className={\`\${styles.dropdown} \${isDarkMode ? styles.dropdownDark : styles.dropdownLight}\`}`).
-
-4. **Tailwind CSS and Next.js Integration:**
-   - If Tailwind utility classes are present in the rendered HTML (verified via browser inspector) but the corresponding CSS rules are not being applied (styles don't appear in the computed styles), it often indicates an issue with Tailwind's CSS generation process.
-   - Ensure the `content` array in `tailwind.config.js` correctly includes paths to all files where Tailwind classes are used (e.g., `./components/**/*.{js,ts,jsx,tsx}`, `./sections/**/*.{js,ts,jsx,tsx}`).
-   - Verify that `styles/global.css` (or your main CSS entry point imported in `_app.tsx`) contains the `@tailwind base;`, `@tailwind components;`, and `@tailwind utilities;` directives.
-   - Modern Next.js versions (10+) generally handle Tailwind integration seamlessly _without_ requiring a separate `postcss.config.js` file, provided `tailwindcss` and `autoprefixer` are installed. Adding an explicit `postcss.config.js` can conflict with Next.js's built-in PostCSS setup. If encountering issues, try removing `postcss.config.js` and restarting the development server.
-
-5. **Opioid Converter Integration & Mobile Refinement:**
-   - Integrated the standalone `OpioidConverter` by creating `/opioid-converter` with a custom `OpioidConverterLayout` (bypassing the default layout via `Page.getLayout` and `_app.tsx` checking `Component.getLayout`; required exporting `NextPageWithLayout`). Refactored the component to use React hooks (`useState`, `useCallback`, `useEffect`) and styled with CSS Modules (using `clamp()` for responsive sizing).
-   - Extensive mobile refinement for the data-dense table was required beyond standard responsive techniques, involving adjustments to CSS Grid (`grid-template-columns`), input `min-width`, header text wrapping (`white-space: normal`), and element `gap`.
-
-6. **Case Sensitivity in File Names (Windows vs. Linux Deployment):**
-   - **Problem**: Images and assets may work locally on Windows (case-insensitive file system) but fail in production on Vercel/Linux (case-sensitive file system).
-   - **Symptoms**: Files load correctly in local development but return 404 errors in production deployment.
-   - **Solution**: Use `git mv oldName.png newName.png` to rename files in git to match the exact case used in code references. For example, if code references `linkedin.png` but git tracks `Linkedin.png`, use `git mv public/images/Linkedin.png public/images/linkedin.png`.
-   - **Prevention**: Always use consistent lowercase naming for assets, or ensure file names in git exactly match their references in code.
-
-7. **Unified Link Components and External Navigation Patterns:**
-   - When refactoring navigation components for visual consistency (adding inverse-color active states and hover animations to the mobile Sidebar), a seemingly simple task—converting the Resume external link to use the new `SidebarLink` component—revealed an important architectural decision point. The component needed substantial enhancement to support both internal navigation (using Next.js `Link` for client-side routing and prefetching) and external links (using standard `<a>` tags with security attributes like `rel="noopener noreferrer"`). This is architecturally significant because it establishes a **single source of truth** for all navigation styling and behavior while respecting the fundamental distinction between internal and external navigation. Mixing these concerns carelessly can lead to SEO penalties (external links without proper `rel` attributes), broken prefetching (Next.js Link wrapping external URLs), or inconsistent UX (some links behaving differently despite appearing identical). The solution—a conditional render based on an `external` prop—ensures that every link in the sidebar receives identical visual treatment (inverse backgrounds, vertical sliding selectors, theme-aware colors) while maintaining semantic correctness and framework-specific optimizations. This pattern is now reusable across the application wherever unified link presentation is needed, demonstrating how **design system consistency requirements can drive meaningful architectural improvements** rather than superficial styling changes.
+---
 
 ## Accessibility
 

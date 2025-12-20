@@ -132,7 +132,7 @@ const Sidebar = ({
         <Button
           onClick={toggleSidebar}
           aria-label="Close menu"
-          className="absolute top-12 right-3 border rounded-md p-1 bg-transparent"
+          className="absolute top-4 right-3 border rounded-md p-1 bg-transparent"
         >
           <XMarkIcon className="h-5 w-5" />
         </Button>
@@ -179,7 +179,7 @@ const Sidebar = ({
             isActive={isRouteActive(allLinksUrl)}
             onClick={toggleSidebar}
           >
-            <span aria-hidden="true">🔗 </span>All Links
+            <span aria-hidden="true">🔗 </span>Linktree
           </SidebarLink>
         )}
         {privacyStatementUrl && (
