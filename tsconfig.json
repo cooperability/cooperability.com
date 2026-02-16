@@ -18,9 +18,15 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./*"]
-    },
-    "typeRoots": []
+    }
   },
   "include": ["next-env.d.ts", "src/**/*.ts", "src/**/*.tsx", "next.config.js"],
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/*.spec.ts",
+    "**/*.spec.tsx",
+    "**/__tests__/**"
+  ]
 }
