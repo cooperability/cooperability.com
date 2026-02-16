@@ -81,7 +81,7 @@ const RAW_RUNTIME_STATE =
           ["lint-staged", "npm:15.5.2"],\
           ["lucide-react", "virtual:dc3fc578bfa5e06182a4d2be39ede0bc5b74940b1ffe0d70c26892ab140a4699787750fba175dc306292e80b4aa2c8c5f68c2a821e69b2c37e360c0dff36ff66#npm:0.525.0"],\
           ["next", "virtual:dc3fc578bfa5e06182a4d2be39ede0bc5b74940b1ffe0d70c26892ab140a4699787750fba175dc306292e80b4aa2c8c5f68c2a821e69b2c37e360c0dff36ff66#npm:16.1.5"],\
-          ["next-mdx-remote", "virtual:dc3fc578bfa5e06182a4d2be39ede0bc5b74940b1ffe0d70c26892ab140a4699787750fba175dc306292e80b4aa2c8c5f68c2a821e69b2c37e360c0dff36ff66#npm:5.0.0"],\
+          ["next-mdx-remote", "virtual:dc3fc578bfa5e06182a4d2be39ede0bc5b74940b1ffe0d70c26892ab140a4699787750fba175dc306292e80b4aa2c8c5f68c2a821e69b2c37e360c0dff36ff66#npm:6.0.0"],\
           ["next-sitemap", "virtual:dc3fc578bfa5e06182a4d2be39ede0bc5b74940b1ffe0d70c26892ab140a4699787750fba175dc306292e80b4aa2c8c5f68c2a821e69b2c37e360c0dff36ff66#npm:4.2.3"],\
           ["next-themes", "virtual:dc3fc578bfa5e06182a4d2be39ede0bc5b74940b1ffe0d70c26892ab140a4699787750fba175dc306292e80b4aa2c8c5f68c2a821e69b2c37e360c0dff36ff66#npm:0.4.6"],\
           ["postcss", "npm:8.5.6"],\
@@ -13683,23 +13683,24 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["next-mdx-remote", [\
-      ["npm:5.0.0", {\
-        "packageLocation": "./.yarn/cache/next-mdx-remote-npm-5.0.0-7247bc8e12-bf96d57bf9.zip/node_modules/next-mdx-remote/",\
+      ["npm:6.0.0", {\
+        "packageLocation": "./.yarn/cache/next-mdx-remote-npm-6.0.0-fc37108c7c-b85c24034a.zip/node_modules/next-mdx-remote/",\
         "packageDependencies": [\
-          ["next-mdx-remote", "npm:5.0.0"]\
+          ["next-mdx-remote", "npm:6.0.0"]\
         ],\
         "linkType": "SOFT"\
       }],\
-      ["virtual:dc3fc578bfa5e06182a4d2be39ede0bc5b74940b1ffe0d70c26892ab140a4699787750fba175dc306292e80b4aa2c8c5f68c2a821e69b2c37e360c0dff36ff66#npm:5.0.0", {\
-        "packageLocation": "./.yarn/__virtual__/next-mdx-remote-virtual-bf20b5715e/0/cache/next-mdx-remote-npm-5.0.0-7247bc8e12-bf96d57bf9.zip/node_modules/next-mdx-remote/",\
+      ["virtual:dc3fc578bfa5e06182a4d2be39ede0bc5b74940b1ffe0d70c26892ab140a4699787750fba175dc306292e80b4aa2c8c5f68c2a821e69b2c37e360c0dff36ff66#npm:6.0.0", {\
+        "packageLocation": "./.yarn/__virtual__/next-mdx-remote-virtual-6d92a5da82/0/cache/next-mdx-remote-npm-6.0.0-fc37108c7c-b85c24034a.zip/node_modules/next-mdx-remote/",\
         "packageDependencies": [\
           ["@babel/code-frame", "npm:7.27.1"],\
           ["@mdx-js/mdx", "npm:3.1.0"],\
           ["@mdx-js/react", "virtual:dc3fc578bfa5e06182a4d2be39ede0bc5b74940b1ffe0d70c26892ab140a4699787750fba175dc306292e80b4aa2c8c5f68c2a821e69b2c37e360c0dff36ff66#npm:3.1.0"],\
           ["@types/react", "npm:19.1.8"],\
-          ["next-mdx-remote", "virtual:dc3fc578bfa5e06182a4d2be39ede0bc5b74940b1ffe0d70c26892ab140a4699787750fba175dc306292e80b4aa2c8c5f68c2a821e69b2c37e360c0dff36ff66#npm:5.0.0"],\
+          ["next-mdx-remote", "virtual:dc3fc578bfa5e06182a4d2be39ede0bc5b74940b1ffe0d70c26892ab140a4699787750fba175dc306292e80b4aa2c8c5f68c2a821e69b2c37e360c0dff36ff66#npm:6.0.0"],\
           ["react", "npm:19.1.0"],\
-          ["unist-util-remove", "npm:3.1.1"],\
+          ["unist-util-remove", "npm:4.0.0"],\
+          ["unist-util-visit", "npm:5.1.0"],\
           ["vfile", "npm:6.0.3"],\
           ["vfile-matter", "npm:5.0.1"]\
         ],\
@@ -15482,7 +15483,7 @@ const RAW_RUNTIME_STATE =
           ["lint-staged", "npm:15.5.2"],\
           ["lucide-react", "virtual:dc3fc578bfa5e06182a4d2be39ede0bc5b74940b1ffe0d70c26892ab140a4699787750fba175dc306292e80b4aa2c8c5f68c2a821e69b2c37e360c0dff36ff66#npm:0.525.0"],\
           ["next", "virtual:dc3fc578bfa5e06182a4d2be39ede0bc5b74940b1ffe0d70c26892ab140a4699787750fba175dc306292e80b4aa2c8c5f68c2a821e69b2c37e360c0dff36ff66#npm:16.1.5"],\
-          ["next-mdx-remote", "virtual:dc3fc578bfa5e06182a4d2be39ede0bc5b74940b1ffe0d70c26892ab140a4699787750fba175dc306292e80b4aa2c8c5f68c2a821e69b2c37e360c0dff36ff66#npm:5.0.0"],\
+          ["next-mdx-remote", "virtual:dc3fc578bfa5e06182a4d2be39ede0bc5b74940b1ffe0d70c26892ab140a4699787750fba175dc306292e80b4aa2c8c5f68c2a821e69b2c37e360c0dff36ff66#npm:6.0.0"],\
           ["next-sitemap", "virtual:dc3fc578bfa5e06182a4d2be39ede0bc5b74940b1ffe0d70c26892ab140a4699787750fba175dc306292e80b4aa2c8c5f68c2a821e69b2c37e360c0dff36ff66#npm:4.2.3"],\
           ["next-themes", "virtual:dc3fc578bfa5e06182a4d2be39ede0bc5b74940b1ffe0d70c26892ab140a4699787750fba175dc306292e80b4aa2c8c5f68c2a821e69b2c37e360c0dff36ff66#npm:0.4.6"],\
           ["postcss", "npm:8.5.6"],\
@@ -17438,13 +17439,13 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["unist-util-remove", [\
-      ["npm:3.1.1", {\
-        "packageLocation": "./.yarn/cache/unist-util-remove-npm-3.1.1-4eb96f179f-c0dae9fd9f.zip/node_modules/unist-util-remove/",\
+      ["npm:4.0.0", {\
+        "packageLocation": "./.yarn/cache/unist-util-remove-npm-4.0.0-40ee7e5c4d-30f3ed3109.zip/node_modules/unist-util-remove/",\
         "packageDependencies": [\
-          ["@types/unist", "npm:2.0.11"],\
-          ["unist-util-is", "npm:5.2.1"],\
-          ["unist-util-remove", "npm:3.1.1"],\
-          ["unist-util-visit-parents", "npm:5.1.3"]\
+          ["@types/unist", "npm:3.0.3"],\
+          ["unist-util-is", "npm:6.0.0"],\
+          ["unist-util-remove", "npm:4.0.0"],\
+          ["unist-util-visit-parents", "npm:6.0.1"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -17484,6 +17485,16 @@ const RAW_RUNTIME_STATE =
           ["@types/unist", "npm:3.0.3"],\
           ["unist-util-is", "npm:6.0.0"],\
           ["unist-util-visit", "npm:5.0.0"],\
+          ["unist-util-visit-parents", "npm:6.0.1"]\
+        ],\
+        "linkType": "HARD"\
+      }],\
+      ["npm:5.1.0", {\
+        "packageLocation": "./.yarn/cache/unist-util-visit-npm-5.1.0-768083cd0a-a56e1bbbf6.zip/node_modules/unist-util-visit/",\
+        "packageDependencies": [\
+          ["@types/unist", "npm:3.0.3"],\
+          ["unist-util-is", "npm:6.0.0"],\
+          ["unist-util-visit", "npm:5.1.0"],\
           ["unist-util-visit-parents", "npm:6.0.1"]\
         ],\
         "linkType": "HARD"\
