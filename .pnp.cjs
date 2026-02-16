@@ -12088,7 +12088,7 @@ const RAW_RUNTIME_STATE =
           ["lighthouse", "npm:13.0.1"],\
           ["lighthouse-logger", "npm:2.0.2"],\
           ["lighthouse-stack-packs", "npm:1.12.3"],\
-          ["lodash-es", "npm:4.17.21"],\
+          ["lodash-es", "npm:4.17.23"],\
           ["lookup-closest-locale", "npm:6.2.0"],\
           ["open", "npm:8.4.2"],\
           ["puppeteer-core", "npm:24.33.0"],\
@@ -12239,10 +12239,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["lodash-es", [\
-      ["npm:4.17.21", {\
-        "packageLocation": "./.yarn/cache/lodash-es-npm-4.17.21-b45832dfce-fb407355f7.zip/node_modules/lodash-es/",\
+      ["npm:4.17.23", {\
+        "packageLocation": "./.yarn/cache/lodash-es-npm-4.17.23-b4279789e6-3150fb6660.zip/node_modules/lodash-es/",\
         "packageDependencies": [\
-          ["lodash-es", "npm:4.17.21"]\
+          ["lodash-es", "npm:4.17.23"]\
         ],\
         "linkType": "HARD"\
       }]\
