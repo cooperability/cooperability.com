@@ -58,7 +58,7 @@ const RAW_RUNTIME_STATE =
           ["@types/punycode", "npm:2.1.4"],\
           ["@types/react", "npm:19.1.8"],\
           ["@types/react-dom", "virtual:dc3fc578bfa5e06182a4d2be39ede0bc5b74940b1ffe0d70c26892ab140a4699787750fba175dc306292e80b4aa2c8c5f68c2a821e69b2c37e360c0dff36ff66#npm:19.1.6"],\
-          ["@vercel/analytics", "virtual:dc3fc578bfa5e06182a4d2be39ede0bc5b74940b1ffe0d70c26892ab140a4699787750fba175dc306292e80b4aa2c8c5f68c2a821e69b2c37e360c0dff36ff66#npm:1.5.0"],\
+          ["@vercel/analytics", "virtual:dc3fc578bfa5e06182a4d2be39ede0bc5b74940b1ffe0d70c26892ab140a4699787750fba175dc306292e80b4aa2c8c5f68c2a821e69b2c37e360c0dff36ff66#npm:1.6.1"],\
           ["@vercel/speed-insights", "virtual:dc3fc578bfa5e06182a4d2be39ede0bc5b74940b1ffe0d70c26892ab140a4699787750fba175dc306292e80b4aa2c8c5f68c2a821e69b2c37e360c0dff36ff66#npm:1.2.0"],\
           ["@yarnpkg/pnpify", "npm:4.1.6"],\
           ["acorn", "npm:8.15.0"],\
@@ -5665,15 +5665,15 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["@vercel/analytics", [\
-      ["npm:1.5.0", {\
-        "packageLocation": "./.yarn/cache/@vercel-analytics-npm-1.5.0-638aefa6a6-43d33ea83b.zip/node_modules/@vercel/analytics/",\
+      ["npm:1.6.1", {\
+        "packageLocation": "./.yarn/cache/@vercel-analytics-npm-1.6.1-cc058602a7-df39ec4192.zip/node_modules/@vercel/analytics/",\
         "packageDependencies": [\
-          ["@vercel/analytics", "npm:1.5.0"]\
+          ["@vercel/analytics", "npm:1.6.1"]\
         ],\
         "linkType": "SOFT"\
       }],\
-      ["virtual:dc3fc578bfa5e06182a4d2be39ede0bc5b74940b1ffe0d70c26892ab140a4699787750fba175dc306292e80b4aa2c8c5f68c2a821e69b2c37e360c0dff36ff66#npm:1.5.0", {\
-        "packageLocation": "./.yarn/__virtual__/@vercel-analytics-virtual-61468ddd31/0/cache/@vercel-analytics-npm-1.5.0-638aefa6a6-43d33ea83b.zip/node_modules/@vercel/analytics/",\
+      ["virtual:dc3fc578bfa5e06182a4d2be39ede0bc5b74940b1ffe0d70c26892ab140a4699787750fba175dc306292e80b4aa2c8c5f68c2a821e69b2c37e360c0dff36ff66#npm:1.6.1", {\
+        "packageLocation": "./.yarn/__virtual__/@vercel-analytics-virtual-d0f0154ddd/0/cache/@vercel-analytics-npm-1.6.1-cc058602a7-df39ec4192.zip/node_modules/@vercel/analytics/",\
         "packageDependencies": [\
           ["@remix-run/react", null],\
           ["@sveltejs/kit", null],\
@@ -5684,7 +5684,7 @@ const RAW_RUNTIME_STATE =
           ["@types/sveltejs__kit", null],\
           ["@types/vue", null],\
           ["@types/vue-router", null],\
-          ["@vercel/analytics", "virtual:dc3fc578bfa5e06182a4d2be39ede0bc5b74940b1ffe0d70c26892ab140a4699787750fba175dc306292e80b4aa2c8c5f68c2a821e69b2c37e360c0dff36ff66#npm:1.5.0"],\
+          ["@vercel/analytics", "virtual:dc3fc578bfa5e06182a4d2be39ede0bc5b74940b1ffe0d70c26892ab140a4699787750fba175dc306292e80b4aa2c8c5f68c2a821e69b2c37e360c0dff36ff66#npm:1.6.1"],\
           ["next", "virtual:dc3fc578bfa5e06182a4d2be39ede0bc5b74940b1ffe0d70c26892ab140a4699787750fba175dc306292e80b4aa2c8c5f68c2a821e69b2c37e360c0dff36ff66#npm:16.1.6"],\
           ["react", "npm:19.1.0"],\
           ["svelte", null],\
@@ -15388,7 +15388,7 @@ const RAW_RUNTIME_STATE =
           ["@types/punycode", "npm:2.1.4"],\
           ["@types/react", "npm:19.1.8"],\
           ["@types/react-dom", "virtual:dc3fc578bfa5e06182a4d2be39ede0bc5b74940b1ffe0d70c26892ab140a4699787750fba175dc306292e80b4aa2c8c5f68c2a821e69b2c37e360c0dff36ff66#npm:19.1.6"],\
-          ["@vercel/analytics", "virtual:dc3fc578bfa5e06182a4d2be39ede0bc5b74940b1ffe0d70c26892ab140a4699787750fba175dc306292e80b4aa2c8c5f68c2a821e69b2c37e360c0dff36ff66#npm:1.5.0"],\
+          ["@vercel/analytics", "virtual:dc3fc578bfa5e06182a4d2be39ede0bc5b74940b1ffe0d70c26892ab140a4699787750fba175dc306292e80b4aa2c8c5f68c2a821e69b2c37e360c0dff36ff66#npm:1.6.1"],\
           ["@vercel/speed-insights", "virtual:dc3fc578bfa5e06182a4d2be39ede0bc5b74940b1ffe0d70c26892ab140a4699787750fba175dc306292e80b4aa2c8c5f68c2a821e69b2c37e360c0dff36ff66#npm:1.2.0"],\
           ["@yarnpkg/pnpify", "npm:4.1.6"],\
           ["acorn", "npm:8.15.0"],\
