@@ -36,7 +36,7 @@ const RAW_RUNTIME_STATE =
           ["@mdx-js/loader", "virtual:dc3fc578bfa5e06182a4d2be39ede0bc5b74940b1ffe0d70c26892ab140a4699787750fba175dc306292e80b4aa2c8c5f68c2a821e69b2c37e360c0dff36ff66#npm:3.1.0"],\
           ["@mdx-js/react", "virtual:dc3fc578bfa5e06182a4d2be39ede0bc5b74940b1ffe0d70c26892ab140a4699787750fba175dc306292e80b4aa2c8c5f68c2a821e69b2c37e360c0dff36ff66#npm:3.1.0"],\
           ["@next/bundle-analyzer", "npm:16.0.10"],\
-          ["@next/eslint-plugin-next", "npm:15.5.7"],\
+          ["@next/eslint-plugin-next", "npm:16.1.6"],\
           ["@next/mdx", "virtual:dc3fc578bfa5e06182a4d2be39ede0bc5b74940b1ffe0d70c26892ab140a4699787750fba175dc306292e80b4aa2c8c5f68c2a821e69b2c37e360c0dff36ff66#npm:15.5.7"],\
           ["@radix-ui/react-accordion", "virtual:dc3fc578bfa5e06182a4d2be39ede0bc5b74940b1ffe0d70c26892ab140a4699787750fba175dc306292e80b4aa2c8c5f68c2a821e69b2c37e360c0dff36ff66#npm:1.2.11"],\
           ["@radix-ui/react-checkbox", "virtual:dc3fc578bfa5e06182a4d2be39ede0bc5b74940b1ffe0d70c26892ab140a4699787750fba175dc306292e80b4aa2c8c5f68c2a821e69b2c37e360c0dff36ff66#npm:1.3.2"],\
@@ -2340,6 +2340,14 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/@next-eslint-plugin-next-npm-15.5.7-50fd68cc0a-a204cbf5d8.zip/node_modules/@next/eslint-plugin-next/",\
         "packageDependencies": [\
           ["@next/eslint-plugin-next", "npm:15.5.7"],\
+          ["fast-glob", "npm:3.3.1"]\
+        ],\
+        "linkType": "HARD"\
+      }],\
+      ["npm:16.1.6", {\
+        "packageLocation": "./.yarn/cache/@next-eslint-plugin-next-npm-16.1.6-36ce37468d-1498ded342.zip/node_modules/@next/eslint-plugin-next/",\
+        "packageDependencies": [\
+          ["@next/eslint-plugin-next", "npm:16.1.6"],\
           ["fast-glob", "npm:3.3.1"]\
         ],\
         "linkType": "HARD"\
@@ -15500,7 +15508,7 @@ const RAW_RUNTIME_STATE =
           ["@mdx-js/loader", "virtual:dc3fc578bfa5e06182a4d2be39ede0bc5b74940b1ffe0d70c26892ab140a4699787750fba175dc306292e80b4aa2c8c5f68c2a821e69b2c37e360c0dff36ff66#npm:3.1.0"],\
           ["@mdx-js/react", "virtual:dc3fc578bfa5e06182a4d2be39ede0bc5b74940b1ffe0d70c26892ab140a4699787750fba175dc306292e80b4aa2c8c5f68c2a821e69b2c37e360c0dff36ff66#npm:3.1.0"],\
           ["@next/bundle-analyzer", "npm:16.0.10"],\
-          ["@next/eslint-plugin-next", "npm:15.5.7"],\
+          ["@next/eslint-plugin-next", "npm:16.1.6"],\
           ["@next/mdx", "virtual:dc3fc578bfa5e06182a4d2be39ede0bc5b74940b1ffe0d70c26892ab140a4699787750fba175dc306292e80b4aa2c8c5f68c2a821e69b2c37e360c0dff36ff66#npm:15.5.7"],\
           ["@radix-ui/react-accordion", "virtual:dc3fc578bfa5e06182a4d2be39ede0bc5b74940b1ffe0d70c26892ab140a4699787750fba175dc306292e80b4aa2c8c5f68c2a821e69b2c37e360c0dff36ff66#npm:1.2.11"],\
           ["@radix-ui/react-checkbox", "virtual:dc3fc578bfa5e06182a4d2be39ede0bc5b74940b1ffe0d70c26892ab140a4699787750fba175dc306292e80b4aa2c8c5f68c2a821e69b2c37e360c0dff36ff66#npm:1.3.2"],\
