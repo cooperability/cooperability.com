@@ -8215,10 +8215,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["diff", [\
-      ["npm:4.0.2", {\
-        "packageLocation": "./.yarn/cache/diff-npm-4.0.2-73133c7102-81b91f9d39.zip/node_modules/diff/",\
+      ["npm:4.0.4", {\
+        "packageLocation": "./.yarn/cache/diff-npm-4.0.4-e9ea573423-855fb70b09.zip/node_modules/diff/",\
         "packageDependencies": [\
-          ["diff", "npm:4.0.2"]\
+          ["diff", "npm:4.0.4"]\
         ],\
         "linkType": "HARD"\
       }],\
@@ -16957,7 +16957,7 @@ const RAW_RUNTIME_STATE =
           ["acorn-walk", "npm:8.3.4"],\
           ["arg", "npm:4.1.3"],\
           ["create-require", "npm:1.1.1"],\
-          ["diff", "npm:4.0.2"],\
+          ["diff", "npm:4.0.4"],\
           ["make-error", "npm:1.3.6"],\
           ["ts-node", "virtual:dc3fc578bfa5e06182a4d2be39ede0bc5b74940b1ffe0d70c26892ab140a4699787750fba175dc306292e80b4aa2c8c5f68c2a821e69b2c37e360c0dff36ff66#npm:10.9.2"],\
           ["typescript", "patch:typescript@npm%3A5.9.3#optional!builtin<compat/typescript>::version=5.9.3&hash=5786d5"],\
