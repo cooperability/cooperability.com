@@ -76,7 +76,7 @@
     "@next/bundle-analyzer": "^16.0.10",
     "@next/eslint-plugin-next": "^16.1.6",
     "@serwist/build": "^9.2.1",
-    "@swc/core": "^1.15.11",
+    "@swc/core": "^1.15.13",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.2",
