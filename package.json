@@ -90,7 +90,7 @@
     "acorn": "^8.15.0",
     "autoprefixer": "^10.4.24",
     "cross-env": "^7.0.3",
-    "eslint": "^9.30.0",
+    "eslint": "^10.0.1",
     "eslint-config-next": "^15.4.8",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-mdx": "^3.4.1",
