@@ -72,7 +72,7 @@
     "@axe-core/cli": "^4.10.1",
     "@eslint/compat": "^1.2.9",
     "@eslint/eslintrc": "^3.3.3",
-    "@eslint/js": "^9.26.0",
+    "@eslint/js": "^10.0.1",
     "@next/bundle-analyzer": "^16.1.6",
     "@next/eslint-plugin-next": "^16.1.6",
     "@serwist/build": "^9.2.1",
