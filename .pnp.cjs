@@ -35,7 +35,7 @@ const RAW_RUNTIME_STATE =
           ["@heroicons/react", "virtual:dc3fc578bfa5e06182a4d2be39ede0bc5b74940b1ffe0d70c26892ab140a4699787750fba175dc306292e80b4aa2c8c5f68c2a821e69b2c37e360c0dff36ff66#npm:2.2.0"],\
           ["@mdx-js/loader", "virtual:dc3fc578bfa5e06182a4d2be39ede0bc5b74940b1ffe0d70c26892ab140a4699787750fba175dc306292e80b4aa2c8c5f68c2a821e69b2c37e360c0dff36ff66#npm:3.1.1"],\
           ["@mdx-js/react", "virtual:dc3fc578bfa5e06182a4d2be39ede0bc5b74940b1ffe0d70c26892ab140a4699787750fba175dc306292e80b4aa2c8c5f68c2a821e69b2c37e360c0dff36ff66#npm:3.1.1"],\
-          ["@next/bundle-analyzer", "npm:16.0.10"],\
+          ["@next/bundle-analyzer", "npm:16.1.6"],\
           ["@next/eslint-plugin-next", "npm:16.1.6"],\
           ["@next/mdx", "virtual:dc3fc578bfa5e06182a4d2be39ede0bc5b74940b1ffe0d70c26892ab140a4699787750fba175dc306292e80b4aa2c8c5f68c2a821e69b2c37e360c0dff36ff66#npm:15.5.7"],\
           ["@radix-ui/react-accordion", "virtual:dc3fc578bfa5e06182a4d2be39ede0bc5b74940b1ffe0d70c26892ab140a4699787750fba175dc306292e80b4aa2c8c5f68c2a821e69b2c37e360c0dff36ff66#npm:1.2.12"],\
@@ -2337,10 +2337,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["@next/bundle-analyzer", [\
-      ["npm:16.0.10", {\
-        "packageLocation": "./.yarn/cache/@next-bundle-analyzer-npm-16.0.10-6eb378677b-0b5d43c391.zip/node_modules/@next/bundle-analyzer/",\
+      ["npm:16.1.6", {\
+        "packageLocation": "./.yarn/cache/@next-bundle-analyzer-npm-16.1.6-85f1aaac70-d89733d525.zip/node_modules/@next/bundle-analyzer/",\
         "packageDependencies": [\
-          ["@next/bundle-analyzer", "npm:16.0.10"],\
+          ["@next/bundle-analyzer", "npm:16.1.6"],\
           ["webpack-bundle-analyzer", "npm:4.10.1"]\
         ],\
         "linkType": "HARD"\
@@ -15620,7 +15620,7 @@ const RAW_RUNTIME_STATE =
           ["@heroicons/react", "virtual:dc3fc578bfa5e06182a4d2be39ede0bc5b74940b1ffe0d70c26892ab140a4699787750fba175dc306292e80b4aa2c8c5f68c2a821e69b2c37e360c0dff36ff66#npm:2.2.0"],\
           ["@mdx-js/loader", "virtual:dc3fc578bfa5e06182a4d2be39ede0bc5b74940b1ffe0d70c26892ab140a4699787750fba175dc306292e80b4aa2c8c5f68c2a821e69b2c37e360c0dff36ff66#npm:3.1.1"],\
           ["@mdx-js/react", "virtual:dc3fc578bfa5e06182a4d2be39ede0bc5b74940b1ffe0d70c26892ab140a4699787750fba175dc306292e80b4aa2c8c5f68c2a821e69b2c37e360c0dff36ff66#npm:3.1.1"],\
-          ["@next/bundle-analyzer", "npm:16.0.10"],\
+          ["@next/bundle-analyzer", "npm:16.1.6"],\
           ["@next/eslint-plugin-next", "npm:16.1.6"],\
           ["@next/mdx", "virtual:dc3fc578bfa5e06182a4d2be39ede0bc5b74940b1ffe0d70c26892ab140a4699787750fba175dc306292e80b4aa2c8c5f68c2a821e69b2c37e360c0dff36ff66#npm:15.5.7"],\
           ["@radix-ui/react-accordion", "virtual:dc3fc578bfa5e06182a4d2be39ede0bc5b74940b1ffe0d70c26892ab140a4699787750fba175dc306292e80b4aa2c8c5f68c2a821e69b2c37e360c0dff36ff66#npm:1.2.12"],\
