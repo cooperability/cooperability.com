@@ -9692,12 +9692,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lucide-react@npm:^0.525.0":
-  version: 0.525.0
-  resolution: "lucide-react@npm:0.525.0"
+"lucide-react@npm:^0.575.0":
+  version: 0.575.0
+  resolution: "lucide-react@npm:0.575.0"
   peerDependencies:
     react: ^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0
-  checksum: 10c0/81c4438e2cf1c86ea2ebe0a97b378201512450894283cccce766a89bc6a4e47c8df1d9115d845d98f582bb0a10be31c454aa232520fea35018dac1cd8466ea9b
+  checksum: 10c0/4f42e81c88f60c8f904b178c0b28e8ac9a99da8ef24eba5f26ed97b63124304a847baea2f71125629a272df58dbb61cd799ff6a7e4878e5a4c28d8a699b84730
   languageName: node
   linkType: hard
 
@@ -12497,7 +12497,7 @@ __metadata:
     jest-environment-jsdom: "npm:^29.7.0"
     lighthouse: "npm:^13.0.3"
     lint-staged: "npm:^15.5.1"
-    lucide-react: "npm:^0.525.0"
+    lucide-react: "npm:^0.575.0"
     next: "npm:16.1.6"
     next-mdx-remote: "npm:6.0.0"
     next-sitemap: "npm:^4.2.3"
