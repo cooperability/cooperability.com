@@ -72,7 +72,7 @@ const RAW_RUNTIME_STATE =
           ["eslint-config-prettier", "virtual:dc3fc578bfa5e06182a4d2be39ede0bc5b74940b1ffe0d70c26892ab140a4699787750fba175dc306292e80b4aa2c8c5f68c2a821e69b2c37e360c0dff36ff66#npm:10.1.8"],\
           ["eslint-plugin-mdx", "virtual:dc3fc578bfa5e06182a4d2be39ede0bc5b74940b1ffe0d70c26892ab140a4699787750fba175dc306292e80b4aa2c8c5f68c2a821e69b2c37e360c0dff36ff66#npm:3.5.0"],\
           ["eslint-plugin-react-hooks", "virtual:dc3fc578bfa5e06182a4d2be39ede0bc5b74940b1ffe0d70c26892ab140a4699787750fba175dc306292e80b4aa2c8c5f68c2a821e69b2c37e360c0dff36ff66#npm:7.0.1"],\
-          ["globals", "npm:16.3.0"],\
+          ["globals", "npm:17.3.0"],\
           ["gray-matter", "npm:4.0.3"],\
           ["husky", "npm:9.1.7"],\
           ["jest", "virtual:dc3fc578bfa5e06182a4d2be39ede0bc5b74940b1ffe0d70c26892ab140a4699787750fba175dc306292e80b4aa2c8c5f68c2a821e69b2c37e360c0dff36ff66#npm:29.7.0"],\
@@ -10182,10 +10182,10 @@ const RAW_RUNTIME_STATE =
         ],\
         "linkType": "HARD"\
       }],\
-      ["npm:16.3.0", {\
-        "packageLocation": "./.yarn/cache/globals-npm-16.3.0-d099b11ba2-c62dc20357.zip/node_modules/globals/",\
+      ["npm:17.3.0", {\
+        "packageLocation": "./.yarn/cache/globals-npm-17.3.0-a102428cc6-7f21443eca.zip/node_modules/globals/",\
         "packageDependencies": [\
-          ["globals", "npm:16.3.0"]\
+          ["globals", "npm:17.3.0"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -15678,7 +15678,7 @@ const RAW_RUNTIME_STATE =
           ["eslint-config-prettier", "virtual:dc3fc578bfa5e06182a4d2be39ede0bc5b74940b1ffe0d70c26892ab140a4699787750fba175dc306292e80b4aa2c8c5f68c2a821e69b2c37e360c0dff36ff66#npm:10.1.8"],\
           ["eslint-plugin-mdx", "virtual:dc3fc578bfa5e06182a4d2be39ede0bc5b74940b1ffe0d70c26892ab140a4699787750fba175dc306292e80b4aa2c8c5f68c2a821e69b2c37e360c0dff36ff66#npm:3.5.0"],\
           ["eslint-plugin-react-hooks", "virtual:dc3fc578bfa5e06182a4d2be39ede0bc5b74940b1ffe0d70c26892ab140a4699787750fba175dc306292e80b4aa2c8c5f68c2a821e69b2c37e360c0dff36ff66#npm:7.0.1"],\
-          ["globals", "npm:16.3.0"],\
+          ["globals", "npm:17.3.0"],\
           ["gray-matter", "npm:4.0.3"],\
           ["husky", "npm:9.1.7"],\
           ["jest", "virtual:dc3fc578bfa5e06182a4d2be39ede0bc5b74940b1ffe0d70c26892ab140a4699787750fba175dc306292e80b4aa2c8c5f68c2a821e69b2c37e360c0dff36ff66#npm:29.7.0"],\
