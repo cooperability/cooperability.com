@@ -7500,10 +7500,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["basic-ftp", [\
-      ["npm:5.0.5", {\
-        "packageLocation": "./.yarn/cache/basic-ftp-npm-5.0.5-4f7972e368-be983a3997.zip/node_modules/basic-ftp/",\
+      ["npm:5.2.0", {\
+        "packageLocation": "./.yarn/cache/basic-ftp-npm-5.2.0-21ff20e47d-a0f85c01de.zip/node_modules/basic-ftp/",\
         "packageDependencies": [\
-          ["basic-ftp", "npm:5.0.5"]\
+          ["basic-ftp", "npm:5.2.0"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -10416,7 +10416,7 @@ const RAW_RUNTIME_STATE =
       ["npm:6.0.4", {\
         "packageLocation": "./.yarn/cache/get-uri-npm-6.0.4-ca20285841-07c87abe1f.zip/node_modules/get-uri/",\
         "packageDependencies": [\
-          ["basic-ftp", "npm:5.0.5"],\
+          ["basic-ftp", "npm:5.2.0"],\
           ["data-uri-to-buffer", "npm:6.0.2"],\
           ["debug", "virtual:92a28e392bb7746809827b7e8ebf6aec49c5f04125481214ae6ea6f4de204344bcccbe5eb3a2f4388bb368cfa5d84f03ce0d8f32a9fcc3f5e92ea34723da1c56#npm:4.4.1"],\
           ["get-uri", "npm:6.0.4"]\
