@@ -12646,7 +12646,7 @@ __metadata:
     "@vercel/analytics": "npm:^1.6.1"
     "@vercel/speed-insights": "npm:^1.3.1"
     "@yarnpkg/pnpify": "npm:^4.1.6"
-    acorn: "npm:^8.15.0"
+    acorn: "npm:^8.16.0"
     autoprefixer: "npm:^10.4.27"
     class-variance-authority: "npm:^0.7.1"
     clsx: "npm:^2.1.1"
