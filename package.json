@@ -89,7 +89,7 @@
     "@yarnpkg/pnpify": "^4.1.6",
     "acorn": "^8.15.0",
     "autoprefixer": "^10.4.27",
-    "cross-env": "^7.0.3",
+    "cross-env": "^10.1.0",
     "eslint": "^10.0.2",
     "eslint-config-next": "^15.4.8",
     "eslint-config-prettier": "^10.1.8",
