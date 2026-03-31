@@ -12639,7 +12639,7 @@ const RAW_RUNTIME_STATE =
           ["micromatch", "npm:4.0.8"],\
           ["pidtree", "npm:0.6.0"],\
           ["string-argv", "npm:0.3.2"],\
-          ["yaml", "npm:2.8.0"]\
+          ["yaml", "npm:2.8.3"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -15024,7 +15024,7 @@ const RAW_RUNTIME_STATE =
           ["postcss", "npm:8.5.6"],\
           ["postcss-load-config", "virtual:403059edc194f8eee9f9b8f9ab634e67126b182288b0cf3b56c13ed0ebaeda2fb24025b868e17fbbf02f6cd6a0b5ab93ce2bfe51d215138ea74d0736d87896c8#npm:4.0.2"],\
           ["ts-node", null],\
-          ["yaml", "npm:2.8.0"]\
+          ["yaml", "npm:2.8.3"]\
         ],\
         "packagePeers": [\
           "@types/postcss",\
@@ -17769,7 +17769,7 @@ const RAW_RUNTIME_STATE =
           ["vfile-message", "npm:4.0.2"],\
           ["vfile-reporter", "npm:8.1.1"],\
           ["vfile-statistics", "npm:3.0.0"],\
-          ["yaml", "npm:2.8.0"]\
+          ["yaml", "npm:2.8.3"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -18127,7 +18127,7 @@ const RAW_RUNTIME_STATE =
         "packageDependencies": [\
           ["vfile", "npm:6.0.3"],\
           ["vfile-matter", "npm:5.0.1"],\
-          ["yaml", "npm:2.8.0"]\
+          ["yaml", "npm:2.8.3"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -18692,10 +18692,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["yaml", [\
-      ["npm:2.8.0", {\
-        "packageLocation": "./.yarn/cache/yaml-npm-2.8.0-01747dd315-f6f7310cf7.zip/node_modules/yaml/",\
+      ["npm:2.8.3", {\
+        "packageLocation": "./.yarn/cache/yaml-npm-2.8.3-dfea86f9e0-ddff0e11c1.zip/node_modules/yaml/",\
         "packageDependencies": [\
-          ["yaml", "npm:2.8.0"]\
+          ["yaml", "npm:2.8.3"]\
         ],\
         "linkType": "HARD"\
       }]\
