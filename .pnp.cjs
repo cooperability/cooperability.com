@@ -9466,7 +9466,7 @@ const RAW_RUNTIME_STATE =
           ["hasown", "npm:2.0.2"],\
           ["is-core-module", "npm:2.16.1"],\
           ["is-glob", "npm:4.0.3"],\
-          ["minimatch", "npm:3.1.2"],\
+          ["minimatch", "npm:3.1.5"],\
           ["object.fromentries", "npm:2.0.8"],\
           ["object.groupby", "npm:1.0.3"],\
           ["object.values", "npm:1.2.1"],\
@@ -9508,7 +9508,7 @@ const RAW_RUNTIME_STATE =
           ["hasown", "npm:2.0.2"],\
           ["jsx-ast-utils", "npm:3.3.5"],\
           ["language-tags", "npm:1.0.9"],\
-          ["minimatch", "npm:3.1.2"],\
+          ["minimatch", "npm:3.1.5"],\
           ["object.fromentries", "npm:2.0.8"],\
           ["safe-regex-test", "npm:1.1.0"],\
           ["string.prototype.includes", "npm:2.0.1"]\
@@ -9575,7 +9575,7 @@ const RAW_RUNTIME_STATE =
           ["estraverse", "npm:5.3.0"],\
           ["hasown", "npm:2.0.2"],\
           ["jsx-ast-utils", "npm:3.3.5"],\
-          ["minimatch", "npm:3.1.2"],\
+          ["minimatch", "npm:3.1.5"],\
           ["object.entries", "npm:1.1.9"],\
           ["object.fromentries", "npm:2.0.8"],\
           ["object.values", "npm:1.2.1"],\
@@ -13808,14 +13808,6 @@ const RAW_RUNTIME_STATE =
         ],\
         "linkType": "HARD"\
       }],\
-      ["npm:3.1.2", {\
-        "packageLocation": "./.yarn/cache/minimatch-npm-3.1.2-9405269906-0262810a8f.zip/node_modules/minimatch/",\
-        "packageDependencies": [\
-          ["brace-expansion", "npm:1.1.12"],\
-          ["minimatch", "npm:3.1.2"]\
-        ],\
-        "linkType": "HARD"\
-      }],\
       ["npm:3.1.5", {\
         "packageLocation": "./.yarn/cache/minimatch-npm-3.1.5-86958baf50-2ecbdc0d33.zip/node_modules/minimatch/",\
         "packageDependencies": [\
@@ -17191,7 +17183,7 @@ const RAW_RUNTIME_STATE =
         "packageDependencies": [\
           ["@istanbuljs/schema", "npm:0.1.3"],\
           ["glob", "npm:10.5.0"],\
-          ["minimatch", "npm:3.1.2"],\
+          ["minimatch", "npm:3.1.5"],\
           ["test-exclude", "npm:6.0.0"]\
         ],\
         "linkType": "HARD"\
