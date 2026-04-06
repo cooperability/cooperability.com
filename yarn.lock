@@ -3155,21 +3155,34 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@serwist/build@npm:^9.2.1":
-  version: 9.2.1
-  resolution: "@serwist/build@npm:9.2.1"
+"@serwist/build@npm:^9.5.7":
+  version: 9.5.7
+  resolution: "@serwist/build@npm:9.5.7"
   dependencies:
+    "@serwist/utils": "npm:9.5.7"
     common-tags: "npm:1.8.2"
-    glob: "npm:10.4.5"
+    glob: "npm:10.5.0"
     pretty-bytes: "npm:6.1.1"
     source-map: "npm:0.8.0-beta.0"
-    zod: "npm:4.1.5"
+    zod: "npm:4.3.6"
   peerDependencies:
     typescript: ">=5.0.0"
   peerDependenciesMeta:
     typescript:
       optional: true
-  checksum: 10c0/b442c29b6c096825ed443c80617f8f37ce2334369e3d5adf821931db564c62b0afdfd98bc2050503b11887a05259a7f48b17e3ed2a17e8c9c858fd8a76012f1c
+  checksum: 10c0/5511e586bc9afb4b91aeaf80d552804e5bc9287d984b20bd1ca602a1f90b3ceb8eb796befdbfdbed8856efe4330494f93d4534d808e75f9d0296a4987fbeb8b1
+  languageName: node
+  linkType: hard
+
+"@serwist/utils@npm:9.5.7":
+  version: 9.5.7
+  resolution: "@serwist/utils@npm:9.5.7"
+  peerDependencies:
+    browserslist: ">=4"
+  peerDependenciesMeta:
+    browserslist:
+      optional: true
+  checksum: 10c0/98ec0faad357b0949ad564c9f5949a982fd3bbe219ab28507d8ecc9a7010575cbcd86b80aba633991c945a8939f01f97c2dbbf125110f125237f47ffc6ded51d
   languageName: node
   linkType: hard
 
@@ -12622,7 +12635,7 @@ __metadata:
     "@radix-ui/react-switch": "npm:^1.2.6"
     "@radix-ui/react-tabs": "npm:^1.1.2"
     "@radix-ui/react-tooltip": "npm:^1.2.8"
-    "@serwist/build": "npm:^9.2.1"
+    "@serwist/build": "npm:^9.5.7"
     "@swc/core": "npm:^1.15.21"
     "@tailwindcss/typography": "npm:^0.5.19"
     "@testing-library/dom": "npm:^10.4.1"
@@ -15336,10 +15349,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"zod@npm:4.1.5":
-  version: 4.1.5
-  resolution: "zod@npm:4.1.5"
-  checksum: 10c0/7826fb931bc71d4d0fff2fbb72f1a1cf30a6672cf9dbe6933a216bbb60242ef1c3bdfbcd3c5b27e806235a35efaad7a4a9897ff4d3621452f9ea278bce6fd42a
+"zod@npm:4.3.6, zod@npm:^3.25.0 || ^4.0.0":
+  version: 4.3.6
+  resolution: "zod@npm:4.3.6"
+  checksum: 10c0/860d25a81ab41d33aa25f8d0d07b091a04acb426e605f396227a796e9e800c44723ed96d0f53a512b57be3d1520f45bf69c0cb3b378a232a00787a2609625307
   languageName: node
   linkType: hard
 
@@ -15347,13 +15360,6 @@ __metadata:
   version: 3.25.67
   resolution: "zod@npm:3.25.67"
   checksum: 10c0/80a0cab3033272c4ab9312198081f0c4ea88e9673c059aa36dc32024906363729db54bdb78f3dc9d5529bd1601f74974d5a56c0a23e40c6f04a9270c9ff22336
-  languageName: node
-  linkType: hard
-
-"zod@npm:^3.25.0 || ^4.0.0":
-  version: 4.3.6
-  resolution: "zod@npm:4.3.6"
-  checksum: 10c0/860d25a81ab41d33aa25f8d0d07b091a04acb426e605f396227a796e9e800c44723ed96d0f53a512b57be3d1520f45bf69c0cb3b378a232a00787a2609625307
   languageName: node
   linkType: hard
 
