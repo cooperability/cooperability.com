@@ -58,7 +58,7 @@ const RAW_RUNTIME_STATE =
           ["@types/punycode", "npm:2.1.4"],\
           ["@types/react", "npm:19.1.8"],\
           ["@types/react-dom", "virtual:dc3fc578bfa5e06182a4d2be39ede0bc5b74940b1ffe0d70c26892ab140a4699787750fba175dc306292e80b4aa2c8c5f68c2a821e69b2c37e360c0dff36ff66#npm:19.1.6"],\
-          ["@vercel/analytics", "virtual:dc3fc578bfa5e06182a4d2be39ede0bc5b74940b1ffe0d70c26892ab140a4699787750fba175dc306292e80b4aa2c8c5f68c2a821e69b2c37e360c0dff36ff66#npm:1.6.1"],\
+          ["@vercel/analytics", "virtual:dc3fc578bfa5e06182a4d2be39ede0bc5b74940b1ffe0d70c26892ab140a4699787750fba175dc306292e80b4aa2c8c5f68c2a821e69b2c37e360c0dff36ff66#npm:2.0.1"],\
           ["@vercel/speed-insights", "virtual:dc3fc578bfa5e06182a4d2be39ede0bc5b74940b1ffe0d70c26892ab140a4699787750fba175dc306292e80b4aa2c8c5f68c2a821e69b2c37e360c0dff36ff66#npm:1.3.1"],\
           ["@yarnpkg/pnpify", "npm:4.1.6"],\
           ["acorn", "npm:8.15.0"],\
@@ -6191,27 +6191,29 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["@vercel/analytics", [\
-      ["npm:1.6.1", {\
-        "packageLocation": "./.yarn/cache/@vercel-analytics-npm-1.6.1-cc058602a7-df39ec4192.zip/node_modules/@vercel/analytics/",\
+      ["npm:2.0.1", {\
+        "packageLocation": "./.yarn/cache/@vercel-analytics-npm-2.0.1-728d94e8b4-c788c03d0f.zip/node_modules/@vercel/analytics/",\
         "packageDependencies": [\
-          ["@vercel/analytics", "npm:1.6.1"]\
+          ["@vercel/analytics", "npm:2.0.1"]\
         ],\
         "linkType": "SOFT"\
       }],\
-      ["virtual:dc3fc578bfa5e06182a4d2be39ede0bc5b74940b1ffe0d70c26892ab140a4699787750fba175dc306292e80b4aa2c8c5f68c2a821e69b2c37e360c0dff36ff66#npm:1.6.1", {\
-        "packageLocation": "./.yarn/__virtual__/@vercel-analytics-virtual-d0f0154ddd/0/cache/@vercel-analytics-npm-1.6.1-cc058602a7-df39ec4192.zip/node_modules/@vercel/analytics/",\
+      ["virtual:dc3fc578bfa5e06182a4d2be39ede0bc5b74940b1ffe0d70c26892ab140a4699787750fba175dc306292e80b4aa2c8c5f68c2a821e69b2c37e360c0dff36ff66#npm:2.0.1", {\
+        "packageLocation": "./.yarn/__virtual__/@vercel-analytics-virtual-6505f4db1d/0/cache/@vercel-analytics-npm-2.0.1-728d94e8b4-c788c03d0f.zip/node_modules/@vercel/analytics/",\
         "packageDependencies": [\
           ["@remix-run/react", null],\
           ["@sveltejs/kit", null],\
           ["@types/next", null],\
+          ["@types/nuxt", null],\
           ["@types/react", "npm:19.1.8"],\
           ["@types/remix-run__react", null],\
           ["@types/svelte", null],\
           ["@types/sveltejs__kit", null],\
           ["@types/vue", null],\
           ["@types/vue-router", null],\
-          ["@vercel/analytics", "virtual:dc3fc578bfa5e06182a4d2be39ede0bc5b74940b1ffe0d70c26892ab140a4699787750fba175dc306292e80b4aa2c8c5f68c2a821e69b2c37e360c0dff36ff66#npm:1.6.1"],\
+          ["@vercel/analytics", "virtual:dc3fc578bfa5e06182a4d2be39ede0bc5b74940b1ffe0d70c26892ab140a4699787750fba175dc306292e80b4aa2c8c5f68c2a821e69b2c37e360c0dff36ff66#npm:2.0.1"],\
           ["next", "virtual:dc3fc578bfa5e06182a4d2be39ede0bc5b74940b1ffe0d70c26892ab140a4699787750fba175dc306292e80b4aa2c8c5f68c2a821e69b2c37e360c0dff36ff66#npm:16.2.3"],\
+          ["nuxt", null],\
           ["react", "npm:19.1.0"],\
           ["svelte", null],\
           ["vue", null],\
@@ -6221,6 +6223,7 @@ const RAW_RUNTIME_STATE =
           "@remix-run/react",\
           "@sveltejs/kit",\
           "@types/next",\
+          "@types/nuxt",\
           "@types/react",\
           "@types/remix-run__react",\
           "@types/svelte",\
@@ -6228,6 +6231,7 @@ const RAW_RUNTIME_STATE =
           "@types/vue-router",\
           "@types/vue",\
           "next",\
+          "nuxt",\
           "react",\
           "svelte",\
           "vue-router",\
@@ -15870,7 +15874,7 @@ const RAW_RUNTIME_STATE =
           ["@types/punycode", "npm:2.1.4"],\
           ["@types/react", "npm:19.1.8"],\
           ["@types/react-dom", "virtual:dc3fc578bfa5e06182a4d2be39ede0bc5b74940b1ffe0d70c26892ab140a4699787750fba175dc306292e80b4aa2c8c5f68c2a821e69b2c37e360c0dff36ff66#npm:19.1.6"],\
-          ["@vercel/analytics", "virtual:dc3fc578bfa5e06182a4d2be39ede0bc5b74940b1ffe0d70c26892ab140a4699787750fba175dc306292e80b4aa2c8c5f68c2a821e69b2c37e360c0dff36ff66#npm:1.6.1"],\
+          ["@vercel/analytics", "virtual:dc3fc578bfa5e06182a4d2be39ede0bc5b74940b1ffe0d70c26892ab140a4699787750fba175dc306292e80b4aa2c8c5f68c2a821e69b2c37e360c0dff36ff66#npm:2.0.1"],\
           ["@vercel/speed-insights", "virtual:dc3fc578bfa5e06182a4d2be39ede0bc5b74940b1ffe0d70c26892ab140a4699787750fba175dc306292e80b4aa2c8c5f68c2a821e69b2c37e360c0dff36ff66#npm:1.3.1"],\
           ["@yarnpkg/pnpify", "npm:4.1.6"],\
           ["acorn", "npm:8.15.0"],\
