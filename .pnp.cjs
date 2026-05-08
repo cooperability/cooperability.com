@@ -7219,11 +7219,11 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["axios", [\
-      ["npm:1.15.0", {\
-        "packageLocation": "./.yarn/cache/axios-npm-1.15.0-9132fa0a61-47e0f860e9.zip/node_modules/axios/",\
+      ["npm:1.16.0", {\
+        "packageLocation": "./.yarn/cache/axios-npm-1.16.0-77f999ccb9-1c91a5221b.zip/node_modules/axios/",\
         "packageDependencies": [\
-          ["axios", "npm:1.15.0"],\
-          ["follow-redirects", "virtual:9132fa0a61efc86c3366c1f4c98c4eaafaefa0c123aca659f85cbce3e47a61c0090e4615b3b10a9c9285534e80db49e04a98baf895cccb5d9c934849464afff0#npm:1.15.11"],\
+          ["axios", "npm:1.16.0"],\
+          ["follow-redirects", "virtual:77f999ccb93c7a8b1163212330fc2663930702a6310c22e4e44a0943273d572bf2cd007ae086150f8e94e02087a59aa85c3d28f0def8ae1df499b727a5c2330b#npm:1.16.0"],\
           ["form-data", "npm:4.0.4"],\
           ["proxy-from-env", "npm:2.1.0"]\
         ],\
@@ -7914,7 +7914,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/unplugged/chromedriver-npm-138.0.1-6538a6d727/node_modules/chromedriver/",\
         "packageDependencies": [\
           ["@testim/chrome-version", "npm:1.1.4"],\
-          ["axios", "npm:1.15.0"],\
+          ["axios", "npm:1.16.0"],\
           ["chromedriver", "npm:138.0.1"],\
           ["compare-versions", "npm:6.1.1"],\
           ["extract-zip", "npm:2.0.1"],\
@@ -10153,19 +10153,19 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["follow-redirects", [\
-      ["npm:1.15.11", {\
-        "packageLocation": "./.yarn/cache/follow-redirects-npm-1.15.11-ae7b2db266-d301f43054.zip/node_modules/follow-redirects/",\
+      ["npm:1.16.0", {\
+        "packageLocation": "./.yarn/cache/follow-redirects-npm-1.16.0-816e4f62d9-a1e2900163.zip/node_modules/follow-redirects/",\
         "packageDependencies": [\
-          ["follow-redirects", "npm:1.15.11"]\
+          ["follow-redirects", "npm:1.16.0"]\
         ],\
         "linkType": "SOFT"\
       }],\
-      ["virtual:9132fa0a61efc86c3366c1f4c98c4eaafaefa0c123aca659f85cbce3e47a61c0090e4615b3b10a9c9285534e80db49e04a98baf895cccb5d9c934849464afff0#npm:1.15.11", {\
-        "packageLocation": "./.yarn/__virtual__/follow-redirects-virtual-fdd81fa3e5/0/cache/follow-redirects-npm-1.15.11-ae7b2db266-d301f43054.zip/node_modules/follow-redirects/",\
+      ["virtual:77f999ccb93c7a8b1163212330fc2663930702a6310c22e4e44a0943273d572bf2cd007ae086150f8e94e02087a59aa85c3d28f0def8ae1df499b727a5c2330b#npm:1.16.0", {\
+        "packageLocation": "./.yarn/__virtual__/follow-redirects-virtual-c86df41732/0/cache/follow-redirects-npm-1.16.0-816e4f62d9-a1e2900163.zip/node_modules/follow-redirects/",\
         "packageDependencies": [\
           ["@types/debug", null],\
           ["debug", null],\
-          ["follow-redirects", "virtual:9132fa0a61efc86c3366c1f4c98c4eaafaefa0c123aca659f85cbce3e47a61c0090e4615b3b10a9c9285534e80db49e04a98baf895cccb5d9c934849464afff0#npm:1.15.11"]\
+          ["follow-redirects", "virtual:77f999ccb93c7a8b1163212330fc2663930702a6310c22e4e44a0943273d572bf2cd007ae086150f8e94e02087a59aa85c3d28f0def8ae1df499b727a5c2330b#npm:1.16.0"]\
         ],\
         "packagePeers": [\
           "@types/debug",\
@@ -18197,7 +18197,7 @@ const RAW_RUNTIME_STATE =
       ["npm:9.0.4", {\
         "packageLocation": "./.yarn/cache/wait-on-npm-9.0.4-0c132c1dc4-914d3a76ea.zip/node_modules/wait-on/",\
         "packageDependencies": [\
-          ["axios", "npm:1.15.0"],\
+          ["axios", "npm:1.16.0"],\
           ["joi", "npm:18.0.2"],\
           ["lodash", "npm:4.18.1"],\
           ["minimist", "npm:1.2.8"],\
