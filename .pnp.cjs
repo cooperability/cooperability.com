@@ -6484,7 +6484,7 @@ const RAW_RUNTIME_STATE =
           ["ci-info", "npm:4.2.0"],\
           ["clipanion", "virtual:b80567f1f726ad28b5f69c2f4d583115762754ed5e643c8ffc700d555267034c078163b8acf27ac9e54b95573c3afeb591dde0dc0755beb1e2c159d60551a612#npm:4.0.0-rc.4"],\
           ["cross-spawn", "npm:7.0.6"],\
-          ["diff", "npm:5.2.0"],\
+          ["diff", "npm:5.2.2"],\
           ["dotenv", "npm:16.6.1"],\
           ["fast-glob", "npm:3.3.3"],\
           ["got", "npm:11.8.6"],\
@@ -6517,7 +6517,7 @@ const RAW_RUNTIME_STATE =
           ["ci-info", "npm:4.2.0"],\
           ["clipanion", "virtual:b80567f1f726ad28b5f69c2f4d583115762754ed5e643c8ffc700d555267034c078163b8acf27ac9e54b95573c3afeb591dde0dc0755beb1e2c159d60551a612#npm:4.0.0-rc.4"],\
           ["cross-spawn", "npm:7.0.6"],\
-          ["diff", "npm:5.2.0"],\
+          ["diff", "npm:5.2.2"],\
           ["dotenv", "npm:16.6.1"],\
           ["es-toolkit", "npm:1.44.0"],\
           ["fast-glob", "npm:3.3.3"],\
@@ -8741,10 +8741,10 @@ const RAW_RUNTIME_STATE =
         ],\
         "linkType": "HARD"\
       }],\
-      ["npm:5.2.0", {\
-        "packageLocation": "./.yarn/cache/diff-npm-5.2.0-f523a581f3-aed0941f20.zip/node_modules/diff/",\
+      ["npm:5.2.2", {\
+        "packageLocation": "./.yarn/cache/diff-npm-5.2.2-8338a97b62-52da594c54.zip/node_modules/diff/",\
         "packageDependencies": [\
-          ["diff", "npm:5.2.0"]\
+          ["diff", "npm:5.2.2"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -18042,7 +18042,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/uvu-npm-0.5.6-c8507ad49b-ad32eb5f7d.zip/node_modules/uvu/",\
         "packageDependencies": [\
           ["dequal", "npm:2.0.3"],\
-          ["diff", "npm:5.2.0"],\
+          ["diff", "npm:5.2.2"],\
           ["kleur", "npm:4.1.5"],\
           ["sade", "npm:1.8.1"],\
           ["uvu", "npm:0.5.6"]\
