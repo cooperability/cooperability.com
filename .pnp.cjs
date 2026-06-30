@@ -6811,7 +6811,7 @@ const RAW_RUNTIME_STATE =
         "packageDependencies": [\
           ["ajv", "npm:8.17.1"],\
           ["fast-deep-equal", "npm:3.1.3"],\
-          ["fast-uri", "npm:3.0.6"],\
+          ["fast-uri", "npm:3.1.3"],\
           ["json-schema-traverse", "npm:1.0.0"],\
           ["require-from-string", "npm:2.0.2"]\
         ],\
@@ -10032,10 +10032,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["fast-uri", [\
-      ["npm:3.0.6", {\
-        "packageLocation": "./.yarn/cache/fast-uri-npm-3.0.6-140ab22003-74a513c2af.zip/node_modules/fast-uri/",\
+      ["npm:3.1.3", {\
+        "packageLocation": "./.yarn/cache/fast-uri-npm-3.1.3-90ca1925ff-0ce4058155.zip/node_modules/fast-uri/",\
         "packageDependencies": [\
-          ["fast-uri", "npm:3.0.6"]\
+          ["fast-uri", "npm:3.1.3"]\
         ],\
         "linkType": "HARD"\
       }]\
