@@ -1,0 +1,12 @@
+---
+description: MDX authoring and lint pitfalls for resources and posts
+globs: "**/*.{mdx,md}"
+alwaysApply: false
+---
+
+# MDX
+
+- Blank lines before/after JSX blocks inside markdown
+- Avoid `<br />` inside markdown lists — use proper list structure
+- Run `yarn lint:mdx` / `yarn format:mdx` when editing MDX heavily
+- Keep accessibility: headings hierarchy, link text, image alt when embedding media

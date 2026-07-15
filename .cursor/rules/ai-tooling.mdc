@@ -1,0 +1,12 @@
+---
+description: When editing agent skills, CLI catalogs, or AI infra under .cursor/.claude
+globs: ".{cursor,claude}/**/*"
+alwaysApply: false
+---
+
+# AI tooling edits
+
+- Keep `.cursor/` and `.claude/` **mirrored** for skills, cli catalogs, and agents unless a tool-specific note is required
+- Skills: concise `SKILL.md` with `name` + third-person `description` (what + when)
+- CLI catalogs: non-interactive commands only; link between test / accessibility / quality
+- Update root `AGENTS.md` when adding/removing skills or agents

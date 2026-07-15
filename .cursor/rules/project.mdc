@@ -1,0 +1,15 @@
+---
+description: Core cooperability.com conventions for every agent session
+alwaysApply: true
+---
+
+# Project conventions
+
+- **Stack:** Next.js (Pages Router in `src/pages`), React 19, TypeScript, Tailwind, Yarn 4 PnP, Node 22
+- **Package manager:** Yarn only (`yarn`). Do not use npm/pnpm unless migrating
+- **Tests:** `yarn jest --ci --watchAll=false` — never leave Jest in watch mode
+- **A11y suite:** `yarn access` (axe + Lighthouse); static ARIA via `yarn lint`
+- **Prefer** `src/components` and `src/lib` over legacy root `components/` / `lib/`
+- **Docs:** `docs/Tooling.md`, agent catalogs in `.cursor/cli/`, skills in `.cursor/skills/`
+- Match existing patterns; no drive-by refactors; no secrets in commits
+- Line endings in git are LF (see `.gitattributes`)
