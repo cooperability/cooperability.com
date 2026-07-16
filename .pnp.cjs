@@ -1443,7 +1443,7 @@ const RAW_RUNTIME_STATE =
           ["@eslint/config-array", "npm:0.23.2"],\
           ["@eslint/object-schema", "npm:3.0.2"],\
           ["debug", "virtual:92a28e392bb7746809827b7e8ebf6aec49c5f04125481214ae6ea6f4de204344bcccbe5eb3a2f4388bb368cfa5d84f03ce0d8f32a9fcc3f5e92ea34723da1c56#npm:4.4.1"],\
-          ["minimatch", "npm:10.2.2"]\
+          ["minimatch", "npm:10.2.5"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -7554,11 +7554,11 @@ const RAW_RUNTIME_STATE =
         ],\
         "linkType": "HARD"\
       }],\
-      ["npm:5.0.3", {\
-        "packageLocation": "./.yarn/cache/brace-expansion-npm-5.0.3-134cbcf5ff-e474d300e5.zip/node_modules/brace-expansion/",\
+      ["npm:5.0.6", {\
+        "packageLocation": "./.yarn/cache/brace-expansion-npm-5.0.6-abf39a1281-8c919869b9.zip/node_modules/brace-expansion/",\
         "packageDependencies": [\
           ["balanced-match", "npm:4.0.4"],\
-          ["brace-expansion", "npm:5.0.3"]\
+          ["brace-expansion", "npm:5.0.6"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -9243,7 +9243,7 @@ const RAW_RUNTIME_STATE =
           ["is-glob", "npm:4.0.3"],\
           ["jiti", null],\
           ["json-stable-stringify-without-jsonify", "npm:1.0.1"],\
-          ["minimatch", "npm:10.2.2"],\
+          ["minimatch", "npm:10.2.5"],\
           ["natural-compare", "npm:1.4.0"],\
           ["optionator", "npm:0.9.4"]\
         ],\
@@ -13800,11 +13800,11 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["minimatch", [\
-      ["npm:10.2.2", {\
-        "packageLocation": "./.yarn/cache/minimatch-npm-10.2.2-834cf8d1d1-098831f2f5.zip/node_modules/minimatch/",\
+      ["npm:10.2.5", {\
+        "packageLocation": "./.yarn/cache/minimatch-npm-10.2.5-f1c8297822-6bb058bd63.zip/node_modules/minimatch/",\
         "packageDependencies": [\
-          ["brace-expansion", "npm:5.0.3"],\
-          ["minimatch", "npm:10.2.2"]\
+          ["brace-expansion", "npm:5.0.6"],\
+          ["minimatch", "npm:10.2.5"]\
         ],\
         "linkType": "HARD"\
       }],\
