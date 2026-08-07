@@ -44,3 +44,16 @@ Package manager is **Yarn 4 (PnP)**. Do not switch to npm/pnpm unless the user i
 - Index: `AGENTS.md`
 
 When a skill matches the user request, read and follow it.
+
+### Shared vs. project-local skills
+
+The git/GitHub workflow skills are **vendored** from [claugmentations](https://github.com/cooperability/claugmentations) (private) and shared across repos. `.claugmentations.json` lists exactly which files those are.
+
+**Do not edit a synced skill in place** — the next sync reports it as drift and the fix gets lost. Change it upstream in `claugmentations/templates/{claude,cursor}/`, then re-sync:
+
+```bash
+npx github:cooperability/claugmentations sync    # --force to take upstream over local edits
+npx github:cooperability/claugmentations check   # exit 1 if this repo is stale
+```
+
+Everything not in the manifest is project-local and safe to edit here: `cli/**/COMMANDS.md` (the `yarn` commands), all four agents, `.cursor/rules/*.mdc`, and `run-automated-tests`. These stay local precisely because they hardcode this stack — keep stack-specific commands out of the shared skills.

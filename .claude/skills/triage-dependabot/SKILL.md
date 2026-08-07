@@ -79,8 +79,71 @@ EOF
 )"
 ```
 
+## 6. Clean up merged Dependabot branches
+
+Run after a merge, or standalone when the user asks to tidy up branches.
+
+Two rules govern this whole section:
+
+1. **PR state is the authority — never `git branch --merged`.** Dependabot PRs are squash- or rebase-merged, which rewrites the commits. The branch is therefore *not* an ancestor of the default branch, so `git branch --merged` silently omits genuinely merged branches and `git branch -d` refuses to delete them. Ask GitHub what was merged.
+2. **Never delete a branch that has an open PR.** Deleting the head branch closes the PR.
+
+### 6a. Refresh and classify
+
+```bash
+git fetch --prune
+```
+
+`--prune` drops tracking refs for branches already deleted on the remote. This is usually the bulk of local cleanup: Dependabot deletes its own branches when its PRs are merged or closed, independent of the repo's `deleteBranchOnMerge` setting.
+
+Build the two sets that drive every decision below:
+
+```bash
+# merged — safe to delete
+gh pr list --state merged --limit 200 --json headRefName --jq '.[].headRefName' | sort > /tmp/merged.txt
+
+# open — never touch
+gh pr list --state open --limit 200 --json headRefName --jq '.[].headRefName' | sort > /tmp/open.txt
+```
+
+### 6b. Local branches
+
+For each local branch matching `dependabot/*`, plus any local branch you created off a Dependabot PR:
+
+- Skip the current branch and the default branch.
+- Skip anything in the open set.
+- Delete only when the PR state is `MERGED`:
+
+  ```bash
+  git branch -D <branch>
+  ```
+
+  `-D` is deliberate here: `-d` refuses squash-merged branches. Verifying `MERGED` through `gh` is what makes `-D` safe — do not reach for `-D` without that check.
+- A branch with **no** PR at all is not a cleanup candidate. Leave it and report it; it may be unpushed local work.
+
+### 6c. Remote branches
+
+Only when the branch has a `MERGED` PR and is absent from the open set:
+
+```bash
+git push origin --delete <branch>
+```
+
+Expect this to be a no-op on most repos, since Dependabot removes its own branches. If merged Dependabot branches *do* linger on the remote, say so rather than quietly deleting — it usually means a PR was merged by a route Dependabot did not track, which is worth the user knowing.
+
+### 6d. Report
+
+Show the plan before deleting anything, then report what happened:
+
+| Branch | Local | Remote | PR | Action |
+|--------|-------|--------|----|--------|
+
+List kept branches and the reason (open PR, no PR, unpushed commits) alongside deleted ones. "Nothing to clean" is a valid, useful result — report it plainly instead of manufacturing work.
+
 ## Rules
 
 - Never force-push to `main`/`master`. Never commit secrets.
+- Never delete a branch with an open PR, the default branch, or the current branch.
+- Branch cleanup never closes an alert. Alerts close when the fix reaches the default branch; deleting branches is hygiene, not remediation.
 - Do not disable Dependabot or ignore advisories to “clear” the queue.
 - If an alert cannot be fixed yet (no patch, blocked peer dep), leave it open, document blocker in the PR, and still ship fixes for everything else.

@@ -1,10 +1,10 @@
 ---
 name: pr-reviewing
 description: >-
-  Review pull requests and local diffs for deterministic TypeScript smell fixes
-  (as-any, as-unknown, as-never) plus security, DevEx, footguns, and antipatterns.
-  Use when the user asks to review a PR, review changes, code review, or clean up
-  unsafe casts and review quality issues.
+  Review pull requests and local diffs for deterministic code smells (type-system
+  escapes, unexplained suppressions, swallowed errors) plus security, DevEx,
+  footguns, and antipatterns. Use when the user asks to review a PR, review
+  changes, code review, or clean up unsafe casts and review quality issues.
 ---
 
 # PR Reviewing
@@ -28,19 +28,21 @@ Infer the real base branch if not `main`. Skim linked issues for intent.
 
 Search the changed lines (and adjacent context) for mechanical debt. Flag or fix-propose each hit with location:
 
-| Pattern | Why it matters |
-|---------|----------------|
-| `as any` / `as unknown` / `as never` | Hides type errors; prefer correct types, generics, or narrow guards |
-| `as unknown as X` double-casts | Same; treat as high-priority smell |
-| `@ts-ignore` / `@ts-expect-error` without rationale | Require reason or proper typing |
-| eslint-disable without scoped rule + reason | Prefer fixing the violation |
-| `!` non-null assertions on uncertain values | Prefer narrowing |
-| Empty `catch` / swallowed errors | At least log or rethrow with context |
-| `console.log` left in production paths | Remove or gate behind debug |
-| Hardcoded secrets, private URLs, prod tokens | Block merge |
-| `TODO`/`FIXME` introduced without owner/issue | Note if it ships incomplete behavior |
+Use the rows that apply to the languages actually in the diff; ignore the rest.
 
-For TypeScript cast removal: propose the smallest sound fix (type the API, add a type guard, fix the upstream return type). Do not replace `as any` with looser runtime hacks.
+| Pattern | Looks like | Why it matters |
+|---------|-----------|----------------|
+| Type-system escape | TS `as any` / `as unknown` / `as never`; Python `cast(Any, x)`; Go `interface{}` + unchecked assertion; Java raw types | Hides real type errors; prefer correct types, generics, or narrow guards |
+| Double cast through the top type | TS `as unknown as X`; C-style reinterpret casts | Same, but deliberate — treat as high-priority smell |
+| Type-checker suppression without rationale | `@ts-ignore`, `@ts-expect-error`, `# type: ignore`, `#[allow(...)]` | Require a reason comment or proper typing |
+| Linter suppression without scoped rule + reason | `eslint-disable`, `# noqa`, `//nolint`, `# rubocop:disable` | Prefer fixing the violation over blanket silencing |
+| Unchecked non-null / unwrap | TS `!`, Kotlin `!!`, Rust `.unwrap()` / `.expect()`, Go discarded `err` | Prefer narrowing or explicit handling |
+| Empty catch / swallowed error | `catch {}`, `except: pass`, `_ = err`, `rescue nil` | At least log, or rethrow with context |
+| Debug output on production paths | `console.log`, `print()`, `fmt.Println`, `dbg!` | Remove or route through the project's logger |
+| Hardcoded secrets, private URLs, prod tokens | any language | Block merge |
+| `TODO`/`FIXME` introduced without owner/issue | any language | Note if it ships incomplete behavior |
+
+When removing a type escape, propose the smallest sound fix: type the boundary, add a guard or runtime validation, or correct the upstream return type. Do not trade one escape hatch for a looser runtime hack.
 
 ## 3. Abstract pass (judgment)
 

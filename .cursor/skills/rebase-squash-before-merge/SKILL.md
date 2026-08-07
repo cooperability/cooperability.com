@@ -71,7 +71,7 @@ gh pr view --json mergeable,mergeStateStatus,url
 
 - Use `--force-with-lease` only on the **feature** branch after rewrite.
 - If lease fails, fetch and reconcile—do not `--force` without asking.
-- Optionally run tests from `.cursor/cli/test/COMMANDS.md`.
+- Optionally run the project's test suite. Take the command from the repo's own agent docs (`.cursor/cli/test/COMMANDS.md`, `AGENTS.md`, `CLAUDE.md`) if present; otherwise read it off the CI workflow or the README rather than guessing.
 
 ## 5. Report
 
