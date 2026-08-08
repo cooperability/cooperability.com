@@ -15,18 +15,29 @@ This repo ships parallel Cursor and Claude Code configs so either tool can use t
 
 ## Skills (both trees)
 
+Project-local — hardcodes this stack, stays in this repo:
+
 | Skill | Use for |
 |-------|---------|
-| `triage-dependabot` | Clear Dependabot alerts in one bump PR |
-| `security-testing` | Repo security audit (no exploit PoCs) |
-| `pr-reviewing` | PR review: casts, inputs, footguns, DevEx |
-| `compose-pr-description` | Diff → PR/commit title + body |
-| `integration-hunting` | Mine GitHub stars for useful OSS |
 | `run-automated-tests` | Jest + optional quality/a11y gates |
-| `rebase-squash-before-merge` | Rebase, conflict resolve, squash |
+
+Shared, synced from [claugmentations](https://github.com/cooperability/claugmentations). Edit upstream, never in place — see CLAUDE.md:
+
+| Skill | Use for |
+|-------|---------|
+| `shepherd-to-pr` | One-shot: scoped idea → graded, reviewed draft PR |
+| `plan-feature` | Idea → intent, out-of-scope list, files, test plan |
+| `verified-change-loop` | Gate commits/PRs behind independent graded review |
+| `pr-reviewing` | PR review: casts, inputs, footguns, DevEx |
+| `security-testing` | Repo security audit (no exploit PoCs) |
+| `premerge-cleanup` | Rebase, resolve, squash, gate, confirm merge-ready |
 | `worktree-feature-pr` | Isolated worktree → branch → PR |
 | `update-branch-from-base` | Sync branch without squash |
-| `sanitize-pr-for-merge` | Orchestrate merge hygiene |
+| `git-hygiene` | Repo settings, branches, line endings, secrets, reflog |
+| `compose-pr-description` | Diff → PR/commit title + body |
+| `triage-dependabot` | Clear Dependabot alerts in one bump PR |
+| `integration-hunting` | Mine GitHub stars for useful OSS |
+| `extract-chat-insights` | Harvest an old chat, then clear it for deletion |
 
 ## Subagents / personas
 
