@@ -21,7 +21,7 @@ Project-local — hardcodes this stack, stays in this repo:
 |-------|---------|
 | `run-automated-tests` | Jest + optional quality/a11y gates |
 
-Shared, synced from [claugmentations](https://github.com/cooperability/claugmentations). Edit upstream, never in place — see CLAUDE.md:
+Shared — **not in this repo.** These install once into your home directory from [claugmentations](https://github.com/cooperability/claugmentations) and are then available in every repo you open. The table below is an index for humans; the installed set is the authority, and it can move without this file moving. See CLAUDE.md.
 
 | Skill | Use for |
 |-------|---------|

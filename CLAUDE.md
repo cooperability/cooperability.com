@@ -47,13 +47,6 @@ When a skill matches the user request, read and follow it.
 
 ### Shared vs. project-local skills
 
-The git/GitHub workflow skills are **vendored** from [claugmentations](https://github.com/cooperability/claugmentations) (private) and shared across repos. `.claugmentations.json` lists exactly which files those are.
+Everything under `.claude/` and `.cursor/` in this repo is **project-local** and safe to edit here: `cli/**/COMMANDS.md` (the `yarn` commands), all four agents, `.cursor/rules/*.mdc`, and `run-automated-tests`. They stay local precisely because they hardcode this stack — keep stack-specific commands out of anything shared.
 
-**Do not edit a synced skill in place** — the next sync reports it as drift and the fix gets lost. Change it upstream in `claugmentations/templates/{claude,cursor}/`, then re-sync:
-
-```bash
-npx github:cooperability/claugmentations sync    # --force to take upstream over local edits
-npx github:cooperability/claugmentations check   # exit 1 if this repo is stale
-```
-
-Everything not in the manifest is project-local and safe to edit here: `cli/**/COMMANDS.md` (the `yarn` commands), all four agents, `.cursor/rules/*.mdc`, and `run-automated-tests`. These stay local precisely because they hardcode this stack — keep stack-specific commands out of the shared skills.
+The shared git/GitHub workflow skills are **no longer vendored here.** They install once into your home directory from [claugmentations](https://github.com/cooperability/claugmentations) and load in every repo, so this repo has nothing to sync, check, or keep in step — no `.claugmentations.json`, no CI job. To change one, edit it upstream in `claugmentations/templates/claude/` and re-run that package's installer. Never copy one back into this repo: a local copy would shadow the installed skill and silently go stale.
