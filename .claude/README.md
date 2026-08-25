@@ -10,4 +10,4 @@
 
 Mirror of most workflows also lives under `.cursor/` for Cursor.
 
-Most of `skills/` is vendored from [claugmentations](https://github.com/cooperability/claugmentations) — see `../.claugmentations.json` for the exact list, and CLAUDE.md for why those must be edited upstream rather than here. `agents/`, `cli/`, and `skills/run-automated-tests/` are project-local.
+Everything here is project-local and safe to edit: `agents/`, `cli/`, and `skills/run-automated-tests/`. The shared workflow skills that used to be vendored into `skills/` are installed into your home directory from [claugmentations](https://github.com/cooperability/claugmentations) instead, so they load in every repo and none of them live here — see CLAUDE.md.
