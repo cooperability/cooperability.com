@@ -249,10 +249,44 @@ violation still fails the build.
 
 **Two are real, and are documented rather than fixed:**
 
-| Where                 | What                                                                                                                                                                                                              | Why not fixed here                                                                                                                                    |
-| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `OpioidConverter.tsx` | `morphineEq`/`methadoneEq` are derived from `medications` but held in state and re-synced through an effect — a render pass per keystroke. Correct fix: `useMemo` during render, delete the effect and the state. | It is a **medical dosing calculator with no test coverage.** It needs characterisation tests pinning the current arithmetic before anyone touches it. |
-| `PromptComposer.tsx`  | `editedPrompt` is derived from `compiledPrompt` but must stay user-overridable. Correct fix: React's documented "adjust state during render" pattern with a previous-value comparison.                            | Changes **when a user's manual edits get discarded.** That is a product decision, not a lint fix.                                                     |
+| Where                | What                                                                                                                                                                                   | Why not fixed here                                                                                |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `PromptComposer.tsx` | `editedPrompt` is derived from `compiledPrompt` but must stay user-overridable. Correct fix: React's documented "adjust state during render" pattern with a previous-value comparison. | Changes **when a user's manual edits get discarded.** That is a product decision, not a lint fix. |
+
+### 7.1 The OpioidConverter one is now fixed, and it turned up more
+
+Fixed in the order the risk demanded: **characterisation tests first, then the
+refactor.** The arithmetic moved verbatim into `calculateTotals` in
+`utils/calculations.ts`, 22 tests pin it, and the component now computes during
+render with `useMemo` instead of syncing state through an effect.
+
+The tests were **mutation-checked** rather than merely passing: flipping the
+Methadone branch from squaring to multiplying turns 3 tests red, and deriving
+methadone from the rounded rather than the unrounded total turns 4 red. A suite
+that has never been seen to fail is not evidence that anything works.
+
+Writing them surfaced three behaviours that are **pinned, not endorsed**. Each
+looks like a bug, and none was changed, because whether they are bugs is a
+clinical question rather than a technical one:
+
+1. **Methadone is special-cased to `dose` squared** rather than
+   `dose * toMorphine`. Methadone's potency genuinely is non-linear in the daily
+   dose, so a special case is expected — but this particular curve is
+   unverified here.
+
+2. **Methadone's `toMorphine: 0.25` is dead data.** Nothing reads it, because
+   the squaring branch never consults it. Anyone editing that number would see
+   no effect at all. A test asserts this explicitly, so if someone wires it back
+   in, the suite says so loudly.
+
+3. **The two outputs round inconsistently.** `morphineEq` is the rounded total,
+   but `methadoneEq` is derived from the _unrounded_ total. At 3 mg of codeine
+   the UI displays **0 mg morphine equivalent beside 1 mg methadone
+   equivalent** — which is the single clearest argument for having a clinician
+   read this file.
+
+Also worth noting: the Methadone branch matches on `display === 'Methadone'`,
+an exact string. Any other spelling silently takes the multiply path.
 
 ---
 
@@ -386,8 +420,9 @@ ids to GHSA ids (`auditConfig.ignoreCves` → `ignoreGhsas`).
 
 ## 12. Follow-up work, in priority order
 
-1. **Characterisation tests for `OpioidConverter`,** then the `useMemo`
-   refactor in §7. It is a dosing calculator; the tests come first.
+1. ~~Characterisation tests for `OpioidConverter`, then the `useMemo`
+   refactor.~~ **Done** — see §7.1. What remains there is a clinical review of
+   three pinned behaviours, not engineering work.
 2. **Decide the `PromptComposer` edit-discard semantics,** then apply React's
    adjust-during-render pattern.
 3. **tailwindcss 3 → 4** (Dependabot #214). A real migration — new config
