@@ -1,0 +1,67 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main, master]
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+# A second push to the same PR makes the first run's result worthless. Cancel
+# it rather than paying for it to finish.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Lint, types, tests, build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v7
+
+      # MUST come before setup-node: `cache: pnpm` below asks pnpm where its
+      # store lives, so the binary has to exist first. No `version:` here on
+      # purpose -- the action reads it from the `packageManager` field, which
+      # keeps one source of truth for the pnpm version across CI, Vercel and
+      # every developer machine.
+      - uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      # --frozen-lockfile is the pnpm equivalent of `yarn install --immutable`:
+      # fail if pnpm-lock.yaml would have to change, rather than silently
+      # resolving something the lockfile never recorded.
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      # Each step runs even if an earlier one failed, so a red run reports
+      # every problem at once instead of one per push.
+      - name: Lint
+        if: '!cancelled()'
+        run: pnpm lint
+
+      - name: Typecheck
+        if: '!cancelled()'
+        run: pnpm typecheck
+
+      - name: Unit tests
+        if: '!cancelled()'
+        run: pnpm test:ci
+
+      - name: Production build
+        if: '!cancelled()'
+        run: pnpm build
+
+      - name: Upload coverage
+        if: '!cancelled()'
+        uses: actions/upload-artifact@v7
+        with:
+          name: coverage
+          path: coverage/
+          retention-days: 7
+          if-no-files-found: ignore
