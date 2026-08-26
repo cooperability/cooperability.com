@@ -1,7 +1,9 @@
+'use client'
+
 import React, { useState } from 'react'
 import styles from '../styles/utils.module.css'
 import Link from 'next/link'
-import { useRouter } from 'next/router'
+import { usePathname } from 'next/navigation'
 import { useTheme } from 'next-themes'
 import { XMarkIcon } from '@heroicons/react/24/solid'
 import { Button } from '@/components/ui/button'
@@ -98,7 +100,7 @@ const Sidebar = ({
   accessibilityStatementUrl,
 }: SidebarProps) => {
   const { theme } = useTheme()
-  const { asPath } = useRouter()
+  const pathname = usePathname() || '/'
 
   const sidebarThemeClass =
     theme === 'dark' ? styles.sidebarDark : styles.sidebarLight
@@ -107,14 +109,14 @@ const Sidebar = ({
   const isRouteActive = (href: string) => {
     // For root, require exact match
     if (href === '/') {
-      return asPath === href
+      return pathname === href
     }
     // For /resources parent page, only match exactly (not sub-pages)
     if (href === '/resources') {
-      return asPath === '/resources'
+      return pathname === '/resources'
     }
     // For all other paths (like /resources/PrivacyStatement), use startsWith
-    return asPath.startsWith(href)
+    return pathname.startsWith(href)
   }
 
   // Set inverse color CSS variables based on theme

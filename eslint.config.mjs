@@ -1,41 +1,33 @@
+import { createRequire } from 'node:module'
 import { defineConfig } from 'eslint/config'
-import path from 'node:path'
-import { fileURLToPath } from 'node:url'
 import js from '@eslint/js'
-import { FlatCompat } from '@eslint/eslintrc'
 import globals from 'globals'
-import pluginJs from '@eslint/js'
 import tseslint from 'typescript-eslint'
 import eslintConfigPrettier from 'eslint-config-prettier'
+import nextCoreWebVitals from 'eslint-config-next/core-web-vitals'
 import * as mdx from 'eslint-plugin-mdx'
 
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-  recommendedConfig: js.configs.recommended,
-  allConfig: js.configs.all,
-})
+const require = createRequire(import.meta.url)
+
+// eslint-config-next sets `react: { version: 'detect' }`, and detection in
+// eslint-plugin-react 7.37.5 calls an ESLint API that v10 removed, so every
+// react/* rule throws on load. 7.37.5 is the latest release and peers at
+// eslint ^9.7, so there is no version to upgrade to — reading the installed
+// version here skips detection while keeping the rules correctly targeted.
+// Revisit once eslint-plugin-react ships ESLint 10 support.
+const reactVersion = require('react/package.json').version
 
 export default defineConfig([
   {
-    ignores: [
-      '.next/**',
-      '.yarn/**',
-      '.pnp.*',
-      'coverage/**',
-      'public/**',
-      'docs/**',
-      'docs/**',
-    ],
+    ignores: ['.next/**', '.yarn/**', '.pnp.*', 'coverage/**', 'public/**', 'docs/**'],
   },
   { languageOptions: { globals: globals.browser } },
-  pluginJs.configs.recommended,
+  js.configs.recommended,
   ...tseslint.configs.recommended,
-  eslintConfigPrettier,
-  {
-    extends: compat.extends('next/core-web-vitals', 'prettier'),
-  },
+  // Native flat config. Routing this through FlatCompat instead throws
+  // "Converting circular structure to JSON" on eslint-config-next >= 16.
+  ...nextCoreWebVitals,
+  { settings: { react: { version: reactVersion } } },
   {
     ...mdx.flat,
     processor: mdx.createRemarkProcessor({
@@ -73,4 +65,7 @@ export default defineConfig([
       '@typescript-eslint/no-var-requires': 'off',
     },
   },
+  // Last: turns off stylistic rules the configs above enable, so Prettier owns
+  // formatting outright.
+  eslintConfigPrettier,
 ])

@@ -1,17 +1,15 @@
+'use client'
+
 import { useTheme } from 'next-themes'
 import { SunIcon, MoonIcon } from '@heroicons/react/24/solid'
-import { useState, useEffect } from 'react'
 import styles from '../styles/utils.module.css'
+import { useHydrated } from '../hooks/useHydrated'
 
 const ThemeSwitch = () => {
   const { systemTheme, theme, setTheme } = useTheme()
-  const [mounted, setMounted] = useState(false)
+  const hydrated = useHydrated()
 
-  useEffect(() => {
-    setMounted(true)
-  }, [])
-
-  if (!mounted) return null
+  if (!hydrated) return null
 
   const currentTheme = theme === 'system' ? systemTheme : theme
   const isDark = currentTheme === 'dark'

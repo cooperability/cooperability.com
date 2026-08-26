@@ -1,4 +1,6 @@
-import { useState, useEffect, useCallback } from 'react'
+'use client'
+
+import { useSyncExternalStore } from 'react'
 
 /**
  * Tailwind-aligned breakpoints for consistent responsive design
@@ -34,37 +36,32 @@ type BreakpointState = {
  * For CSS-first approach, prefer Tailwind classes (sm:, md:, lg:)
  * Use this hook only when you need JS-based responsive behavior
  */
+const RESIZE_DEBOUNCE_MS = 100
+
+function subscribe(onStoreChange: () => void) {
+  let timeoutId: ReturnType<typeof setTimeout>
+  const onResize = () => {
+    clearTimeout(timeoutId)
+    timeoutId = setTimeout(onStoreChange, RESIZE_DEBOUNCE_MS)
+  }
+
+  window.addEventListener('resize', onResize)
+  return () => {
+    clearTimeout(timeoutId)
+    window.removeEventListener('resize', onResize)
+  }
+}
+
+const getSnapshot = () => window.innerWidth
+
+// 0 is the "not hydrated yet" sentinel; a real viewport is never 0 wide.
+const getServerSnapshot = () => 0
+
 export function useResponsive(): BreakpointState {
-  // SSR-safe: Start with undefined width, hydrate on client
-  const [width, setWidth] = useState<number>(0)
-  const [mounted, setMounted] = useState(false)
-
-  // Debounced resize handler for performance
-  const handleResize = useCallback(() => {
-    setWidth(window.innerWidth)
-  }, [])
-
-  useEffect(() => {
-    // Mark as mounted and set initial width
-    setMounted(true)
-    setWidth(window.innerWidth)
-
-    // Debounce resize events
-    let timeoutId: ReturnType<typeof setTimeout>
-    const debouncedResize = () => {
-      clearTimeout(timeoutId)
-      timeoutId = setTimeout(handleResize, 100)
-    }
-
-    window.addEventListener('resize', debouncedResize)
-    return () => {
-      clearTimeout(timeoutId)
-      window.removeEventListener('resize', debouncedResize)
-    }
-  }, [handleResize])
+  const width = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)
 
   // Return safe defaults during SSR/hydration
-  if (!mounted) {
+  if (width === 0) {
     return {
       isMobile: false,
       isSmall: false,

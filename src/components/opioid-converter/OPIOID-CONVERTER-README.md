@@ -14,7 +14,6 @@ A medical tool for converting opioid dosages to morphine and methadone equivalen
 opioid-converter/
 ├── OpioidConverter.tsx          # Main component file
 ├── OpioidConverter.module.css   # Component styling
-├── OpioidConverterLayout.tsx    # Layout wrapper
 ├── types.ts                     # TypeScript interfaces
 ├── utils/
 │   └── calculations.ts          # Conversion calculations

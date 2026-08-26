@@ -228,6 +228,10 @@ yarn audit:fix          # Attempt automatic fixes
 - Groups patch updates to reduce PR noise
 - Separate tracking for GitHub Actions dependencies
 - Auto-labels PRs with `dependencies` tag
+- Uses `prefix: chore` with `include: scope`, producing clean titles such as
+  `chore(deps): ...` and `chore(deps-dev): ...`; putting `(deps)` in the prefix
+  duplicates the generated scope. This affects new or refreshed PRs, not existing
+  titles retroactively.
 
 ### Responding to Vulnerabilities
 
@@ -247,6 +251,15 @@ yarn audit:fix          # Attempt automatic fixes
 4. **Push:** Pre-push hook confirms fix before code leaves your machine
 
 **Note:** Dependabot alerts show the dependency chain (e.g., `tailwindcss → ... → glob 10.4.5`). Use `resolutions` when upstream packages haven't updated yet.
+
+Keep urgent security PRs focused: do not bundle unrelated Dependabot upgrades,
+because they increase the regression surface and make the patch harder to review.
+
+**MDX trust boundary:** `src/app/resources/[slug]/page.tsx` reads MDX only from
+version-controlled files under `src/resources` during static generation. That
+reduces exposure to vulnerabilities requiring untrusted MDX, but does not replace
+upgrading affected processors. Do not pass user-controlled content to
+`next-mdx-remote`.
 
 ---
 
@@ -422,8 +435,16 @@ Replace `vscode` with your editor: `vim`, `intellij`, `webstorm`, etc.
 | ----------------- | ---------------------------------------------------- | ------- |
 | `.pnp.cjs`        | PnP manifest (part of lockfile)                      | ✅ Yes  |
 | `.pnp.loader.mjs` | ESM loader for PnP                                   | ✅ Yes  |
+| `.yarn/cache/**`  | Zero-install package archives                        | ✅ Yes  |
 | `.yarn/sdks/**`   | Editor wrappers for PnP-aware tooling                | ✅ Yes  |
 | `.yarnrc.yml`     | Yarn configuration (enables PnP, package extensions) | ✅ Yes  |
+
+After changing dependencies, run `yarn install` and commit `package.json`,
+`yarn.lock`, both PnP manifests, and only the package-cache archives changed by
+that dependency graph. Discard platform-specific native-binary cache churn and
+generated `*.tsbuildinfo` files before committing. When resolving dependency
+merge conflicts, reconcile `package.json` first and regenerate PnP artifacts
+rather than hand-editing `.pnp.cjs`.
 
 ### Upgrading Yarn
 
@@ -481,42 +502,16 @@ The `installCommand` uses `corepack enable && yarn install --immutable` to ensur
 
 ## TypeScript Configuration
 
-### Explicit vs Implicit Types
-
-The project uses an **explicit** `types` array in `tsconfig.json` `compilerOptions`:
-
-```json
-{
-  "compilerOptions": {
-    "types": [
-      "react",
-      "react-dom",
-      "next",
-      "jest",
-      "@testing-library/jest-dom",
-      "node"
-    ]
-  }
-}
-```
-
-### Why Explicit?
-
-| Scenario     | Explicit `types` (current)                              | Omitted `types`                                  |
-| ------------ | ------------------------------------------------------- | ------------------------------------------------ |
-| **Behavior** | Only listed packages are injected into global namespace | All `@types/*` packages auto-included            |
-| **Pros**     | Deterministic globals, cleaner IntelliSense             | Zero maintenance, types "just work"              |
-| **Cons**     | Must remember to add every global type                  | Potential for hidden conflicts between libraries |
-
-**Project decision:** We use explicit types to prevent test-only helpers (like `jest-dom`) from leaking into production builds, while ensuring all required runtime globals are available.
-
-**Alternative:** Delete the `types` field entirely to use implicit behavior. **Never** leave it half-populated (e.g., only Jest) or JSX support will break.
-
 ### Multiple tsconfig Files
 
-- `tsconfig.json` - Main configuration for production code
-- `tsconfig.dev.json` - Extended configuration for development tooling
-- `tsconfig.jest.json` - Specialized configuration for Jest tests
+- `tsconfig.json` checks production code and excludes tests.
+- `tsconfig.dev.json` adds Jest, jest-dom, and Node globals for tests and
+  development tooling.
+- `tsconfig.jest.json` provides the Jest-specific JSX configuration.
+
+Do not set `typeRoots: []` in the base config: extended configs then cannot
+resolve `@types/jest`, `@types/node`, or other installed type packages. Keep
+test-only globals in the extended configs instead.
 
 **Usage:**
 

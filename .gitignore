@@ -14,7 +14,6 @@
 # env
 .DS_Store
 .env*
-next-env.d.ts
 
 # debug
 npm-debug.log*
@@ -59,6 +58,17 @@ public/workbox-*.js
 # Large SWC binaries that exceed GitHub limits
 .yarn/cache/next-npm-*.zip
 .yarn/cache/@next-swc-*.zip
+
+# Platform-native binaries fetched by whichever OS ran `yarn install`. Vercel
+# builds on linux, so the linux archives are the ones that must stay tracked;
+# committing a developer's win32/darwin equivalents would swap them out and
+# break the deploy. Everyone re-fetches their own on install.
+.yarn/cache/*-win32-*.zip
+.yarn/cache/*-darwin-*.zip
+
+# Generated build artifacts that were committed by accident
+tsconfig.tsbuildinfo
+/accessibility-reports/
 
 
 # Keep these Yarn PnP files committed:
