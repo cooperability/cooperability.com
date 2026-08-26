@@ -154,6 +154,17 @@ const PromptComposer: React.FC<PromptComposerProps> = ({ className }) => {
 
   // Sync edited prompt with compiled prompt
   React.useEffect(() => {
+    // KNOWN ISSUE, surfaced by eslint-plugin-react-hooks 7.1. editedPrompt is
+    // derived from compiledPrompt but must stay overridable by the user, so it
+    // cannot simply be computed during render. React documents the correct
+    // shape for this -- adjust state during render by comparing against a
+    // previous-value state -- which also removes the extra render pass this
+    // effect costs on every composition change.
+    //
+    // Not refactored here: PromptComposer has no test coverage, and this
+    // changes when a user's manual edits get discarded. That needs a human
+    // looking at the component, not a lint fix at 2am.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setEditedPrompt(compiledPrompt)
   }, [compiledPrompt])
 

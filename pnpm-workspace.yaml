@@ -62,6 +62,19 @@ overrides:
   # this, `pnpm test:ci` cannot collect coverage at all.
   test-exclude: ^7.0.2
 
+  # Fixes two ip-address advisories (SSRF via octal octet parsing, and XSS in
+  # Address6 HTML methods) WITHOUT overriding ip-address itself.
+  #
+  # The chain is socks -> ip-address, and socks 2.8.5 pins `ip-address: ^9`.
+  # Forcing ip-address to ^10 directly would hand socks an API it does not
+  # expect -- the same failure that broke coverage when the glob override
+  # reached test-exclude@6. socks 2.8.9 already declares `ip-address: ^10.1.1`,
+  # so bumping the PARENT lets the fixed child come in legitimately.
+  #
+  # Dev-only either way: the chain is lighthouse and @axe-core/cli, so nothing
+  # here reaches the deployed bundle.
+  socks: ^2.8.9
+
 # --- Peer dependencies ---------------------------------------------------
 # Warn rather than hard-fail, so a peer gap inside someone else's package
 # cannot block a security patch from landing here.
