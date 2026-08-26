@@ -10,9 +10,6 @@
 # alarming, and resolves a different dependency tree than you asked for.
 # ===========================================================================
 
-packages:
-  - .
-
 # --- Module layout -------------------------------------------------------
 # The one property worth carrying over from Yarn PnP's `pnpMode: strict`.
 # `isolated` gives each package a node_modules containing only its DECLARED
