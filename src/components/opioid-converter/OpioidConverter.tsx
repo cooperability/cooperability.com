@@ -132,6 +132,16 @@ const OpioidConverter = () => {
   }, [medications])
 
   useEffect(() => {
+    // KNOWN ISSUE -- not a false positive, unlike the hydration guards elsewhere
+    // in this codebase. morphineEq/methadoneEq are DERIVED from `medications`;
+    // holding them in state and re-syncing through an effect costs a second
+    // render pass on every keystroke. The fix is to compute them during render
+    // with useMemo and delete both the effect and the state.
+    //
+    // That refactor is deliberately NOT done here: this is a medical dosing
+    // calculator with no test coverage, so it needs characterisation tests
+    // pinning the current arithmetic before anyone touches it.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     calculateEquivalents()
   }, [medications, calculateEquivalents])
 
