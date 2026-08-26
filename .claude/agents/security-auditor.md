@@ -14,6 +14,6 @@ Follow the `security-testing` skill checklist. Extra attention here:
 - `dangerouslySetInnerHTML` / MDX HTML / SVG (`dangerouslyAllowSVG` in next.config)
 - Service worker registration and CSP implications
 - Any new `/api` or AI routes: key exposure, prompt injection, rate limits
-- Dependency advisories (`yarn audit:critical`, Dependabot)
+- Dependency advisories (`pnpm audit:critical`, Dependabot)
 
 Never write exploit PoCs against live systems. Report severity + `file:line` + fix sketch. Apply fixes only if asked.

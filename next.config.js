@@ -6,6 +6,11 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
 const nextConfig = {
   reactStrictMode: true,
   eslint: {
+    // Intentionally left on. Linting is a dedicated CI job (.github/workflows/
+    // ci.yml) that runs in parallel with everything else and reports its own
+    // failure; making `next build` lint again would run ESLint twice per PR
+    // and attribute lint failures to the build step. The README TODO asking
+    // to "turn it back on" is satisfied by that job, not by this flag.
     ignoreDuringBuilds: true,
   },
   images: {

@@ -8,49 +8,49 @@
 ## Fast local gates
 
 ```bash
-yarn lint                 # ESLint (js/ts/tsx/mdx) incl. jsx-a11y / ARIA
-yarn lint:mdx             # MDX only
-yarn typecheck            # TypeScript --noEmit
-yarn format               # Prettier write (ask before large rewrites)
-yarn format:mdx           # MDX prettier
+pnpm lint                 # ESLint (js/ts/tsx/mdx) incl. jsx-a11y / ARIA
+pnpm lint:mdx             # MDX only
+pnpm typecheck            # TypeScript --noEmit
+pnpm format               # Prettier write (ask before large rewrites)
+pnpm format:mdx           # MDX prettier
 ```
 
 ## Automated tests (summary)
 
 ```bash
 # Jest (non-interactive)
-yarn jest --ci --watchAll=false
+pnpm test
 
 # Full a11y suite: lint + axe (WCAG2 AA) + Lighthouse a11y on /, /demos, /resources
-yarn access
+pnpm access
 ```
 
 ## Security
 
 ```bash
-yarn audit                # yarn npm audit
-yarn audit:critical       # fail on critical
-yarn audit:fix           # attempt automatic fixes (ask first)
+pnpm audit                # pnpm audit
+pnpm audit:critical       # fail on critical
+pnpm audit:fix           # attempt automatic fixes (ask first)
 ```
 
 ## Build / bundle
 
 ```bash
-yarn build                # next build + SW + sitemap (heavy)
-yarn analyze              # ANALYZE=true next build
+pnpm build                # next build + SW + sitemap (heavy)
+pnpm analyze              # ANALYZE=true next build
 ```
 
 ## Suggested agent sequences
 
 ```bash
 # After a code change (unit + static)
-yarn lint && yarn typecheck && yarn jest --ci --watchAll=false
+pnpm lint && pnpm typecheck && pnpm test
 
 # Before merge (hooks spirit)
-yarn audit:critical && yarn lint && yarn typecheck && yarn jest --ci --watchAll=false
+pnpm audit:critical && pnpm lint && pnpm typecheck && pnpm test
 
 # When user asks for accessibility / Lighthouse / ARIA runtime checks
-yarn access
+pnpm access
 ```
 
 ## Discover in any local project

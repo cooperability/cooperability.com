@@ -12,6 +12,7 @@
     "type-check:dev": "tsc --noEmit --project tsconfig.dev.json",
     "test-types": "tsc --noEmit --project tsconfig.dev.json",
     "lint": "eslint .",
+    "lint:mdx": "eslint \"**/*.mdx\"",
     "format": "prettier --write .",
     "format:mdx": "prettier --write '**/*.mdx'",
     "test": "jest --ci --watchAll=false",

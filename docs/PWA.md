@@ -164,7 +164,7 @@ Co-Operability PWA Suite
 **Build Process:**
 
 ```bash
-yarn build
+pnpm build
   → next build               # Builds Next.js app
   → build-sw.mjs             # Injects precache manifest into src/sw.js → public/sw.js
   → next-sitemap             # Generates sitemap
@@ -418,7 +418,7 @@ export default MyAppletPage
 
 ```bash
 # Start development server
-yarn dev
+pnpm dev
 
 # Navigate to applet URL
 open http://localhost:3000/my-new-applet
@@ -438,7 +438,7 @@ open http://localhost:3000/my-new-applet
 
 ```bash
 # Build and deploy
-yarn build
+pnpm build
 git add .
 git commit -m "Add My New Applet PWA"
 git push origin main  # Triggers Vercel deployment
@@ -724,7 +724,7 @@ curl http://localhost:3000/sw.js
 4. ✅ DevTools → Application → Service Workers → Click "Update"
 5. ✅ Try "Skip waiting" if old worker is stuck
 6. ✅ Clear site data: DevTools → Application → Clear storage → Clear site data
-7. ✅ Rebuild: `yarn build` (regenerates service worker)
+7. ✅ Rebuild: `pnpm build` (regenerates service worker)
 
 **Root Cause:** Service workers have strict security requirements and can be finicky with updates.
 
@@ -1175,8 +1175,8 @@ navigator.clearAppBadge()
 
 ```bash
 # Development
-yarn dev                    # Start dev server
-yarn build                  # Build for production
+pnpm dev                    # Start dev server
+pnpm build                  # Build for production
 
 # Testing
 open http://localhost:3000/prompt-composer    # Test applet
@@ -1206,7 +1206,7 @@ grep 'rel="manifest"' src/pages/*.tsx          # Find manifest links
 □ All icon paths correct (start with /)
 □ Theme colors set appropriately
 □ Descriptions clear and concise
-□ Service worker rebuilt (yarn build)
+□ Service worker rebuilt (pnpm build)
 □ Tested on staging environment
 □ Tested on actual iOS device (required)
 □ Tested on actual Android device
