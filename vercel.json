@@ -1,8 +1,5 @@
 {
-  "installCommand": "corepack enable && yarn install --immutable",
-  "buildCommand": "yarn build",
-  "env": {
-    "ENABLE_EXPERIMENTAL_COREPACK": "1",
-    "YARN_CACHE_FOLDER": "./.next/cache/yarn"
-  }
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "installCommand": "corepack enable && corepack prepare --activate && pnpm install --frozen-lockfile",
+  "buildCommand": "pnpm build"
 }

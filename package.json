@@ -1,12 +1,11 @@
 {
   "private": true,
   "engines": {
-    "node": "22.x",
-    "yarn": ">=1.22.0"
+    "node": ">=22.13.0"
   },
   "scripts": {
     "dev": "next dev",
-    "build": "ls -la && ls -la .yarn && next build && node scripts/build-sw.mjs && next-sitemap",
+    "build": "next build && node scripts/build-sw.mjs && next-sitemap",
     "start": "next start",
     "typecheck": "tsc --noEmit",
     "type-check:watch": "tsc --noEmit --watch",
@@ -16,14 +15,16 @@
     "lint:mdx": "eslint . --ext .mdx",
     "format": "prettier --write .",
     "format:mdx": "prettier --write '**/*.mdx'",
-    "test": "jest --watch",
+    "test": "jest --ci --watchAll=false",
     "prepare": "husky",
     "analyze": "cross-env ANALYZE=true next build",
-    "access:run-audits": "cross-env NEXT_PUBLIC_AXE_FORCE_THEME='light' node scripts/create-report-dir.js && yarn lint && axe http://localhost:3000 http://localhost:3000/demos http://localhost:3000/resources --tags wcag2aa --save ./accessibility-reports/axe-report.json --exit && lighthouse http://localhost:3000 --output json --output html --output-path ./accessibility-reports/lighthouse-report-home --only-categories=accessibility --chrome-flags='--headless --no-sandbox --disable-dev-shm-usage' && lighthouse http://localhost:3000/demos --output json --output html --output-path ./accessibility-reports/lighthouse-report-demos --only-categories=accessibility --chrome-flags='--headless --no-sandbox --disable-dev-shm-usage' && lighthouse http://localhost:3000/resources --output json --output html --output-path ./accessibility-reports/lighthouse-report-resources --only-categories=accessibility --chrome-flags='--headless --no-sandbox --disable-dev-shm-usage'",
+    "access:run-audits": "cross-env NEXT_PUBLIC_AXE_FORCE_THEME='light' node scripts/create-report-dir.js && pnpm lint && axe http://localhost:3000 http://localhost:3000/demos http://localhost:3000/resources --tags wcag2aa --save ./accessibility-reports/axe-report.json --exit && lighthouse http://localhost:3000 --output json --output html --output-path ./accessibility-reports/lighthouse-report-home --only-categories=accessibility --chrome-flags='--headless --no-sandbox --disable-dev-shm-usage' && lighthouse http://localhost:3000/demos --output json --output html --output-path ./accessibility-reports/lighthouse-report-demos --only-categories=accessibility --chrome-flags='--headless --no-sandbox --disable-dev-shm-usage' && lighthouse http://localhost:3000/resources --output json --output html --output-path ./accessibility-reports/lighthouse-report-resources --only-categories=accessibility --chrome-flags='--headless --no-sandbox --disable-dev-shm-usage'",
     "access": "start-server-and-test dev http://localhost:3000 access:run-audits",
-    "audit": "yarn npm audit",
-    "audit:critical": "yarn npm audit --severity critical",
-    "audit:fix": "yarn npm audit --fix"
+    "audit": "pnpm audit",
+    "audit:critical": "pnpm audit --audit-level critical",
+    "audit:fix": "pnpm audit --fix",
+    "test:watch": "jest --watch",
+    "test:ci": "jest --ci --watchAll=false --coverage"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
@@ -60,14 +61,6 @@
     "tailwindcss": "^3.4.0",
     "tailwindcss-animate": "^1.0.7"
   },
-  "dependenciesMeta": {
-    "@next/swc-win32-x64-msvc": {
-      "unplugged": true
-    },
-    "next": {
-      "unplugged": true
-    }
-  },
   "devDependencies": {
     "@axe-core/cli": "^4.10.1",
     "@eslint/compat": "^1.2.9",
@@ -86,7 +79,6 @@
     "@types/punycode": "^2",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
-    "@yarnpkg/pnpify": "^4.1.6",
     "acorn": "^8.15.0",
     "autoprefixer": "^10.4.27",
     "cross-env": "^7.0.3",
@@ -124,14 +116,5 @@
       "eslint --fix"
     ]
   },
-  "packageManager": "yarn@4.10.3",
-  "resolutions": {
-    "punycode": "^2.3.1",
-    "form-data": "^4.0.4",
-    "tmp": "^0.2.4",
-    "tar-fs": "^3.1.1",
-    "glob": "^10.5.0",
-    "mdast-util-to-hast": "^13.2.1",
-    "js-yaml": "^3.14.2"
-  }
+  "packageManager": "pnpm@11.24.0"
 }
