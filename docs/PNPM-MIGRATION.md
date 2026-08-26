@@ -46,6 +46,19 @@ tree that Jest, ESLint, Next and the TypeScript server can all read natively.
 That is why the entire `.yarn/sdks` shim layer and its `.vscode/settings.json`
 wiring were **deleted rather than ported**.
 
+**Parity with PnP strict is partial, and the difference is worth knowing.** At
+the project root the protection is real — `require.resolve('js-yaml')` fails,
+because this project never declared it. Inside the store it is weaker: pnpm's
+default `hoistPattern: ["*"]` hoists a large set of packages (787 here) into
+`node_modules/.pnpm/node_modules`, where every package in the tree can reach
+them. So a _dependency_ importing something it never declared still resolves,
+where `pnpMode: strict` would have hard-failed.
+
+Setting `hoistPattern: []` in `pnpm-workspace.yaml` restores full strictness. It
+is deliberately not set here: it changes resolution for every package in the
+tree, which is not a change to make without a full verification pass behind it.
+Recorded as a known gap rather than quietly implied away.
+
 > **This happened during the migration and is the best demonstration of it.**
 > A script here did `require('js-yaml')` to validate the workflow YAML.
 > `js-yaml` _is_ in the dependency tree — it is a transitive dependency, and
@@ -257,13 +270,27 @@ violation still fails the build.
 
 Fixed in the order the risk demanded: **characterisation tests first, then the
 refactor.** The arithmetic moved verbatim into `calculateTotals` in
-`utils/calculations.ts`, 22 tests pin it, and the component now computes during
+`utils/calculations.ts`, 18 tests pin that module (22 across the repo), and it computes during
 render with `useMemo` instead of syncing state through an effect.
 
-The tests were **mutation-checked** rather than merely passing: flipping the
-Methadone branch from squaring to multiplying turns 3 tests red, and deriving
-methadone from the rounded rather than the unrounded total turns 4 red. A suite
-that has never been seen to fail is not evidence that anything works.
+The tests were **mutation-checked** rather than merely passing. Flipping the
+Methadone branch from squaring to multiplying turns **3 tests red**.
+
+> **Correction.** This section first claimed the second mutant — deriving
+> methadone from the rounded rather than the unrounded total — turned 4 tests
+> red. It turns **exactly 1** red. The original measurement was taken while the
+> first mutant was still applied, because the restore step had silently failed,
+> so 3 of those 4 failures belonged to the other mutation. An adversarial review
+> re-ran both mutants in isolation and caught it.
+>
+> The corrected number matters, because it says the rounding asymmetry — the
+> behaviour this document calls the clearest argument for a clinical review — is
+> pinned by a **single** assertion pair. Every other test uses integer totals,
+> where rounding is a no-op and the mutant is undetectable. The safety net there
+> is thinner than it looked.
+
+A suite that has never been seen to fail is not evidence that anything works —
+and a mutation run whose restore step failed is not evidence either.
 
 Writing them surfaced three behaviours that are **pinned, not endorsed**. Each
 looks like a bug, and none was changed, because whether they are bugs is a
@@ -301,10 +328,20 @@ All figures from one machine, warm pnpm store, same instrument on both sides.
 | Committed package files                        | 1,379 zips, 778 MB | 0          |
 | Cold install (`rm -rf node_modules`)           | —                  | **14.9 s** |
 | Full `build` (Next + service worker + sitemap) | —                  | **12.5 s** |
-| Known advisories                               | 53                 | **5**      |
+| Known advisories                               | 53                 | **0**      |
 
-The 5 remaining have **no upstream fix**: `postcss` (4) and `sharp` (1) are
-both already at the latest published version.
+**This originally read "the 5 remaining have no upstream fix." That was wrong,**
+and an adversarial review caught it. Both packages had published fixes, and the
+project already depended on fixed versions directly — `postcss@8.5.26` and
+`sharp@0.35.3`. The vulnerable copies (`postcss@8.4.31`, `sharp@0.34.5`) were
+being dragged in transitively by `next`.
+
+The fix is the one §5 already teaches, applied to the one case in this tree
+where it clears everything: override the versions so the old transitive copies
+cannot resolve. `pnpm audit` now reports **no known vulnerabilities**, verified
+against the lockfile (zero references to either old version) and by resolving
+`postcss` from inside `next`, which sees 8.5.26. Lint, typecheck, tests and a
+production build all pass with the overrides in place.
 
 ### Turbopack vs webpack — a trade-off, not a win
 
@@ -433,6 +470,8 @@ ids to GHSA ids (`auditConfig.ignoreCves` → `ignoreGhsas`).
    against `pnpm-lock.yaml`.
 5. **Drop `chromedriver`** if the accessibility flow can run on Lighthouse
    alone (§4).
-6. **Raise test coverage.** One test file covers one page. `ci.yml` now
-   collects coverage, so the number is at least visible.
+6. **Raise test coverage.** `collectCoverageFrom` is now set, so the report
+   covers all 41 source modules rather than only the 14 some test happened to
+   import -- untested files show as 0% instead of vanishing. No
+   `coverageThreshold` is set yet, so coverage still cannot fail the build.
 7. **Revisit ESLint 10** when `eslint-plugin-react` supports it (§6).

@@ -72,6 +72,12 @@ overrides:
   # here reaches the deployed bundle.
   socks: ^2.8.9
 
+  # next pulls older transitive copies of both of these alongside the fixed
+  # versions this project depends on directly, and the old copies carry all
+  # five remaining advisories. Pinning them upward clears the tree.
+  postcss: ^8.5.26
+  sharp: ^0.35.3
+
 # --- Peer dependencies ---------------------------------------------------
 # Warn rather than hard-fail, so a peer gap inside someone else's package
 # cannot block a security patch from landing here.
