@@ -1,26 +1,25 @@
-import Layout from '../components/layout'
+import type { Metadata } from 'next'
 import Link from 'next/link'
-import styles from '../styles/utils.module.css'
 import {
   Accordion,
   AccordionItem,
   AccordionTrigger,
   AccordionContent,
-} from '../../components/ui/accordion'
-import ActiveIcon from '../components/ActiveIcon'
-import Head from 'next/head'
-import { GetStaticProps } from 'next'
+} from '@/components/ui/accordion'
+import ActiveIcon from '../../components/ActiveIcon'
+import styles from '../../styles/utils.module.css'
 
-const Demos: React.FC = () => {
+export const revalidate = 86400
+
+export const metadata: Metadata = {
+  title: 'Demos',
+  description: "Cooper Reed's (Co-Operability) coding projects and tech demos.",
+  openGraph: { title: 'Demos | Cooper Reed | Co-Operability' },
+}
+
+export default function Demos() {
   return (
-    <Layout>
-      <Head>
-        <title>Demos | Cooper Reed | Co-Operability</title>
-        <meta
-          name="description"
-          content="Cooper Reed's (Co-Operability) coding projects and tech demos."
-        />
-      </Head>
+    <>
       <h1 className="visually-hidden">Demos</h1>
       <section className={styles.headingMd}>
         <div>
@@ -315,15 +314,6 @@ const Demos: React.FC = () => {
           </AccordionItem>
         </Accordion>
       </section>
-    </Layout>
+    </>
   )
 }
-
-export const getStaticProps: GetStaticProps = async () => {
-  return {
-    props: {},
-    revalidate: 86400, // Revalidate once per day
-  }
-}
-
-export default Demos

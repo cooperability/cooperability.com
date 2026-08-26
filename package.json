@@ -6,7 +6,7 @@
   },
   "scripts": {
     "dev": "next dev",
-    "build": "ls -la && ls -la .yarn && next build && node scripts/build-sw.mjs && next-sitemap",
+    "build": "next build --webpack && node scripts/build-sw.mjs && next-sitemap",
     "start": "next start",
     "typecheck": "tsc --noEmit",
     "type-check:watch": "tsc --noEmit --watch",
@@ -17,6 +17,7 @@
     "format": "prettier --write .",
     "format:mdx": "prettier --write '**/*.mdx'",
     "test": "jest --watch",
+    "test:ci": "jest --ci --watchAll=false",
     "prepare": "husky",
     "analyze": "cross-env ANALYZE=true next build",
     "access:run-audits": "cross-env NEXT_PUBLIC_AXE_FORCE_THEME='light' node scripts/create-report-dir.js && yarn lint && axe http://localhost:3000 http://localhost:3000/demos http://localhost:3000/resources --tags wcag2aa --save ./accessibility-reports/axe-report.json --exit && lighthouse http://localhost:3000 --output json --output html --output-path ./accessibility-reports/lighthouse-report-home --only-categories=accessibility --chrome-flags='--headless --no-sandbox --disable-dev-shm-usage' && lighthouse http://localhost:3000/demos --output json --output html --output-path ./accessibility-reports/lighthouse-report-demos --only-categories=accessibility --chrome-flags='--headless --no-sandbox --disable-dev-shm-usage' && lighthouse http://localhost:3000/resources --output json --output html --output-path ./accessibility-reports/lighthouse-report-resources --only-categories=accessibility --chrome-flags='--headless --no-sandbox --disable-dev-shm-usage'",

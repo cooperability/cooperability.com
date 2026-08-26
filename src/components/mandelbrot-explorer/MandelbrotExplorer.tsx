@@ -1,3 +1,5 @@
+'use client'
+
 import { useState, useRef, useEffect, useCallback } from 'react'
 import styles from './MandelbrotExplorer.module.css'
 import { Button } from '@/components/ui/button'

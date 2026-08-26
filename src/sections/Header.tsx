@@ -7,7 +7,7 @@ import styles from '../styles/utils.module.css'
 import Sidebar from './Sidebar'
 import ThemeSwitch from '../components/ThemeSwitch'
 import { useResponsive } from '../hooks/useResponsive'
-import { useRouter } from 'next/router'
+import { usePathname, useRouter } from 'next/navigation'
 import ActiveIcon from '../components/ActiveIcon'
 
 const resumeUrl =
@@ -19,9 +19,9 @@ const accessibilityStatementUrl = '/resources/AccessibilityStatement'
 const Header = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const { isMobile } = useResponsive()
-  const { asPath, push } = useRouter()
-
-  const currentPath = (asPath || '/').split('?')[0]
+  const { push } = useRouter()
+  // `usePathname` is already query-free, unlike the pages router's `asPath`.
+  const currentPath = usePathname() || '/'
   const currentTab =
     currentPath === '/'
       ? '/'

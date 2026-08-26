@@ -1,3 +1,5 @@
+'use client'
+
 import { useState, useCallback, useEffect } from 'react'
 import styles from './OpioidConverter.module.css'
 import { MedicationItem } from './types'

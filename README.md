@@ -7,17 +7,20 @@ My Next.js portfolio website on Vercel. Several smaller projects within.
 ### Quick wins / hygiene
 
 - OC input fields block numbers but should pop up numpad on mobile
+- Yarn -> pnpm migration, in full
 - SEO; site:cooperability.com
 - Create `.editorconfig` for consistency
 - Add `.npmrc` for Yarn users
 - `commitlint` for commit messages
-- **Migrate Yarn PnP → pnpm 11** (11.13.0, not 11.1.0) — see [Package Manager: Executive Recommendation](#package-manager-executive-recommendation). Blocking for Turbopack/App Router; do it as part of that upgrade
+- **Migrate Yarn PnP → pnpm 11** (11.13.0, not 11.1.0) — see [Package Manager: Executive Recommendation](#package-manager-executive-recommendation). Blocking for **Turbopack**, and therefore for `next build` without `--webpack`. It was _not_ blocking for the App Router migration itself
 - Purge `.yarn/cache` from git history with `git filter-repo` (separate follow-up — the migration alone won't reclaim the 508 MB `.git`)
 - somehow clean up root repo with symlinks to subdirectories
-- Drop the leftover `ls -la && ls -la .yarn` debug prefix from the `build` script
+- ~~Drop the leftover `ls -la && ls -la .yarn` debug prefix from the `build` script~~ (done)
 - Fix `engines.yarn: ">=1.22.0"` — it contradicts the Yarn 4 PnP setup and silently allows Yarn 1 installs
-- Remove `prop-types` (redundant under TypeScript) and convert the last JS files (`src/components/date.js`, `src/components/providers.js`) to TSX
+- Remove `prop-types` (redundant under TypeScript, and no longer imported anywhere) — deferred because removing a dep regenerates `.pnp.cjs`/`yarn.lock` and writes new zips into the tracked `.yarn/cache`
+- ~~Convert the last JS files (`src/components/date.js`, `src/components/providers.js`) to TSX~~ (done — now `src/components/date.tsx` and `src/app/providers.tsx`)
 - Bump `tsconfig` `target` from `es5` to `ES2022` (es5 forces needless downleveling on a Node 22 / modern-browser target)
+- Serwist precaches `.next`-relative paths (`static/chunks/…`) rather than the served `/_next/static/…` URLs, so the precache step likely 404s and the service worker never activates. `scripts/build-sw.mjs` needs `modifyURLPrefix` or a `globDirectory` of `.next/static` with a `/_next/static` prefix
 
 ### AI infrastructure (the main event)
 
@@ -36,19 +39,21 @@ My Next.js portfolio website on Vercel. Several smaller projects within.
 
 ### Framework & architecture modernization
 
-- **Migrate Pages Router → App Router** — you're on Next 16 but still entirely on `src/pages`; unlocks RSC, streaming, route handlers, and the Metadata API
-- Replace the hand-rolled `<Head>` in `layout.tsx` with the Metadata API / `generateMetadata` (fixes SEO, OG, and the `<html lang="en">` inside `<Head>` bug)
+- ~~**Migrate Pages Router → App Router**~~ (done — see [App Router migration notes](#app-router-migration-notes))
+- ~~Replace the hand-rolled `<Head>` in `layout.tsx` with the Metadata API / `generateMetadata`~~ (done — `<html lang="en">` is now real, and every route's tags come from `metadata`/`viewport` exports)
 - Collapse the dual component tree: root `components/ui` + `lib/` vs `src/components` + `src/lib`, with `@/*` → `./*` resolving to root. Point `components.json` at `src/` and delete the duplication (this is the real fix for the "symlinks" TODO)
-- Add `_document` equivalents / custom `404` + `500` pages and a top-level error boundary
+- ~~Add `_document` equivalents / custom `404` + `500` pages and a top-level error boundary~~ (done — `src/app/not-found.tsx`, `error.tsx`, `global-error.tsx`)
 - Adopt `next/font` for self-hosted, layout-shift-free fonts
-- Move the inline `dangerouslySetInnerHTML` service-worker registration in `_app.tsx` into Serwist's own registration (it's a CSP `unsafe-inline` liability)
+- ~~Move the inline `dangerouslySetInnerHTML` service-worker registration out of `_app.tsx`~~ (done — it's now `src/app/service-worker.tsx`, a `useEffect` with no inline script. Handing registration to Serwist's own helper is still open)
 - Upgrade Tailwind 3 → 4 (CSS-first config, faster engine); audit `tailwind.config.js` and `tw-animate-css` afterward
-- Reconsider `next-mdx-remote` vs. compile-time MDX now that RSC makes static MDX cheaper
+- Reconsider `next-mdx-remote` vs. compile-time MDX now that RSC makes static MDX cheaper — half done: `/resources/[slug]` uses `next-mdx-remote/rsc`, so no MDX compiler ships to the client, but `@next/mdx` compile-time MDX is still unexplored
+- Replace the `useResponsive` client boundary on `/resources` with CSS media queries, so the list can be fully server-rendered (it also fixes mobile getting the desktop layout until JS mounts)
 
 ### CI/CD & quality gates
 
-- `next.config.js` sets `eslint.ignoreDuringBuilds: true` — fix the underlying lint errors and turn it back on
-- `yarn test` is `jest --watch`, so it's unusable in CI. Add `test:ci` (`jest --ci --coverage`) and keep `test` interactive
+- **`yarn lint` is currently broken** and has nothing to do with routing: ESLint 10.0.2 against `@typescript-eslint/utils` 8.35.1 throws `TypeError: Class extends value undefined`. Needs a `typescript-eslint` bump to a v10-compatible release. Until then there is no lint gate at all, and `yarn access` fails at its first step
+- ~~`next.config.js` sets `eslint.ignoreDuringBuilds: true`~~ (removed — Next 16 dropped the `eslint` key from `next.config.js` entirely, so it was a no-op that only produced a build warning)
+- ~~`yarn test` is `jest --watch`, so it's unusable in CI. Add `test:ci`~~ (done — `yarn test:ci` is `jest --ci --watchAll=false`; `test` stays interactive). **`--coverage` is deliberately omitted**: `babel-plugin-istanbul` pulls `test-exclude` v6, which fails to resolve under Yarn PnP. Coverage thresholds are blocked on the pnpm migration or a `test-exclude` resolution override
 - Add a real CI workflow — right now only `security-audit.yml` exists. Gate PRs on typecheck + lint + test + build
 - Test coverage is one file (`src/__tests__/pages/index.test.tsx`). Prioritize `opioid-converter/utils/calculations.ts` (clinical math — highest-consequence code in the repo), `mandelbrot-explorer/utils/calculations.ts`, and `prompt-composer/utils/helpers.ts`; set coverage thresholds
 - Add Playwright E2E + `@axe-core/playwright` for the theme-switch, PWA install, and converter flows (already listed as an accessibility maintenance task — this is the mechanism)
@@ -60,10 +65,11 @@ My Next.js portfolio website on Vercel. Several smaller projects within.
 
 ### Security & runtime hardening
 
-- Add real security headers via `next.config.js` `headers()` — CSP, HSTS, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`. Today only *images* have a CSP
+- Add real security headers via `next.config.js` `headers()` — CSP, HSTS, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`. Today only _images_ have a CSP
 - Add error tracking (Sentry or Vercel's) — currently no visibility into client-side runtime failures
-- Delete or repurpose the placeholder `src/pages/api/hello.ts`
-- Audit committed artifacts: `accessibility-reports/`, `tsconfig.tsbuildinfo`, `.swc/` shouldn't be in git
+- ~~Delete or repurpose the placeholder `src/pages/api/hello.ts`~~ (done — deleted; a replacement would now be an `app/api/*/route.ts` Route Handler)
+- Decide the canonical host deliberately. This migration standardised on `https://www.cooperability.com` (matching `next-sitemap.config.js`); the old homepage `<link rel="canonical">` pointed at the apex `https://cooperability.com`. If the apex is the intended canonical, change `metadataBase` in `src/app/layout.tsx` and the sitemap config together
+- ~~Audit committed artifacts: `accessibility-reports/`, `tsconfig.tsbuildinfo`, `.swc/` shouldn't be in git~~ (done — all three untracked and ignored, along with the platform-native `.yarn/cache` archives that made every cross-OS `yarn install` dirty the tree; `next-env.d.ts` was the reverse problem, ignored yet tracked, and is now tracked deliberately because `yarn typecheck` needs its CSS-module and image declarations)
 
 ### Content & product
 
@@ -73,6 +79,40 @@ My Next.js portfolio website on Vercel. Several smaller projects within.
 - OG image generation via `@vercel/og` per page/demo
 - RSS/JSON feed for `resources/`
 - Add a "how it's built" case-study page — the AI infra work above is the portfolio piece
+
+### Visual design (screenshot review — 2026-08-24)
+
+- Give the homepage a real `<h1>` — "Hi, I'm **Cooper**!" is currently an inline bold word inside a body paragraph, so the page has no visually distinct entry point; promote it to a larger/bolder heading separate from the intro text
+- Introduce one accent color beyond link-blue — Home/Demos/Resources are pure black/white plus default anchor blue and the small stack-icon badges; nothing distinguishes a primary CTA like "Try Prompt Composer →" from an ordinary inline link
+- Cap content width on wide viewports — body copy currently has no max-measure constraint; constrain paragraphs to ~65–75 characters (`max-w-prose`) for readability per standard typographic guidance
+- Unify card styling across pages — the homepage quote box uses a bordered/transparent card, but the Demos page's "Academic Papers…" and "Other Stack Elements…" accordions use filled navy rectangles that don't match any other surface color on the site; pick one treatment and apply it everywhere
+- Make Demos sub-project indentation explicit — Prompt Composer / Mandelbrot Explorer / Opioid Converter are nested under cooperability.com by left padding alone; add a connecting tree-line or subtle background tint so the parent-child grouping reads at a glance
+- Reduce stack-icon crowding on Demos rows — rows with long titles (e.g. BookMark eXtractor) pack 5–6 small badges against the right edge; tighten/standardize the gap or cap visible icons with a "+N" overflow
+- Add a hover/active state to list rows on Demos and Resources — currently plain text links with no visible row-level affordance; a background highlight or left-border on hover reinforces that each row is clickable
+- Balance vertical whitespace on the Resources page — with only 3 entries, content pools at the top and leaves a large dead zone before the footer; either center the list vertically, add a short intro line, or shrink the page's min-height so density matches Home/Demos
+- Dim metadata dates further and reserve a consistent column for them on Resources — reinforces title-first, metadata-second reading order as more entries are added
+- Verify focus-ring visibility and contrast on interactive elements against the pure-black background (nav pill, theme toggle, quote refresh icon), and double-check the muted gray "(Ongoing)"/"(2025)" labels on Demos meet WCAG AA contrast — they read borderline light-gray-on-black in the screenshot
+
+## App Router migration notes
+
+Routes live in `src/app/**`. `src/pages/**` is gone. The non-obvious parts, kept
+here because they are the things that bite twice:
+
+| Nuance                                | What actually happens                                                                                                                                                                                                                                                 |
+| ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `next/head`                           | Inert in App Router — it does not warn, it just drops the tags. Everything is `export const metadata` / `generateMetadata`, and `themeColor` specifically lives on `export const viewport`                                                                            |
+| Metadata inheritance                  | Child values **replace** the parent's for a given key; they do not deep-merge. `icons: { apple: … }` on a page silently drops the layout's `icon`, which is how the favicon disappeared from the three applet routes mid-migration                                    |
+| `openGraph.title` templates           | A `title.template` on the root layout only applies to children that set their _own_ `openGraph.title`; children that set just `title` inherit the layout's resolved `default` verbatim. So every content route sets `openGraph.title` explicitly. Nothing derives it from `title` |
+| `appleWebApp.capable`                 | Renders only the modern `mobile-web-app-capable`. iOS before 17 needs the `apple-` prefixed name, which has no Metadata key — it goes through `other`                                                                                                                 |
+| JSON-LD                               | The Metadata API has no key for it. It stays a `<script type="application/ld+json">` in the page body (`src/app/page.tsx`), and its `url` must be kept in step with `metadataBase` by hand or the canonical link and the structured data disagree                     |
+| `getServerSideProps`                  | Becomes a plain server component plus `export const dynamic = 'force-dynamic'`. **Without** `force-dynamic` the page prerenders and anything per-request (the homepage quote) silently freezes at build time                                                          |
+| `next-sitemap` + dynamic routes       | It reads `build-manifest`/`prerender-manifest` only — never `app-build-manifest`. A `force-dynamic` route appears in neither, so `/` had to be re-added via `additionalPaths`. Since `public/sitemap*.xml` is gitignored, this regression is invisible to code review |
+| `getStaticPaths: { fallback: false }` | `generateStaticParams` alone is **not** equivalent — it defaults to `dynamicParams: true`, so unknown slugs get rendered on demand and a missing file 500s instead of 404ing. Needs `export const dynamicParams = false`                                              |
+| `next/dynamic` with `ssr: false`      | Illegal in a Server Component. Each applet route is a server `page.tsx` (for `metadata`) plus a thin `'use client'` wrapper holding the dynamic import and its skeleton                                                                                               |
+| `useRouter`                           | `next/router` throws; use `next/navigation`. `usePathname()` replaces `asPath` and is already query-free                                                                                                                                                              |
+| MDX                                   | `next-mdx-remote/serialize` + spread props becomes `next-mdx-remote/rsc` with a `source` string. RSC has no Context, so `MDXProvider` is out — components are passed explicitly                                                                                       |
+| Nested `ThemeProvider`                | `next-themes` short-circuits a nested provider to a Fragment, so the inner one's props were dead. Collapsing to a single provider is what made `NEXT_PUBLIC_AXE_FORCE_THEME` take effect for the first time — expect `yarn access` numbers to move                    |
+| Turbopack                             | Next 16's default bundler cannot resolve `next/package.json` under Yarn PnP, so plain `next build` fails. The build script pins `--webpack` until the pnpm migration lands                                                                                            |
 
 ## Developer Tooling
 
@@ -327,7 +367,7 @@ See **[docs/PWA.md](docs/PWA.md)** for complete implementation guide, testing pr
 
 ### The one fact that settles it
 
-**Turbopack will never support Yarn PnP.** The Next.js docs list it under *Unsupported and unplanned features*:
+**Turbopack will never support Yarn PnP.** The Next.js docs list it under _Unsupported and unplanned features_:
 
 > **Yarn PnP** — Not planned for Turbopack support in Next.js.
 
@@ -335,26 +375,26 @@ This isn't a "not yet." Turbopack doesn't implement PnP resolution and can't rea
 
 As of **Next.js 16, Turbopack is the stable default bundler for both `next dev` and `next build`** (2–5x faster builds, 5–10x faster Fast Refresh). You're already on Next 16.2.3. So the real choice is:
 
-| | Keep Yarn PnP | Move to pnpm |
-| --- | --- | --- |
-| Bundler | Pinned to `next build --webpack` (legacy opt-out) forever | Turbopack default |
-| App Router / RSC | Works, but on the un-optimized path | Fully supported |
-| Build speed | Today's speed, permanently | 2–5x faster |
-| Long-term | Swimming against Vercel's roadmap | With it |
+|                  | Keep Yarn PnP                                             | Move to pnpm      |
+| ---------------- | --------------------------------------------------------- | ----------------- |
+| Bundler          | Pinned to `next build --webpack` (legacy opt-out) forever | Turbopack default |
+| App Router / RSC | Works, but on the un-optimized path                       | Fully supported   |
+| Build speed      | Today's speed, permanently                                | 2–5x faster       |
+| Long-term        | Swimming against Vercel's roadmap                         | With it           |
 
-Staying on PnP means doing the whole App Router migration and then opting out of the bundler that migration is designed for. That's the wrong trade for a portfolio site whose *point* is demonstrating a modern stack.
+Staying on PnP means doing the whole App Router migration and then opting out of the bundler that migration is designed for. That's the wrong trade for a portfolio site whose _point_ is demonstrating a modern stack.
 
 ### The zero-install premise is already broken — and expensive
 
 The stated reason for PnP is zero-install. It isn't working, and it's costing a lot:
 
 - **`.git` is 508 MB** for a portfolio site (190 MiB packed + 305 MiB loose)
-- **140 MB / 1,377 cache files tracked in git**, across **78 commits** touching `.yarn/cache` — every dependency bump writes new zips into history *permanently*
+- **140 MB / 1,377 cache files tracked in git**, across **78 commits** touching `.yarn/cache` — every dependency bump writes new zips into history _permanently_
 - **`compressionLevel: 0`** stores those zips **uncompressed**, so git can't delta them efficiently
 - **`.yarn/cache` is 754 MB and `.yarn/unplugged` is 399 MB on disk** — ~1.15 GB of local dependency machinery
-- **`.gitignore` deliberately excludes the biggest binaries** (`next-npm-*.zip`, `@next-swc-*.zip`) because they *"exceed GitHub limits"* — which means **a fresh clone must hit the network anyway**. The zero-install benefit is already forfeited while 100% of the cost is still being paid.
+- **`.gitignore` deliberately excludes the biggest binaries** (`next-npm-*.zip`, `@next-swc-*.zip`) because they _"exceed GitHub limits"_ — which means **a fresh clone must hit the network anyway**. The zero-install benefit is already forfeited while 100% of the cost is still being paid.
 - Those ignore rules **don't even work**: 8 swc/next zips (including a 29 MB `@swc-core-linux-x64-gnu`) are still tracked, because `.gitignore` never untracks already-committed files
-- **The docs contradict the config**: `docs/Tooling.md` says *"❌ Don't commit `.yarn/cache/`"* while `.gitignore` explicitly un-ignores it with `!.yarn/cache`
+- **The docs contradict the config**: `docs/Tooling.md` says _"❌ Don't commit `.yarn/cache/`"_ while `.gitignore` explicitly un-ignores it with `!.yarn/cache`
 
 The irony: `.yarn/unplugged` is a 399 MB de-facto `node_modules` (sharp, swc, chromedriver, selenium), because native binaries can't run from inside zips. PnP's headline benefit — no `node_modules` — isn't actually being realized either.
 
@@ -378,7 +418,7 @@ pnpm keeps the two things you actually chose PnP for — **strict resolution** a
 4. Simplify `vercel.json`: drop `ENABLE_EXPERIMENTAL_COREPACK` and `YARN_CACHE_FOLDER`; Vercel detects pnpm natively. Clean the `ls -la` debris from `build`.
 5. **Remove the `webpack(config)` no-op hook from `next.config.js`** — Turbopack ignores `webpack()` config entirely, and its presence is what's silently keeping you on the webpack path. Replace `@next/bundle-analyzer` (a webpack plugin; Turbopack supports loaders, not plugins) with a Turbopack-compatible analysis step.
 6. Add `.npmrc`, `.gitignore` `node_modules`, regenerate editor config (no SDK wrappers needed).
-7. **Shrinking `.git` is a separate job.** Dropping the cache going forward does *not* reclaim the 508 MB — that requires `git filter-repo --path .yarn/cache --invert-paths` and a force-push. Worth doing on a solo repo; sequence it *after* the migration lands.
+7. **Shrinking `.git` is a separate job.** Dropping the cache going forward does _not_ reclaim the 508 MB — that requires `git filter-repo --path .yarn/cache --invert-paths` and a force-push. Worth doing on a solo repo; sequence it _after_ the migration lands.
 
 ### If you stay on Yarn anyway
 
@@ -386,7 +426,7 @@ The defensible middle ground is **Yarn 4 with `nodeLinker: node-modules`** — k
 
 ---
 
-## Package Management (Yarn PnP) — *current state, pending the migration above*
+## Package Management (Yarn PnP) — _current state, pending the migration above_
 
 This project uses **Yarn Plug'n'Play (PnP)** for zero-install, deterministic dependency resolution.
 

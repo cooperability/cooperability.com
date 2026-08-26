@@ -1,3 +1,5 @@
+'use client'
+
 /**
  * Prompt Composer - Research-backed modular prompt construction tool
  * See PROMPT-COMPOSER-README.md for full documentation and research references
