@@ -169,3 +169,63 @@ describe('calculateEquivalent', () => {
     }
   })
 })
+
+/**
+ * The coercion boundary.
+ *
+ * `handleDoseChange` in OpioidConverter does `Number(value)` on a
+ * `type="text"` input, so anything a user can type reaches this function.
+ * These pin what happens when it is not a plain decimal number.
+ *
+ * Every case below is CURRENT BEHAVIOUR AND WRONG-LOOKING. None is a
+ * regression from the pnpm migration or the useMemo refactor; the path simply
+ * had no coverage before. They are pinned here so that whoever fixes the input
+ * (the fix belongs at the input, not in this function) has a failing-test
+ * target and can see exactly what changes.
+ */
+describe('calculateTotals at the coercion boundary', () => {
+  it('propagates NaN to both outputs, which the UI renders literally', () => {
+    // Number('abc') is NaN. Math.round(NaN) is NaN, and NaN survives the sum,
+    // so the component displays "Morphine Equivalence: NaN mg".
+    const result = calculateTotals([med('Morphine', 1, Number('abc'))])
+    expect(result.morphineEq).toBeNaN()
+    expect(result.methadoneEq).toBeNaN()
+  })
+
+  it('lets a single NaN poison an otherwise valid total', () => {
+    // The failure is not isolated to the offending row: one bad field discards
+    // every other dose the user has entered.
+    const meds = [med('Morphine', 1, 100), med('Codeine', 0.15, Number('x'))]
+    expect(calculateTotals(meds).morphineEq).toBeNaN()
+  })
+
+  it('accepts hexadecimal, because Number() does', () => {
+    // A user typing "0x10" gets 16 mg, silently.
+    expect(calculateTotals([med('Morphine', 1, Number('0x10'))])).toEqual({
+      morphineEq: 16,
+      methadoneEq: 8,
+    })
+  })
+
+  it('accepts exponent notation, because Number() does', () => {
+    // "5e3" becomes 5000 mg -- three orders of magnitude from what was typed.
+    expect(calculateTotals([med('Morphine', 1, Number('5e3'))]).morphineEq).toBe(
+      5000
+    )
+  })
+
+  it('produces NaN methadone from a negative total rather than clamping', () => {
+    // sqrt of a negative number is NaN. Nothing rejects a negative dose.
+    const result = calculateTotals([med('Morphine', 1, -10)])
+    expect(result.morphineEq).toBe(-10)
+    expect(result.methadoneEq).toBeNaN()
+  })
+
+  it('treats an empty field as zero', () => {
+    // Number('') is 0, which is the one coercion here that behaves sensibly.
+    expect(calculateTotals([med('Morphine', 1, Number(''))])).toEqual({
+      morphineEq: 0,
+      methadoneEq: 0,
+    })
+  })
+})
