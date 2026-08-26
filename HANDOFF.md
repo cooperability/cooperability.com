@@ -9,11 +9,7 @@ pass on GitHub. **Vercel preview deploys fail and are parked** — see below.
 
 ## Next — take the top item
 
-1. **Characterisation tests for `OpioidConverter`.** It is the highest-value
-   remaining work: clinical dosing maths with zero coverage, and it blocks the
-   one real bug this run found (derived state re-synced through an effect,
-   annotated at `src/components/opioid-converter/OpioidConverter.tsx:135`).
-   Pin the arithmetic first, then do the `useMemo` refactor.
+1. Act on the adversarial review findings (see In flight).
 2. Same treatment for `src/components/prompt-composer/PromptComposer.tsx:157`
    only after deciding the edit-discard semantics — that is a product call.
 3. Refresh the dashboard Artifact each round; keep the same URL.
@@ -23,7 +19,10 @@ pass on GitHub. **Vercel preview deploys fail and are parked** — see below.
 
 ## In flight when this was written — TREAT AS NOT DONE
 
-- Nothing dispatched. Verify against `git log` before redoing anything.
+- **Adversarial design review** of the migration, dispatched 02:35 to a fresh
+  Opus agent briefed to REFUTE. If this session died before its findings were
+  acted on, nothing was lost: it produces a report, not commits. Re-run it
+  rather than trusting that it happened.
 
 ## Done this run
 
@@ -34,6 +33,9 @@ pass on GitHub. **Vercel preview deploys fail and are parked** — see below.
 - `083c661` Fold in the Dependabot upgrades. 53 advisories → 5.
 - `9a1…`–`…` four single-variable Vercel attempts, all rejected (see below).
 - `35c53df` Rewrite the toolchain docs; add `docs/PNPM-MIGRATION.md`.
+- `ff861f8` Pin the opioid dosing arithmetic with 22 mutation-checked
+  characterisation tests, then replace the state+effect with `useMemo`.
+  Surfaced three pinned-not-endorsed behaviours needing a clinician.
 
 ## Vercel — PARKED, needs the human
 
