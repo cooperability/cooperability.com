@@ -62,7 +62,7 @@ describe('Home', () => {
       'href',
       '/demos'
     )
-    expect(screen.getByRole('link', { name: /learnings/i })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: /knowledge/i })).toHaveAttribute(
       'href',
       '/resources'
     )
