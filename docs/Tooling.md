@@ -10,7 +10,7 @@ This document covers all the developer tooling, automation, and quality control 
 - [Security Auditing](#security-auditing)
 - [Bundle Analysis](#bundle-analysis)
 - [Accessibility Testing](#accessibility-testing)
-- [Yarn Plug'n'Play (PnP)](#yarn-plugnplay-pnp)
+- [Package Management (pnpm)](#package-management-pnpm)
 - [TypeScript Configuration](#typescript-configuration)
 - [Component Library (shadcn/ui)](#component-library-shadcnui)
 
@@ -34,8 +34,8 @@ ESLint provides static analysis for JavaScript, TypeScript, JSX, and **MDX** fil
 **Available Commands:**
 
 ```bash
-yarn lint              # Lint all files (.js, .jsx, .ts, .tsx, .mdx)
-yarn lint:mdx          # Lint only MDX files
+pnpm lint              # Lint all files (.js, .jsx, .ts, .tsx, .mdx)
+pnpm lint:mdx          # Lint only MDX files
 ```
 
 **MDX Linting:**
@@ -63,8 +63,8 @@ Prettier enforces consistent code formatting across the entire codebase.
 **Available Commands:**
 
 ```bash
-yarn format            # Format all project files
-yarn format:mdx        # Format only MDX files
+pnpm format            # Format all project files
+pnpm format:mdx        # Format only MDX files
 ```
 
 **Integration:**
@@ -87,7 +87,7 @@ Jest provides the testing framework with React Testing Library for component tes
 **Available Commands:**
 
 ```bash
-yarn test              # Run tests in watch mode
+pnpm test              # Run tests in watch mode
 ```
 
 **Key Learnings:**
@@ -131,7 +131,7 @@ Husky manages Git hooks to enforce quality checks before commits.
 
 ```bash
 # .husky/pre-commit
-yarn lint-staged
+pnpm lint-staged
 ```
 
 ### lint-staged
@@ -178,7 +178,7 @@ A security audit runs automatically before every `git push`:
 
 **Behavior:**
 
-- Runs `yarn npm audit --severity critical`
+- Runs `pnpm audit --audit-level critical`
 - Blocks push if critical vulnerabilities exist
 - Bypass with `git push --no-verify` (emergencies only)
 
@@ -200,9 +200,9 @@ Security auditing runs at multiple layers to catch vulnerabilities early:
 ### Commands
 
 ```bash
-yarn audit              # Full vulnerability report
-yarn audit:critical     # Critical severity only (used by CI)
-yarn audit:fix          # Attempt automatic fixes
+pnpm audit              # Full vulnerability report
+pnpm audit:critical     # Critical severity only (used by CI)
+pnpm audit:fix          # Attempt automatic fixes
 ```
 
 ### GitHub Actions Workflow
@@ -231,9 +231,9 @@ yarn audit:fix          # Attempt automatic fixes
 
 ### Responding to Vulnerabilities
 
-1. **Check severity:** `yarn audit`
+1. **Check severity:** `pnpm audit`
 2. **Update affected package:**
-   - **Direct dependency:** Update version in `package.json`, run `yarn install`
+   - **Direct dependency:** Update version in `package.json`, run `pnpm install`
    - **Transitive dependency:** Add to `resolutions` field in `package.json`:
      ```json
      {
@@ -243,7 +243,7 @@ yarn audit:fix          # Attempt automatic fixes
      }
      ```
      This forces all packages to use the patched version, even if they request older versions.
-3. **Verify fix:** `yarn audit:critical` (should show no suggestions)
+3. **Verify fix:** `pnpm audit:critical` (should show no suggestions)
 4. **Push:** Pre-push hook confirms fix before code leaves your machine
 
 **Note:** Dependabot alerts show the dependency chain (e.g., `tailwindcss → ... → glob 10.4.5`). Use `resolutions` when upstream packages haven't updated yet.
@@ -261,7 +261,7 @@ Visualizes the size and composition of your production bundles.
 **Command:**
 
 ```bash
-yarn analyze
+pnpm analyze
 ```
 
 **Outputs:**
@@ -324,13 +324,13 @@ Three complementary tools ensure WCAG 2.1 AA compliance:
 
 - **Type:** Static analysis during development
 - **What it catches:** Missing alt text, invalid ARIA attributes, non-semantic HTML
-- **When it runs:** During `yarn lint` and pre-commit hooks
+- **When it runs:** During `pnpm lint` and pre-commit hooks
 
 #### 2. axe-core CLI
 
 - **Type:** Runtime WCAG testing
 - **What it catches:** Contrast issues, focus management, live region problems
-- **Command:** `yarn access` (starts dev server → runs audits → saves reports)
+- **Command:** `pnpm access` (starts dev server → runs audits → saves reports)
 
 #### 3. Lighthouse
 
@@ -343,7 +343,7 @@ Three complementary tools ensure WCAG 2.1 AA compliance:
 **Full Suite:**
 
 ```bash
-yarn access
+pnpm access
 ```
 
 This command:
@@ -381,103 +381,90 @@ Update `src/resources/AccessibilityStatement.mdx` with findings and remediation 
 
 ---
 
-## Yarn Plug'n'Play (PnP)
+## Package Management (pnpm)
 
-This project uses **Yarn Plug'n'Play (PnP)** instead of traditional `node_modules`.
+### Why pnpm
 
-### What is PnP?
+Every version of every package is stored **once** in a global
+content-addressable store and hardlinked into `node_modules`. Nothing
+package-related is committed. The repo previously ran Yarn 4 Plug'n'Play with
+1,379 cache archives (778 MB) tracked in git; all of that is gone.
 
-Yarn PnP is a **zero-install** dependency resolution system:
+### Strictness: the property carried over from PnP
 
-- Dependencies resolve directly from `.pnp.cjs` (the PnP manifest)
-- No `node_modules` tree is created
-- Faster installs, smaller checkouts, deterministic resolution
+`nodeLinker: isolated` gives each package a `node_modules` containing only its
+**declared** dependencies. Importing something you never declared fails — the
+same protection `pnpMode: strict` gave us, but through a real directory tree
+that Jest, ESLint, Next and tsserver read natively. That is why the
+`.yarn/sdks` editor shims were deleted rather than ported.
 
-### Benefits
-
-- ✅ **Faster CI**: Smaller checkouts and faster dependency resolution
-- ✅ **Deterministic**: No phantom packages hiding in sub-folders
-- ✅ **Better Editor Integration**: Via Yarn SDKs (`.yarn/sdks/`)
-- ✅ **Security**: Explicit dependency resolution prevents supply chain attacks
-
-### Setup for Contributors
-
-**One-time setup after cloning:**
+If a build suddenly cannot find a package it has always used, the package was
+almost certainly a **phantom dependency**. The fix is to declare it:
 
 ```bash
-yarn dlx @yarnpkg/sdks vscode
+pnpm add -D the-package
 ```
 
-Replace `vscode` with your editor: `vim`, `intellij`, `webstorm`, etc.
+### All configuration lives in one file
 
-**What this does:**
-
-- Generates helper wrappers in `.yarn/sdks/`
-- Allows your IDE's TypeScript server, ESLint, and Prettier to traverse the PnP map
-- Required for proper IntelliSense and linting
-
-### Important Files
-
-| File              | Purpose                                              | Commit? |
-| ----------------- | ---------------------------------------------------- | ------- |
-| `.pnp.cjs`        | PnP manifest (part of lockfile)                      | ✅ Yes  |
-| `.pnp.loader.mjs` | ESM loader for PnP                                   | ✅ Yes  |
-| `.yarn/sdks/**`   | Editor wrappers for PnP-aware tooling                | ✅ Yes  |
-| `.yarnrc.yml`     | Yarn configuration (enables PnP, package extensions) | ✅ Yes  |
-
-### Upgrading Yarn
-
-**Non-interactive upgrade:**
-
-```bash
-yarn set version 4.10.3
-corepack prepare yarn@4.10.3 --activate
-yarn install && yarn dedupe --strategy=highest
+```
+pnpm-workspace.yaml    <- nodeLinker, allowBuilds, overrides, peer settings
 ```
 
-**After upgrading:**
+**Not `.npmrc`** (pnpm 11 reads it for auth and registry only) and **not
+`package.json`** (its `pnpm` field is no longer read). Settings in the wrong
+place are ignored _silently_. This is the single most common way to get a
+subtly wrong dependency tree.
 
-1. Commit the updated `.pnp.cjs` and `yarn.lock`
-2. Re-run `yarn dlx @yarnpkg/sdks vscode` if editor integration breaks
-3. Verify editors still resolve packages correctly
+### Install scripts are denied by default
 
-### Troubleshooting PnP
-
-**Error: Cannot find module './.pnp.cjs'**
-
-- Ensure `corepack enable` has been run (requires admin on Windows)
-- Verify `.pnp.cjs` exists and is committed to git
-- Check that scripts in `package.json` don't manually require `.pnp.cjs` (Corepack handles this)
-
-**Error: Qualified path resolution failed**
-
-- Remove manual `-r ./.pnp.cjs` prefixes from package.json scripts
-- Let Corepack manage the PnP environment
-
-**Missing peer dependency (e.g., `acorn` for `recma-jsx`):**
-Add to `.yarnrc.yml`:
+Yarn ran every install script in the tree. pnpm runs none unless allowlisted:
 
 ```yaml
-packageExtensions:
-  recma-jsx@*:
-    dependencies:
-      acorn: '*'
+allowBuilds:
+  sharp: true
 ```
 
-### Vercel Deployment
+If `pnpm install` reports `[ERR_PNPM_IGNORED_BUILDS]`, a package needs a native
+binary and is not listed. Add it only if you understand why it needs to run
+code at install time.
 
-**Configuration:** `vercel.json`
+> `allowBuilds` is pnpm 11. It replaced `onlyBuiltDependencies`, which pnpm 11
+> removed and now **ignores without warning** — so configuration copied from
+> older guides looks correct and does nothing.
 
-The `installCommand` uses `corepack enable && yarn install --immutable` to ensure Vercel uses the correct Yarn version (v4, not v1 Classic).
+### Common commands
 
-**Key Learnings:**
+| Task                                   | Command                             |
+| -------------------------------------- | ----------------------------------- |
+| Install exactly what the lockfile says | `pnpm install --frozen-lockfile`    |
+| Add a dependency                       | `pnpm add x` / `pnpm add -D x`      |
+| Why is this package here?              | `pnpm why x`                        |
+| Run a binary from the tree             | `pnpm exec <bin>`                   |
+| One-off without installing             | `pnpm dlx <pkg>`                    |
+| Check peer dependency gaps             | `pnpm peers check`                  |
+| Audit                                  | `pnpm audit --audit-level critical` |
 
-- Vercel may default to Yarn v1 despite `packageManager` field in `package.json`
-- Explicitly enabling Corepack in the install command forces correct version
-- The `.pnp.cjs` file must be committed to git for deployment to succeed
-- Simplified build scripts (no manual PnP loader) prevent resolution errors
+### Version pinning
 
----
+The pnpm version lives in exactly one place — `packageManager` in
+`package.json`. CI (`pnpm/action-setup` with no `version:` key), Vercel and
+every developer machine read it from there. This matters more than usual:
+older pnpm silently ignores `pnpm-workspace.yaml`, so a host that picked its
+own pnpm would install with no overrides and no allowed builds, and not fail.
+
+### Troubleshooting
+
+| Symptom                                                  | Cause                                                                |
+| -------------------------------------------------------- | -------------------------------------------------------------------- |
+| `Cannot find module X` for a package that "is installed" | Phantom dependency — declare it                                      |
+| `ERR_PNPM_IGNORED_BUILDS`                                | Package needs `allowBuilds`                                          |
+| A setting appears to do nothing                          | It is in `.npmrc` or `package.json` instead of `pnpm-workspace.yaml` |
+| `ERR_PNPM_OUTDATED_LOCKFILE` in CI                       | `package.json` changed without re-running `pnpm install`             |
+| Overriding a package broke its parent                    | Bump the parent instead — see `docs/PNPM-MIGRATION.md` §5            |
+
+Full migration write-up, including measured before/after numbers and the
+problems the migration uncovered: **`docs/PNPM-MIGRATION.md`**.
 
 ## TypeScript Configuration
 
@@ -521,8 +508,8 @@ The project uses an **explicit** `types` array in `tsconfig.json` `compilerOptio
 **Usage:**
 
 ```bash
-yarn typecheck                    # Check production code
-yarn type-check:dev               # Check with dev tooling types
+pnpm typecheck                    # Check production code
+pnpm type-check:dev               # Check with dev tooling types
 ```
 
 ---
@@ -600,30 +587,29 @@ module.exports = {
 
 ### What to Commit
 
-| Path                           | Generated by   | Purpose                                 | Commit?                           |
-| ------------------------------ | -------------- | --------------------------------------- | --------------------------------- |
-| `.yarn/sdks/**`                | `yarn sdks`    | Editor wrappers for PnP-aware tooling   | ✅ Yes                            |
-| `.pnp.cjs` & `.pnp.loader.mjs` | Yarn           | PnP mapping & loader (part of lockfile) | ✅ Yes                            |
-| `components/ui/**`             | `shadcn-ui`    | UI component source files               | ✅ Yes                            |
-| `accessibility-reports/**`     | `yarn access`  | Accessibility audit reports             | ❌ No (gitignored)                |
-| `.next/analyze/*.html`         | `yarn analyze` | Bundle size visualizations              | ❌ No (gitignored)                |
-| `tsconfig.tsbuildinfo`         | TypeScript     | Build cache                             | ✅ Yes (tracked for optimization) |
+| Path                       | Generated by   | Purpose                     | Commit?            |
+| -------------------------- | -------------- | --------------------------- | ------------------ |
+| `pnpm-lock.yaml`           | pnpm           | The dependency lockfile     | ✅ Yes             |
+| `components/ui/**`         | `shadcn-ui`    | UI component source files   | ✅ Yes             |
+| `accessibility-reports/**` | `pnpm access`  | Accessibility audit reports | ❌ No (gitignored) |
+| `.next/analyze/*.html`     | `pnpm analyze` | Bundle size visualizations  | ❌ No (gitignored) |
+| `tsconfig.tsbuildinfo`     | TypeScript     | Build cache                 | ❌ No (gitignored) |
 
 ### .gitignore Best Practices
 
 **Current configuration:**
 
-- Uses glob patterns to ignore large platform-specific binaries (e.g., `**/@next/swc-*/**`)
-- Excludes PnP cache (`.yarn/cache/**`) for zero-install setup
-- Includes `.yarn/releases/**` to version-lock Yarn binary
 - Excludes build artifacts (`.next/**`, `out/**`, `dist/**`)
+- Excludes `node_modules/` — pnpm keeps packages in a global store outside the
+  repo, so there is nothing package-related left to commit or exclude
 
-**PnP-specific:**
+**pnpm-specific:**
 
-- ✅ Commit `.pnp.cjs` and `.pnp.loader.mjs`
-- ✅ Commit `.yarn/sdks/` for editor integration
-- ❌ Don't commit `.yarn/cache/` (optional: enable for true zero-install)
-- ❌ Don't commit `.yarn/install-state.gz`
+- ✅ Commit `pnpm-lock.yaml` — it is the only artifact git needs
+- ✅ Commit `pnpm-workspace.yaml` — it holds all pnpm configuration
+- ❌ Never commit a second lockfile (`yarn.lock`, `package-lock.json`,
+  `bun.lockb`). Two lockfiles means two dependency trees and a coin flip over
+  which one the deploy resolves
 
 ---
 
@@ -632,39 +618,41 @@ module.exports = {
 ### Daily Development
 
 ```bash
-yarn dev              # Start development server
-yarn lint             # Check code quality
-yarn typecheck        # Check TypeScript types
-yarn test             # Run tests in watch mode
+pnpm dev              # Start development server
+pnpm lint             # Check code quality
+pnpm typecheck        # Check TypeScript types
+pnpm test             # Run tests in watch mode
 ```
 
 ### Pre-Deployment
 
 ```bash
-yarn lint             # Lint all files
-yarn format           # Format all files
-yarn typecheck        # Check types
-yarn build            # Build for production
-yarn analyze          # Analyze bundle size
-yarn access           # Run accessibility audits
+pnpm lint             # Lint all files
+pnpm format           # Format all files
+pnpm typecheck        # Check types
+pnpm build            # Build for production
+pnpm analyze          # Analyze bundle size
+pnpm access           # Run accessibility audits
 ```
 
 ### Dependency Management
 
 ```bash
-yarn up               # Update all dependencies
-yarn dedupe           # Remove duplicate packages
-yarn audit            # Full security vulnerability report
-yarn audit:critical   # Critical vulnerabilities only
-yarn audit:fix        # Attempt automatic fixes
+pnpm update           # Update within the ranges in package.json
+pnpm update --latest  # Update across majors (review the diff)
+pnpm dedupe           # Remove duplicate packages
+pnpm audit            # Full security vulnerability report
+pnpm audit:critical   # Critical vulnerabilities only
+pnpm audit:fix        # Attempt automatic fixes
 ```
 
 ### Troubleshooting
 
 ```bash
-yarn cache clean      # Clear Yarn cache
-rm -rf .yarn/cache .pnp.cjs yarn.lock && yarn install  # Nuclear option
-yarn dlx @yarnpkg/sdks vscode  # Regenerate editor SDKs
+pnpm store prune                       # Drop store entries nothing references
+rm -rf node_modules && pnpm install    # Nuclear option
+pnpm why <pkg>                         # Trace why a package is in the tree
+pnpm peers check                       # List peer dependency gaps
 ```
 
 ---
@@ -675,16 +663,19 @@ yarn dlx @yarnpkg/sdks vscode  # Regenerate editor SDKs
 
 **Configuration:** `vercel.json`
 
-**Build Command:** `yarn build`
+**Build Command:** `pnpm build`
 
 - Runs `next build`
 - Generates service worker via `scripts/build-sw.mjs`
 - Generates sitemap via `next-sitemap`
 
-**Install Command:** `corepack enable && yarn install --immutable`
+**Install Command:** `pnpm install --frozen-lockfile`
 
-- Forces Yarn v4 (PnP mode)
-- `--immutable` ensures lockfile isn't modified during build
+- `--frozen-lockfile` fails the build rather than silently resolving something
+  `pnpm-lock.yaml` never recorded (the `yarn install --immutable` equivalent)
+- `ENABLE_EXPERIMENTAL_COREPACK=1` is what lets Vercel honour `packageManager`
+- `engines.node` must be a major selector (`"22.x"`); Vercel rejects semver
+  ranges such as `">=22.13.0"`
 
 **Environment:**
 
@@ -705,33 +696,33 @@ Runs on PRs, pushes to main, weekly cron, and manual dispatch. See [Security Aud
 
 | Command               | Purpose                       |
 | --------------------- | ----------------------------- |
-| `yarn dev`            | Start development server      |
-| `yarn build`          | Build for production          |
-| `yarn lint`           | Lint all files                |
-| `yarn lint:mdx`       | Lint only MDX files           |
-| `yarn format`         | Format all files              |
-| `yarn format:mdx`     | Format only MDX files         |
-| `yarn typecheck`      | Check TypeScript types        |
-| `yarn test`           | Run tests in watch mode       |
-| `yarn analyze`        | Analyze bundle size           |
-| `yarn access`         | Run accessibility audits      |
-| `yarn audit`          | Full security audit           |
-| `yarn audit:critical` | Critical vulnerabilities only |
+| `pnpm dev`            | Start development server      |
+| `pnpm build`          | Build for production          |
+| `pnpm lint`           | Lint all files                |
+| `pnpm lint:mdx`       | Lint only MDX files           |
+| `pnpm format`         | Format all files              |
+| `pnpm format:mdx`     | Format only MDX files         |
+| `pnpm typecheck`      | Check TypeScript types        |
+| `pnpm test`           | Run tests in watch mode       |
+| `pnpm analyze`        | Analyze bundle size           |
+| `pnpm access`         | Run accessibility audits      |
+| `pnpm audit`          | Full security audit           |
+| `pnpm audit:critical` | Critical vulnerabilities only |
 
 ### File Locations
 
-| File                 | Purpose                           |
-| -------------------- | --------------------------------- |
-| `eslint.config.mjs`  | ESLint configuration              |
-| `.prettierrc.json`   | Prettier configuration            |
-| `jest.config.js`     | Jest configuration                |
-| `jest.setup.js`      | Jest setup (imports jest-dom)     |
-| `tailwind.config.js` | Tailwind CSS configuration        |
-| `tsconfig.json`      | TypeScript configuration          |
-| `next.config.js`     | Next.js configuration             |
-| `vercel.json`        | Vercel deployment configuration   |
-| `.yarnrc.yml`        | Yarn configuration (PnP settings) |
-| `package.json`       | Dependencies and scripts          |
+| File                  | Purpose                         |
+| --------------------- | ------------------------------- |
+| `eslint.config.mjs`   | ESLint configuration            |
+| `.prettierrc.json`    | Prettier configuration          |
+| `jest.config.js`      | Jest configuration              |
+| `jest.setup.js`       | Jest setup (imports jest-dom)   |
+| `tailwind.config.js`  | Tailwind CSS configuration      |
+| `tsconfig.json`       | TypeScript configuration        |
+| `next.config.js`      | Next.js configuration           |
+| `vercel.json`         | Vercel deployment configuration |
+| `pnpm-workspace.yaml` | ALL pnpm configuration          |
+| `package.json`        | Dependencies and scripts        |
 
 ---
 
@@ -822,7 +813,7 @@ Avoid creating `new Date()` objects—string comparison is reliable and avoids T
 
 1. Ensure `"types": ["jest", "@testing-library/jest-dom"]` in `tsconfig.json`
 2. Restart TypeScript server in your IDE
-3. If persisting: `rm -rf node_modules && yarn install`
+3. If persisting: `rm -rf node_modules && pnpm install`
 
 ### Issue: MDX parsing errors
 
@@ -833,7 +824,7 @@ Avoid creating `new Date()` objects—string comparison is reliable and avoids T
 1. Add blank lines before/after JSX components in MDX
 2. Don't mix HTML tags (like `<br />`) inside markdown lists
 3. Ensure proper indentation for closing tags
-4. Run `yarn lint:mdx` to validate
+4. Run `pnpm lint:mdx` to validate
 
 ### Issue: Prettier and ESLint conflicts
 
@@ -844,26 +835,36 @@ Avoid creating `new Date()` objects—string comparison is reliable and avoids T
 - This shouldn't happen - `eslint-config-prettier` disables conflicting rules
 - If it does: check that `eslint-config-prettier` is the **last** item in your ESLint extends array
 
-### Issue: Yarn PnP resolution errors
+### Issue: `Cannot find module` for a package that is clearly installed
 
-**Symptoms:** `Cannot find module` or `Qualified path resolution failed`
+**Symptoms:** A package you can see in `node_modules` fails to import.
+
+**Cause:** It is a **phantom dependency**. `nodeLinker: isolated` only exposes
+what this project _declares_, so code relying on a transitive dependency stops
+resolving. This is the protection working, not a bug.
 
 **Fix:**
 
-1. Ensure `corepack enable` has been run
-2. Remove manual `-r ./.pnp.cjs` from package.json scripts
-3. Regenerate editor SDKs: `yarn dlx @yarnpkg/sdks vscode`
-4. Verify `.pnp.cjs` exists and is committed
+1. `pnpm why <pkg>` to confirm it arrives transitively
+2. `pnpm add <pkg>` (or `-D`) to declare it properly
+
+### Issue: `ERR_PNPM_IGNORED_BUILDS`
+
+**Symptoms:** Install ends with a list of packages whose build scripts were
+skipped, and a native binary is missing afterwards.
+
+**Fix:** Add the package to `allowBuilds` in `pnpm-workspace.yaml` — and only
+after deciding you are comfortable with it executing code at install time.
 
 ### Issue: Jest tests failing on CI but passing locally
 
-**Symptoms:** Tests pass with `yarn test` but fail in CI
+**Symptoms:** Tests pass with `pnpm test` but fail in CI
 
 **Fix:**
 
 1. Ensure time zones are consistent (use `Date-fns` with explicit zones)
 2. Mock `Math.random()` and other non-deterministic functions
-3. Use `--ci` flag in CI: `yarn test --ci --coverage`
+3. Use `--ci` flag in CI: `pnpm test --ci --coverage`
 4. Check for file system case sensitivity (Windows vs Linux)
 
 ---
@@ -871,7 +872,8 @@ Avoid creating `new Date()` objects—string comparison is reliable and avoids T
 ## Further Reading
 
 - [Next.js Testing Documentation](https://nextjs.org/docs/pages/guides/testing/jest)
-- [Yarn PnP Documentation](https://yarnpkg.com/features/pnp)
+- [pnpm Documentation](https://pnpm.io)
+- [This repo's migration write-up](./PNPM-MIGRATION.md)
 - [shadcn/ui Documentation](https://ui.shadcn.com)
 - [WCAG 2.1 Guidelines](https://www.w3.org/WAI/WCAG21/quickref/)
 - [Webpack Bundle Analyzer](https://github.com/webpack-contrib/webpack-bundle-analyzer)

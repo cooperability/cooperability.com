@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # NextTS Portfolio - Environment Setup Script
-# This ensures consistent Node.js/yarn versions across different machines
+# This ensures consistent Node.js/pnpm versions across different machines
 
 echo "🔧 Setting up NextTS Portfolio environment..."
 
@@ -40,13 +40,13 @@ fi
 
 # Install dependencies locally
 echo "📥 Installing project dependencies..."
-yarn install
+pnpm install
 
 echo "🎉 Environment setup complete!"
 echo ""
 echo "Available commands:"
-echo "  yarn dev       - Start development server"
-echo "  yarn build     - Build for production"
-echo "  yarn typecheck - Run TypeScript checks"
-echo "  yarn lint      - Run ESLint"
-echo "  yarn test      - Run tests" 
+echo "  pnpm dev       - Start development server"
+echo "  pnpm build     - Build for production"
+echo "  pnpm typecheck - Run TypeScript checks"
+echo "  pnpm lint      - Run ESLint"
+echo "  pnpm test      - Run tests" 

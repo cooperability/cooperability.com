@@ -1,0 +1,85 @@
+# ===========================================================================
+# pnpm configuration -- the single source of truth.
+#
+# READ THIS BEFORE ADDING A SETTING ANYWHERE ELSE.
+#
+# pnpm 11 made `.npmrc` auth/registry-only. Every other setting must live in
+# THIS file. Settings put in `.npmrc` or in package.json's `pnpm` field are
+# ignored -- in most cases silently. That failure mode is the single most
+# dangerous thing about this toolchain: the install succeeds, prints nothing
+# alarming, and resolves a different dependency tree than you asked for.
+# ===========================================================================
+
+# --- Module layout -------------------------------------------------------
+# The one property worth carrying over from Yarn PnP's `pnpMode: strict`.
+# `isolated` gives each package a node_modules containing only its DECLARED
+# dependencies, so importing something you never declared still fails. Unlike
+# PnP it is a real directory tree, so Jest, ESLint, Next and tsserver read it
+# natively and the .yarn/sdks shim layer disappears entirely.
+nodeLinker: isolated
+
+# --- Supply chain --------------------------------------------------------
+# Which dependencies may execute code at install time. Yarn ran every install
+# script in the tree (`enableScripts: true`); pnpm denies all by default and
+# takes an explicit allowlist. This is a genuine security upgrade: a
+# compromised version of any package NOT listed here gets no install-time
+# code execution on a developer machine or in CI.
+#
+# `allowBuilds` is a pnpm 11 setting. It replaced `onlyBuiltDependencies`,
+# which pnpm 11 removed and now IGNORES rather than errors on -- so a config
+# copied from a pnpm 10 tutorial looks correct and does nothing.
+allowBuilds:
+  '@swc/core': true # Rust binary; the compiler behind the Jest transform
+  sharp: true # libvips; Next.js image optimization at build time
+  unrs-resolver: true # Rust binary backing ESLint's import resolver
+
+  # DEV-ONLY, and the first entry worth deleting. chromedriver is pulled in by
+  # @axe-core/cli and used solely by `pnpm access`. Its install script
+  # downloads a browser driver over the network on every clean install. It is
+  # allowlisted only because Yarn already ran it, so that this migration
+  # changes mechanism and not behaviour. See docs/PNPM-MIGRATION.md.
+  chromedriver: true
+
+# --- Version pinning carried over from Yarn `resolutions` ----------------
+# Each entry pins a transitive package that an advisory or deprecation forced
+# upward. Semantics are identical to Yarn's field; only the name changed.
+overrides:
+  punycode: ^2.3.1
+  form-data: ^4.0.4
+  tmp: ^0.2.4
+  tar-fs: ^3.1.1
+  glob: ^10.5.0
+  mdast-util-to-hast: ^13.2.1
+  js-yaml: ^3.14.2
+
+  # Forced by the glob override above, not by an advisory. test-exclude@6 calls
+  # `util.promisify(glob)`, which only works when glob exports a function --
+  # glob 10 exports an object, so coverage died with "The \"original\" argument
+  # must be of type function". test-exclude@7 uses the glob 10 API. Without
+  # this, `pnpm test:ci` cannot collect coverage at all.
+  test-exclude: ^7.0.2
+
+  # Fixes two ip-address advisories (SSRF via octal octet parsing, and XSS in
+  # Address6 HTML methods) WITHOUT overriding ip-address itself.
+  #
+  # The chain is socks -> ip-address, and socks 2.8.5 pins `ip-address: ^9`.
+  # Forcing ip-address to ^10 directly would hand socks an API it does not
+  # expect -- the same failure that broke coverage when the glob override
+  # reached test-exclude@6. socks 2.8.9 already declares `ip-address: ^10.1.1`,
+  # so bumping the PARENT lets the fixed child come in legitimately.
+  #
+  # Dev-only either way: the chain is lighthouse and @axe-core/cli, so nothing
+  # here reaches the deployed bundle.
+  socks: ^2.8.9
+
+  # next pulls older transitive copies of both of these alongside the fixed
+  # versions this project depends on directly, and the old copies carry all
+  # five remaining advisories. Pinning them upward clears the tree.
+  postcss: ^8.5.26
+  sharp: ^0.35.3
+
+# --- Peer dependencies ---------------------------------------------------
+# Warn rather than hard-fail, so a peer gap inside someone else's package
+# cannot block a security patch from landing here.
+strictPeerDependencies: false
+autoInstallPeers: true

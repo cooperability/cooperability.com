@@ -1,32 +1,28 @@
-#!/usr/bin/env sh
-# =============================================================================
-# Pre-push Security Audit Hook
-# Platform: macOS / Linux / Git Bash on Windows
-# =============================================================================
-# This hook runs before 'git push' and blocks if critical vulnerabilities exist.
-# To bypass in emergencies: git push --no-verify
-# =============================================================================
+# Blocks a push when a dependency has a CRITICAL advisory.
+# Bypass in a genuine emergency with: git push --no-verify
 
 set -e
 
 echo ""
-echo "🔒 Running security audit before push..."
+echo "Running security audit before push..."
 echo ""
 
-# Run the audit
-if yarn npm audit --severity critical; then
+# `pnpm audit` replaces `yarn npm audit`. pnpm 11 no longer delegates audit to
+# the npm CLI at all -- it queries npm's bulk advisories endpoint directly --
+# so the old `yarn npm audit` phrasing has no pnpm equivalent and the flag is
+# --audit-level, not --severity.
+if pnpm audit --audit-level critical; then
     echo ""
-    echo "✅ No critical vulnerabilities found. Pushing..."
+    echo "No critical vulnerabilities found. Pushing."
     echo ""
-    exit 0
 else
     echo ""
-    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    echo "❌ PUSH BLOCKED: Critical security vulnerabilities found!"
-    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "--------------------------------------------------------------"
+    echo "PUSH BLOCKED: critical vulnerabilities found."
+    echo "--------------------------------------------------------------"
     echo ""
-    echo "To see details:     yarn audit"
-    echo "To bypass (unsafe): git push --no-verify"
+    echo "  See details:      pnpm audit"
+    echo "  Bypass (unsafe):  git push --no-verify"
     echo ""
     exit 1
 fi

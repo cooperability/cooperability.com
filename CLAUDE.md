@@ -1,24 +1,31 @@
 # CLAUDE.md — cooperability.com
 
-Next.js portfolio (Pages Router under `src/pages`), Vercel, Yarn 4 PnP, Node 22.
+Next.js portfolio (Pages Router under `src/pages`), Vercel, pnpm 11, Node 22.
 
 ## Commands agents should use
 
 Prefer catalogs in `.claude/cli/` (mirrored under `.cursor/cli/`).
 
-| Task | Command |
-|------|---------|
-| Dev server | `yarn dev` |
-| Lint (incl. jsx-a11y) | `yarn lint` |
-| Types | `yarn typecheck` |
-| Unit tests (non-interactive) | `yarn jest --ci --watchAll=false` |
-| A11y (axe + Lighthouse) | `yarn access` |
-| Security audit | `yarn audit:critical` |
-| Format | `yarn format` (ask before huge rewrites) |
+| Task                         | Command                                  |
+| ---------------------------- | ---------------------------------------- |
+| Dev server                   | `pnpm dev`                               |
+| Lint (incl. jsx-a11y)        | `pnpm lint`                              |
+| Types                        | `pnpm typecheck`                         |
+| Unit tests (non-interactive) | `pnpm test`                              |
+| Unit tests + coverage        | `pnpm test:ci`                           |
+| A11y (axe + Lighthouse)      | `pnpm access`                            |
+| Security audit               | `pnpm audit:critical`                    |
+| Format                       | `pnpm format` (ask before huge rewrites) |
 
-**Never** run `yarn test` in agent sessions — it is Jest watch mode.
+`pnpm test` is now the non-interactive run and is safe in agent sessions. The
+watcher moved to `pnpm test:watch` — **never** run that one unattended.
 
-Package manager is **Yarn 4 (PnP)**. Do not switch to npm/pnpm unless the user is doing that migration.
+Package manager is **pnpm 11**. Do not switch to npm or yarn.
+
+All pnpm configuration lives in `pnpm-workspace.yaml` — not `.npmrc` (auth and
+registry only in pnpm 11) and not `package.json` (its `pnpm` field is ignored).
+Settings placed in the wrong file are ignored **silently**. See
+`docs/PNPM-MIGRATION.md`.
 
 ## Architecture (quick)
 
@@ -47,6 +54,6 @@ When a skill matches the user request, read and follow it.
 
 ### Shared vs. project-local skills
 
-Everything under `.claude/` and `.cursor/` in this repo is **project-local** and safe to edit here: `cli/**/COMMANDS.md` (the `yarn` commands), all four agents, `.cursor/rules/*.mdc`, and `run-automated-tests`. They stay local precisely because they hardcode this stack — keep stack-specific commands out of anything shared.
+Everything under `.claude/` and `.cursor/` in this repo is **project-local** and safe to edit here: `cli/**/COMMANDS.md` (the `pnpm` commands), all four agents, `.cursor/rules/*.mdc`, and `run-automated-tests`. They stay local precisely because they hardcode this stack — keep stack-specific commands out of anything shared.
 
 The shared git/GitHub workflow skills are **no longer vendored here.** They install once into your home directory from [claugmentations](https://github.com/cooperability/claugmentations) and load in every repo, so this repo has nothing to sync, check, or keep in step — no `.claugmentations.json`, no CI job. To change one, edit it upstream in `claugmentations/templates/claude/` and re-run that package's installer. Never copy one back into this repo: a local copy would shadow the installed skill and silently go stale.

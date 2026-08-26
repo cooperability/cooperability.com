@@ -485,7 +485,7 @@ import { SpeedInsights } from '@vercel/speed-insights/next'
 ### Bundle Analysis
 
 ```bash
-yarn analyze  # Runs next build with ANALYZE=true
+pnpm analyze  # Runs next build with ANALYZE=true
 ```
 
 ### Key Metrics to Monitor
@@ -495,7 +495,7 @@ yarn analyze  # Runs next build with ANALYZE=true
 | FCP         | < 1.8s   | Lighthouse, Speed Insights |
 | LCP         | < 2.5s   | Lighthouse, Speed Insights |
 | CLS         | < 0.1    | Lighthouse, Speed Insights |
-| Bundle Size | Minimize | `yarn analyze`             |
+| Bundle Size | Minimize | `pnpm analyze`             |
 
 ---
 

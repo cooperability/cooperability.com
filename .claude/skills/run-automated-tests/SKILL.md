@@ -22,15 +22,15 @@ Read (in order):
 
 | Intent | Command (this repo) |
 |--------|---------------------|
-| Default Jest suite | `yarn jest --ci --watchAll=false` |
+| Default Jest suite | `pnpm test` |
 | Fail fast | add `--bail` |
 | One area | path or `--testPathPattern=` |
 | Related to edits | `--findRelatedTests --passWithNoTests` on touched files |
-| Static ARIA / a11y | `yarn lint` |
-| Full axe + Lighthouse | `yarn access` (slow; needs :3000) |
+| Static ARIA / a11y | `pnpm lint` |
+| Full axe + Lighthouse | `pnpm access` (slow; needs :3000) |
 | + types/lint | see quality catalog |
 
-**Never** run `yarn test` in an agent session (it is watch mode). Do not run `yarn access` unless a11y/Lighthouse was requested.
+**Never** run `pnpm test` in an agent session (it is watch mode). Do not run `pnpm access` unless a11y/Lighthouse was requested.
 
 ## 3. Execute and report
 
@@ -44,7 +44,7 @@ Read (in order):
 When asked to “make sure CI would pass”:
 
 ```bash
-yarn lint && yarn typecheck && yarn jest --ci --watchAll=false
+pnpm lint && pnpm typecheck && pnpm test
 ```
 
-Add `yarn audit:critical` if security is in scope.
+Add `pnpm audit:critical` if security is in scope.

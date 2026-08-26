@@ -15,6 +15,11 @@ updates:
     # Limit open PRs to avoid noise
     open-pull-requests-limit: 10
 
+    # NOTE: the `npm` ecosystem covers pnpm too -- Dependabot picks the manager
+    # from the lockfile it finds, so pnpm-lock.yaml is handled with no rename.
+    # Any PR opened against the old yarn.lock cannot rebase onto this tree and
+    # must be closed; Dependabot reopens it against pnpm-lock.yaml.
+
     # Group minor/patch updates to reduce PR noise
     groups:
       # Group all patch updates together

@@ -1,6 +1,7 @@
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import styles from './OpioidConverter.module.css'
 import { MedicationItem } from './types'
+import { calculateTotals } from './utils/calculations'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 
@@ -108,32 +109,17 @@ const MEDICATION_ARRAY: MedicationItem[] = [
 const OpioidConverter = () => {
   const [medications, setMedications] =
     useState<MedicationItem[]>(MEDICATION_ARRAY)
-  const [morphineEq, setMorphineEq] = useState(0)
-  const [methadoneEq, setMethadoneEq] = useState(0)
   const [activeInput, setActiveInput] = useState<number | null>(null)
 
-  const calculateEquivalents = useCallback(() => {
-    let newMorphineEq = 0
-
-    medications.forEach((med) => {
-      let equivalence = med.dailyDose
-      if (med.display === 'Methadone') {
-        equivalence = Math.pow(equivalence, 2)
-      } else {
-        equivalence *= med.toMorphine
-      }
-      newMorphineEq += equivalence
-    })
-
-    const newMethadoneEq = Math.sqrt(newMorphineEq * 4)
-
-    setMorphineEq(Math.round(newMorphineEq))
-    setMethadoneEq(Math.round(newMethadoneEq))
-  }, [medications])
-
-  useEffect(() => {
-    calculateEquivalents()
-  }, [medications, calculateEquivalents])
+  // Derived from `medications`, so computed during render rather than held in
+  // state and re-synced by an effect. The previous shape cost a second render
+  // pass on every keystroke. The arithmetic itself is unchanged -- it moved
+  // verbatim into calculateTotals, which is pinned by characterisation tests
+  // in src/__tests__/components/opioid-converter/calculations.test.ts.
+  const { morphineEq, methadoneEq } = useMemo(
+    () => calculateTotals(medications),
+    [medications]
+  )
 
   const handleDoseChange = useCallback((index: number, value: string) => {
     setMedications((prev) =>

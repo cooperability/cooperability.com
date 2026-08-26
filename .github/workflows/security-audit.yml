@@ -1,21 +1,22 @@
 name: Security Audit
 
 on:
-  # Run on every PR to main/master
   pull_request:
     branches: [main, master]
-
-  # Run on pushes to main (catches direct commits)
   push:
     branches: [main, master]
-
-  # Weekly scan: Sunday at 2 AM UTC
-  # Catches newly disclosed vulnerabilities in existing dependencies
+  # Weekly scan catches advisories disclosed against dependencies we already
+  # have, which a PR-triggered run never would.
   schedule:
     - cron: '0 2 * * 0'
-
-  # Allow manual trigger from GitHub UI
   workflow_dispatch:
+
+concurrency:
+  group: audit-${{ github.workflow }}-${{ github.ref }}
+  # Never cancel on the default branch: a cancelled run is not a failure, so two
+  # merges landing close together could put a commit on main with no completed
+  # CI and no red X.
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
   audit:
@@ -23,51 +24,50 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
+      - uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v7
         with:
-          node-version: '22'
+          node-version-file: .nvmrc
 
-      - name: Enable Corepack (for Yarn 4)
-        run: corepack enable
+      # No install step. `pnpm audit` resolves the tree from pnpm-lock.yaml and
+      # queries the advisory API directly, so it needs neither node_modules nor
+      # a store. The old workflow ran a full `yarn install --immutable` first,
+      # which also meant every dependency install script executed on a runner
+      # whose only job was to read a lockfile.
+      - name: Audit (critical) - blocking
+        run: pnpm audit --audit-level critical
 
-      - name: Install dependencies
-        run: yarn install --immutable
+      - name: Audit (high) - informational
+        if: '!cancelled()'
+        run: pnpm audit --audit-level high || true
 
-      - name: Run security audit (critical)
-        run: yarn npm audit --severity critical
-
-      - name: Run security audit (high) - warning only
-        run: yarn npm audit --severity high || true
-        # Non-blocking for high severity, but visible in logs
-
-      # Optional: Create GitHub issue on scheduled run failure
-      - name: Create issue on vulnerability found
+      - name: Open an issue if the scheduled scan fails
         if: failure() && github.event_name == 'schedule'
         uses: actions/github-script@v9
         with:
           script: |
-            const title = '🚨 Security Vulnerability Detected';
-            const body = `A scheduled security audit found critical vulnerabilities in dependencies.\n\nRun \`yarn npm audit\` locally to see details.\n\n[View workflow run](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})`;
+            const title = 'Security: critical vulnerability in dependencies'
+            const body = [
+              'The scheduled audit found a **critical** advisory.',
+              '',
+              'Reproduce locally with `pnpm audit`.',
+              '',
+              `[View workflow run](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})`,
+            ].join('\n')
 
-            // Check if issue already exists
-            const issues = await github.rest.issues.listForRepo({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              state: 'open',
-              labels: 'security'
-            });
-
-            const existingIssue = issues.data.find(i => i.title === title);
-            if (!existingIssue) {
+            const existing = await github.paginate(
+              github.rest.issues.listForRepo,
+              { owner: context.repo.owner, repo: context.repo.repo, state: 'open', labels: 'security' }
+            )
+            if (!existing.some((i) => i.title === title)) {
               await github.rest.issues.create({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                title: title,
-                body: body,
-                labels: ['security', 'dependencies']
-              });
+                title,
+                body,
+                labels: ['security', 'dependencies'],
+              })
             }

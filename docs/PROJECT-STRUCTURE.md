@@ -9,10 +9,8 @@ These files MUST remain in root per tool/framework conventions:
 | File                     | Purpose                                   | Required in Root? |
 | ------------------------ | ----------------------------------------- | ----------------- |
 | `package.json`           | Project dependencies & scripts            | ✅ Yes            |
-| `yarn.lock`              | Dependency lockfile                       | ✅ Yes            |
-| `.yarnrc.yml`            | Yarn configuration                        | ✅ Yes            |
-| `.pnp.cjs`               | Yarn PnP manifest                         | ✅ Yes            |
-| `.pnp.loader.mjs`        | Yarn PnP ESM loader                       | ✅ Yes            |
+| `pnpm-lock.yaml`         | Dependency lockfile                       | ✅ Yes            |
+| `pnpm-workspace.yaml`    | pnpm configuration (ALL of it)            | ✅ Yes            |
 | `next.config.js`         | Next.js configuration                     | ✅ Yes            |
 | `next-env.d.ts`          | Next.js type definitions (auto-generated) | ✅ Yes            |
 | `tsconfig.json`          | TypeScript base config                    | ✅ Yes            |
@@ -80,7 +78,7 @@ echo "engine-strict=true" > .npmrc
 
 **Benefits:**
 
-- Prevents mixing npm and yarn
+- Prevents mixing npm, yarn and pnpm
 - Enforces package manager consistency
 
 ---
@@ -127,7 +125,7 @@ cooperability.com/
 ├── .github/                    # GitHub-specific configs
 ├── .husky/                     # Git hooks
 ├── .vscode/                    # Editor settings
-├── .yarn/                      # Yarn PnP SDKs
+├── node_modules/               # pnpm symlinks into the global store
 ├── docs/                       # ✨ Renamed from documentation/
 │   ├── DEPLOYMENT-FIXES.md
 │   ├── MCP.md
@@ -147,5 +145,5 @@ cooperability.com/
 ├── package.json
 ├── README.md
 ├── tsconfig.json
-└── yarn.lock
+└── pnpm-lock.yaml
 ```
