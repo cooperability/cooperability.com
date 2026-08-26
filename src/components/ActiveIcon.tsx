@@ -3,8 +3,8 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { useTheme } from 'next-themes'
-import { useState, useEffect } from 'react'
 import styles from '../styles/utils.module.css'
+import { useHydrated } from '../hooks/useHydrated'
 
 export interface ActiveIconProps {
   href: string
@@ -30,24 +30,17 @@ const ActiveIcon: React.FC<ActiveIconProps> = ({
   external = true,
 }) => {
   const { systemTheme, theme } = useTheme()
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
+  const hydrated = useHydrated()
 
   // Determine the current theme
   const currentTheme = theme === 'system' ? systemTheme : theme
 
   // Construct the image source URL
   let imageSource = imgSrc
-  if (iconName && mounted) {
-    // Use skillicons.dev with theme support
-    const themeParam = currentTheme === 'dark' ? 'dark' : 'light'
+  if (iconName) {
+    // Light is the pre-hydration default, so server and client markup agree.
+    const themeParam = hydrated && currentTheme === 'dark' ? 'dark' : 'light'
     imageSource = `https://skillicons.dev/icons?i=${iconName}&theme=${themeParam}`
-  } else if (iconName && !mounted) {
-    // During SSR/initial render, use light theme as default
-    imageSource = `https://skillicons.dev/icons?i=${iconName}&theme=light`
   }
 
   // Determine alt text

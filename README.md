@@ -17,10 +17,11 @@ My Next.js portfolio website on Vercel. Several smaller projects within.
 - somehow clean up root repo with symlinks to subdirectories
 - ~~Drop the leftover `ls -la && ls -la .yarn` debug prefix from the `build` script~~ (done)
 - Fix `engines.yarn: ">=1.22.0"` — it contradicts the Yarn 4 PnP setup and silently allows Yarn 1 installs
-- Remove `prop-types` (redundant under TypeScript, and no longer imported anywhere) — deferred because removing a dep regenerates `.pnp.cjs`/`yarn.lock` and writes new zips into the tracked `.yarn/cache`
+- ~~Remove `prop-types`~~ (done — the stated blocker turned out not to exist: `YARN_CACHE_FOLDER` is set in `vercel.json` and in local shells, so Yarn writes to a cache _outside_ `.yarn/cache` and dependency changes produce no tracked-cache churn at all. Zero-install is therefore already not in effect; see the pnpm section)
 - ~~Convert the last JS files (`src/components/date.js`, `src/components/providers.js`) to TSX~~ (done — now `src/components/date.tsx` and `src/app/providers.tsx`)
 - Bump `tsconfig` `target` from `es5` to `ES2022` (es5 forces needless downleveling on a Node 22 / modern-browser target)
-- Serwist precaches `.next`-relative paths (`static/chunks/…`) rather than the served `/_next/static/…` URLs, so the precache step likely 404s and the service worker never activates. `scripts/build-sw.mjs` needs `modifyURLPrefix` or a `globDirectory` of `.next/static` with a `/_next/static` prefix
+- ~~Serwist precaches `.next`-relative paths rather than the served `/_next/static/…` URLs~~ (done — confirmed every old entry 404'd, and that the manifest also swept in `.next/server` and `.next/cache`, neither of which is reachable over HTTP. Now 42 entries, all verified 200)
+- Precache `public/` assets too. The Serwist fix above scopes the manifest to `.next/static`, so icons and images are still fetched on demand, and there is no offline fallback route
 
 ### AI infrastructure (the main event)
 
@@ -51,11 +52,11 @@ My Next.js portfolio website on Vercel. Several smaller projects within.
 
 ### CI/CD & quality gates
 
-- **`yarn lint` is currently broken** and has nothing to do with routing: ESLint 10.0.2 against `@typescript-eslint/utils` 8.35.1 throws `TypeError: Class extends value undefined`. Needs a `typescript-eslint` bump to a v10-compatible release. Until then there is no lint gate at all, and `yarn access` fails at its first step
+- ~~**`yarn lint` is broken**~~ (fixed — see [Why ESLint is pinned to 9.x](#why-eslint-is-pinned-to-9x). It now passes clean, and `jsx-a11y` runs for the first time)
 - ~~`next.config.js` sets `eslint.ignoreDuringBuilds: true`~~ (removed — Next 16 dropped the `eslint` key from `next.config.js` entirely, so it was a no-op that only produced a build warning)
 - ~~`yarn test` is `jest --watch`, so it's unusable in CI. Add `test:ci`~~ (done — `yarn test:ci` is `jest --ci --watchAll=false`; `test` stays interactive). **`--coverage` is deliberately omitted**: `babel-plugin-istanbul` pulls `test-exclude` v6, which fails to resolve under Yarn PnP. Coverage thresholds are blocked on the pnpm migration or a `test-exclude` resolution override
 - Add a real CI workflow — right now only `security-audit.yml` exists. Gate PRs on typecheck + lint + test + build
-- Test coverage is one file (`src/__tests__/pages/index.test.tsx`). Prioritize `opioid-converter/utils/calculations.ts` (clinical math — highest-consequence code in the repo), `mandelbrot-explorer/utils/calculations.ts`, and `prompt-composer/utils/helpers.ts`; set coverage thresholds
+- Test coverage is four files (home page, quote box, opioid-converter equivalences, `useResponsive`). Still to prioritize: `mandelbrot-explorer/utils/calculations.ts` and `prompt-composer/utils/helpers.ts`; set coverage thresholds
 - Add Playwright E2E + `@axe-core/playwright` for the theme-switch, PWA install, and converter flows (already listed as an accessibility maintenance task — this is the mechanism)
 - Add Lighthouse CI with perf/a11y budgets on PRs, replacing the manual `yarn access` run
 - Consider Vitest over Jest (faster, native ESM, less SWC/PnP config surface)
@@ -65,7 +66,8 @@ My Next.js portfolio website on Vercel. Several smaller projects within.
 
 ### Security & runtime hardening
 
-- Add real security headers via `next.config.js` `headers()` — CSP, HSTS, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`. Today only _images_ have a CSP
+- ~~Add real security headers via `next.config.js` `headers()`~~ (done — `X-Content-Type-Options`, `Referrer-Policy`, `X-Frame-Options`, `Permissions-Policy` and HSTS are enforced on every route). **The CSP ships as `Content-Security-Policy-Report-Only` and still needs promoting.** It cannot be enforced as written: `next-themes` and Next's bootstrap both inject inline `<script>`, so a real policy needs a per-request nonce, which forces dynamic rendering on every route. Check a preview deploy's console for violations, then decide whether that trade is worth making
+- HSTS is deliberately sent **without `preload`** — that ships the apex to browser preload lists and is impractical to reverse. Add it as a decision, not a side effect
 - Add error tracking (Sentry or Vercel's) — currently no visibility into client-side runtime failures
 - ~~Delete or repurpose the placeholder `src/pages/api/hello.ts`~~ (done — deleted; a replacement would now be an `app/api/*/route.ts` Route Handler)
 - Decide the canonical host deliberately. This migration standardised on `https://www.cooperability.com` (matching `next-sitemap.config.js`); the old homepage `<link rel="canonical">` pointed at the apex `https://cooperability.com`. If the apex is the intended canonical, change `metadataBase` in `src/app/layout.tsx` and the sitemap config together
@@ -112,7 +114,55 @@ here because they are the things that bite twice:
 | `useRouter`                           | `next/router` throws; use `next/navigation`. `usePathname()` replaces `asPath` and is already query-free                                                                                                                                                              |
 | MDX                                   | `next-mdx-remote/serialize` + spread props becomes `next-mdx-remote/rsc` with a `source` string. RSC has no Context, so `MDXProvider` is out — components are passed explicitly                                                                                       |
 | Nested `ThemeProvider`                | `next-themes` short-circuits a nested provider to a Fragment, so the inner one's props were dead. Collapsing to a single provider is what made `NEXT_PUBLIC_AXE_FORCE_THEME` take effect for the first time — expect `yarn access` numbers to move                    |
-| Turbopack                             | Next 16's default bundler cannot resolve `next/package.json` under Yarn PnP, so plain `next build` fails. The build script pins `--webpack` until the pnpm migration lands                                                                                            |
+| Turbopack                             | Next 16's default bundler cannot resolve `next/package.json` under Yarn PnP. This breaks **`dev` and `analyze` as well as `build`** — only `build` had been pinned, so `yarn dev` was failing outright. All three now pass `--webpack`, which `analyze` needed anyway since `@next/bundle-analyzer` is a webpack plugin Turbopack ignores  |
+| Hydration gating                      | The `useState(false)` + `useEffect(() => setMounted(true))` idiom costs a second render pass on every mount and trips `react-hooks/set-state-in-effect`. `src/hooks/useHydrated.ts` does the same job with `useSyncExternalStore` and no effect                       |
+| Derived state                         | `useEffect` that only mirrors a computed value into state renders the stale value first. Compute it during render instead (`useMemo`), or for a value the user can also edit, adjust state during render by comparing against the previous input                      |
+
+## Why ESLint is pinned to 9.x
+
+`yarn lint` had been crashing rather than linting, so nothing in the repo was
+being checked — including `jsx-a11y`, which the accessibility work depends on.
+The cause was not one bad package but a major-version mismatch: **ESLint 10 is
+ahead of the plugins this stack needs.**
+
+Peer ranges as of the fix:
+
+| Plugin                     | Latest  | Max ESLint |
+| -------------------------- | ------- | ---------- |
+| `eslint-plugin-react`      | 7.37.5  | `^9.7`     |
+| `eslint-plugin-jsx-a11y`   | 6.10.2  | `^9`       |
+| `eslint-plugin-import`     | 2.32.0  | `^9`       |
+| `eslint-plugin-react-hooks`| 7.1.1   | `^10` ✅   |
+| `typescript-eslint`        | 8.68.0  | `^10` ✅   |
+
+Three of the plugins `eslint-config-next` pulls have **no ESLint 10 release at
+all**, so there was nothing to upgrade to. Downgrading to 9.39.5 restores a
+working lint gate; it is not a weakening, because the alternative was no gate.
+Revisit when `eslint-plugin-react` and `eslint-plugin-jsx-a11y` ship ESLint 10
+support.
+
+Two related things were fixed in the same pass, and both are worth knowing:
+
+- **`FlatCompat` is no longer needed.** `eslint-config-next` 16 ships a native
+  flat config at `eslint-config-next/core-web-vitals`. Loading it through
+  `FlatCompat` instead throws `Converting circular structure to JSON`. Dropping
+  the shim removed `@eslint/eslintrc` and `@eslint/compat` (the latter was never
+  imported).
+- **React version detection is pinned.** `eslint-config-next` sets
+  `react: { version: 'detect' }`, and detection calls an ESLint API that v10
+  removed. `eslint.config.mjs` now reads the installed version directly, which
+  is both immune to that break and faster.
+
+`eslint-config-prettier` also moved to the **end** of the config array — it has
+to come after every config whose stylistic rules it exists to switch off.
+
+**`yarn access` is unblocked but still unverified.** It runs `yarn lint` first
+and used to die there; it now gets through to `axe`. Completing it needs a
+Chrome binary on `PATH`, which the agent sandbox this was fixed in did not have,
+so the a11y numbers have not actually been re-measured. Run it locally — and
+treat the result as a new baseline, not a regression, because collapsing the
+nested `ThemeProvider` made `NEXT_PUBLIC_AXE_FORCE_THEME` effective for the
+first time.
 
 ## Developer Tooling
 
@@ -231,7 +281,6 @@ module.exports = {
 - `next`: The React framework for production.
 - `next-mdx-remote`: Renders MDX content dynamically in Next.js.
 - `next-themes`: Theme switching support for Next.js apps.
-- `prop-types`: Runtime type checking for React props.
 - `react`: JavaScript library for building user interfaces.
 - `react-dom`: Serves as the entry point to the DOM and server renderers for React.
 - `remark`: Markdown processor.
@@ -240,8 +289,6 @@ module.exports = {
 
 ### Development Dependencies (`devDependencies`)
 
-- `@eslint/compat`: Compatibility utilities for ESLint flat config.
-- `@eslint/eslintrc`: Utilities for using `.eslintrc` configs with flat config.
 - `@eslint/js`: Core JavaScript rules for ESLint.
 - `@types/node`: TypeScript definitions for Node.js.
 - `@types/react`: TypeScript definitions for React.

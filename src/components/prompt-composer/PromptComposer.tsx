@@ -154,10 +154,15 @@ const PromptComposer: React.FC<PromptComposerProps> = ({ className }) => {
     return parts.join('\n\n')
   }, [selectedComponents, audienceToggle])
 
-  // Sync edited prompt with compiled prompt
-  React.useEffect(() => {
+  // The textarea is user-editable, so `compiledPrompt` cannot simply be
+  // rendered directly — but re-syncing in an effect meant every component
+  // toggle painted the stale prompt first. Adjusting during render instead
+  // keeps the edit buffer while making the update single-pass.
+  const [lastCompiled, setLastCompiled] = useState(compiledPrompt)
+  if (lastCompiled !== compiledPrompt) {
+    setLastCompiled(compiledPrompt)
     setEditedPrompt(compiledPrompt)
-  }, [compiledPrompt])
+  }
 
   const groupedComponents = COMPONENT_ARRAY.reduce(
     (acc, component) => {

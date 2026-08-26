@@ -8,7 +8,9 @@ import ServiceWorkerRegistration from './service-worker'
 import styles from '../styles/utils.module.css'
 import '../styles/global.css'
 
-export const siteTitle = 'Cooper Reed | Co-Operability'
+// Not exported: Next type-checks route files against a fixed set of allowed
+// exports, and any extra one fails the build.
+const siteTitle = 'Cooper Reed | Co-Operability'
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.cooperability.com'),

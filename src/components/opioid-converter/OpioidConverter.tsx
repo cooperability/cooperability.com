@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import styles from './OpioidConverter.module.css'
 import { MedicationItem } from './types'
 import Image from 'next/image'
@@ -110,12 +110,13 @@ const MEDICATION_ARRAY: MedicationItem[] = [
 const OpioidConverter = () => {
   const [medications, setMedications] =
     useState<MedicationItem[]>(MEDICATION_ARRAY)
-  const [morphineEq, setMorphineEq] = useState(0)
-  const [methadoneEq, setMethadoneEq] = useState(0)
   const [activeInput, setActiveInput] = useState<number | null>(null)
 
-  const calculateEquivalents = useCallback(() => {
-    let newMorphineEq = 0
+  // Derived from `medications`, so computed during render rather than mirrored
+  // into state by an effect — the effect version rendered every dose change
+  // twice, once with the previous total still on screen.
+  const { morphineEq, methadoneEq } = useMemo(() => {
+    let total = 0
 
     medications.forEach((med) => {
       let equivalence = med.dailyDose
@@ -124,18 +125,14 @@ const OpioidConverter = () => {
       } else {
         equivalence *= med.toMorphine
       }
-      newMorphineEq += equivalence
+      total += equivalence
     })
 
-    const newMethadoneEq = Math.sqrt(newMorphineEq * 4)
-
-    setMorphineEq(Math.round(newMorphineEq))
-    setMethadoneEq(Math.round(newMethadoneEq))
+    return {
+      morphineEq: Math.round(total),
+      methadoneEq: Math.round(Math.sqrt(total * 4)),
+    }
   }, [medications])
-
-  useEffect(() => {
-    calculateEquivalents()
-  }, [medications, calculateEquivalents])
 
   const handleDoseChange = useCallback((index: number, value: string) => {
     setMedications((prev) =>
