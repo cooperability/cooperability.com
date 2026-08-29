@@ -87,7 +87,7 @@
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
     "@yarnpkg/pnpify": "^4.1.6",
-    "acorn": "^8.15.0",
+    "acorn": "^8.16.0",
     "autoprefixer": "^10.4.27",
     "cross-env": "^7.0.3",
     "eslint": "^10.0.2",
