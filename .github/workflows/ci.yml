@@ -1,0 +1,53 @@
+name: CI
+
+# Lint, types, tests and a production build on every PR.
+#
+# This exists because a branch once reached a pull request with three green
+# checks while `.pnp.cjs` pointed at a temp directory that no longer existed.
+# Nothing ran lint, typecheck, jest or build, and `yarn install --immutable`
+# regenerates that manifest rather than failing on it, so the fault was
+# invisible to CI. These four steps would have caught it on push.
+
+on:
+  pull_request:
+    branches: [main, master]
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+# A newer push to the same PR makes the in-flight run redundant.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Lint, types, tests, build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+
+      - name: Enable Corepack (for Yarn 4)
+        run: corepack enable
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Lint
+        run: yarn lint
+
+      - name: Typecheck
+        run: yarn typecheck
+
+      - name: Unit tests
+        run: yarn jest --ci --watchAll=false
+
+      - name: Production build
+        run: yarn build
