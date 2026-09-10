@@ -158,7 +158,11 @@ const PromptComposer: React.FC<PromptComposerProps> = ({ className }) => {
   // rendered directly — but re-syncing in an effect meant every component
   // toggle painted the stale prompt first. Adjusting during render instead
   // keeps the edit buffer while making the update single-pass.
-  const [lastCompiled, setLastCompiled] = useState(compiledPrompt)
+  // Seeded to null rather than `compiledPrompt` so the very first render also
+  // takes this branch. Seeding it to the compiled value made the two agree
+  // before `editedPrompt` had ever been filled, leaving the textarea unrendered
+  // until something changed the compilation.
+  const [lastCompiled, setLastCompiled] = useState<string | null>(null)
   if (lastCompiled !== compiledPrompt) {
     setLastCompiled(compiledPrompt)
     setEditedPrompt(compiledPrompt)
