@@ -4,7 +4,7 @@ import React, { useState } from 'react'
 import styles from '../styles/utils.module.css'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useTheme } from 'next-themes'
+import { useResolvedTheme } from '../hooks/useResolvedTheme'
 import { XMarkIcon } from '@heroicons/react/24/solid'
 import { Button } from '@/components/ui/button'
 
@@ -99,11 +99,10 @@ const Sidebar = ({
   privacyStatementUrl,
   accessibilityStatementUrl,
 }: SidebarProps) => {
-  const { theme } = useTheme()
+  const isDark = useResolvedTheme() === 'dark'
   const pathname = usePathname() || '/'
 
-  const sidebarThemeClass =
-    theme === 'dark' ? styles.sidebarDark : styles.sidebarLight
+  const sidebarThemeClass = isDark ? styles.sidebarDark : styles.sidebarLight
 
   // Helper to check if a route is active
   const isRouteActive = (href: string) => {
@@ -120,10 +119,9 @@ const Sidebar = ({
   }
 
   // Set inverse color CSS variables based on theme
-  const inverseColors =
-    theme === 'dark'
-      ? { '--inverse-bg': '#ffffff', '--inverse-text': '#000000' }
-      : { '--inverse-bg': '#000000', '--inverse-text': '#ffffff' }
+  const inverseColors = isDark
+    ? { '--inverse-bg': '#ffffff', '--inverse-text': '#000000' }
+    : { '--inverse-bg': '#000000', '--inverse-text': '#ffffff' }
 
   return (
     <div

@@ -3,7 +3,7 @@
 import * as React from 'react'
 import * as AccordionPrimitive from '@radix-ui/react-accordion'
 import { ChevronDownIcon } from 'lucide-react'
-import { useTheme } from 'next-themes'
+import { useResolvedTheme } from '@/src/hooks/useResolvedTheme'
 
 import { cn } from '@/lib/utils'
 
@@ -31,9 +31,7 @@ function AccordionTrigger({
   children,
   ...props
 }: React.ComponentProps<typeof AccordionPrimitive.Trigger>) {
-  const { theme, systemTheme } = useTheme()
-  const currentTheme = theme === 'system' ? systemTheme : theme
-  const isDark = currentTheme === 'dark'
+  const isDark = useResolvedTheme() === 'dark'
 
   return (
     <AccordionPrimitive.Header className="flex">
@@ -60,9 +58,7 @@ function AccordionContent({
   children,
   ...props
 }: React.ComponentProps<typeof AccordionPrimitive.Content>) {
-  const { theme, systemTheme } = useTheme()
-  const currentTheme = theme === 'system' ? systemTheme : theme
-  const isDark = currentTheme === 'dark'
+  const isDark = useResolvedTheme() === 'dark'
 
   return (
     <AccordionPrimitive.Content
