@@ -43,7 +43,6 @@ public/workbox-*.js
 
 # Yarn
 .yarn/*
-!.yarn/cache
 !.yarn/patches
 !.yarn/plugins
 !.yarn/releases
@@ -55,17 +54,6 @@ public/workbox-*.js
 .yarn/unplugged/
 .yarn/build-state.yml
 
-# Large SWC binaries that exceed GitHub limits
-.yarn/cache/next-npm-*.zip
-.yarn/cache/@next-swc-*.zip
-
-# Platform-native binaries fetched by whichever OS ran `yarn install`. Vercel
-# builds on linux, so the linux archives are the ones that must stay tracked;
-# committing a developer's win32/darwin equivalents would swap them out and
-# break the deploy. Everyone re-fetches their own on install.
-.yarn/cache/*-win32-*.zip
-.yarn/cache/*-darwin-*.zip
-
 # Generated build artifacts that were committed by accident
 tsconfig.tsbuildinfo
 /accessibility-reports/
@@ -73,5 +61,10 @@ tsconfig.tsbuildinfo
 
 # Keep these Yarn PnP files committed:
 # .yarn/releases/ (Yarn binary)
-# .yarn/cache/ (actual packages)
 # .yarn/sdks/ (IDE integration)
+#
+# .yarn/cache is deliberately NOT tracked. It could never be complete: next and
+# @next-swc exceed GitHub file limits, and the platform-native archives differ
+# per OS, so a Windows install deleted the linux ones Vercel builds against.
+# Vercel ignores it regardless (vercel.json points YARN_CACHE_FOLDER at
+# .next/cache/yarn). yarn install --immutable is what guarantees reproducibility.
