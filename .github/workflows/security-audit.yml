@@ -18,6 +18,10 @@ concurrency:
   # CI and no red X.
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
+permissions:
+  contents: read
+  issues: write
+
 jobs:
   audit:
     name: Dependency Security Audit

@@ -14,6 +14,32 @@ function exists(rel: string): boolean {
   return fs.existsSync(path.join(root, rel))
 }
 
+/** Top-level YAML map. Skips comments and nested keys. */
+function parseTopLevelMap(yaml: string, key: string): Record<string, string> {
+  const lines = yaml.split('\n')
+  const start = lines.findIndex((line) => line === `${key}:`)
+  if (start < 0) {
+    return {}
+  }
+  const out: Record<string, string> = {}
+  for (let i = start + 1; i < lines.length; i++) {
+    const line = lines[i]
+    if (/^\S/.test(line)) {
+      break
+    }
+    const trimmed = line.trim()
+    if (trimmed === '' || trimmed.startsWith('#')) {
+      continue
+    }
+    const match = trimmed.match(/^('[^']+'|"[^"]+"|[A-Za-z0-9@/_.-]+):\s*(\S+)/)
+    if (!match) {
+      continue
+    }
+    out[match[1].replace(/^['"]|['"]$/g, '')] = match[2]
+  }
+  return out
+}
+
 const COREPACK_BOOTSTRAP =
   /^corepack enable && corepack prepare (.+) --activate && pnpm install --frozen-lockfile$/
 
@@ -60,8 +86,40 @@ describe('pnpm 11 contract', () => {
   it('stores pnpm 11 settings in pnpm-workspace.yaml', () => {
     const yaml = read('pnpm-workspace.yaml')
     expect(yaml).toMatch(/nodeLinker:\s*isolated/)
-    expect(yaml).toMatch(/allowBuilds:/)
+    expect(yaml).not.toMatch(/^onlyBuiltDependencies:/m)
     expect(yaml).toMatch(/packages:\s*\n\s*-\s*['"]?\./)
+  })
+
+  it('allowlists the install scripts Next, ESLint, and access actually need', () => {
+    const allowBuilds = parseTopLevelMap(
+      read('pnpm-workspace.yaml'),
+      'allowBuilds'
+    )
+    expect(allowBuilds).toEqual({
+      '@swc/core': 'true',
+      sharp: 'true',
+      'unrs-resolver': 'true',
+      chromedriver: 'true',
+    })
+  })
+
+  it('pins the same overrides in the workspace file and the lockfile', () => {
+    const expected = {
+      punycode: '^2.3.1',
+      'form-data': '^4.0.4',
+      tmp: '^0.2.4',
+      glob: '^10.5.0',
+      'mdast-util-to-hast': '^13.2.1',
+      'js-yaml': '^3.15.2',
+      'test-exclude': '^7.0.2',
+      socks: '^2.8.9',
+      postcss: '^8.5.26',
+      sharp: '^0.35.4',
+    }
+    const workspace = parseTopLevelMap(read('pnpm-workspace.yaml'), 'overrides')
+    const lockfile = parseTopLevelMap(read('pnpm-lock.yaml'), 'overrides')
+    expect(workspace).toEqual(expected)
+    expect(lockfile).toEqual(expected)
   })
 
   it('bootstraps pnpm 11 on Vercel through corepack, not detection', () => {
@@ -85,6 +143,16 @@ describe('pnpm 11 contract', () => {
     expect(ci).toMatch(/name: Vercel-shaped install and build/)
     expect(ci).toContain(`run: ${vercel.installCommand}`)
     expect(vercel.installCommand).toContain(pkg.packageManager ?? '')
+  })
+
+  it('restricts GITHUB_TOKEN to what each workflow actually uses', () => {
+    const ci = read('.github/workflows/ci.yml')
+    const audit = read('.github/workflows/security-audit.yml')
+    expect(ci).toMatch(/^permissions:\n {2}contents: read\n/m)
+    expect(ci).toMatch(/actions: write/)
+    expect(audit).toMatch(
+      /^permissions:\n {2}contents: read\n {2}issues: write\n/m
+    )
   })
 
   it('maps @/ aliases so findRelatedTests sees tests', () => {

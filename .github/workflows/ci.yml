@@ -14,10 +14,16 @@ concurrency:
   # CI and no red X.
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
+permissions:
+  contents: read
+
 jobs:
   verify:
     name: Lint, types, tests, build
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: write
 
     steps:
       - uses: actions/checkout@v7
