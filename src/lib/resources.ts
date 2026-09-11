@@ -5,6 +5,10 @@ import matter from 'gray-matter'
 
 const RESOURCES_PATH = path.join(process.cwd(), 'src/resources')
 
+// Content files only. `readdirSync` also hands back directories and strays like
+// .DS_Store, and every one of them used to reach `readFileSync` below.
+const CONTENT_FILE = /\.mdx?$/
+
 export interface ResourceData {
   id: string
   date?: string
@@ -23,10 +27,14 @@ export interface Resource {
   frontMatter: ResourceFrontMatter
 }
 
-export function getAllResourcesData(): ResourceData[] {
-  const fileNames = fs.readdirSync(RESOURCES_PATH)
+function resourceFileNames(): string[] {
+  return fs
+    .readdirSync(RESOURCES_PATH)
+    .filter((fileName) => CONTENT_FILE.test(fileName))
+}
 
-  const allResourcesData = fileNames.map((fileName) => {
+export function getAllResourcesData(): ResourceData[] {
+  const allResourcesData = resourceFileNames().map((fileName) => {
     const fullPath = path.join(RESOURCES_PATH, fileName)
     const fileContents = fs.readFileSync(fullPath, 'utf8')
 
@@ -34,7 +42,7 @@ export function getAllResourcesData(): ResourceData[] {
     const { data } = matter(fileContents)
 
     // Remove ".mdx" or ".md" from file name to get id
-    const id = fileName.replace(/\.mdx?$/, '')
+    const id = fileName.replace(CONTENT_FILE, '')
 
     // Combine the data with the id
     return {
@@ -52,14 +60,20 @@ export function getAllResourcesData(): ResourceData[] {
  * which App Router invokes separately for the same request.
  */
 export const getResourceBySlug = cache((slug: string): Resource | null => {
-  // Only ever read a slug we already enumerated. A raw param reaching
-  // path.join would otherwise be a traversal surface.
-  if (!getAllResourcesData().some((resource) => resource.id === slug)) {
+  // Resolve the slug back to a real file name rather than assuming `.mdx`. A
+  // `.md` resource enumerated fine and then threw ENOENT here. Matching against
+  // the enumerated names is also what keeps a raw param out of path.join, which
+  // is the traversal guard.
+  const fileName = resourceFileNames().find(
+    (name) => name.replace(CONTENT_FILE, '') === slug
+  )
+
+  if (!fileName) {
     return null
   }
 
   const fileContents = fs.readFileSync(
-    path.join(RESOURCES_PATH, `${slug}.mdx`),
+    path.join(RESOURCES_PATH, fileName),
     'utf8'
   )
   const { content, data } = matter(fileContents)

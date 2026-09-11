@@ -1,3 +1,4 @@
+import { Profiler } from 'react'
 import { render, screen, fireEvent, within } from '@testing-library/react'
 import OpioidConverter from '../../components/opioid-converter/OpioidConverter'
 
@@ -82,5 +83,62 @@ describe('OpioidConverter', () => {
     fireEvent.click(screen.getByRole('button', { name: /clear all/i }))
     expect(morphineTotal()).toBe('Morphine Equivalence: 0 mg')
     expect(methadoneTotal()).toBe('Methadone Equivalence: 0 mg')
+  })
+})
+
+/**
+ * Everything above passes just as well against the `useState` + `useEffect`
+ * mirror this component's rewrite removed, because `fireEvent` flushes effects
+ * before the assertion runs and the stale paint is already gone by then. The
+ * difference between deriving during render and mirroring into state is only
+ * observable *between* commits: the mirror paints once with the previous total
+ * still on screen, then again with the new one.
+ *
+ * `Profiler.onRender` fires once per commit, during the layout phase, which is
+ * after React has mutated the DOM. Reading the DOM there is what catches that
+ * intermediate frame.
+ */
+describe('OpioidConverter render passes', () => {
+  function renderWithCommitLog() {
+    const commits: Array<{ dose: string; total: string }> = []
+    render(
+      <Profiler
+        id="opioid-converter"
+        onRender={() => {
+          commits.push({
+            dose: (doseInputFor('Morphine') as HTMLInputElement).value,
+            total: morphineTotal()!,
+          })
+        }}
+      >
+        <OpioidConverter />
+      </Profiler>
+    )
+    return commits
+  }
+
+  it('never paints a total that disagrees with the dose on screen', () => {
+    const commits = renderWithCommitLog()
+    commits.length = 0
+
+    // Morphine converts at 1, so the total must equal the dose in the very
+    // same frame the dose appears in.
+    fireEvent.change(doseInputFor('Morphine'), { target: { value: '30' } })
+
+    expect(commits.length).toBeGreaterThan(0)
+    for (const { dose, total } of commits) {
+      expect(total).toBe(`Morphine Equivalence: ${Number(dose || 0)} mg`)
+    }
+  })
+
+  it('reaches the new total in a single commit', () => {
+    const commits = renderWithCommitLog()
+    commits.length = 0
+
+    fireEvent.change(doseInputFor('Morphine'), { target: { value: '30' } })
+
+    expect(commits).toEqual([
+      { dose: '30', total: 'Morphine Equivalence: 30 mg' },
+    ])
   })
 })

@@ -14,8 +14,10 @@ const getServerSnapshot = () => false
  * markup on the server than on the client (theme, viewport, locale).
  *
  * Prefer this to the `useState(false)` + `useEffect(() => setMounted(true))`
- * idiom, which schedules a second render pass on every mount and trips
- * `react-hooks/set-state-in-effect`.
+ * idiom — but not because it saves a render. Both pass twice: swapping the
+ * server snapshot for the client one is itself a second pass. What this buys
+ * is that React drives the swap as part of hydration rather than an effect
+ * racing it, and that the effect idiom trips `react-hooks/set-state-in-effect`.
  */
 export function useHydrated(): boolean {
   return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)

@@ -76,9 +76,10 @@ export default defineConfig([
     files: NODE_CJS,
     ...js.configs.recommended,
     languageOptions: { sourceType: 'commonjs', globals: globals.node },
-    // Default espree parser. The plugin is still registered because these
-    // files carry `eslint-disable` comments naming its rules, and an unknown
-    // rule in a disable directive is itself an error.
+    // Default espree parser. The plugin is registered so the two overrides
+    // below can name it: `require` is the correct idiom in these files, and
+    // the overrides keep it correct if they ever come under a config that
+    // switches the TypeScript rules on.
     plugins: { '@typescript-eslint': tseslint.plugin },
     rules: {
       '@typescript-eslint/no-require-imports': 'off',

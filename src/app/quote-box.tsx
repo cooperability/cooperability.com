@@ -29,7 +29,7 @@ export default function QuoteBox({ initialQuote }: { initialQuote: string }) {
           <ArrowPathIcon />
         </Button>
       </div>
-      <span suppressHydrationWarning>{quote}</span>
+      <span>{quote}</span>
     </div>
   )
 }

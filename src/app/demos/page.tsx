@@ -9,8 +9,6 @@ import {
 import ActiveIcon from '../../components/ActiveIcon'
 import styles from '../../styles/utils.module.css'
 
-export const revalidate = 86400
-
 export const metadata: Metadata = {
   title: 'Demos',
   description: "Cooper Reed's (Co-Operability) coding projects and tech demos.",

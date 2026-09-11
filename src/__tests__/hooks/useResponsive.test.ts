@@ -80,11 +80,37 @@ describe('useResponsive', () => {
     expect(result.current.isMobile).toBe(true)
   })
 
-  it('removes its resize listener on unmount', () => {
+  it('removes the very listener it added on unmount', () => {
+    // Asserting `toHaveBeenCalledWith('resize', expect.any(Function))` passes
+    // against `removeEventListener('resize', () => {})` too, which removes
+    // nothing and leaks the real handler. The identity is the whole assertion.
+    const addSpy = jest.spyOn(window, 'addEventListener')
     const removeSpy = jest.spyOn(window, 'removeEventListener')
+
     const { unmount } = renderHook(() => useResponsive())
+    const added = addSpy.mock.calls.filter(([event]) => event === 'resize')
+    expect(added).toHaveLength(1)
+
     unmount()
-    expect(removeSpy).toHaveBeenCalledWith('resize', expect.any(Function))
+    const removed = removeSpy.mock.calls.filter(([event]) => event === 'resize')
+    expect(removed).toHaveLength(1)
+    expect(removed[0][1]).toBe(added[0][1])
+
+    addSpy.mockRestore()
     removeSpy.mockRestore()
+  })
+
+  it('clears a pending debounce on unmount', () => {
+    // The listener going away does not help if the timer it already scheduled
+    // still fires into an unmounted store.
+    const { unmount } = renderHook(() => useResponsive())
+
+    act(() => {
+      window.dispatchEvent(new Event('resize'))
+    })
+    expect(jest.getTimerCount()).toBe(1)
+
+    unmount()
+    expect(jest.getTimerCount()).toBe(0)
   })
 })

@@ -1,3 +1,4 @@
+import { renderToString } from 'react-dom/server'
 import { render, screen, fireEvent } from '@testing-library/react'
 import QuoteBox from '../../app/quote-box'
 
@@ -35,5 +36,24 @@ describe('QuoteBox', () => {
       expect(current).not.toBe(previous)
       previous = current!
     }
+  })
+})
+
+describe('QuoteBox hydration', () => {
+  it('renders identical markup on the server and on the client', () => {
+    // `suppressHydrationWarning` sat on the quote span. Under `force-dynamic`
+    // the server and the client see the same prop, so it masked nothing — but
+    // it would have masked a real mismatch the moment that stopped being true.
+    // Removing it only stays safe while this holds.
+    const serverHtml = renderToString(<QuoteBox initialQuote="A fixed quote" />)
+    const { container } = render(<QuoteBox initialQuote="A fixed quote" />)
+
+    // Round-trip the server string through jsdom first. React's server
+    // renderer and jsdom escape attribute text differently (&#x27; against a
+    // bare apostrophe), and that is serialization, not a hydration mismatch.
+    const normalized = document.createElement('div')
+    normalized.innerHTML = serverHtml
+
+    expect(container.innerHTML).toBe(normalized.innerHTML)
   })
 })

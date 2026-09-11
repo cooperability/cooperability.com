@@ -36,7 +36,13 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  themeColor: '#ffffff',
+  // One value paints the browser chrome white behind a dark page. These mirror
+  // `--background` in global.css: oklch(1 0 0), and Tailwind slate-950 for
+  // `.dark`.
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
+    { media: '(prefers-color-scheme: dark)', color: '#020617' },
+  ],
 }
 
 export default function RootLayout({
