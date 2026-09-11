@@ -14517,17 +14517,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["nanoid", [\
-      ["npm:3.3.11", {\
-        "packageLocation": "./.yarn/cache/nanoid-npm-3.3.11-f98c1f9ef6-40e7f70b3d.zip/node_modules/nanoid/",\
+      ["npm:3.3.19", {\
+        "packageLocation": "./.yarn/cache/nanoid-npm-3.3.19-b508bd6b51-ce7afa6258.zip/node_modules/nanoid/",\
         "packageDependencies": [\
-          ["nanoid", "npm:3.3.11"]\
-        ],\
-        "linkType": "HARD"\
-      }],\
-      ["npm:3.3.18", {\
-        "packageLocation": "./.yarn/cache/nanoid-npm-3.3.18-3dd24ff2e6-b994b4e396.zip/node_modules/nanoid/",\
-        "packageDependencies": [\
-          ["nanoid", "npm:3.3.18"]\
+          ["nanoid", "npm:3.3.19"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -15410,7 +15403,7 @@ const RAW_RUNTIME_STATE =
       ["npm:8.5.10", {\
         "packageLocation": "./.yarn/cache/postcss-npm-8.5.10-e528db09cb-c592dffa0c.zip/node_modules/postcss/",\
         "packageDependencies": [\
-          ["nanoid", "npm:3.3.11"],\
+          ["nanoid", "npm:3.3.19"],\
           ["picocolors", "npm:1.1.1"],\
           ["postcss", "npm:8.5.10"],\
           ["source-map-js", "npm:1.2.1"]\
@@ -15420,7 +15413,7 @@ const RAW_RUNTIME_STATE =
       ["npm:8.5.23", {\
         "packageLocation": "./.yarn/cache/postcss-npm-8.5.23-ea01eac089-ed714e635b.zip/node_modules/postcss/",\
         "packageDependencies": [\
-          ["nanoid", "npm:3.3.18"],\
+          ["nanoid", "npm:3.3.19"],\
           ["picocolors", "npm:1.1.1"],\
           ["postcss", "npm:8.5.23"],\
           ["source-map-js", "npm:1.2.1"]\
@@ -15430,7 +15423,7 @@ const RAW_RUNTIME_STATE =
       ["npm:8.5.6", {\
         "packageLocation": "./.yarn/cache/postcss-npm-8.5.6-e7f126c6f3-5127cc7c91.zip/node_modules/postcss/",\
         "packageDependencies": [\
-          ["nanoid", "npm:3.3.11"],\
+          ["nanoid", "npm:3.3.19"],\
           ["picocolors", "npm:1.1.1"],\
           ["postcss", "npm:8.5.6"],\
           ["source-map-js", "npm:1.2.1"]\
