@@ -7503,17 +7503,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["baseline-browser-mapping", [\
-      ["npm:2.10.8", {\
-        "packageLocation": "./.yarn/cache/baseline-browser-mapping-npm-2.10.8-ac45efd2b9-a77882e8ac.zip/node_modules/baseline-browser-mapping/",\
+      ["npm:2.11.22", {\
+        "packageLocation": "./.yarn/cache/baseline-browser-mapping-npm-2.11.22-b8e02e7b3f-455905743c.zip/node_modules/baseline-browser-mapping/",\
         "packageDependencies": [\
-          ["baseline-browser-mapping", "npm:2.10.8"]\
-        ],\
-        "linkType": "HARD"\
-      }],\
-      ["npm:2.9.19", {\
-        "packageLocation": "./.yarn/cache/baseline-browser-mapping-npm-2.9.19-aab193a58f-569928db78.zip/node_modules/baseline-browser-mapping/",\
-        "packageDependencies": [\
-          ["baseline-browser-mapping", "npm:2.9.19"]\
+          ["baseline-browser-mapping", "npm:2.11.22"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -7597,7 +7590,7 @@ const RAW_RUNTIME_STATE =
       ["npm:4.28.1", {\
         "packageLocation": "./.yarn/cache/browserslist-npm-4.28.1-e455c4c2e8-545a5fa9d7.zip/node_modules/browserslist/",\
         "packageDependencies": [\
-          ["baseline-browser-mapping", "npm:2.9.19"],\
+          ["baseline-browser-mapping", "npm:2.11.22"],\
           ["browserslist", "npm:4.28.1"],\
           ["caniuse-lite", "npm:1.0.30001770"],\
           ["electron-to-chromium", "npm:1.5.286"],\
@@ -14126,7 +14119,7 @@ const RAW_RUNTIME_STATE =
           ["@types/react-dom", "virtual:dc3fc578bfa5e06182a4d2be39ede0bc5b74940b1ffe0d70c26892ab140a4699787750fba175dc306292e80b4aa2c8c5f68c2a821e69b2c37e360c0dff36ff66#npm:19.1.6"],\
           ["@types/sass", null],\
           ["babel-plugin-react-compiler", null],\
-          ["baseline-browser-mapping", "npm:2.10.8"],\
+          ["baseline-browser-mapping", "npm:2.11.22"],\
           ["caniuse-lite", "npm:1.0.30001726"],\
           ["next", "virtual:dc3fc578bfa5e06182a4d2be39ede0bc5b74940b1ffe0d70c26892ab140a4699787750fba175dc306292e80b4aa2c8c5f68c2a821e69b2c37e360c0dff36ff66#npm:16.2.6"],\
           ["postcss", "npm:8.4.31"],\
