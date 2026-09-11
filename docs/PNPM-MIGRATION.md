@@ -322,7 +322,7 @@ All figures from one machine, warm pnpm store, same instrument on both sides.
 | Committed package files                        | 1,379 zips, 778 MB | 0          |
 | Cold install (`rm -rf node_modules`)           | —                  | **14.9 s** |
 | Full `build` (Next + service worker + sitemap) | —                  | **12.5 s** |
-| Known advisories                               | 53                 | **1 moderate** |
+| Known advisories                               | 53                 | **0** |
 
 **This originally read "the 5 remaining have no upstream fix." That was wrong,**
 and an adversarial review caught it. Both packages had published fixes, and the
@@ -331,10 +331,10 @@ project already depended on fixed versions directly — `postcss@8.5.26` and
 being dragged in transitively by `next`.
 
 The fix is the one §5 already teaches: override the versions so the old
-transitive copies cannot resolve. `pnpm audit --audit-level high` exits 0.
-One **moderate** remains: `adm-zip`, reached only through the accessibility
-dev chain (`@axe-core/cli` → `chromedriver`). It is not in the production
-bundle.
+transitive copies cannot resolve. `pnpm audit` exits 0. The last moderate
+(`adm-zip` via `@axe-core/cli` → `chromedriver`) is forced to `^0.6.1`
+(GHSA-vwc7-r8mq-g2x9). That release published 2026-09-11. The 72-hour
+rule yields to a CVE patch.
 
 ### Turbopack vs webpack — a trade-off, not a win
 

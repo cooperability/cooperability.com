@@ -50,6 +50,7 @@ describe('pnpm 11 contract', () => {
     dependenciesMeta?: unknown
     resolutions?: unknown
     scripts: Record<string, string>
+    dependencies?: Record<string, string>
     devDependencies?: Record<string, string>
   }
 
@@ -60,6 +61,7 @@ describe('pnpm 11 contract', () => {
     expect(pkg.resolutions).toBeUndefined()
     expect(pkg.devDependencies?.['@yarnpkg/pnpify']).toBeUndefined()
     expect(pkg.devDependencies?.eslint).toMatch(/^10\./)
+    expect(pkg.dependencies?.['@next/mdx']).toMatch(/^[\^~]?16\./)
   })
 
   it('keeps agent and CI test scripts non-interactive', () => {
@@ -115,11 +117,15 @@ describe('pnpm 11 contract', () => {
       socks: '^2.8.9',
       postcss: '^8.5.26',
       sharp: '^0.35.4',
+      'adm-zip': '^0.6.1',
     }
     const workspace = parseTopLevelMap(read('pnpm-workspace.yaml'), 'overrides')
     const lockfile = parseTopLevelMap(read('pnpm-lock.yaml'), 'overrides')
     expect(workspace).toEqual(expected)
     expect(lockfile).toEqual(expected)
+    expect(read('pnpm-workspace.yaml')).toMatch(
+      /minimumReleaseAgeExclude:\n\s+-\s+adm-zip@0\.6\.1/
+    )
   })
 
   it('bootstraps pnpm 11 on Vercel through corepack, not detection', () => {
@@ -149,7 +155,8 @@ describe('pnpm 11 contract', () => {
     const ci = read('.github/workflows/ci.yml')
     const audit = read('.github/workflows/security-audit.yml')
     expect(ci).toMatch(/^permissions:\n {2}contents: read\n/m)
-    expect(ci).toMatch(/actions: write/)
+    expect(ci).not.toMatch(/actions:\s*write/)
+    expect(ci).not.toMatch(/contents:\s*write/)
     expect(audit).toMatch(
       /^permissions:\n {2}contents: read\n {2}issues: write\n/m
     )
