@@ -12724,8 +12724,8 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["joi", [\
-      ["npm:18.0.2", {\
-        "packageLocation": "./.yarn/cache/joi-npm-18.0.2-79a3fbcace-e395e07df0.zip/node_modules/joi/",\
+      ["npm:18.2.9", {\
+        "packageLocation": "./.yarn/cache/joi-npm-18.2.9-3710fcc903-ac4934ea6a.zip/node_modules/joi/",\
         "packageDependencies": [\
           ["@hapi/address", "npm:5.1.1"],\
           ["@hapi/formula", "npm:3.0.2"],\
@@ -12734,7 +12734,7 @@ const RAW_RUNTIME_STATE =
           ["@hapi/tlds", "npm:1.1.6"],\
           ["@hapi/topo", "npm:6.0.2"],\
           ["@standard-schema/spec", "npm:1.1.0"],\
-          ["joi", "npm:18.0.2"]\
+          ["joi", "npm:18.2.9"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -18792,7 +18792,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/wait-on-npm-9.0.4-0c132c1dc4-914d3a76ea.zip/node_modules/wait-on/",\
         "packageDependencies": [\
           ["axios", "npm:1.18.1"],\
-          ["joi", "npm:18.0.2"],\
+          ["joi", "npm:18.2.9"],\
           ["lodash", "npm:4.18.1"],\
           ["minimist", "npm:1.2.8"],\
           ["rxjs", "npm:7.8.2"],\
