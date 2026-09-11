@@ -99,6 +99,9 @@ describe('pnpm 11 contract', () => {
       'docs/Tooling.md',
       'docs/MCP.md',
     ]
+    expect(read('README.md')).not.toMatch(/All three now pass `--webpack`/)
+    expect(read('README.md')).not.toMatch(/`test` stays interactive/)
+    expect(read('README.md')).not.toMatch(/only `security-audit\.yml` exists/)
     const invocation =
       /(?:^|[\s`'"])yarn (?:install|dev|build|lint|test|access|analyze|typecheck|add|mcp:start)\b/
     for (const rel of live) {

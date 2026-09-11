@@ -277,7 +277,7 @@ not imported by the converter. There is no `calculateTotals` function. Do not
 treat that file as the tested source of truth.
 
 The tests were **mutation-checked** rather than merely passing. Flipping the
-Methadone branch from squaring to multiplying turns **3 tests red**.
+Methadone branch from squaring to multiplying turns **1 test red**.
 
 > **Correction.** This section first claimed the second mutant — deriving
 > methadone from the rounded rather than the unrounded total — turned 4 tests

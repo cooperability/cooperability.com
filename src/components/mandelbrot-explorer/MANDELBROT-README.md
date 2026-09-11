@@ -178,14 +178,14 @@ For each pixel (x, y):
 ### Local Development
 
 ```bash
-yarn dev
+pnpm dev
 # Navigate to http://localhost:3000/mandelbrot-explorer
 ```
 
 ### Production
 
 ```bash
-yarn build
+pnpm build
 # Deployed via Vercel at cooperability.com/mandelbrot-explorer
 ```
 

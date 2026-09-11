@@ -50,7 +50,8 @@ allowBuilds:
 # --- Version pinning carried over from Yarn `resolutions` ----------------
 # Semantics are identical to Yarn's field; only the name changed. An override
 # is not proof the advisory is gone: `pnpm audit` is the measurement. As of
-# this branch it still reports two highs (sharp/libheif, js-yaml 3.x).
+# this branch it still reports one moderate (`adm-zip`, accessibility chain
+# only). The previous sharp/js-yaml highs are cleared by 0.35.4 and 3.15.2.
 overrides:
   punycode: ^2.3.1
   form-data: ^4.0.4
@@ -58,7 +59,7 @@ overrides:
   tar-fs: ^3.1.1
   glob: ^10.5.0
   mdast-util-to-hast: ^13.2.1
-  js-yaml: ^3.14.2
+  js-yaml: ^3.15.2
 
   # Forced by the glob override above, not by an advisory. test-exclude@6 calls
   # `util.promisify(glob)`, which only works when glob exports a function --
@@ -81,11 +82,11 @@ overrides:
   socks: ^2.8.9
 
   # next also pulls older transitive copies of these. Raising them matches
-  # the direct dependency ranges in package.json. It does not clear every
-  # advisory: sharp@0.35.3 still carries the libheif GHSA pair, and js-yaml
-  # stays on 3.x (a 4.x bump is an API change, not an override).
+  # the direct dependency ranges in package.json. sharp@0.35.4 clears the
+  # libheif GHSAs. js-yaml@3.15.2 clears the 3.x merge-keys advisory without
+  # a 4.x API bump.
   postcss: ^8.5.26
-  sharp: ^0.35.3
+  sharp: ^0.35.4
 
 # --- Peer dependencies ---------------------------------------------------
 # Warn rather than hard-fail, so a peer gap inside someone else's package

@@ -136,4 +136,6 @@ cooperability.com/
 ├── package.json
 ├── pnpm-lock.yaml
 ├── pnpm-workspace.yaml
+├── README.md
+└── tsconfig.json
 ```
