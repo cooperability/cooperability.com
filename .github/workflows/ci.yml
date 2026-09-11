@@ -1,13 +1,5 @@
 name: CI
 
-# Lint, types, tests and a production build on every PR.
-#
-# This exists because a branch once reached a pull request with three green
-# checks while `.pnp.cjs` pointed at a temp directory that no longer existed.
-# Nothing ran lint, typecheck, jest or build, and `yarn install --immutable`
-# regenerates that manifest rather than failing on it, so the fault was
-# invisible to CI. These four steps would have caught it on push.
-
 on:
   pull_request:
     branches: [main, master]
@@ -15,10 +7,12 @@ on:
     branches: [main, master]
   workflow_dispatch:
 
-# A newer push to the same PR makes the in-flight run redundant.
 concurrency:
-  group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  # Never cancel on the default branch: a cancelled run is not a failure, so two
+  # merges landing close together could put a commit on main with no completed
+  # CI and no red X.
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
   verify:
@@ -26,28 +20,68 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
+      # MUST come before setup-node: `cache: pnpm` below asks pnpm where its
+      # store lives, so the binary has to exist first. No `version:` here on
+      # purpose -- the action reads it from the `packageManager` field, which
+      # keeps one source of truth for the pnpm version across CI, Vercel and
+      # every developer machine.
+      - uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v7
         with:
-          node-version: '22'
+          node-version-file: .nvmrc
+          cache: pnpm
 
-      - name: Enable Corepack (for Yarn 4)
-        run: corepack enable
+      - name: Install
+        run: pnpm install --frozen-lockfile
 
-      - name: Install dependencies
-        run: yarn install --immutable
-
+      # Each step runs even if an earlier one failed, so a red run reports
+      # every problem at once instead of one per push.
       - name: Lint
-        run: yarn lint
+        if: '!cancelled()'
+        run: pnpm lint
 
       - name: Typecheck
-        run: yarn typecheck
+        if: '!cancelled()'
+        run: pnpm typecheck
 
       - name: Unit tests
-        run: yarn jest --ci --watchAll=false
+        if: '!cancelled()'
+        run: pnpm test:ci
 
       - name: Production build
-        run: yarn build
+        if: '!cancelled()'
+        run: pnpm build
+
+      - name: Upload coverage
+        if: '!cancelled()'
+        uses: actions/upload-artifact@v7
+        with:
+          name: coverage
+          path: coverage/
+          retention-days: 7
+          if-no-files-found: ignore
+
+  # Vercel does not run pnpm/action-setup. As of 2026-09-11 its build-utils
+  # still do not list pnpm 11 (vercel/vercel#17434, PR #17450 unmerged), so
+  # lockfile 9.0 is detected as pnpm 9 or the install falls through to npm.
+  # This job runs the same corepack bootstrap as vercel.json installCommand
+  # on a stock Node image, which is the closest CI can get to that path.
+  vercel-shaped:
+    name: Vercel-shaped install and build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+
+      - name: Corepack-bootstrap pnpm 11 and install
+        run: corepack enable && corepack prepare pnpm@11.24.0 --activate && pnpm install --frozen-lockfile
+
+      - name: Production build
+        run: pnpm build

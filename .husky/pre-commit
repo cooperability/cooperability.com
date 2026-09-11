@@ -1,2 +1,12 @@
-# Commented out for Windows development - uncomment for Linux/macOS
-# yarn lint-staged
+# Runs prettier, eslint --fix and related Jest tests over STAGED files only.
+#
+# This hook used to be commented out with the note "Commented out for Windows
+# development". The .bat sibling that was supposed to cover Windows was never
+# reachable: git invokes .husky/pre-commit through sh on every platform,
+# including Windows, because Git for Windows ships its own sh. So the hook has
+# not run for anyone, on any OS, for as long as it has been disabled.
+#
+# It is safe to re-enable now: with a real node_modules tree, `pnpm exec`
+# resolves lint-staged's bin directly and none of the Yarn PnP shim problems
+# that likely prompted the original workaround apply.
+pnpm exec lint-staged

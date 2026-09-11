@@ -7,16 +7,14 @@ My Next.js portfolio website on Vercel. Several smaller projects within.
 ### Quick wins / hygiene
 
 - OC input fields block numbers but should pop up numpad on mobile
-- Yarn -> pnpm migration, in full
+- pnpm 11 migration, in full (this PR)
 - SEO; site:cooperability.com
 - Create `.editorconfig` for consistency
-- Add `.npmrc` for Yarn users
 - `commitlint` for commit messages
-- **Migrate Yarn PnP → pnpm 11** (11.13.0, not 11.1.0) — see [Package Manager: Executive Recommendation](#package-manager-executive-recommendation). Blocking for **Turbopack**, and therefore for `next build` without `--webpack`. It was _not_ blocking for the App Router migration itself
-- Purge `.yarn/cache` from git history with `git filter-repo` (separate follow-up — the migration alone won't reclaim the 508 MB `.git`)
+- Purge `.yarn/cache` from git history with `git filter-repo` (separate follow-up — the migration alone will not reclaim the 508 MB `.git`)
 - somehow clean up root repo with symlinks to subdirectories
 - ~~Drop the leftover `ls -la && ls -la .yarn` debug prefix from the `build` script~~ (done)
-- Fix `engines.yarn: ">=1.22.0"` — it contradicts the Yarn 4 PnP setup and silently allows Yarn 1 installs
+- ~~Fix `engines.yarn: ">=1.22.0"`~~ (done — the field is gone with the pnpm migration)
 - ~~Remove `prop-types`~~ (done — the stated blocker turned out not to exist: `YARN_CACHE_FOLDER` is set in `vercel.json` and in local shells, so Yarn writes to a cache _outside_ `.yarn/cache` and dependency changes produce no tracked-cache churn at all. Zero-install is therefore already not in effect; see the pnpm section)
 - ~~Convert the last JS files (`src/components/date.js`, `src/components/providers.js`) to TSX~~ (done — now `src/components/date.tsx` and `src/app/providers.tsx`)
 - Bump `tsconfig` `target` from `es5` to `ES2022` (es5 forces needless downleveling on a Node 22 / modern-browser target)
@@ -170,14 +168,14 @@ This project uses a comprehensive suite of quality control tools. For complete d
 
 **Quick Reference:**
 
-- `yarn dev` - Start development server
-- `yarn lint` / `yarn lint:mdx` - ESLint checking (includes MDX validation)
-- `yarn format` / `yarn format:mdx` - Prettier formatting
-- `yarn test` - Jest + React Testing Library
-- `yarn typecheck` - TypeScript validation
-- `yarn analyze` - Webpack bundle analysis
-- `yarn access` - Accessibility audits (ESLint + Axe-core + Lighthouse)
-- `yarn audit` / `yarn audit:critical` - Security vulnerability scanning
+- `pnpm dev` - Start development server
+- `pnpm lint` / `pnpm lint:mdx` - ESLint checking (includes MDX validation)
+- `pnpm format` / `pnpm format:mdx` - Prettier formatting
+- `pnpm test` - Jest + React Testing Library (non-interactive)
+- `pnpm typecheck` - TypeScript validation
+- `pnpm analyze` - Webpack bundle analysis
+- `pnpm access` - Accessibility audits (ESLint + Axe-core + Lighthouse)
+- `pnpm audit` / `pnpm audit:critical` - Security vulnerability scanning
 
 **Security:** Pre-push hooks and GitHub Actions block vulnerable code. See [docs/Tooling.md#security-auditing](docs/Tooling.md#security-auditing).
 
@@ -187,7 +185,7 @@ This project uses a comprehensive suite of quality control tools. For complete d
 - **Formatting:** Prettier with automatic MDX prose wrapping
 - **Testing:** Jest with @testing-library/react and jest-dom matchers
 - **Automation:** Husky (pre-commit + pre-push security), lint-staged, GitHub Actions
-- **Package Management:** Yarn Plug'n'Play (PnP) for zero-install, deterministic dependencies
+- **Package Management:** pnpm 11 with an isolated `node_modules` tree and a single `pnpm-lock.yaml`
 - **UI Components:** shadcn/ui (Tailwind + Radix UI primitives)
 - **Bundle Analysis:** Webpack Bundle Analyzer for optimization
 - **Accessibility:** Automated testing with axe-core CLI and Lighthouse
@@ -407,100 +405,27 @@ This comprehensive guide covers everything from PWA basics to advanced implement
 
 See **[docs/PWA.md](docs/PWA.md)** for complete implementation guide, testing procedures, and troubleshooting.
 
-## Package Manager: Executive Recommendation
+## Package Manager
 
-> **Verdict: migrate to pnpm. Do it as part of the App Router upgrade, not after.**
-> Confidence: high. The deciding factor is architectural, not preference.
+This repo runs **pnpm 11**. Yarn 4 PnP is gone. The write-up of what changed, and why, is [docs/PNPM-MIGRATION.md](docs/PNPM-MIGRATION.md).
 
-### The one fact that settles it
+**Turbopack is the default bundler.** Yarn PnP could not resolve `next/package.json` under Turbopack. pnpm's real `node_modules` tree can, so `dev` and `build` no longer pass `--webpack`. `analyze` still pins webpack because `@next/bundle-analyzer` is a webpack plugin.
 
-**Turbopack will never support Yarn PnP.** The Next.js docs list it under _Unsupported and unplanned features_:
-
-> **Yarn PnP** — Not planned for Turbopack support in Next.js.
-
-This isn't a "not yet." Turbopack doesn't implement PnP resolution and can't read files out of zip archives — it's a Rust bundler with a filesystem-based resolver, and PnP is a JS-runtime resolution shim. The two are architecturally incompatible.
-
-As of **Next.js 16, Turbopack is the stable default bundler for both `next dev` and `next build`** (2–5x faster builds, 5–10x faster Fast Refresh). You're already on Next 16.2.3. So the real choice is:
-
-|                  | Keep Yarn PnP                                             | Move to pnpm      |
-| ---------------- | --------------------------------------------------------- | ----------------- |
-| Bundler          | Pinned to `next build --webpack` (legacy opt-out) forever | Turbopack default |
-| App Router / RSC | Works, but on the un-optimized path                       | Fully supported   |
-| Build speed      | Today's speed, permanently                                | 2–5x faster       |
-| Long-term        | Swimming against Vercel's roadmap                         | With it           |
-
-Staying on PnP means doing the whole App Router migration and then opting out of the bundler that migration is designed for. That's the wrong trade for a portfolio site whose _point_ is demonstrating a modern stack.
-
-### The zero-install premise is already broken — and expensive
-
-The stated reason for PnP is zero-install. It isn't working, and it's costing a lot:
-
-- **`.git` is 508 MB** for a portfolio site (190 MiB packed + 305 MiB loose)
-- **140 MB / 1,377 cache files tracked in git**, across **78 commits** touching `.yarn/cache` — every dependency bump writes new zips into history _permanently_
-- **`compressionLevel: 0`** stores those zips **uncompressed**, so git can't delta them efficiently
-- **`.yarn/cache` is 754 MB and `.yarn/unplugged` is 399 MB on disk** — ~1.15 GB of local dependency machinery
-- **`.gitignore` deliberately excludes the biggest binaries** (`next-npm-*.zip`, `@next-swc-*.zip`) because they _"exceed GitHub limits"_ — which means **a fresh clone must hit the network anyway**. The zero-install benefit is already forfeited while 100% of the cost is still being paid.
-- Those ignore rules **don't even work**: 8 swc/next zips (including a 29 MB `@swc-core-linux-x64-gnu`) are still tracked, because `.gitignore` never untracks already-committed files
-- **The docs contradict the config**: `docs/Tooling.md` says _"❌ Don't commit `.yarn/cache/`"_ while `.gitignore` explicitly un-ignores it with `!.yarn/cache`
-
-The irony: `.yarn/unplugged` is a 399 MB de-facto `node_modules` (sharp, swc, chromedriver, selenium), because native binaries can't run from inside zips. PnP's headline benefit — no `node_modules` — isn't actually being realized either.
-
-### The PnP tax already in this repo
-
-Each of these exists solely to work around PnP: `dependenciesMeta.unplugged` for `next` and `@next/swc-win32-x64-msvc` · `packageExtensions` patching `acorn` onto `recma-jsx` · `@yarnpkg/pnpify` in devDependencies · `.yarn/sdks/**` editor wrappers requiring `yarn dlx @yarnpkg/sdks vscode` after every upgrade · `ENABLE_EXPERIMENTAL_COREPACK` in `vercel.json` · the `ls -la && ls -la .yarn` debug leftovers still in the `build` script (fossils of a past Vercel install fight) · a whole troubleshooting section in `docs/Tooling.md`. On Windows, `corepack enable` also needs admin.
-
-### What you give up, honestly
-
-- **Strict phantom-dependency prevention.** `pnpMode: strict` is genuinely stricter than anything else. But pnpm's isolated, symlinked `node_modules` gets you ~90% of it: undeclared deps aren't resolvable, which is the failure mode that actually bites.
-- **Zero-install.** Already not working (see above). pnpm's content-addressable store + `--frozen-lockfile` gives fast, deterministic CI installs instead.
-- **A one-time migration cost.** Mechanical, and it deletes more config than it adds.
-
-pnpm keeps the two things you actually chose PnP for — **strict resolution** and **determinism** — and drops the incompatibility.
-
-### Migration sketch
-
-1. `corepack use pnpm@11` (pnpm 11 requires Node 22+; you're on Node 22 ✅). Latest is **11.13.0** — your TODO's `11.1.0` is already stale.
-2. Delete `.yarnrc.yml`, `.pnp.cjs`, `.pnp.loader.mjs`, `.yarn/`, `yarn.lock`; remove `@yarnpkg/pnpify` and `dependenciesMeta`; fix `engines.yarn` → `engines.pnpm`.
-3. Port `resolutions` → pnpm `overrides`, and `packageExtensions` → `pnpm.packageExtensions` (the `acorn`/`recma-jsx` fix may be unnecessary once hoisting changes — verify before porting).
-4. Simplify `vercel.json`: drop `ENABLE_EXPERIMENTAL_COREPACK` and `YARN_CACHE_FOLDER`; Vercel detects pnpm natively. Clean the `ls -la` debris from `build`.
-5. **Remove the `webpack(config)` no-op hook from `next.config.js`** — Turbopack ignores `webpack()` config entirely, and its presence is what's silently keeping you on the webpack path. Replace `@next/bundle-analyzer` (a webpack plugin; Turbopack supports loaders, not plugins) with a Turbopack-compatible analysis step.
-6. Add `.npmrc`, `.gitignore` `node_modules`, regenerate editor config (no SDK wrappers needed).
-7. **Shrinking `.git` is a separate job.** Dropping the cache going forward does _not_ reclaim the 508 MB — that requires `git filter-repo --path .yarn/cache --invert-paths` and a force-push. Worth doing on a solo repo; sequence it _after_ the migration lands.
-
-### If you stay on Yarn anyway
-
-The defensible middle ground is **Yarn 4 with `nodeLinker: node-modules`** — keeps Yarn, restores Turbopack compatibility, drops the cache bloat. It's strictly better than the status quo. But at that point you're using Yarn for none of the reasons you picked Yarn, and pnpm does the same job faster with a better store. Pick pnpm.
-
----
-
-## Package Management (Yarn PnP) — _current state, pending the migration above_
-
-This project uses **Yarn Plug'n'Play (PnP)** for zero-install, deterministic dependency resolution.
-
-**Benefits:**
-
-- ✅ Faster CI (smaller checkouts)
-- ✅ Deterministic resolution (no phantom packages)
-- ✅ Better editor integration via Yarn SDKs
-
-**One-time setup after cloning:**
+**Clone setup:**
 
 ```bash
-yarn dlx @yarnpkg/sdks vscode  # or vim, intellij, etc.
+corepack enable
+corepack prepare pnpm@11.24.0 --activate
+pnpm install --frozen-lockfile
 ```
 
-**Important Files:**
+**Important files:**
 
-- `.pnp.cjs` - PnP manifest (commit to git)
-- `.yarn/sdks/**` - Editor wrappers (commit to git)
-- `.yarnrc.yml` - Yarn configuration
+- `pnpm-lock.yaml` — the lockfile. Commit it.
+- `pnpm-workspace.yaml` — every pnpm 11 setting except registry auth. `.npmrc` is not used.
+- `package.json` `packageManager` — the pinned pnpm version. CI, Vercel, and Corepack all read it.
 
-**Upgrading Yarn:**
+Vercel does not yet detect pnpm 11 from lockfile 9.0 ([vercel/vercel#17434](https://github.com/vercel/vercel/issues/17434)). `vercel.json` therefore runs `corepack enable && corepack prepare pnpm@11.24.0 --activate` before install, instead of trusting the detector.
 
-```bash
-yarn set version 4.10.3
-corepack prepare yarn@4.10.3 --activate
-yarn install && yarn dedupe --strategy=highest
-```
+Purging `.yarn/cache` from git history is still a separate `git filter-repo` job. Dropping the files from HEAD does not shrink the clone.
 
-See **[docs/Tooling.md#yarn-plugnplay-pnp](docs/Tooling.md#yarn-plugnplay-pnp)** for troubleshooting and Vercel deployment details.

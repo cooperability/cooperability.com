@@ -1,31 +1,23 @@
 #!/usr/bin/env sh
-# =============================================================================
-# Pre-push Security Audit Hook
-# Platform: macOS / Linux / Git Bash on Windows
-# =============================================================================
-# This hook runs before 'git push' and blocks if critical vulnerabilities exist.
-# To bypass in emergencies: git push --no-verify
-# =============================================================================
+# Pre-push security audit. Blocks the push if a critical advisory is open.
+# Bypass in emergencies: git push --no-verify
 
 set -e
 
 echo ""
-echo "🔒 Running security audit before push..."
+echo "Running security audit before push..."
 echo ""
 
-# Run the audit
-if yarn npm audit --severity critical; then
+if pnpm audit --audit-level critical; then
     echo ""
-    echo "✅ No critical vulnerabilities found. Pushing..."
+    echo "No critical vulnerabilities found. Pushing..."
     echo ""
     exit 0
 else
     echo ""
-    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    echo "❌ PUSH BLOCKED: Critical security vulnerabilities found!"
-    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "PUSH BLOCKED: critical security vulnerabilities found."
     echo ""
-    echo "To see details:     yarn audit"
+    echo "To see details:     pnpm audit"
     echo "To bypass (unsafe): git push --no-verify"
     echo ""
     exit 1

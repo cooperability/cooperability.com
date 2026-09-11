@@ -89,7 +89,11 @@ export default defineConfig([
   {
     files: ['jest.setup.js'],
     ...js.configs.recommended,
-    languageOptions: { sourceType: 'module', globals: globals.node },
+    languageOptions: {
+      sourceType: 'module',
+      // This file calls jest.mock. Node globals alone leave `jest` undefined.
+      globals: { ...globals.node, ...globals.jest },
+    },
   },
   {
     files: ['scripts/**/*.mjs'],
