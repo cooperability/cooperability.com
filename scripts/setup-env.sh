@@ -1,52 +1,53 @@
 #!/bin/bash
 
 # NextTS Portfolio - Environment Setup Script
-# This ensures consistent Node.js/yarn versions across different machines
+# This ensures consistent Node.js/pnpm versions across different machines
 
-echo "🔧 Setting up NextTS Portfolio environment..."
+echo "Setting up NextTS Portfolio environment..."
 
 # Check if .nvmrc exists
 if [ -f ".nvmrc" ]; then
-    echo "📦 Found .nvmrc file"
-    
+    echo "Found .nvmrc file"
+
     # Check if nvm is available
     if command -v nvm &> /dev/null; then
-        echo "🔄 Using NVM to set Node.js version..."
+        echo "Using NVM to set Node.js version..."
         nvm use
         nvm install
     else
-        echo "⚠️  NVM not found. Please ensure Node.js $(cat .nvmrc) is installed."
+        echo "NVM not found. Please ensure Node.js $(cat .nvmrc) is installed."
         echo "    Current Node.js version: $(node --version 2>/dev/null || echo 'Not installed')"
     fi
 else
-    echo "⚠️  .nvmrc file not found"
+    echo ".nvmrc file not found"
 fi
 
 # Check Node.js version
 if command -v node &> /dev/null; then
-    echo "✅ Node.js version: $(node --version)"
+    echo "Node.js version: $(node --version)"
 else
-    echo "❌ Node.js not found. Please install Node.js 18.17.0+"
+    echo "Node.js not found. Please install Node.js 22.x"
     exit 1
 fi
 
-# Check yarn
-if command -v yarn &> /dev/null; then
-    echo "✅ Yarn version: $(yarn --version)"
-else
-    echo "❌ Yarn not found. Installing yarn globally..."
-    npm install -g yarn
+if ! command -v corepack &> /dev/null; then
+    echo "corepack not found. Install Node.js 22, which ships it."
+    exit 1
 fi
 
-# Install dependencies locally
-echo "📥 Installing project dependencies..."
-yarn install
+corepack enable
+corepack prepare --activate
 
-echo "🎉 Environment setup complete!"
+echo "pnpm version: $(pnpm --version)"
+
+echo "Installing project dependencies..."
+pnpm install
+
+echo "Environment setup complete!"
 echo ""
 echo "Available commands:"
-echo "  yarn dev       - Start development server"
-echo "  yarn build     - Build for production"
-echo "  yarn typecheck - Run TypeScript checks"
-echo "  yarn lint      - Run ESLint"
-echo "  yarn test      - Run tests" 
+echo "  pnpm dev       - Start development server"
+echo "  pnpm build     - Build for production"
+echo "  pnpm typecheck - Run TypeScript checks"
+echo "  pnpm lint      - Run ESLint"
+echo "  pnpm test      - Run tests"

@@ -9,10 +9,8 @@ These files MUST remain in root per tool/framework conventions:
 | File                     | Purpose                                   | Required in Root? |
 | ------------------------ | ----------------------------------------- | ----------------- |
 | `package.json`           | Project dependencies & scripts            | ✅ Yes            |
-| `yarn.lock`              | Dependency lockfile                       | ✅ Yes            |
-| `.yarnrc.yml`            | Yarn configuration                        | ✅ Yes            |
-| `.pnp.cjs`               | Yarn PnP manifest                         | ✅ Yes            |
-| `.pnp.loader.mjs`        | Yarn PnP ESM loader                       | ✅ Yes            |
+| `pnpm-lock.yaml`         | Dependency lockfile                       | ✅ Yes            |
+| `pnpm-workspace.yaml`    | pnpm linker, overrides, allowBuilds       | ✅ Yes            |
 | `next.config.js`         | Next.js configuration                     | ✅ Yes            |
 | `next-env.d.ts`          | Next.js type definitions (auto-generated) | ✅ Yes            |
 | `tsconfig.json`          | TypeScript base config                    | ✅ Yes            |
@@ -71,17 +69,9 @@ EOF
 - Ensures consistent formatting across editors
 - Complements Prettier configuration
 
-#### 2. **Add `.npmrc` for Yarn users**
+#### 2. **Do not add a Yarn `.npmrc`**
 
-```bash
-# Prevent accidental npm usage
-echo "engine-strict=true" > .npmrc
-```
-
-**Benefits:**
-
-- Prevents mixing npm and yarn
-- Enforces package manager consistency
+This tree uses pnpm 11. Settings belong in `pnpm-workspace.yaml`. `.npmrc` is auth/registry-only.
 
 ---
 
@@ -127,8 +117,7 @@ cooperability.com/
 ├── .github/                    # GitHub-specific configs
 ├── .husky/                     # Git hooks
 ├── .vscode/                    # Editor settings
-├── .yarn/                      # Yarn PnP SDKs
-├── docs/                       # ✨ Renamed from documentation/
+├── docs/                       # Project docs
 │   ├── DEPLOYMENT-FIXES.md
 │   ├── MCP.md
 │   ├── PWA.md
@@ -145,7 +134,6 @@ cooperability.com/
 ├── .nvmrc
 ├── .prettierrc.json
 ├── package.json
-├── README.md
-├── tsconfig.json
-└── yarn.lock
+├── pnpm-lock.yaml
+├── pnpm-workspace.yaml
 ```

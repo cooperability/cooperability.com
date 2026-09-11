@@ -269,9 +269,12 @@ violation still fails the build.
 ### 7.1 The OpioidConverter one is now fixed, and it turned up more
 
 Fixed in the order the risk demanded: **characterisation tests first, then the
-refactor.** The arithmetic moved verbatim into `calculateTotals` in
-`utils/calculations.ts`, 18 tests pin that module (22 across the repo), and it computes during
-render with `useMemo` instead of syncing state through an effect.
+refactor.** The live arithmetic is still inline in `OpioidConverter.tsx` and
+computes during render with `useMemo` instead of syncing state through an
+effect. Ten tests in `src/__tests__/components/opioid-converter.test.tsx` pin
+that component. `utils/calculations.ts` exports `calculateEquivalent` and is
+not imported by the converter. There is no `calculateTotals` function. Do not
+treat that file as the tested source of truth.
 
 The tests were **mutation-checked** rather than merely passing. Flipping the
 Methadone branch from squaring to multiplying turns **3 tests red**.
@@ -482,9 +485,9 @@ ids to GHSA ids (`auditConfig.ignoreCves` → `ignoreGhsas`).
 3. **tailwindcss 3 → 4** (Dependabot #214). A real migration — new config
    format, rewritten cascade layers — with visual consequences on every page.
    Its own PR, with a human looking at the result.
-4. **Close the 20 open Dependabot PRs.** They carry `yarn.lock` diffs and
-   cannot rebase onto a tree with no `yarn.lock`. Dependabot reopens them
-   against `pnpm-lock.yaml`.
+4. **Leave open Dependabot PRs that still carry `yarn.lock`.** Closing an
+   individual Dependabot PR records an implicit ignore for that version.
+   Dependabot does not reopen it against `pnpm-lock.yaml`.
 5. **Drop `chromedriver`** if the accessibility flow can run on Lighthouse
    alone (§4).
 6. **Raise test coverage.** `collectCoverageFrom` is now set, so the report

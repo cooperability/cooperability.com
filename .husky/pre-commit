@@ -1,3 +1,4 @@
+#!/usr/bin/env sh
 # Runs prettier, eslint --fix and related Jest tests over STAGED files only.
 #
 # This hook used to be commented out with the note "Commented out for Windows

@@ -338,7 +338,7 @@ Detailed learnings from this project are documented in their respective location
 
 This project follows WCAG 2.1 AA standards with automated testing via ESLint, Axe-core, and Lighthouse.
 
-**Run audits:** `yarn access` (saves reports to `./accessibility-reports/`)
+**Run audits:** `pnpm access` (saves reports to `./accessibility-reports/`)
 
 **Completed Features:**
 

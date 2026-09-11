@@ -9,7 +9,7 @@ const customJestConfig = {
   // next/jest does NOT translate tsconfig "paths" into a Jest mapper. Runtime
   // resolution survives via the SWC transform, but Jest's STATIC dependency
   // graph does not -- so `jest --findRelatedTests <file>` returned zero matches
-  // for every @/-aliased module, including the opioid dosing calculator.
+  // for modules imported via `@/` (for example `src/hooks/useResponsive.ts`).
   //
   // That matters because .husky/pre-commit runs, through lint-staged:
   //   jest --bail --findRelatedTests --passWithNoTests <staged files>

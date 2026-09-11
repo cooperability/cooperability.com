@@ -11,6 +11,9 @@ function exists(rel: string): boolean {
   return fs.existsSync(path.join(root, rel))
 }
 
+const COREPACK_BOOTSTRAP =
+  /^corepack enable && corepack prepare (.+) --activate && pnpm install --frozen-lockfile$/
+
 describe('pnpm 11 contract', () => {
   const pkg = JSON.parse(read('package.json')) as {
     packageManager?: string
@@ -35,10 +38,11 @@ describe('pnpm 11 contract', () => {
     expect(JSON.stringify(pkg.scripts)).not.toMatch(/yarn /)
   })
 
-  it('drops the webpack pin from the default Next scripts', () => {
+  it('drops the webpack pin from the default Next scripts, and keeps it on analyze', () => {
     expect(pkg.scripts.dev).toBe('next dev')
     expect(pkg.scripts.build).toMatch(/^next build /)
     expect(pkg.scripts.build).not.toMatch(/--webpack/)
+    expect(pkg.scripts.analyze).toMatch(/--webpack/)
   })
 
   it('does not keep Yarn lockfiles or PnP shims', () => {
@@ -62,20 +66,44 @@ describe('pnpm 11 contract', () => {
       buildCommand: string
       env: Record<string, string>
     }
-    expect(vercel.installCommand).toMatch(/corepack prepare pnpm@11/)
-    expect(vercel.installCommand).toMatch(/pnpm install --frozen-lockfile/)
+    const match = vercel.installCommand.match(COREPACK_BOOTSTRAP)
+    expect(match?.[1]).toBe(pkg.packageManager)
     expect(vercel.buildCommand).toBe('pnpm build')
     expect(vercel.env.ENABLE_EXPERIMENTAL_COREPACK).toBe('1')
     expect(vercel.env.YARN_CACHE_FOLDER).toBeUndefined()
   })
 
-  it('runs GitHub Actions with pnpm, including a Vercel-shaped job', () => {
+  it('runs the Vercel-shaped CI job with the same corepack command as vercel.json', () => {
     const ci = read('.github/workflows/ci.yml')
+    const vercel = JSON.parse(read('vercel.json')) as { installCommand: string }
     expect(ci).not.toMatch(/run:\s*yarn\b/)
     expect(ci).toMatch(/pnpm\/action-setup/)
-    expect(ci).toMatch(/pnpm install --frozen-lockfile/)
     expect(ci).toMatch(/name: Vercel-shaped install and build/)
-    expect(ci).toMatch(/corepack prepare pnpm@11/)
+    expect(ci).toContain(`run: ${vercel.installCommand}`)
+    expect(vercel.installCommand).toContain(pkg.packageManager ?? '')
+  })
+
+  it('maps @/ aliases so lint-staged findRelatedTests can see tests', () => {
+    const config = read('jest.config.js')
+    expect(config).toMatch(/moduleNameMapper/)
+    expect(config).toMatch(/\^@\/\(\.\*\)\$/)
+  })
+
+  it('does not instruct yarn as the live package manager in setup or shipped prompts', () => {
+    const live = [
+      'scripts/setup-env.sh',
+      'src/resources/LLMPrompts.mdx',
+      'docs/PROJECT-STRUCTURE.md',
+      'docs/PWA.md',
+      'docs/Performance.md',
+      'docs/Tooling.md',
+      'docs/MCP.md',
+    ]
+    const invocation =
+      /(?:^|[\s`'"])yarn (?:install|dev|build|lint|test|access|analyze|typecheck|add|mcp:start)\b/
+    for (const rel of live) {
+      expect(read(rel)).not.toMatch(invocation)
+    }
   })
 })
 

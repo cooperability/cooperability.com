@@ -48,8 +48,9 @@ allowBuilds:
   chromedriver: true
 
 # --- Version pinning carried over from Yarn `resolutions` ----------------
-# Each entry pins a transitive package that an advisory or deprecation forced
-# upward. Semantics are identical to Yarn's field; only the name changed.
+# Semantics are identical to Yarn's field; only the name changed. An override
+# is not proof the advisory is gone: `pnpm audit` is the measurement. As of
+# this branch it still reports two highs (sharp/libheif, js-yaml 3.x).
 overrides:
   punycode: ^2.3.1
   form-data: ^4.0.4
@@ -79,9 +80,10 @@ overrides:
   # here reaches the deployed bundle.
   socks: ^2.8.9
 
-  # next pulls older transitive copies of both of these alongside the fixed
-  # versions this project depends on directly, and the old copies carry all
-  # five remaining advisories. Pinning them upward clears the tree.
+  # next also pulls older transitive copies of these. Raising them matches
+  # the direct dependency ranges in package.json. It does not clear every
+  # advisory: sharp@0.35.3 still carries the libheif GHSA pair, and js-yaml
+  # stays on 3.x (a 4.x bump is an API change, not an override).
   postcss: ^8.5.26
   sharp: ^0.35.3
 
