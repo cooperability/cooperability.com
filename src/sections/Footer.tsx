@@ -1,3 +1,5 @@
+'use client'
+
 import Link from 'next/link'
 import ActiveIcon from '../components/ActiveIcon'
 import { useResponsive } from '../hooks/useResponsive'

@@ -1,8 +1,10 @@
+'use client'
+
 import React, { useState } from 'react'
 import styles from '../styles/utils.module.css'
 import Link from 'next/link'
-import { useRouter } from 'next/router'
-import { useTheme } from 'next-themes'
+import { usePathname } from 'next/navigation'
+import { useResolvedTheme } from '../hooks/useResolvedTheme'
 import { XMarkIcon } from '@heroicons/react/24/solid'
 import { Button } from '@/components/ui/button'
 
@@ -97,31 +99,29 @@ const Sidebar = ({
   privacyStatementUrl,
   accessibilityStatementUrl,
 }: SidebarProps) => {
-  const { theme } = useTheme()
-  const { asPath } = useRouter()
+  const isDark = useResolvedTheme() === 'dark'
+  const pathname = usePathname() || '/'
 
-  const sidebarThemeClass =
-    theme === 'dark' ? styles.sidebarDark : styles.sidebarLight
+  const sidebarThemeClass = isDark ? styles.sidebarDark : styles.sidebarLight
 
   // Helper to check if a route is active
   const isRouteActive = (href: string) => {
     // For root, require exact match
     if (href === '/') {
-      return asPath === href
+      return pathname === href
     }
     // For /resources parent page, only match exactly (not sub-pages)
     if (href === '/resources') {
-      return asPath === '/resources'
+      return pathname === '/resources'
     }
     // For all other paths (like /resources/PrivacyStatement), use startsWith
-    return asPath.startsWith(href)
+    return pathname.startsWith(href)
   }
 
   // Set inverse color CSS variables based on theme
-  const inverseColors =
-    theme === 'dark'
-      ? { '--inverse-bg': '#ffffff', '--inverse-text': '#000000' }
-      : { '--inverse-bg': '#000000', '--inverse-text': '#ffffff' }
+  const inverseColors = isDark
+    ? { '--inverse-bg': '#ffffff', '--inverse-text': '#000000' }
+    : { '--inverse-bg': '#000000', '--inverse-text': '#ffffff' }
 
   return (
     <div

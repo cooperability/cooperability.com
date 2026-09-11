@@ -14,7 +14,6 @@
 # env
 .DS_Store
 .env*
-next-env.d.ts
 
 # debug
 npm-debug.log*
@@ -44,7 +43,6 @@ public/workbox-*.js
 
 # Yarn
 .yarn/*
-!.yarn/cache
 !.yarn/patches
 !.yarn/plugins
 !.yarn/releases
@@ -56,12 +54,17 @@ public/workbox-*.js
 .yarn/unplugged/
 .yarn/build-state.yml
 
-# Large SWC binaries that exceed GitHub limits
-.yarn/cache/next-npm-*.zip
-.yarn/cache/@next-swc-*.zip
+# Generated build artifacts that were committed by accident
+tsconfig.tsbuildinfo
+/accessibility-reports/
 
 
 # Keep these Yarn PnP files committed:
 # .yarn/releases/ (Yarn binary)
-# .yarn/cache/ (actual packages)
 # .yarn/sdks/ (IDE integration)
+#
+# .yarn/cache is deliberately NOT tracked. It could never be complete: next and
+# @next-swc exceed GitHub file limits, and the platform-native archives differ
+# per OS, so a Windows install deleted the linux ones Vercel builds against.
+# Vercel ignores it regardless (vercel.json points YARN_CACHE_FOLDER at
+# .next/cache/yarn). yarn install --immutable is what guarantees reproducibility.

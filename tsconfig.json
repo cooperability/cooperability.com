@@ -14,13 +14,21 @@
     "isolatedModules": true,
     "noEmit": true,
     "incremental": true,
-    "jsx": "preserve",
+    "jsx": "react-jsx",
     "baseUrl": ".",
     "paths": {
       "@/*": ["./*"]
-    }
+    },
+    "plugins": [{ "name": "next" }]
   },
-  "include": ["next-env.d.ts", "src/**/*.ts", "src/**/*.tsx", "next.config.js"],
+  "include": [
+    "next-env.d.ts",
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "next.config.js",
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts"
+  ],
   "exclude": [
     "node_modules",
     "**/*.test.ts",
