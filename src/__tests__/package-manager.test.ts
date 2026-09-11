@@ -1,7 +1,10 @@
 import fs from 'node:fs'
 import path from 'node:path'
+import { execFileSync } from 'node:child_process'
+import { createRequire } from 'node:module'
 
 const root = path.join(__dirname, '../..')
+const nodeRequire = createRequire(__filename)
 
 function read(rel: string): string {
   return fs.readFileSync(path.join(root, rel), 'utf8')
@@ -84,10 +87,21 @@ describe('pnpm 11 contract', () => {
     expect(vercel.installCommand).toContain(pkg.packageManager ?? '')
   })
 
-  it('maps @/ aliases so lint-staged findRelatedTests can see tests', () => {
-    const config = read('jest.config.js')
-    expect(config).toMatch(/moduleNameMapper/)
-    expect(config).toMatch(/\^@\/\(\.\*\)\$/)
+  it('maps @/ aliases so findRelatedTests sees tests', () => {
+    const jestBin = nodeRequire.resolve('jest/bin/jest')
+    const out = execFileSync(
+      process.execPath,
+      [
+        jestBin,
+        '--listTests',
+        '--findRelatedTests',
+        '--watchAll=false',
+        '--ci',
+        'components/ui/accordion.tsx',
+      ],
+      { encoding: 'utf8', cwd: root, timeout: 30000 }
+    )
+    expect(out).toMatch(/accordion-theme\.test/)
   })
 
   it('does not instruct yarn as the live package manager in setup or shipped prompts', () => {
@@ -102,6 +116,9 @@ describe('pnpm 11 contract', () => {
       'src/app/providers.tsx',
       'src/components/prompt-composer/PROMPT-COMPOSER-README.md',
     ]
+    expect(read('README.md')).not.toMatch(
+      /YARN_CACHE_FOLDER` is set in `vercel\.json/
+    )
     expect(read('README.md')).not.toMatch(/Why ESLint is pinned to 9\.x/)
     expect(read('README.md')).not.toMatch(/All three now pass `--webpack`/)
     expect(read('README.md')).not.toMatch(/`test` stays interactive/)

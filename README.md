@@ -15,7 +15,7 @@ My Next.js portfolio website on Vercel. Several smaller projects within.
 - somehow clean up root repo with symlinks to subdirectories
 - ~~Drop the leftover `ls -la && ls -la .yarn` debug prefix from the `build` script~~ (done)
 - ~~Fix `engines.yarn: ">=1.22.0"`~~ (done — the field is gone with the pnpm migration)
-- ~~Remove `prop-types`~~ (done — the stated blocker turned out not to exist: `YARN_CACHE_FOLDER` is set in `vercel.json` and in local shells, so Yarn writes to a cache _outside_ `.yarn/cache` and dependency changes produce no tracked-cache churn at all. Zero-install is therefore already not in effect; see the pnpm section)
+- ~~Remove `prop-types`~~ (done — Yarn's zero-install cache was already unused; this PR deletes the Yarn machinery rather than preserving it)
 - ~~Convert the last JS files (`src/components/date.js`, `src/components/providers.js`) to TSX~~ (done — now `src/components/date.tsx` and `src/app/providers.tsx`)
 - Bump `tsconfig` `target` from `es5` to `ES2022` (es5 forces needless downleveling on a Node 22 / modern-browser target)
 - ~~Serwist precaches `.next`-relative paths rather than the served `/_next/static/…` URLs~~ (done — confirmed every old entry 404'd, and that the manifest also swept in `.next/server` and `.next/cache`, neither of which is reachable over HTTP. Now 42 entries, all verified 200)
@@ -69,7 +69,7 @@ My Next.js portfolio website on Vercel. Several smaller projects within.
 - Add error tracking (Sentry or Vercel's) — currently no visibility into client-side runtime failures
 - ~~Delete or repurpose the placeholder `src/pages/api/hello.ts`~~ (done — deleted; a replacement would now be an `app/api/*/route.ts` Route Handler)
 - Decide the canonical host deliberately. This migration standardised on `https://www.cooperability.com` (matching `next-sitemap.config.js`); the old homepage `<link rel="canonical">` pointed at the apex `https://cooperability.com`. If the apex is the intended canonical, change `metadataBase` in `src/app/layout.tsx` and the sitemap config together
-- ~~Audit committed artifacts: `accessibility-reports/`, `tsconfig.tsbuildinfo`, `.swc/` shouldn't be in git~~ (done — all three untracked and ignored, along with the platform-native `.yarn/cache` archives that made every cross-OS `yarn install` dirty the tree; `next-env.d.ts` was the reverse problem, ignored yet tracked, and is now tracked deliberately because `yarn typecheck` needs its CSS-module and image declarations)
+- ~~Audit committed artifacts: `accessibility-reports/` and `tsconfig.tsbuildinfo` shouldn't be in git~~ (done — both untracked and ignored. `.swc/` is untracked but not ignored. `next-env.d.ts` is tracked because `pnpm typecheck` needs its CSS-module and image declarations)
 
 ### Content & product
 
