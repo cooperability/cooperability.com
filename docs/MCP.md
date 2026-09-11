@@ -66,9 +66,9 @@ Your portfolio website has a **unique combination of requirements** that make MC
 - **Current State**: Manual bundle analysis via `pnpm analyze` and Vercel Analytics.
 - **MCP Opportunity**: Create an MCP server that monitors bundle sizes, identifies tree-shaking opportunities, and suggests dynamic imports. Ask: _"Which components should I lazy-load to reduce First Load JS?"_ and get data-driven recommendations.
 
-### 6. **Deployment Pipeline (Vercel + Yarn PnP)**
+### 6. **Deployment Pipeline (Vercel + pnpm 11)**
 
-- **Current State**: Complex Yarn PnP setup with Vercel-specific configurations.
+- **Current State**: `vercel.json` runs `corepack enable && corepack prepare pnpm@11.24.0 --activate && pnpm install --frozen-lockfile` because Vercel still does not detect pnpm 11 from lockfile 9.0.
 - **MCP Opportunity**: MCP servers can provide pre-deployment checks, validate environment variables, and predict build failures before pushing to Vercel. This reduces "push and pray" deployments.
 
 ---

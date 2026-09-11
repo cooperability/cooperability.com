@@ -30,6 +30,7 @@ describe('pnpm 11 contract', () => {
     expect(pkg.dependenciesMeta).toBeUndefined()
     expect(pkg.resolutions).toBeUndefined()
     expect(pkg.devDependencies?.['@yarnpkg/pnpify']).toBeUndefined()
+    expect(pkg.devDependencies?.eslint).toMatch(/^10\./)
   })
 
   it('keeps agent and CI test scripts non-interactive', () => {
@@ -98,7 +99,10 @@ describe('pnpm 11 contract', () => {
       'docs/Performance.md',
       'docs/Tooling.md',
       'docs/MCP.md',
+      'src/app/providers.tsx',
+      'src/components/prompt-composer/PROMPT-COMPOSER-README.md',
     ]
+    expect(read('README.md')).not.toMatch(/Why ESLint is pinned to 9\.x/)
     expect(read('README.md')).not.toMatch(/All three now pass `--webpack`/)
     expect(read('README.md')).not.toMatch(/`test` stays interactive/)
     expect(read('README.md')).not.toMatch(/only `security-audit\.yml` exists/)

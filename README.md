@@ -50,13 +50,13 @@ My Next.js portfolio website on Vercel. Several smaller projects within.
 
 ### CI/CD & quality gates
 
-- ~~**`yarn lint` is broken**~~ (fixed — see [Why ESLint is pinned to 9.x](#why-eslint-is-pinned-to-9x). It now passes clean, and `jsx-a11y` runs for the first time)
+- ~~**`yarn lint` is broken**~~ (fixed — see [Why ESLint 10 is kept](#why-eslint-10-is-kept). `pnpm lint` exits 0)
 - ~~`next.config.js` sets `eslint.ignoreDuringBuilds: true`~~ (removed — Next 16 dropped the `eslint` key from `next.config.js` entirely, so it was a no-op that only produced a build warning)
 - ~~`yarn test` is `jest --watch`, so it's unusable in CI. Add `test:ci`~~ (done — `pnpm test` is `jest --ci --watchAll=false`; `pnpm test:watch` is the watcher; `pnpm test:ci` collects coverage via `test-exclude@7`)
 - ~~Add a real CI workflow (the repo used to ship only the security-audit workflow).~~ (done — `.github/workflows/ci.yml` gates PRs on lint, typecheck, test, build, and a Vercel-shaped install)
 - Test coverage is four files (home page, quote box, opioid-converter equivalences, `useResponsive`). Still to prioritize: `mandelbrot-explorer/utils/calculations.ts` and `prompt-composer/utils/helpers.ts`; set coverage thresholds
 - Add Playwright E2E + `@axe-core/playwright` for the theme-switch, PWA install, and converter flows (already listed as an accessibility maintenance task — this is the mechanism)
-- Add Lighthouse CI with perf/a11y budgets on PRs, replacing the manual `yarn access` run
+- Add Lighthouse CI with perf/a11y budgets on PRs, replacing the manual `pnpm access` run
 - Consider Vitest over Jest (faster, native ESM, less SWC/PnP config surface)
 - Add `SECURITY.md`, `CODEOWNERS`, a PR template, and a `LICENSE` (repo has issue templates but none of these)
 - Pin GitHub Actions to commit SHAs and set explicit least-privilege `permissions:` on each workflow
@@ -111,33 +111,19 @@ here because they are the things that bite twice:
 | `next/dynamic` with `ssr: false`      | Illegal in a Server Component. Each applet route is a server `page.tsx` (for `metadata`) plus a thin `'use client'` wrapper holding the dynamic import and its skeleton                                                                                               |
 | `useRouter`                           | `next/router` throws; use `next/navigation`. `usePathname()` replaces `asPath` and is already query-free                                                                                                                                                              |
 | MDX                                   | `next-mdx-remote/serialize` + spread props becomes `next-mdx-remote/rsc` with a `source` string. RSC has no Context, so `MDXProvider` is out — components are passed explicitly                                                                                       |
-| Nested `ThemeProvider`                | `next-themes` short-circuits a nested provider to a Fragment, so the inner one's props were dead. Collapsing to a single provider is what made `NEXT_PUBLIC_AXE_FORCE_THEME` take effect for the first time — expect `yarn access` numbers to move                    |
+| Nested `ThemeProvider`                | `next-themes` short-circuits a nested provider to a Fragment, so the inner one's props were dead. Collapsing to a single provider is what made `NEXT_PUBLIC_AXE_FORCE_THEME` take effect for the first time — expect `pnpm access` numbers to move                    |
 | Turbopack                             | Yarn PnP could not resolve `next/package.json`, so `dev`/`build`/`analyze` were pinned to `--webpack`. This tree is pnpm 11: `dev` and `build` use Turbopack. `--webpack` stays only on `analyze`, because `@next/bundle-analyzer` is a webpack plugin Turbopack ignores |
 | Hydration gating                      | The `useState(false)` + `useEffect(() => setMounted(true))` idiom costs a second render pass on every mount and trips `react-hooks/set-state-in-effect`. `src/hooks/useHydrated.ts` does the same job with `useSyncExternalStore` and no effect                       |
 | Derived state                         | `useEffect` that only mirrors a computed value into state renders the stale value first. Compute it during render instead (`useMemo`), or for a value the user can also edit, adjust state during render by comparing against the previous input                      |
 
-## Why ESLint is pinned to 9.x
+## Why ESLint 10 is kept
 
-`yarn lint` had been crashing rather than linting, so nothing in the repo was
-being checked — including `jsx-a11y`, which the accessibility work depends on.
-The cause was not one bad package but a major-version mismatch: **ESLint 10 is
-ahead of the plugins this stack needs.**
+This tree pins `eslint` at **10.10.0**. `pnpm lint` exits 0. The Yarn-era
+write-up that recommended downgrading to 9.39.5 applied to an unscoped
+`eslint-config-next` config. #267 scoped APP files in `eslint.config.mjs` and
+kept ESLint 10. This PR does not replay the downgrade.
 
-Peer ranges as of the fix:
-
-| Plugin                     | Latest  | Max ESLint |
-| -------------------------- | ------- | ---------- |
-| `eslint-plugin-react`      | 7.37.5  | `^9.7`     |
-| `eslint-plugin-jsx-a11y`   | 6.10.2  | `^9`       |
-| `eslint-plugin-import`     | 2.32.0  | `^9`       |
-| `eslint-plugin-react-hooks`| 7.1.1   | `^10` ✅   |
-| `typescript-eslint`        | 8.68.0  | `^10` ✅   |
-
-Three of the plugins `eslint-config-next` pulls have **no ESLint 10 release at
-all**, so there was nothing to upgrade to. Downgrading to 9.39.5 restores a
-working lint gate; it is not a weakening, because the alternative was no gate.
-Revisit when `eslint-plugin-react` and `eslint-plugin-jsx-a11y` ship ESLint 10
-support.
+The rest of this section is the config work that still applies:
 
 Two related things were fixed in the same pass, and both are worth knowing:
 
@@ -154,7 +140,7 @@ Two related things were fixed in the same pass, and both are worth knowing:
 `eslint-config-prettier` also moved to the **end** of the config array — it has
 to come after every config whose stylistic rules it exists to switch off.
 
-**`yarn access` is unblocked but still unverified.** It runs `yarn lint` first
+**`pnpm access` is unblocked but still unverified.** It runs `pnpm lint` first
 and used to die there; it now gets through to `axe`. Completing it needs a
 Chrome binary on `PATH`, which the agent sandbox this was fixed in did not have,
 so the a11y numbers have not actually been re-measured. Run it locally — and

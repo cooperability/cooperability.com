@@ -212,21 +212,12 @@ Three faults stacked, each hidden by the one in front:
 3. **`eslint-config-next` was pinned at `^15.4.8` while `next` was 16.x** — a
    full major behind.
 
-### ESLint was downgraded 10 → 9, on purpose
+### ESLint 10 was kept (the 10 → 9 downgrade is history)
 
-`eslint-plugin-react`'s **latest** release, 7.37.5, declares:
-
-```json
-"peerDependencies": { "eslint": "^3 || ^4 || ^5 || ^6 || ^7 || ^8 || ^9.7" }
-```
-
-There is no ESLint 10 support, and `eslint-config-next` pulls the plugin in
-transitively. On ESLint 10 it dies inside `detectReactVersion` calling
-`context.getFilename()`, removed in that major.
-
-The repo had upgraded past its own plugin ecosystem. **Revisit when
-`eslint-plugin-react` ships an ESLint 10 peer range** — that is the falsifier
-for this decision.
+The Yarn-era branch downgraded ESLint 10 → 9 because `eslint-plugin-react`
+7.37.5 declared no ESLint 10 peer range. #267 scoped APP files in
+`eslint.config.mjs` and kept **ESLint 10.10.0**. This rebuild does not replay
+the downgrade. `pnpm lint` exits 0 on this tree. See §12.
 
 ### A test asserted copy that had been rewritten
 
@@ -331,20 +322,19 @@ All figures from one machine, warm pnpm store, same instrument on both sides.
 | Committed package files                        | 1,379 zips, 778 MB | 0          |
 | Cold install (`rm -rf node_modules`)           | —                  | **14.9 s** |
 | Full `build` (Next + service worker + sitemap) | —                  | **12.5 s** |
-| Known advisories                               | 53                 | **0**      |
+| Known advisories                               | 53                 | **1 moderate** |
 
 **This originally read "the 5 remaining have no upstream fix." That was wrong,**
 and an adversarial review caught it. Both packages had published fixes, and the
 project already depended on fixed versions directly — `postcss@8.5.26` and
-`sharp@0.35.3`. The vulnerable copies (`postcss@8.4.31`, `sharp@0.34.5`) were
+`sharp@0.35.4`. The vulnerable copies (`postcss@8.4.31`, `sharp@0.34.5`) were
 being dragged in transitively by `next`.
 
-The fix is the one §5 already teaches, applied to the one case in this tree
-where it clears everything: override the versions so the old transitive copies
-cannot resolve. `pnpm audit` now reports **no known vulnerabilities**, verified
-against the lockfile (zero references to either old version) and by resolving
-`postcss` from inside `next`, which sees 8.5.26. Lint, typecheck, tests and a
-production build all pass with the overrides in place.
+The fix is the one §5 already teaches: override the versions so the old
+transitive copies cannot resolve. `pnpm audit --audit-level high` exits 0.
+One **moderate** remains: `adm-zip`, reached only through the accessibility
+dev chain (`@axe-core/cli` → `chromedriver`). It is not in the production
+bundle.
 
 ### Turbopack vs webpack — a trade-off, not a win
 
