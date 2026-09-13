@@ -97,5 +97,9 @@ overrides:
 # cannot block a security patch from landing here.
 strictPeerDependencies: false
 autoInstallPeers: true
+
+# 72 hours. Writing the number makes the exclude below live and turns on
+# strict mode (pnpm 11's implicit 1440-minute default is non-strict).
+minimumReleaseAge: 4320
 minimumReleaseAgeExclude:
   - adm-zip@0.6.1

@@ -17,9 +17,6 @@ updates:
 
     # NOTE: the `npm` ecosystem covers pnpm too. Dependabot picks the manager
     # from the lockfile it finds, so pnpm-lock.yaml is handled with no rename.
-    # Do not close open Dependabot PRs that still carry yarn.lock. Closing an
-    # individual PR records an implicit ignore for that version
-    # (dependabot/dependabot-core#3589) and Dependabot will not recreate it.
 
     # Group minor/patch updates to reduce PR noise
     groups:

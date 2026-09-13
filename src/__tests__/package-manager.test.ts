@@ -85,6 +85,15 @@ describe('pnpm 11 contract', () => {
     expect(exists('pnpm-lock.yaml')).toBe(true)
   })
 
+  it('keeps Tailwind 3 animation CSS, not Tailwind 4 at-rules', () => {
+    const css = read('src/styles/global.css')
+    expect(css).not.toMatch(/@import\s+['"]tw-animate-css['"]/)
+    expect(css).not.toMatch(/@theme\b/)
+    expect(css).not.toMatch(/@custom-variant\b/)
+    expect(pkg.devDependencies?.['tw-animate-css']).toBeUndefined()
+    expect(pkg.dependencies?.['tailwindcss-animate']).toMatch(/^\^1\./)
+  })
+
   it('stores pnpm 11 settings in pnpm-workspace.yaml', () => {
     const yaml = read('pnpm-workspace.yaml')
     expect(yaml).toMatch(/nodeLinker:\s*isolated/)
@@ -124,7 +133,7 @@ describe('pnpm 11 contract', () => {
     expect(workspace).toEqual(expected)
     expect(lockfile).toEqual(expected)
     expect(read('pnpm-workspace.yaml')).toMatch(
-      /minimumReleaseAgeExclude:\n\s+-\s+adm-zip@0\.6\.1/
+      /minimumReleaseAge:\s*4320\nminimumReleaseAgeExclude:\n\s+-\s+adm-zip@0\.6\.1/
     )
   })
 

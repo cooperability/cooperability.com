@@ -44,7 +44,7 @@ My Next.js portfolio website on Vercel. Several smaller projects within.
 - ~~Add `_document` equivalents / custom `404` + `500` pages and a top-level error boundary~~ (done — `src/app/not-found.tsx`, `error.tsx`, `global-error.tsx`)
 - Adopt `next/font` for self-hosted, layout-shift-free fonts
 - ~~Move the inline `dangerouslySetInnerHTML` service-worker registration out of `_app.tsx`~~ (done — it's now `src/app/service-worker.tsx`, a `useEffect` with no inline script. Handing registration to Serwist's own helper is still open)
-- Upgrade Tailwind 3 → 4 (CSS-first config, faster engine); audit `tailwind.config.js` and `tw-animate-css` afterward
+- Upgrade Tailwind 3 → 4 (CSS-first config, faster engine); audit `tailwind.config.js` and add `tw-animate-css` in place of `tailwindcss-animate` afterward
 - Reconsider `next-mdx-remote` vs. compile-time MDX now that RSC makes static MDX cheaper — half done: `/resources/[slug]` uses `next-mdx-remote/rsc`, so no MDX compiler ships to the client, but `@next/mdx` compile-time MDX is still unexplored
 - Replace the `useResponsive` client boundary on `/resources` with CSS media queries, so the list can be fully server-rendered (it also fixes mobile getting the desktop layout until JS mounts)
 

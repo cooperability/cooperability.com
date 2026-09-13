@@ -475,9 +475,9 @@ ids to GHSA ids (`auditConfig.ignoreCves` → `ignoreGhsas`).
 3. **tailwindcss 3 → 4** (Dependabot #214). A real migration — new config
    format, rewritten cascade layers — with visual consequences on every page.
    Its own PR, with a human looking at the result.
-4. **Leave open Dependabot PRs that still carry `yarn.lock`.** Closing an
-   individual Dependabot PR records an implicit ignore for that version.
-   Dependabot does not reopen it against `pnpm-lock.yaml`.
+4. **Close leftover Dependabot PRs that still carry `yarn.lock`.** Those
+   updates retarget `pnpm-lock.yaml` after this lands. Closing them here
+   is intentional: the Yarn PnP tree is gone.
 5. **Drop `chromedriver`** if the accessibility flow can run on Lighthouse
    alone (§4).
 6. **Raise test coverage.** `collectCoverageFrom` is now set, so the report
