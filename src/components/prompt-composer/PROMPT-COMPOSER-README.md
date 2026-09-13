@@ -173,7 +173,7 @@ This is not "the wrong shade" — it is roughly **1.7:1 contrast** on the primar
 
 `PromptComposer.tsx:530-535` renders the primary output control with `value`, `onChange`, `className`, and `placeholder` only — no `<Label htmlFor>`, no `aria-label`, no `aria-labelledby`. The `placeholder` is the sole textual hint and it never renders, because the textarea only mounts when `editedPrompt` is non-empty (see finding 1). A screen-reader user reaches an unlabelled multiline edit box.
 
-This is a WCAG 4.1.2 failure on the component's main interactive element, and it is exactly the class of defect the repo's own `yarn access` (axe + Lighthouse) gate exists to catch. Fix: one `aria-label`, or wire the existing `CardTitle` up via `aria-labelledby`. One line.
+This is a WCAG 4.1.2 failure on the component's main interactive element, and it is exactly the class of defect the repo's own `pnpm access` (axe + Lighthouse) gate exists to catch. Fix: one `aria-label`, or wire the existing `CardTitle` up via `aria-labelledby`. One line.
 
 ### 4. The subtitle has no dark-mode variant — and the fixed version already exists, unused
 

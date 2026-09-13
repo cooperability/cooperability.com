@@ -96,13 +96,14 @@ quality, accessibility, and performance.
 ## Shell & Environment
 
 - Always use Git Bash for terminal commands (not PowerShell or cmd)
-- Ensure yarn is installed globally before running package management commands
+- Ensure pnpm is enabled through corepack before running package management
+  commands
 
 ## Dependencies & Setup
 
-- Use yarn (yarn.lock exists) for package management
+- Use pnpm (`pnpm-lock.yaml` exists) for package management
 - Always check if node_modules exists before suggesting code fixes
-- Common commands: `yarn install`, `yarn dev`, `yarn build`, `yarn typecheck`
+- Common commands: `pnpm install`, `pnpm dev`, `pnpm build`, `pnpm typecheck`
 - Suggest running these commands when encountering module resolution errors
 
 ## Code Standards
@@ -115,7 +116,7 @@ quality, accessibility, and performance.
 
 ## Architecture Patterns
 
-- Pages in src/pages/ (Pages Router, not App Router)
+- Pages in `src/app/` (App Router)
 - Components in src/components/ with TypeScript interfaces
 - Utilities in src/lib/
 - Global styles in src/styles/
@@ -124,9 +125,9 @@ quality, accessibility, and performance.
 ## Development Workflow
 
 1. First check if dependencies are installed (`ls node_modules` or similar)
-2. Run `yarn typecheck` to identify TypeScript issues
-3. Use `yarn dev` to test changes locally
-4. Lint with `yarn lint` before suggesting code complete
+2. Run `pnpm typecheck` to identify TypeScript issues
+3. Use `pnpm dev` to test changes locally
+4. Lint with `pnpm lint` before suggesting code complete
 
 ## When to Ask vs. Act
 
@@ -146,7 +147,7 @@ ACT immediately for:
 
 ## Error Diagnosis Priority
 
-1. Missing dependencies (suggest yarn install)
+1. Missing dependencies (suggest pnpm install)
 2. Missing files (check if they exist elsewhere)
 3. TypeScript configuration issues
 4. Import/export mismatches

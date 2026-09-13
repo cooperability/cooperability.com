@@ -1,45 +1,47 @@
 # Test CLI commands (Jest)
 
-Package manager: **Yarn 4 (PnP)**. Use `yarn` (not `npm`).
+Package manager: **pnpm 11**. Use `pnpm` (not `npm` or `yarn`).
 
 For axe / Lighthouse / ARIA audits → [../accessibility/COMMANDS.md](../accessibility/COMMANDS.md).
 
 ## Agent default (non-interactive)
 
-`yarn test` is **watch mode** — do **not** use it in agent/CI sessions.
+`pnpm test` is a single run (`jest --ci --watchAll=false`). Use that in agent and CI sessions.
 
 ```bash
 # Full suite, single run (preferred)
-yarn jest --ci --watchAll=false
+pnpm test
 
 # Allow empty suite
-yarn jest --ci --watchAll=false --passWithNoTests
+pnpm test --passWithNoTests
 
 # Fail fast
-yarn jest --ci --watchAll=false --bail
+pnpm test --bail
 
 # One file / pattern
-yarn jest --ci --watchAll=false path/to/file.test.tsx
-yarn jest --ci --watchAll=false --testPathPattern=opioid
+pnpm test path/to/file.test.tsx
+pnpm test --testPathPattern=opioid
 
 # Related to staged/changed files (pre-commit style)
-yarn jest --bail --findRelatedTests --passWithNoTests --watchAll=false --ci <file...>
+pnpm exec jest --bail --findRelatedTests --passWithNoTests --watchAll=false --ci <file...>
 
 # Coverage
-yarn jest --ci --watchAll=false --coverage
+pnpm test:ci
 ```
 
 ## Human / interactive
 
 ```bash
-yarn test                 # jest --watch
+pnpm test:watch           # jest --watch
 ```
+
+Never run `pnpm test:watch` unattended.
 
 ## Related type gates
 
 ```bash
-yarn typecheck            # tsc --noEmit
-yarn test-types           # tsc --noEmit -p tsconfig.dev.json
+pnpm typecheck            # tsc --noEmit
+pnpm test-types           # tsc --noEmit -p tsconfig.dev.json
 ```
 
 ## Layout
