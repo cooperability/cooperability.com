@@ -6,14 +6,47 @@
 
 ## Table of Contents
 
-1. [What is a PWA?](#what-is-a-pwa)
-2. [The Applet Suite Philosophy](#the-applet-suite-philosophy)
-3. [Architecture](#architecture)
-4. [Implementation Guide](#implementation-guide)
-5. [Testing & Validation](#testing--validation)
-6. [Troubleshooting](#troubleshooting)
-7. [Advantages & Disadvantages](#advantages--disadvantages)
-8. [Future Enhancements](#future-enhancements)
+1. [Current status](#current-status)
+2. [What is a PWA?](#what-is-a-pwa)
+3. [The Applet Suite Philosophy](#the-applet-suite-philosophy)
+4. [Architecture](#architecture)
+5. [Implementation Guide](#implementation-guide)
+6. [Testing & Validation](#testing--validation)
+7. [Troubleshooting](#troubleshooting)
+8. [Advantages & Disadvantages](#advantages--disadvantages)
+9. [Future Enhancements](#future-enhancements)
+
+## Current status
+
+**Fully implemented** as of January 2025.
+
+**Implemented applets:**
+
+- **"Prompt Composer"** installs as a standalone app from `/demos/prompt-composer`
+- **"Opioid Converter"** installs as a standalone app from `/demos/opioid-converter`
+- **"Mandelbrot Explorer"** installs as a standalone app from `/demos/mandelbrot-explorer`
+- **"Co-Operability"** is the main portfolio, with shortcuts to Prompt Composer and Opioid Converter
+
+**What that gets you:**
+
+- Each applet installs under its own name and icon
+- One shared service worker across all of them, so caching is not duplicated
+- One icon set, for brand consistency
+- iOS and Android support
+- Offline capability through Serwist, the Workbox successor
+
+**How it is built:**
+
+- **Service worker:** Serwist, migrated from the deprecated `next-pwa`
+- **Build chain:** `next build` then `build-sw.mjs` then `next-sitemap`
+- **Files:** `src/sw.js` is the source, `public/sw.js` the compiled output
+
+**Next steps:**
+
+- Custom icons per applet
+- Fuller offline behaviour, including a fallback route
+- Deep linking and share targets
+- App store distribution (Microsoft Store, Google Play via TWA)
 
 ---
 
