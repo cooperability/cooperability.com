@@ -41,37 +41,132 @@ jobs:
       # a store. The old workflow ran a full `yarn install --immutable` first,
       # which also meant every dependency install script executed on a runner
       # whose only job was to read a lockfile.
+      #
+      # `--ignore-registry-errors` is load-bearing: issue #253 was opened
+      # because `yarn npm audit` crashed on a malformed registry response and
+      # the old workflow treated that crash as a critical finding. This flag
+      # is pnpm's own documented answer to that failure mode ("a build should
+      # not fail because the registry has issues"). A registry hiccup now
+      # exits 0 instead of masquerading as a vulnerability.
       - name: Audit (critical) - blocking
-        run: pnpm audit --audit-level critical
+        run: pnpm audit --audit-level critical --ignore-registry-errors
 
       - name: Audit (high) - informational
         if: '!cancelled()'
-        run: pnpm audit --audit-level high || true
+        run: pnpm audit --audit-level high --ignore-registry-errors || true
+
+      # Re-run with --json, schedule-only, purely to get structured advisory
+      # data for the issue body below. Since --ignore-registry-errors already
+      # ruled out a registry hiccup, reaching this step means pnpm found a
+      # real advisory.
+      - name: Capture critical advisory details
+        if: failure() && github.event_name == 'schedule'
+        run: pnpm audit --audit-level critical --ignore-registry-errors --json > audit-critical.json || true
 
       - name: Open an issue if the scheduled scan fails
         if: failure() && github.event_name == 'schedule'
         uses: actions/github-script@v9
         with:
           script: |
-            const title = 'Security: critical vulnerability in dependencies'
+            const fs = require('fs')
+
+            // Two title generations have opened this alert: the pre-migration
+            // yarn workflow (issue #253) and this one. Listing both lets a
+            // clean scan (below) find and resolve either.
+            const KNOWN_TITLES = [
+              'Security: critical vulnerability in dependencies',
+              '🚨 Security Vulnerability Detected',
+            ]
+            const title = KNOWN_TITLES[0]
+
+            let advisories = {}
+            let counts = {}
+            try {
+              const report = JSON.parse(fs.readFileSync('audit-critical.json', 'utf8'))
+              advisories = report.advisories || {}
+              counts = report.metadata?.vulnerabilities || {}
+            } catch (e) {
+              core.warning(`Could not read audit-critical.json: ${e.message}`)
+            }
+
+            const findings = Object.values(advisories)
+            const findingLines = findings.length
+              ? findings.map((a) => {
+                  // npm/pnpm's audit format uses "<0.0.0" to mean no fix exists yet.
+                  const patched = a.patched_versions && a.patched_versions !== '<0.0.0'
+                    ? a.patched_versions
+                    : 'no fix published yet'
+                  return [
+                    `- **${a.module_name}**: ${a.title} (${a.severity})`,
+                    `  vulnerable: \`${a.vulnerable_versions}\`, patched: \`${patched}\``,
+                    a.url ? `  ${a.url}` : '',
+                  ].filter(Boolean).join('\n')
+                })
+              : ['- Advisory details were not captured. See the workflow run log for the raw `pnpm audit` output.']
+
             const body = [
-              'The scheduled audit found a **critical** advisory.',
+              'The scheduled audit found one or more **critical** advisories:',
               '',
-              'Reproduce locally with `pnpm audit`.',
+              ...findingLines,
+              '',
+              Object.keys(counts).length ? `Counts by severity: \`${JSON.stringify(counts)}\`` : '',
+              '',
+              'Reproduce locally with `pnpm audit --audit-level critical`.',
               '',
               `[View workflow run](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})`,
-            ].join('\n')
+            ].filter(Boolean).join('\n')
 
             const existing = await github.paginate(
               github.rest.issues.listForRepo,
               { owner: context.repo.owner, repo: context.repo.repo, state: 'open', labels: 'security' }
             )
-            if (!existing.some((i) => i.title === title)) {
+            if (!existing.some((i) => KNOWN_TITLES.includes(i.title))) {
               await github.rest.issues.create({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 title,
                 body,
                 labels: ['security', 'dependencies'],
+              })
+            }
+
+      # Closes the loop on false alarms like #253: if a security issue this
+      # workflow opened is still open, say so once a scheduled run comes back
+      # clean, instead of leaving it to go stale with no signal either way.
+      - name: Comment if a previously reported advisory is now clean
+        if: success() && github.event_name == 'schedule'
+        uses: actions/github-script@v9
+        with:
+          script: |
+            const KNOWN_TITLES = [
+              'Security: critical vulnerability in dependencies',
+              '🚨 Security Vulnerability Detected',
+            ]
+            const noteText = 'is clean as of this scheduled run'
+
+            const open = await github.paginate(
+              github.rest.issues.listForRepo,
+              { owner: context.repo.owner, repo: context.repo.repo, state: 'open', labels: 'security' }
+            )
+            const stale = open.filter((i) => KNOWN_TITLES.includes(i.title))
+
+            for (const issue of stale) {
+              const comments = await github.paginate(
+                github.rest.issues.listComments,
+                { owner: context.repo.owner, repo: context.repo.repo, issue_number: issue.number }
+              )
+              if (comments.some((c) => c.body.includes(noteText))) continue
+
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                body: [
+                  `\`pnpm audit --audit-level critical\` ${noteText}.`,
+                  '',
+                  'If the advisory that opened this issue has been patched, close it. To double-check first, run `pnpm audit --audit-level critical` locally.',
+                  '',
+                  `[View workflow run](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})`,
+                ].join('\n'),
               })
             }
