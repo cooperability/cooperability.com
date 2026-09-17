@@ -29,9 +29,7 @@ run of these items.
 
 ## AI infrastructure (the main event)
 
-- Add an `/api` LLM route using the Anthropic SDK (`claude-opus-4-8` / `claude-sonnet-5`) with streaming responses, and a shared `src/lib/ai/` client module (foundation: every item below builds on this)
-- Add server-side prompt-injection hygiene: never echo untrusted MDX into system prompts, pin system prompts server-side, never expose the API key to the client (build in before anything is public, not after)
-- Rate-limit + abuse-guard any public AI endpoint (Vercel KV / Upstash, per-IP token bucket, max token caps, request size limits) before it costs money
+- Move rate limiting to a shared store (Vercel KV / Upstash) behind the `RateLimiter` interface in `src/lib/ai/rate-limit.ts`. The in-memory token buckets shipped with the route bound abuse per serverless instance, not globally, and the caps themselves (body, prompt, output tokens) are already in place
 - Decide and document an AI usage/privacy stance in `PrivacyStatement.mdx` (what's sent to model providers, retention, opt-out) before any user-facing AI feature ships
 - Add `public/llms.txt` + `llms-full.txt` so agents can index the site correctly (cheap, static, no dependency on the route work above)
 - Wire **Prompt Composer** to a live model: preview/critique the composed prompt, score it against the research-backed rubric it already encodes, suggest missing components
@@ -40,6 +38,8 @@ run of these items.
 - Cost/latency observability for AI calls (token counts, p95 latency, spend per route). Log to Vercel Observability or an OTel exporter
 - RAG/chat over `src/resources/**` MDX + docs (embed at build time, ship a small static index, so no vector DB is needed at this size)
 - Implement the **MCP server** that `docs/MCP.md` currently only describes. Expose site content/tools (opioid conversion, prompt composition) over MCP, or otherwise mark the doc as aspirational
+- ~~Add an `/api` LLM route using the Anthropic SDK with streaming responses, and a shared `src/lib/ai/` client module~~ (done: `POST /api/ai/critique` streams from `claude-sonnet-5`, the cheaper of the two models this line listed, with the handler in `src/lib/ai/critique.ts` because Next 16 allows no extra exports from a route file)
+- ~~Add server-side prompt-injection hygiene~~ (done: the system prompt is a server-side constant, caller text only enters the user turn fenced in tags with any case or spacing of the fence tag escaped, and the key is read only in `src/lib/ai/client.ts`. The route also requires `application/json`, so a cross-site simple POST cannot spend budget from a visitor's browser)
 - ~~Add a root `CLAUDE.md` + repo-local skills/agents under `.claude/` / `.cursor/`~~ (done: see `CLAUDE.md`, `AGENTS.md`)
 
 ## Framework & architecture modernization
