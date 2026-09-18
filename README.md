@@ -39,7 +39,8 @@ flowchart LR
   sw[["public/sw.js"]]:::built
   icons{{"skillicons.dev"}}:::built
   vitals{{"Vercel Analytics"}}:::built
-  ai(["/api LLM route"]):::planned
+  ai(["/api/ai/critique"]):::built
+  anthropic{{"Anthropic API"}}:::built
 
   visitor --> edge --> layout
   layout --> home
@@ -53,6 +54,8 @@ flowchart LR
   demos -->|remote SVG| icons
   layout -.-> sw
   layout -.-> vitals
+  edge -->|"POST, streamed"| ai
+  ai -->|claude-sonnet-5| anthropic
   applets -.->|planned| ai
 ```
 
@@ -81,12 +84,22 @@ array, and resource pages are MDX files on disk, read at request time by
 `next-mdx-remote/rsc` for the body. Because the MDX is compiled on the server,
 no MDX compiler ships to the browser.
 
-**The trust boundary.** Two third parties are reached at runtime.
+**The AI boundary.** `/api/ai/critique` is the only route that leaves the
+origin with caller input. It streams a prompt critique from `claude-sonnet-5`
+through `src/lib/ai/`, which pins the system prompt server-side, fences caller
+text inside the user turn, caps the body at 16 KB and the output at 2,048
+tokens, and rate-limits per IP and per instance. It answers 503 until
+`ANTHROPIC_API_KEY` is set, so an unconfigured deploy cannot spend. No UI calls
+it yet.
+
+**The trust boundary.** Three third parties are reached at runtime.
 `skillicons.dev` serves the tech-stack SVGs on `/demos`, which is why
 `next.config.js` sets `dangerouslyAllowSVG` behind a domain allowlist and a
 `script-src 'none'` image CSP ([details](docs/Icons.md)). Vercel Analytics and
 Speed Insights collect page metrics without cookies, which is the reason there
-is no Google Analytics on this site.
+is no Google Analytics on this site. Anthropic's API is reached only from the
+server, only on a request to the AI route above, and the key never reaches the
+browser.
 
 **The offline boundary.** `src/sw.js` is compiled to `public/sw.js` at build
 time by Serwist, which injects a precache manifest of the built `.next/static`
