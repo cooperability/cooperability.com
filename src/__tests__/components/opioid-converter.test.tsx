@@ -74,6 +74,15 @@ describe('OpioidConverter', () => {
     expect(morphineTotal()).toBe('Morphine Equivalence: 0 mg')
   })
 
+  it('shows the decimal numpad on mobile for every dose input', () => {
+    render(<OpioidConverter />)
+    const inputs = screen.getAllByRole('textbox')
+    expect(inputs.length).toBeGreaterThan(0)
+    for (const input of inputs) {
+      expect(input).toHaveAttribute('inputmode', 'decimal')
+    }
+  })
+
   it('resets every dose with Clear All', () => {
     render(<OpioidConverter />)
     fireEvent.change(doseInputFor('Morphine'), { target: { value: '30' } })

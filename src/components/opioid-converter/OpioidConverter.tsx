@@ -209,6 +209,8 @@ const OpioidConverter = () => {
               <td className={styles.doseCell}>
                 <input
                   type="text"
+                  inputMode="decimal"
+                  pattern="[0-9]*\.?[0-9]*"
                   value={med.dailyDose || ''}
                   onChange={(e) => handleDoseChange(index, e.target.value)}
                   onFocus={() => setActiveInput(index)}

@@ -19,13 +19,13 @@ run of these items.
 - `commitlint` for commit messages
 - somehow clean up root repo with symlinks to subdirectories
 - SEO: audit what `site:cooperability.com` returns
-- OC input fields block numbers but should pop up numpad on mobile
 - ~~pnpm 11 migration, in full~~ (done: see [PNPM Migration](PNPM-MIGRATION.md))
 - ~~Drop the leftover `ls -la && ls -la .yarn` debug prefix from the `build` script~~ (done)
 - ~~Fix `engines.yarn: ">=1.22.0"`~~ (done: the field is gone with the pnpm migration)
 - ~~Remove `prop-types`~~ (done: Yarn's zero-install cache was already unused, and the pnpm migration deleted the Yarn machinery rather than preserving it)
 - ~~Convert the last JS files (`src/components/date.js`, `src/components/providers.js`) to TSX~~ (done: now `src/components/date.tsx` and `src/app/providers.tsx`)
 - ~~Serwist precaches `.next`-relative paths rather than the served `/_next/static/…` URLs~~ (done: confirmed every old entry 404'd, and that the manifest also swept in `.next/server` and `.next/cache`, neither of which is reachable over HTTP. Now 42 entries, all verified 200)
+- ~~OC input fields block numbers but should pop up numpad on mobile~~ (done: added `inputMode="decimal"` and a matching `pattern` to the dose inputs)
 
 ## AI infrastructure (the main event)
 
