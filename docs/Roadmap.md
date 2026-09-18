@@ -15,7 +15,6 @@ run of these items.
 - Bump `tsconfig` `target` from `es5` to `ES2022`. It's a one-line change, and es5 forces needless downleveling on every build for a Node 22 / modern-browser target
 - Purge `.yarn/cache` from git history with `git filter-repo` (separate follow-up: the migration alone does not reclaim the 508 MB `.git`, which every clone and CI checkout pays for)
 - Precache `public/` assets too. The Serwist fix below scopes the manifest to `.next/static`, so icons and images are still fetched on demand, and there is no offline fallback route
-- Create `.editorconfig` for consistency
 - `commitlint` for commit messages
 - somehow clean up root repo with symlinks to subdirectories
 - SEO: audit what `site:cooperability.com` returns
@@ -26,6 +25,7 @@ run of these items.
 - ~~Remove `prop-types`~~ (done: Yarn's zero-install cache was already unused, and the pnpm migration deleted the Yarn machinery rather than preserving it)
 - ~~Convert the last JS files (`src/components/date.js`, `src/components/providers.js`) to TSX~~ (done: now `src/components/date.tsx` and `src/app/providers.tsx`)
 - ~~Serwist precaches `.next`-relative paths rather than the served `/_next/static/…` URLs~~ (done: confirmed every old entry 404'd, and that the manifest also swept in `.next/server` and `.next/cache`, neither of which is reachable over HTTP. Now 42 entries, all verified 200)
+- ~~Create `.editorconfig` for consistency~~ (done: root settings agree with Prettier, so `pnpm format` changes nothing because of it)
 
 ## AI infrastructure (the main event)
 
