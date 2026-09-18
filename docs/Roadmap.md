@@ -57,7 +57,7 @@ run of these items.
 ## CI/CD & quality gates
 
 - Stop the security-audit workflow from opening a false-alarm issue on any failed step. **This is the fix for [issue #253](https://github.com/cooperability/cooperability.com/issues/253):** that issue's linked run shows `yarn npm audit --severity critical` crashing with an unhandled `RequestError` (the yarn registry returned malformed JSON to the advisory-bulk endpoint), not a real advisory. `pnpm audit --audit-level critical` finds nothing today (verified 2026-09-15). The pnpm migration already swapped `yarn npm audit` for `pnpm audit` in `.github/workflows/security-audit.yml`, which fixes that specific crash, but the issue-creation step still fires on bare `if: failure()` with no check that the failure was an actual finding, so any transient audit-tool error (network blip, registry outage) can still raise the same false alarm
-- Pin GitHub Actions to commit SHAs and set explicit least-privilege `permissions:` on each workflow
+- ~~Pin GitHub Actions to commit SHAs and set explicit least-privilege `permissions:` on each workflow~~ (done: every `uses:` carries a full SHA plus a `# vX.Y.Z` comment Dependabot keeps current, and the existing `permissions:` blocks were reviewed per job and already least-privilege, so they stay as they were)
 - Make the `high` severity audit blocking, or document why it stays advisory
 - Add `SECURITY.md`, `CODEOWNERS`, a PR template, and a `LICENSE` (repo has issue templates but none of these)
 - Test coverage is four files (home page, quote box, opioid-converter equivalences, `useResponsive`). Still to prioritize: `mandelbrot-explorer/utils/calculations.ts` and `prompt-composer/utils/helpers.ts`, then set coverage thresholds
