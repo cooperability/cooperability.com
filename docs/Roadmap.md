@@ -12,7 +12,6 @@ run of these items.
 
 ## Quick wins / hygiene
 
-- Bump `tsconfig` `target` from `es5` to `ES2022`. It's a one-line change, and es5 forces needless downleveling on every build for a Node 22 / modern-browser target
 - Purge `.yarn/cache` from git history with `git filter-repo` (separate follow-up: the migration alone does not reclaim the 508 MB `.git`, which every clone and CI checkout pays for)
 - Precache `public/` assets too. The Serwist fix below scopes the manifest to `.next/static`, so icons and images are still fetched on demand, and there is no offline fallback route
 - Create `.editorconfig` for consistency
@@ -26,6 +25,7 @@ run of these items.
 - ~~Remove `prop-types`~~ (done: Yarn's zero-install cache was already unused, and the pnpm migration deleted the Yarn machinery rather than preserving it)
 - ~~Convert the last JS files (`src/components/date.js`, `src/components/providers.js`) to TSX~~ (done: now `src/components/date.tsx` and `src/app/providers.tsx`)
 - ~~Serwist precaches `.next`-relative paths rather than the served `/_next/static/…` URLs~~ (done: confirmed every old entry 404'd, and that the manifest also swept in `.next/server` and `.next/cache`, neither of which is reachable over HTTP. Now 42 entries, all verified 200)
+- ~~Bump `tsconfig` `target` from `es5` to `ES2022`~~ (done: the change only affects which syntax `tsc` accepts, since Next's SWC transpilation reads browserslist, not tsconfig `target`, and `lib` was already pinned to `esnext` so the default-lib jump never applied)
 
 ## AI infrastructure (the main event)
 
