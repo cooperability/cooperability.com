@@ -15,8 +15,8 @@ import { createTokenBucket } from '../../../lib/ai/rate-limit'
 
 jest.mock('@anthropic-ai/sdk', () => jest.fn())
 
-const allow = { take: () => true }
-const deny = { take: () => false }
+const allow = { take: () => true, refund: () => {} }
+const deny = { take: () => false, refund: () => {} }
 
 function fakeClient(events: unknown[]) {
   const abort = jest.fn()
@@ -130,7 +130,7 @@ describe('createCritiqueHandler', () => {
     expect(stream).not.toHaveBeenCalled()
   })
 
-  it('rate-limits by the first x-forwarded-for address', async () => {
+  it('rate-limits on the proxy-appended address, not a caller-supplied one', async () => {
     const { client } = fakeClient([])
     const POST = createCritiqueHandler({
       perIp: createTokenBucket({ capacity: 1, refillIntervalMs: 60_000 }),
@@ -142,14 +142,59 @@ describe('createCritiqueHandler', () => {
     const first = await POST(
       post(body, { 'x-forwarded-for': '1.1.1.1, 10.0.0.1' })
     )
-    const sameClient = await POST(
+    // Same connecting address, a spoofed leading entry. Keying on the first
+    // entry would hand this request a fresh bucket and defeat the limit.
+    const spoofed = await POST(
+      post(body, { 'x-forwarded-for': '9.9.9.9, 10.0.0.1' })
+    )
+    const otherClient = await POST(
       post(body, { 'x-forwarded-for': '1.1.1.1, 10.0.0.2' })
     )
-    const otherClient = await POST(post(body, { 'x-forwarded-for': '2.2.2.2' }))
 
     expect(first.status).toBe(200)
-    expect(sameClient.status).toBe(429)
+    expect(spoofed.status).toBe(429)
     expect(otherClient.status).toBe(200)
+  })
+
+  it('prefers x-real-ip, which the platform sets, over any forwarded chain', async () => {
+    const { client } = fakeClient([])
+    const POST = createCritiqueHandler({
+      perIp: createTokenBucket({ capacity: 1, refillIntervalMs: 60_000 }),
+      global: allow,
+      getClient: () => client,
+    })
+    const body = JSON.stringify({ prompt: 'x' })
+
+    const first = await POST(
+      post(body, { 'x-real-ip': '1.1.1.1', 'x-forwarded-for': '9.9.9.9' })
+    )
+    const second = await POST(
+      post(body, { 'x-real-ip': '1.1.1.1', 'x-forwarded-for': '8.8.8.8' })
+    )
+
+    expect(first.status).toBe(200)
+    expect(second.status).toBe(429)
+  })
+
+  it('refunds the per-IP token when the global bucket is the one that rejects', async () => {
+    const { client } = fakeClient([textDelta('ok')])
+    let globalOpen = false
+    const POST = createCritiqueHandler({
+      perIp: createTokenBucket({ capacity: 1, refillIntervalMs: 60_000 }),
+      global: { take: () => globalOpen, refund: () => {} },
+      getClient: () => client,
+    })
+    const body = JSON.stringify({ prompt: 'x' })
+    const headers = { 'x-real-ip': '1.1.1.1' }
+
+    const blocked = await POST(post(body, headers))
+    globalOpen = true
+    const afterRecovery = await POST(post(body, headers))
+
+    expect(blocked.status).toBe(429)
+    // Without the refund the caller's single token is gone and an honest
+    // retry stays 429 long after the shared budget recovered.
+    expect(afterRecovery.status).toBe(200)
   })
 
   it.each([
@@ -230,8 +275,8 @@ describe('createCritiqueHandler', () => {
   })
 
   it('does not spend rate-limit tokens on requests that fail validation', async () => {
-    const perIp = { take: jest.fn(() => true) }
-    const global = { take: jest.fn(() => true) }
+    const perIp = { take: jest.fn(() => true), refund: jest.fn() }
+    const global = { take: jest.fn(() => true), refund: jest.fn() }
     const { client } = fakeClient([])
     const POST = createCritiqueHandler({
       perIp,
@@ -324,6 +369,57 @@ describe('createCritiqueHandler', () => {
     expect(res.status).toBe(502)
     expect(await res.json()).toEqual({ error: 'Upstream model request failed' })
     expect(log).toHaveBeenCalled()
+    log.mockRestore()
+  })
+
+  it('fails the body when the stream ends errored rather than closing a clean 200', async () => {
+    // The SDK can mark the stream errored and still report done, when the
+    // failure lands with no reader waiting on it.
+    const stream = jest.fn(() => ({
+      async *[Symbol.asyncIterator]() {
+        yield textDelta('partial')
+      },
+      abort: jest.fn(),
+      errored: true,
+      aborted: false,
+    }))
+    const client = { messages: { stream } } as unknown as Anthropic
+    const POST = createCritiqueHandler({
+      perIp: allow,
+      global: allow,
+      getClient: () => client,
+    })
+    const log = jest.spyOn(console, 'error').mockImplementation(() => {})
+
+    const res = await POST(post(JSON.stringify({ prompt: 'x' })))
+
+    expect(res.status).toBe(200)
+    await expect(res.text()).rejects.toThrow()
+    log.mockRestore()
+  })
+
+  it('ends quietly on a client disconnect instead of logging an upstream fault', async () => {
+    const stream = jest.fn(() => ({
+      async *[Symbol.asyncIterator]() {
+        yield textDelta('a')
+        throw new Error('Request was aborted.')
+      },
+      abort: jest.fn(),
+      errored: false,
+      aborted: true,
+    }))
+    const client = { messages: { stream } } as unknown as Anthropic
+    const POST = createCritiqueHandler({
+      perIp: allow,
+      global: allow,
+      getClient: () => client,
+    })
+    const log = jest.spyOn(console, 'error').mockImplementation(() => {})
+
+    const res = await POST(post(JSON.stringify({ prompt: 'x' })))
+
+    await expect(res.text()).resolves.toBe('')
+    expect(log).not.toHaveBeenCalled()
     log.mockRestore()
   })
 

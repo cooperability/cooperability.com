@@ -14,10 +14,15 @@ function jsonError(status: number, error: string, headers?: HeadersInit) {
   return Response.json({ error }, { status, headers })
 }
 
+// Vercel sets x-real-ip itself, and appends the connecting address to the END
+// of x-forwarded-for. Reading the first entry would take a caller-supplied
+// value, letting anyone mint a fresh bucket per request by varying the header.
 function clientIp(request: Request): string {
-  return (
-    request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown'
-  )
+  const realIp = request.headers.get('x-real-ip')?.trim()
+  if (realIp) return realIp
+
+  const forwarded = request.headers.get('x-forwarded-for')?.split(',') ?? []
+  return forwarded[forwarded.length - 1]?.trim() || 'unknown'
 }
 
 export function createCritiqueHandler({
@@ -54,7 +59,15 @@ export function createCritiqueHandler({
 
     // Limits run after validation so malformed requests, which never reach
     // the model, cannot drain the buckets real callers depend on.
-    if (!perIp.take(clientIp(request)) || !global.take('global')) {
+    const ip = clientIp(request)
+    if (!perIp.take(ip)) {
+      return jsonError(429, 'Too many requests', { 'Retry-After': '60' })
+    }
+    if (!global.take('global')) {
+      // The caller did nothing wrong, so give their token back. Keeping it
+      // would leave them locked out for a further window after the shared
+      // budget recovers.
+      perIp.refund(ip)
       return jsonError(429, 'Too many requests', { 'Retry-After': '60' })
     }
 
@@ -85,19 +98,45 @@ export function createCritiqueHandler({
 
     const encoder = new TextEncoder()
     const body = new ReadableStream<Uint8Array>({
-      async start(controller) {
+      // Pulling one delta at a time applies backpressure. Draining the whole
+      // generation up front would buffer it in function memory whenever the
+      // client reads slowly or stalls.
+      async pull(controller) {
         try {
-          for (; !next.done; next = await events.next()) {
+          for (;;) {
+            if (next.done) {
+              // The SDK can mark the stream errored and still report done,
+              // when the failure lands with no reader waiting. Closing here
+              // would hand back a truncated critique as a clean 200.
+              if (stream.errored) throw new Error('upstream stream errored')
+              controller.close()
+              return
+            }
+
             const event = next.value
+            next = await events.next()
             if (
               event.type === 'content_block_delta' &&
               event.delta.type === 'text_delta'
             ) {
               controller.enqueue(encoder.encode(event.delta.text))
+              return
             }
           }
-          controller.close()
         } catch (error) {
+          // A visitor navigating away aborts the upstream stream, which
+          // rejects the in-flight read. That is a normal disconnect, and
+          // logging it as a fault buries the real ones.
+          if (stream.aborted || request.signal.aborted) {
+            try {
+              // End the body. Returning here instead would leave pull to be
+              // called again with the same unconsumed event, forever.
+              controller.close()
+            } catch {
+              // The reader cancelled first, so it is already closed.
+            }
+            return
+          }
           console.error('critique: upstream stream failed', error)
           controller.error(error)
         }
