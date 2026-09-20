@@ -26,6 +26,9 @@ export const DEMOS = [
   },
 ]
 
+// Ordered by id, and deliberately unfiltered: src/app/resources/page.tsx
+// sorts by date and hides three statement slugs from its index, but those
+// pages are served and linkable, so the machine-readable copy lists them.
 function sortedResources() {
   return getAllResourcesData().sort((a, b) => a.id.localeCompare(b.id))
 }
@@ -33,10 +36,17 @@ function sortedResources() {
 // No current title or body needs these, but content is added by hand and a
 // stray bracket or tag would otherwise break every entry after it.
 const linkText = (text: string) => text.replace(/[\\[\]]/g, '\\$&')
+// Angle brackets too: the wrapper below exists to give an unambiguous
+// boundary, and a title like `Foo > Bar` would end the tag early without it.
 const attribute = (text: string) =>
-  text.replaceAll('&', '&amp;').replaceAll('"', '&quot;')
-const blockBody = (text: string) =>
-  text.replace(/<\/resource>/gi, '&lt;/resource>')
+  text
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+// Both ends of the wrapper. An opening tag in a body would otherwise read as
+// the start of a new resource, which is the same break as a closing one.
+const blockBody = (text: string) => text.replace(/<(\/?resource\b)/gi, '&lt;$1')
 
 export function buildLlmsTxt(): string {
   const demos = DEMOS.map(
