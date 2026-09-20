@@ -1,5 +1,8 @@
 export interface RateLimiter {
   take(key: string): boolean
+  // Returns a token taken from one bucket when a later bucket rejects the
+  // same request. Any shared-store implementation owes the same guarantee.
+  refund(key: string): void
 }
 
 interface Bucket {
@@ -49,6 +52,13 @@ export function createTokenBucket({
       if (bucket.tokens < 1) return false
       bucket.tokens -= 1
       return true
+    },
+
+    refund(key) {
+      // take() has already normalised updatedAt for this key, so only the
+      // count moves. A key evicted in between is simply not refunded.
+      const bucket = buckets.get(key)
+      if (bucket) bucket.tokens = Math.min(capacity, bucket.tokens + 1)
     },
   }
 }
