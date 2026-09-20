@@ -19,8 +19,8 @@ Out of scope:
 
 ## Reporting a vulnerability
 
-GitHub private vulnerability reporting is not yet enabled on this repository. Once it is, report through the repo's **Security** tab using **Report a vulnerability**, which opens a private advisory visible only to the maintainer.
+Report through the repository's **Security** tab, using **Report a vulnerability**. That opens a private advisory visible only to the maintainer.
 
-Until then, open a regular [GitHub issue](https://github.com/cooperability/cooperability.com/issues) describing the problem, minus any exploit detail that would put site visitors at risk before a fix ships.
+If that option is not there, private reporting has not been turned on yet. Open a [GitHub issue](https://github.com/cooperability/cooperability.com/issues) saying only that you have a security report and asking for a private channel. Keep the details out of it. A GitHub issue is public the moment you file it, so a description complete enough to act on would disclose the problem to everyone before a fix exists.
 
 This is a single-maintainer personal site. There is no committed response-time window.
