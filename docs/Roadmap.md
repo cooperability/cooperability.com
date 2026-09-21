@@ -12,7 +12,6 @@ run of these items.
 
 ## Quick wins / hygiene
 
-- Bump `tsconfig` `target` from `es5` to `ES2022`. It's a one-line change, and es5 forces needless downleveling on every build for a Node 22 / modern-browser target
 - Purge `.yarn/cache` from git history with `git filter-repo` (separate follow-up: the migration alone does not reclaim the 508 MB `.git`, which every clone and CI checkout pays for)
 - Precache `public/` assets too. The Serwist fix below scopes the manifest to `.next/static`, so icons and images are still fetched on demand, and there is no offline fallback route
 - Create `.editorconfig` for consistency
@@ -26,6 +25,7 @@ run of these items.
 - ~~Remove `prop-types`~~ (done: Yarn's zero-install cache was already unused, and the pnpm migration deleted the Yarn machinery rather than preserving it)
 - ~~Convert the last JS files (`src/components/date.js`, `src/components/providers.js`) to TSX~~ (done: now `src/components/date.tsx` and `src/app/providers.tsx`)
 - ~~Serwist precaches `.next`-relative paths rather than the served `/_next/static/…` URLs~~ (done: confirmed every old entry 404'd, and that the manifest also swept in `.next/server` and `.next/cache`, neither of which is reachable over HTTP. Now 42 entries, all verified 200)
+- ~~Bump `tsconfig` `target` from `es5` to `ES2022`~~ (done: Next's SWC transpilation reads browserslist, not tsconfig `target`, and `lib` was already pinned to `esnext`, so the default-lib jump never applied. One real semantic change rides along: `target: ES2022` flips `useDefineForClassFields` to true, so class fields get `[[Define]]` rather than `[[Set]]` semantics. That is inert here, because `src/`, `components/` and `lib/` hold no class declarations. Pin it to `false` if one ever lands and the distinction matters)
 
 ## AI infrastructure (the main event)
 
@@ -59,7 +59,7 @@ run of these items.
 - Stop the security-audit workflow from opening a false-alarm issue on any failed step. **This is the fix for [issue #253](https://github.com/cooperability/cooperability.com/issues/253):** that issue's linked run shows `yarn npm audit --severity critical` crashing with an unhandled `RequestError` (the yarn registry returned malformed JSON to the advisory-bulk endpoint), not a real advisory. `pnpm audit --audit-level critical` finds nothing today (verified 2026-09-15). The pnpm migration already swapped `yarn npm audit` for `pnpm audit` in `.github/workflows/security-audit.yml`, which fixes that specific crash, but the issue-creation step still fires on bare `if: failure()` with no check that the failure was an actual finding, so any transient audit-tool error (network blip, registry outage) can still raise the same false alarm
 - Pin GitHub Actions to commit SHAs and set explicit least-privilege `permissions:` on each workflow
 - Make the `high` severity audit blocking, or document why it stays advisory
-- Add `SECURITY.md`, `CODEOWNERS`, a PR template, and a `LICENSE` (repo has issue templates but none of these)
+- ~~Add `SECURITY.md` and a PR template~~ (done: `SECURITY.md` and `.github/pull_request_template.md`). Still open: `CODEOWNERS` (auto-requests review) and `LICENSE` (owner's legal choice)
 - Test coverage is four files (home page, quote box, opioid-converter equivalences, `useResponsive`). Still to prioritize: `mandelbrot-explorer/utils/calculations.ts` and `prompt-composer/utils/helpers.ts`, then set coverage thresholds
 - Add Lighthouse CI with perf/a11y budgets on PRs, replacing the manual `pnpm access` run
 - Add Playwright E2E + `@axe-core/playwright` for the theme-switch, PWA install, and converter flows (already listed as an accessibility maintenance task, and this is the mechanism)
