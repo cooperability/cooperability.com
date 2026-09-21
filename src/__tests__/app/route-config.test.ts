@@ -12,13 +12,14 @@ const read = (relativePath: string) =>
 
 describe('canonical host', () => {
   // The apex 308s to www at the Vercel domain layer, so www is what every
-  // canonical link, share card and sitemap entry must claim. Three files name
+  // canonical link, share card and sitemap entry must claim. Four files name
   // the host independently; before this PR they disagreed, and nothing but
   // this test stops them drifting apart again.
   const FILES = [
     'src/app/layout.tsx',
     'src/app/page.tsx',
     'next-sitemap.config.js',
+    'src/lib/llms.ts',
   ]
 
   it.each(FILES)('%s names the site host', (file) => {
