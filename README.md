@@ -39,7 +39,9 @@ flowchart LR
   sw[["public/sw.js"]]:::built
   icons{{"skillicons.dev"}}:::built
   vitals{{"Vercel Analytics"}}:::built
-  ai(["/api LLM route"]):::planned
+  ai(["/api/ai/critique"]):::built
+  anthropic{{"Anthropic API"}}:::built
+  kv[("Upstash Redis")]:::built
 
   visitor --> edge --> layout
   layout --> home
@@ -53,7 +55,9 @@ flowchart LR
   demos -->|remote SVG| icons
   layout -.-> sw
   layout -.-> vitals
-  applets -.->|planned| ai
+  applets -->|"Prompt Composer review, NDJSON"| ai
+  ai -->|claude-sonnet-5| anthropic
+  ai <-->|"spend ledger, off switch"| kv
 ```
 
 **Legend.** Shape carries what a thing is: circle a person, stadium an entry
@@ -81,12 +85,27 @@ array, and resource pages are MDX files on disk, read at request time by
 `next-mdx-remote/rsc` for the body. Because the MDX is compiled on the server,
 no MDX compiler ships to the browser.
 
-**The trust boundary.** Two third parties are reached at runtime.
+**The AI boundary.** `/api/ai/critique` is the only route that leaves the
+origin with caller input. Prompt Composer's AI review calls it on demand, and
+it streams a structured review from `claude-sonnet-5` through `src/lib/ai/`.
+The system prompt is pinned server-side, caller text is fenced inside the user
+turn, the body is capped at 16 KB and the output at 3,072 tokens, and requests
+are rate-limited per IP. Every request reserves its worst-case cost in a
+spend ledger before the model is called, and admission stops at 98% of
+`AI_BUDGET_USD` per period. `pnpm ai:off` turns it off in seconds without a
+redeploy. It answers 503 until `ANTHROPIC_API_KEY` is set, so an unconfigured
+deploy cannot spend. See [AI Review](docs/AI-Review.md) for operations, cost
+and the threat model.
+
+**The trust boundary.** Four third parties are reached at runtime.
 `skillicons.dev` serves the tech-stack SVGs on `/demos`, which is why
 `next.config.js` sets `dangerouslyAllowSVG` behind a domain allowlist and a
 `script-src 'none'` image CSP ([details](docs/Icons.md)). Vercel Analytics and
 Speed Insights collect page metrics without cookies, which is the reason there
-is no Google Analytics on this site.
+is no Google Analytics on this site. Anthropic's API is reached only from the
+server, only on a request to the AI route above, and the key never reaches the
+browser. Upstash Redis holds the AI route's spend ledger and off switch, and is
+spoken to over its REST API with plain `fetch`, so it adds no dependency.
 
 **The offline boundary.** `src/sw.js` is compiled to `public/sw.js` at build
 time by Serwist, which injects a precache manifest of the built `.next/static`
@@ -204,6 +223,7 @@ why, so a reader can tell load-bearing packages from incidental ones.
 | `@vercel/analytics`, `@vercel/speed-insights`                                                               | Cookieless page and Web Vitals metrics                               |
 | `date-fns`                                                                                                  | Formats resource dates                                               |
 | `sharp`                                                                                                     | Image optimization backend for `next/image`                          |
+| `@anthropic-ai/sdk`                                                                                         | Claude API client for `/api/ai/critique`. Server-only                |
 
 ### Development (`devDependencies`)
 
@@ -226,6 +246,7 @@ why, so a reader can tell load-bearing packages from incidental ones.
 | Document                                        | What is in it                                                               |
 | ----------------------------------------------- | --------------------------------------------------------------------------- |
 | [Roadmap](docs/Roadmap.md)                      | Everything outstanding, grouped by kind of work                             |
+| [AI Review](docs/AI-Review.md)                  | The review route: setup, off switch, spend budget, cost, threat model       |
 | [App Router Notes](docs/App-Router.md)          | The migration nuances that bite twice                                       |
 | [PNPM Migration](docs/PNPM-MIGRATION.md)        | Yarn 4 PnP to pnpm 11: what changed, what it exposed, what it did not fix   |
 | [Lint Gate](docs/Lint-Gate.md)                  | Why ESLint stays on 10, and the config work that came with it               |

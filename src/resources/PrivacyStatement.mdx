@@ -1,6 +1,6 @@
 ---
 title: 'Privacy Statement'
-date: '2025-05-18'
+date: '2026-09-25'
 description:
   My commitment to privacy and information about Co-Operability.com's data
   handling.
@@ -19,10 +19,24 @@ detailed user profiles or require complex consent mechanisms. If you're browsing
 with Safari's Advanced Tracking Protection and see a warning message, that's
 just Safari being extra cautious—the analytics here are genuinely non-invasive.
 
+**AI review in Prompt Composer.** Prompt Composer's live check runs entirely in
+your browser and sends nothing anywhere. The optional **AI review** is
+different: only when you click it, the text of your compiled prompt is sent to
+Anthropic's API to be graded, and the review is streamed back to you. This site
+does not store your prompt or the review, and its logs record only token counts,
+cost and timing, never the text. Anthropic processes the request under its
+[commercial terms](https://www.anthropic.com/legal/commercial-terms) and
+[privacy policy](https://www.anthropic.com/legal/privacy). Don't include
+anything in a prompt you review that you wouldn't send to a third party. Your
+composer selections are saved in your own browser's local storage so they
+survive a refresh. Clear removes them.
+
 **What I've implemented:**
 
 - Privacy-forward Vercel Analytics (no cookies, anonymized data)
 - Google Search Console integration for search performance
+- AI review that sends a prompt to Anthropic only when you ask for it, and is
+  never stored here
 - HTTPS security and mobile-responsive design
 - 301 redirects from old URLs to maintain SEO without broken links
 - Current XML sitemap submission
