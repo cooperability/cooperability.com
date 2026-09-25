@@ -10,7 +10,7 @@ export const DEMOS = [
     path: '/demos/prompt-composer',
     title: 'Prompt Composer',
     description:
-      'A visual prompt building tool that demonstrates the modular nature of effective prompts for AI interactions.',
+      'Build prompts from the components current evidence says matter, check them live, and get an AI review with a suggested rewrite.',
   },
   {
     path: '/demos/mandelbrot-explorer',

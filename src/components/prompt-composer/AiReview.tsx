@@ -109,11 +109,11 @@ export default function AiReview({
       </div>
 
       {availability !== 'enabled' ? (
-        <p className="text-muted-foreground text-sm">
+        <p className="text-gray-600 dark:text-gray-400 text-sm">
           {UNAVAILABLE[availability]}
         </p>
       ) : (
-        <p className="text-muted-foreground text-xs">
+        <p className="text-gray-600 dark:text-gray-400 text-xs">
           Scores the prompt on the same six dimensions as the live check,
           suggests fixes, and drafts a rewrite. Sends the prompt text to
           Anthropic’s API; this site does not store it.{' '}
@@ -139,7 +139,7 @@ export default function AiReview({
         </p>
       )}
       {state.fromCache && (
-        <p className="text-muted-foreground text-xs">
+        <p className="text-gray-600 dark:text-gray-400 text-xs">
           Same prompt as an earlier review, so that result is shown again at no
           cost.
         </p>
@@ -155,7 +155,7 @@ export default function AiReview({
           {score !== null && (
             <div className="flex items-baseline gap-3">
               <span className="text-3xl font-bold tabular-nums">{score}</span>
-              <span className="text-muted-foreground">/100</span>
+              <span className="text-gray-600 dark:text-gray-400">/100</span>
               {delta !== null && delta !== 0 && (
                 <span
                   className={`flex items-center text-sm font-semibold ${
@@ -191,7 +191,7 @@ export default function AiReview({
                   </dt>
                   {entry.score !== undefined && (
                     <div
-                      className="bg-muted mt-1 h-1.5 overflow-hidden rounded-full"
+                      className="bg-gray-100 dark:bg-gray-800 mt-1 h-1.5 overflow-hidden rounded-full"
                       aria-hidden="true"
                     >
                       <div
@@ -201,7 +201,9 @@ export default function AiReview({
                     </div>
                   )}
                   {entry.note && (
-                    <dd className="text-muted-foreground mt-1">{entry.note}</dd>
+                    <dd className="text-gray-600 dark:text-gray-400 mt-1">
+                      {entry.note}
+                    </dd>
                   )}
                 </div>
               )
@@ -244,7 +246,7 @@ export default function AiReview({
           {view.rewrite && (
             <div className="space-y-2">
               <h3 className="text-sm font-semibold">Suggested rewrite</h3>
-              <pre className="bg-muted max-h-80 overflow-auto rounded-md p-3 font-mono text-xs leading-relaxed whitespace-pre-wrap">
+              <pre className="bg-gray-100 dark:bg-gray-800 max-h-80 overflow-auto rounded-md p-3 font-mono text-xs leading-relaxed whitespace-pre-wrap">
                 {view.rewrite}
               </pre>
               {!streaming && (

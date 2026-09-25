@@ -5,7 +5,7 @@ import PromptComposerClient from './prompt-composer-client'
 export const metadata: Metadata = {
   title: 'Prompt Composer',
   description:
-    'A visual prompt building tool that demonstrates the modular nature of effective prompts for AI interactions.',
+    'Build prompts from the components current evidence says matter, check them live, and get an AI review with a suggested rewrite.',
   openGraph: { title: 'Prompt Composer | Cooper Reed | Co-Operability' },
   manifest: '/icons/prompt-composer.webmanifest',
   // Metadata keys replace the parent's value rather than merging into it, so
