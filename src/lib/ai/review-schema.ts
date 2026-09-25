@@ -3,6 +3,8 @@
 // ships to the browser.
 import { COMPONENT_IDS } from '@/src/components/prompt-composer/catalog'
 
+export const MAX_PROMPT_CHARS = 8_000
+
 export const REVIEW_DIMENSIONS = [
   'task',
   'context',

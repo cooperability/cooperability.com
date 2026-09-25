@@ -1,5 +1,10 @@
+import { MAX_PROMPT_CHARS } from './review-schema'
+
+// Lives in review-schema.ts, which ships to the browser, so the composer can
+// show the same limit this route enforces.
+export { MAX_PROMPT_CHARS }
+
 export const MAX_BODY_BYTES = 16_000
-export const MAX_PROMPT_CHARS = 8_000
 // Adaptive thinking spends from this budget too, and the review now carries
 // a rewrite of up to 400 words after its scorecard, so it cannot be
 // lowballed without truncating the part visitors want most.
