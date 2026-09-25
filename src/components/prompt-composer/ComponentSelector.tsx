@@ -36,8 +36,14 @@ const GROUP_LABELS: Record<string, string> = {
   length: 'Length',
 }
 
+// Explicit palette colours rather than the shadcn tokens (border-input,
+// ring-ring, ...): those resolve to invalid colours on this site, which would
+// leave the fields with no visible focus ring. See docs/Roadmap.md.
+// The Radix primitives' own focus ring uses the same broken token.
+const controlFocus = 'focus-visible:ring-blue-500/60'
+
 export const textareaClass =
-  'w-full rounded-md border border-input bg-background px-3 py-2 text-sm leading-relaxed placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
+  'w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm leading-relaxed text-gray-900 placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:border-gray-600 dark:bg-gray-950 dark:text-gray-100 dark:placeholder:text-gray-400'
 
 interface Props {
   state: ComposerState
@@ -103,7 +109,9 @@ export default function ComponentSelector({
               </span>
             </AccordionTrigger>
             <AccordionContent className="space-y-4">
-              <p className="text-muted-foreground">{section.blurb}</p>
+              <p className="text-gray-600 dark:text-gray-400">
+                {section.blurb}
+              </p>
 
               {fields.map((field) => {
                 const hintId = `pc-${field.id}-hint`
@@ -124,7 +132,10 @@ export default function ComponentSelector({
                       onChange={(e) => onField(field.id, e.target.value)}
                       className={textareaClass}
                     />
-                    <p id={hintId} className="text-muted-foreground text-xs">
+                    <p
+                      id={hintId}
+                      className="text-gray-600 dark:text-gray-400 text-xs"
+                    >
                       {field.hint}
                     </p>
                   </div>
@@ -150,7 +161,11 @@ export default function ComponentSelector({
                       className="gap-2"
                     >
                       <div className="flex items-center gap-2">
-                        <RadioGroupItem value="none" id={`pc-${group}-none`} />
+                        <RadioGroupItem
+                          value="none"
+                          id={`pc-${group}-none`}
+                          className={controlFocus}
+                        />
                         <Label htmlFor={`pc-${group}-none`}>
                           Let the model decide
                         </Label>
@@ -160,12 +175,16 @@ export default function ComponentSelector({
                           key={option.id}
                           className="flex items-center gap-2"
                         >
-                          <RadioGroupItem value={option.id} id={option.id} />
+                          <RadioGroupItem
+                            value={option.id}
+                            id={option.id}
+                            className={controlFocus}
+                          />
                           <Label htmlFor={option.id} className="flex-wrap">
                             <span className="font-semibold">
                               {option.label}
                             </span>
-                            <span className="text-muted-foreground font-normal">
+                            <span className="text-gray-600 dark:text-gray-400 font-normal">
                               {option.description}
                             </span>
                           </Label>
@@ -184,10 +203,11 @@ export default function ComponentSelector({
                         id={option.id}
                         checked={state.selected.has(option.id)}
                         onCheckedChange={() => onToggle(option.id)}
+                        className={controlFocus}
                       />
                       <Label htmlFor={option.id} className="flex-wrap">
                         <span className="font-semibold">{option.label}</span>
-                        <span className="text-muted-foreground font-normal">
+                        <span className="text-gray-600 dark:text-gray-400 font-normal">
                           {option.description}
                         </span>
                       </Label>

@@ -98,7 +98,7 @@ export default function CompiledPrompt({
       />
 
       {edited && (
-        <p className="text-muted-foreground text-xs">
+        <p className="text-gray-600 dark:text-gray-400 text-xs">
           Edited by hand. Changes to the components will not overwrite your
           edits until you discard them.
         </p>
@@ -106,7 +106,7 @@ export default function CompiledPrompt({
 
       <p
         id="pc-compiled-stats"
-        className="text-muted-foreground flex flex-wrap gap-x-4 text-xs tabular-nums"
+        className="text-gray-600 dark:text-gray-400 flex flex-wrap gap-x-4 text-xs tabular-nums"
       >
         <span>{countWords(text)} words</span>
         <span>~{estimateTokens(text)} tokens</span>

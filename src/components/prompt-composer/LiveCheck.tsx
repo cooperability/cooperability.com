@@ -35,7 +35,7 @@ const STATUS: Record<
   na: {
     icon: MinusCircle,
     label: 'Not needed',
-    className: 'text-muted-foreground',
+    className: 'text-gray-600 dark:text-gray-400',
   },
 }
 
@@ -59,16 +59,18 @@ export default function LiveCheck({
         </h2>
         <span className="text-sm tabular-nums">
           {result.score === null ? (
-            <span className="text-muted-foreground">Start writing</span>
+            <span className="text-gray-600 dark:text-gray-400">
+              Start writing
+            </span>
           ) : (
             <>
               <span className="font-bold">{result.score}</span>
-              <span className="text-muted-foreground">/100</span>
+              <span className="text-gray-600 dark:text-gray-400">/100</span>
             </>
           )}
         </span>
       </div>
-      <p className="text-muted-foreground text-xs">
+      <p className="text-gray-600 dark:text-gray-400 text-xs">
         Free and instant, from rules on the composer. The AI review below reads
         the prompt itself.
       </p>
