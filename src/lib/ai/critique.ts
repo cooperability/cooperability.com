@@ -146,6 +146,7 @@ export function createCritiqueHandlers({
           hasApiKey: getClient() !== null,
           store,
           ledger,
+          minReservationMicro: reservationMicro(''),
         }),
         at: now(),
       }

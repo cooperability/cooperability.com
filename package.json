@@ -24,7 +24,10 @@
     "access": "start-server-and-test dev http://localhost:3000 access:run-audits",
     "audit": "pnpm audit",
     "audit:critical": "pnpm audit --audit-level critical",
-    "audit:fix": "pnpm audit --fix"
+    "audit:fix": "pnpm audit --fix",
+    "ai:status": "node --env-file-if-exists=.env.local scripts/ai-switch.mjs status",
+    "ai:off": "node --env-file-if-exists=.env.local scripts/ai-switch.mjs off",
+    "ai:on": "node --env-file-if-exists=.env.local scripts/ai-switch.mjs on"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "0.125.0",

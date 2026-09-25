@@ -764,6 +764,24 @@ describe('GET status', () => {
     })
   })
 
+  it('reports budget as soon as the smallest request would be refused', async () => {
+    const { store, GET, POST } = handlers({ AI_BUDGET_USD: '1' })
+    // $1 at 98% is a 980,000 micro-USD ceiling. Leave less headroom than
+    // one minimal reservation but far more than a typical review's cost.
+    await store.incrBy(
+      'ai:spend:' + new Date().toISOString().slice(0, 7),
+      980_000 - reservationMicro('') + 1,
+      60
+    )
+
+    expect(await (await GET()).json()).toEqual({
+      enabled: false,
+      reason: 'budget',
+    })
+    // And the status agrees with what a POST would do.
+    expect((await POST(post(JSON.stringify({ prompt: 'x' })))).status).toBe(503)
+  })
+
   it('reports unconfigured without an API key', async () => {
     const res = await handlers({}, () => null).GET()
 
