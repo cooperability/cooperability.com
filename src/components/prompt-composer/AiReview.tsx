@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { ArrowDown, ArrowUp, Check, Copy, Sparkles, Square } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -56,6 +56,8 @@ export default function AiReview({
   onAddOption,
 }: Props) {
   const [copied, setCopied] = useState(false)
+  const timer = useRef<ReturnType<typeof setTimeout>>(undefined)
+  useEffect(() => () => clearTimeout(timer.current), [])
   const { view, phase } = state
   const score = overallScore(view)
   const streaming = phase === 'streaming'
@@ -74,7 +76,8 @@ export default function AiReview({
     try {
       await navigator.clipboard.writeText(view.rewrite)
       setCopied(true)
-      setTimeout(() => setCopied(false), 2_000)
+      clearTimeout(timer.current)
+      timer.current = setTimeout(() => setCopied(false), 2_000)
     } catch {
       // The rewrite stays selectable on the page.
     }
