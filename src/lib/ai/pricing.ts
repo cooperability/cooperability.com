@@ -10,9 +10,11 @@ import type Anthropic from '@anthropic-ai/sdk'
 export const PRICE_PER_MTOK = {
   input: 2,
   output: 10,
-  // Cache writes bill at 1.25x input and reads at 0.1x. The critique prompt
-  // is under Sonnet 5's 1,024-token caching minimum, so neither is expected,
-  // but pricing them keeps the meter correct if that changes.
+  // Cache writes bill at 1.25x input and reads at 0.1x. The route does not
+  // cache: the system prompt (about 1,100 tokens) sits at Sonnet 5's
+  // 1,024-token minimum, and at this site's traffic most requests would pay
+  // the write premium for a read that never comes within the 5-minute TTL.
+  // Pricing both keeps the meter correct if that changes.
   cacheWrite: 2.5,
   cacheRead: 0.2,
 } as const

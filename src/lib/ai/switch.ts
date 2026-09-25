@@ -23,21 +23,21 @@ export type Availability =
       reason: 'disabled' | 'budget' | 'unconfigured' | 'unavailable'
     }
 
-// Rough cost of an ordinary critique. The status endpoint reports "budget"
-// once less than this remains, so the UI stops offering a button that would
-// only answer 503.
-export const TYPICAL_CRITIQUE_MICRO = 20_000
-
 export async function checkAvailability({
   env = process.env,
   hasApiKey,
   store,
   ledger,
+  minReservationMicro,
 }: {
   env?: NodeJS.ProcessEnv
   hasApiKey: boolean
   store: CounterStore
   ledger: SpendLedger
+  // What the smallest possible request reserves. Reporting "budget" once
+  // less than this remains keeps the status in step with what a POST would
+  // actually admit, so the UI never offers a button that can only 503.
+  minReservationMicro: number
 }): Promise<Availability> {
   if (disabledByEnv(env)) return { enabled: false, reason: 'disabled' }
   if (!hasApiKey) return { enabled: false, reason: 'unconfigured' }
@@ -46,7 +46,7 @@ export async function checkAvailability({
       return { enabled: false, reason: 'disabled' }
     }
     const { spentMicro, ceilingMicro } = await ledger.status()
-    if (spentMicro + TYPICAL_CRITIQUE_MICRO > ceilingMicro) {
+    if (spentMicro + minReservationMicro > ceilingMicro) {
       return { enabled: false, reason: 'budget' }
     }
   } catch (error) {
