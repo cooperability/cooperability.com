@@ -27,6 +27,7 @@
     "audit:fix": "pnpm audit --fix"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "0.125.0",
     "@heroicons/react": "^2.2.0",
     "@mdx-js/loader": "^3.1.1",
     "@mdx-js/react": "^3.1.1",
