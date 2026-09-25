@@ -132,6 +132,13 @@ export function useCritique() {
       abortRef.current = controller
       setState({ ...INITIAL, phase: 'streaming', reviewedText: text })
 
+      // Only the current run may write state. A run superseded by a newer
+      // one, or by reset(), still settles its promise afterwards, and would
+      // otherwise paint "Review cancelled." over whatever replaced it.
+      const update: typeof setState = (next) => {
+        if (abortRef.current === controller) setState(next)
+      }
+
       let raw = ''
       let view = EMPTY_REVIEW
       try {
@@ -147,10 +154,14 @@ export function useCritique() {
             error?: string
             reason?: Availability
           }
-          if (body.reason && REASONS.has(body.reason)) {
+          if (
+            abortRef.current === controller &&
+            body.reason &&
+            REASONS.has(body.reason)
+          ) {
             setAvailability(body.reason)
           }
-          setState((s) => ({
+          update((s) => ({
             ...s,
             phase: 'error',
             error: errorFor(res.status, body.error),
@@ -180,7 +191,7 @@ export function useCritique() {
             else ending = msg
           }
           view = toReviewView(parsePartialJson(raw))
-          setState((s) => ({ ...s, view }))
+          update((s) => ({ ...s, view }))
         }
 
         // The whole document is here now. A strict parse is authoritative;
@@ -192,7 +203,7 @@ export function useCritique() {
         }
 
         if (!ending || ending.type === 'error') {
-          setState((s) => ({
+          update((s) => ({
             ...s,
             view,
             phase: 'error',
@@ -201,7 +212,7 @@ export function useCritique() {
           return
         }
         if (ending.stop_reason === 'refusal') {
-          setState((s) => ({
+          update((s) => ({
             ...s,
             view,
             phase: 'error',
@@ -214,7 +225,7 @@ export function useCritique() {
         const previousScore = truncated
           ? lastScoreRef.current
           : complete(text, view)
-        setState((s) => ({
+        update((s) => ({
           ...s,
           view,
           phase: 'done',
@@ -223,7 +234,7 @@ export function useCritique() {
         }))
       } catch {
         if (controller.signal.aborted) {
-          setState((s) => ({
+          update((s) => ({
             ...s,
             view,
             phase: 'error',
@@ -231,7 +242,7 @@ export function useCritique() {
           }))
           return
         }
-        setState((s) => ({
+        update((s) => ({
           ...s,
           view,
           phase: 'error',
@@ -246,7 +257,10 @@ export function useCritique() {
 
   const cancel = useCallback(() => abortRef.current?.abort(), [])
   const reset = useCallback(() => {
-    abortRef.current?.abort()
+    // Detach before aborting, so the aborted run cannot write back.
+    const running = abortRef.current
+    abortRef.current = null
+    running?.abort()
     setState(INITIAL)
   }, [])
 

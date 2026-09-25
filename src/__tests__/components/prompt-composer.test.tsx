@@ -298,6 +298,60 @@ describe('AI review', () => {
     expect(await screen.findByText(/switched off for now/i)).toBeInTheDocument()
   })
 
+  // A body that never finishes on its own, and rejects its pending read when
+  // the request is aborted, as fetch does.
+  function hangingFetch() {
+    const fetchMock = jest.fn(async (_url: string, init?: RequestInit) => {
+      if (!init?.method) return { json: async () => ({ enabled: true }) }
+      const signal = init.signal!
+      return {
+        ok: true,
+        status: 200,
+        body: {
+          getReader: () => ({
+            read: () =>
+              new Promise((_, reject) =>
+                signal.addEventListener('abort', () =>
+                  reject(new DOMException('Aborted', 'AbortError'))
+                )
+              ),
+          }),
+        },
+      }
+    })
+    Object.assign(globalThis, { fetch: fetchMock })
+  }
+
+  async function startHangingReview() {
+    hangingFetch()
+    await renderComposer()
+    typeTask('Write a haiku')
+    const button = screen.getByRole('button', { name: /review with ai/i })
+    await waitFor(() => expect(button).toBeEnabled())
+    fireEvent.click(button)
+    await screen.findByText(/reviewing your prompt/i)
+  }
+
+  it('reports a stopped review as cancelled', async () => {
+    await startHangingReview()
+
+    fireEvent.click(screen.getByRole('button', { name: /stop/i }))
+
+    expect(await screen.findByText('Review cancelled.')).toBeInTheDocument()
+  })
+
+  it('leaves a clean panel when Clear interrupts a review', async () => {
+    await startHangingReview()
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'Clear' }))
+    })
+
+    // The aborted request settles after the reset. It must not write back.
+    expect(screen.queryByText('Review cancelled.')).not.toBeInTheDocument()
+    expect(screen.queryByText(/reviewing your prompt/i)).not.toBeInTheDocument()
+  })
+
   it('does not present an interrupted stream as a finished review', async () => {
     mockFetch(undefined, () => ({
       ok: true,
