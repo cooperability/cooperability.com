@@ -1,8 +1,9 @@
 export const MAX_BODY_BYTES = 16_000
 export const MAX_PROMPT_CHARS = 8_000
-// Adaptive thinking spends from this budget too, so it cannot be lowballed
-// without truncating the critique.
-export const MAX_OUTPUT_TOKENS = 2_048
+// Adaptive thinking spends from this budget too, and the review now carries
+// a rewrite of up to 400 words after its scorecard, so it cannot be
+// lowballed without truncating the part visitors want most.
+export const MAX_OUTPUT_TOKENS = 3_072
 
 // A chunked request carries no content-length, so the cap has to be enforced
 // while reading. request.text() would buffer an unbounded body first.
