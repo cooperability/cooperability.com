@@ -3,6 +3,8 @@ import {
   dpadFromPoint,
   faceFromPoint,
   FACE_LAYOUT,
+  FACE_REACH,
+  KEY_MAP,
   readGamepad,
   type ButtonSet,
 } from '../../components/game/input'
@@ -34,34 +36,72 @@ describe('dpadFromPoint', () => {
 })
 
 describe('faceFromPoint', () => {
-  it('presses the button under the thumb', () => {
-    expect(faceFromPoint(FACE_LAYOUT.a.x, FACE_LAYOUT.a.y)).toEqual(['a'])
-    expect(faceFromPoint(FACE_LAYOUT.b.x, FACE_LAYOUT.b.y)).toEqual(['b'])
+  const centre = (b: keyof typeof FACE_LAYOUT) =>
+    [FACE_LAYOUT[b].x, FACE_LAYOUT[b].y] as const
+  const between = (p: keyof typeof FACE_LAYOUT, q: keyof typeof FACE_LAYOUT) =>
+    [
+      (FACE_LAYOUT[p].x + FACE_LAYOUT[q].x) / 2,
+      (FACE_LAYOUT[p].y + FACE_LAYOUT[q].y) / 2,
+    ] as const
+
+  it('sits in the Xbox diamond: Y top, X left, B right, A bottom', () => {
+    expect(FACE_LAYOUT.y.y).toBeLessThan(FACE_LAYOUT.a.y)
+    expect(FACE_LAYOUT.x.x).toBeLessThan(FACE_LAYOUT.b.x)
   })
 
-  it('presses both when the thumb rolls onto the gap between them', () => {
-    const midX = (FACE_LAYOUT.a.x + FACE_LAYOUT.b.x) / 2
-    const midY = (FACE_LAYOUT.a.y + FACE_LAYOUT.b.y) / 2
-    expect(sorted(faceFromPoint(midX, midY))).toEqual(['a', 'b'])
+  it.each(['a', 'b', 'x', 'y'] as const)(
+    'presses %s alone at its centre',
+    (b) => {
+      expect(faceFromPoint(...centre(b))).toEqual([b])
+    }
+  )
+
+  it('presses both of two neighbours when the thumb rolls between them', () => {
+    expect(sorted(faceFromPoint(...between('a', 'x')))).toEqual(['a', 'x'])
+    expect(sorted(faceFromPoint(...between('y', 'b')))).toEqual(['b', 'y'])
   })
 
-  it('presses nothing well away from both buttons', () => {
-    const { a, b, radius } = FACE_LAYOUT
-    const reach = radius + 0.05
+  it('presses nothing at the centre, between opposite buttons', () => {
+    expect(faceFromPoint(...between('a', 'y'))).toEqual([])
+  })
+
+  it('presses nothing out of reach of every button', () => {
+    const buttons = Object.values(FACE_LAYOUT)
+    let checked = 0
     for (let i = 0; i <= 50; i++) {
       for (let j = 0; j <= 50; j++) {
         const [x, y] = [i / 50, j / 50]
-        const far =
-          Math.hypot(x - a.x, y - a.y) > reach &&
-          Math.hypot(x - b.x, y - b.y) > reach
-        if (far) expect([x, y, faceFromPoint(x, y)]).toEqual([x, y, []])
+        const far = buttons.every(
+          (b) => Math.hypot(x - b.x, y - b.y) > FACE_REACH
+        )
+        if (!far) continue
+        checked++
+        expect([x, y, faceFromPoint(x, y)]).toEqual([x, y, []])
       }
     }
+    // Guards against the scan silently checking nothing.
+    expect(checked).toBeGreaterThan(500)
+  })
+})
+
+describe('KEY_MAP', () => {
+  it('mirrors the face diamond on IJKL', () => {
+    expect([KEY_MAP.KeyI, KEY_MAP.KeyJ, KEY_MAP.KeyK, KEY_MAP.KeyL]).toEqual([
+      'y',
+      'x',
+      'a',
+      'b',
+    ])
   })
 
-  it('presses nothing in the empty corners', () => {
-    expect(faceFromPoint(0.02, 0.02)).toEqual([])
-    expect(faceFromPoint(0.98, 0.98)).toEqual([])
+  it('moves on WASD and the arrows', () => {
+    expect([KEY_MAP.KeyW, KEY_MAP.KeyA, KEY_MAP.KeyS, KEY_MAP.KeyD]).toEqual([
+      'up',
+      'left',
+      'down',
+      'right',
+    ])
+    expect(KEY_MAP.ArrowLeft).toBe('left')
   })
 })
 
@@ -81,9 +121,11 @@ describe('readGamepad', () => {
     return sorted([...set])
   }
 
-  it('puts Game Boy A on the right face button and B on the bottom one', () => {
-    expect(read(pad([1]))).toEqual(['a'])
-    expect(read(pad([0]))).toEqual(['b'])
+  it('maps the standard face buttons to the Xbox diamond', () => {
+    expect(read(pad([0]))).toEqual(['a'])
+    expect(read(pad([1]))).toEqual(['b'])
+    expect(read(pad([2]))).toEqual(['x'])
+    expect(read(pad([3]))).toEqual(['y'])
   })
 
   it('maps the D-pad and the centre buttons', () => {

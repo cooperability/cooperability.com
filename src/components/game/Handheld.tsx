@@ -2,7 +2,6 @@
 
 import Link from 'next/link'
 import { useEffect, useRef, useState, type PointerEvent } from 'react'
-import { createDemoGame, HEIGHT, WIDTH } from './demo-game'
 import {
   Controls,
   dpadFromPoint,
@@ -11,6 +10,7 @@ import {
   type Button,
 } from './input'
 import { startLoop } from './loop'
+import { createSandbox, HEIGHT, WIDTH } from './sandbox/game'
 import styles from './Handheld.module.css'
 
 type Mode = 'touch' | 'external'
@@ -56,9 +56,20 @@ export default function Handheld() {
     const ctx = canvas?.getContext('2d')
     if (!canvas || !screen || !root || !ctx) return
 
-    const game = createDemoGame()
+    const game = createSandbox()
 
     const onKey = (e: KeyboardEvent) => {
+      if (
+        e.code === 'KeyF' &&
+        e.type === 'keydown' &&
+        !e.repeat &&
+        !e.metaKey &&
+        !e.ctrlKey
+      ) {
+        if (document.fullscreenElement)
+          document.exitFullscreen().catch(() => {})
+        else root.requestFullscreen?.().catch(() => {})
+      }
       const button = KEY_MAP[e.code]
       if (!button) return
       if (e.type === 'keyup') return controls.key(button, false)
@@ -250,17 +261,23 @@ export default function Handheld() {
       </div>
 
       <div
-        className={styles.dpad}
+        className={`${styles.diamond} ${styles.dpad}`}
         {...zone((x, y) => dpadFromPoint(x * 2 - 1, y * 2 - 1))}
         aria-hidden="true"
       >
-        <span className={styles.up} />
-        <span className={styles.down} />
-        <span className={styles.left} />
-        <span className={styles.right} />
+        <span className={styles.up}>▲</span>
+        <span className={styles.left}>◀</span>
+        <span className={styles.right}>▶</span>
+        <span className={styles.down}>▼</span>
       </div>
 
-      <div className={styles.face} {...zone(faceFromPoint)} aria-hidden="true">
+      <div
+        className={`${styles.diamond} ${styles.face}`}
+        {...zone(faceFromPoint)}
+        aria-hidden="true"
+      >
+        <span className={styles.y}>Y</span>
+        <span className={styles.x}>X</span>
         <span className={styles.b}>B</span>
         <span className={styles.a}>A</span>
       </div>
@@ -272,6 +289,33 @@ export default function Handheld() {
         <span className={styles.start} {...zone(() => ['start'])}>
           START
         </span>
+      </div>
+
+      {/* Desktop: which keys the game is hearing, from any input source. */}
+      <div className={styles.keys} data-control="" aria-hidden="true">
+        <div className={styles.cluster}>
+          <kbd className={styles.up}>W</kbd>
+          <kbd className={styles.left}>A</kbd>
+          <kbd className={styles.down}>S</kbd>
+          <kbd className={styles.right}>D</kbd>
+        </div>
+        <div className={styles.cluster}>
+          <kbd className={styles.y}>I</kbd>
+          <kbd className={styles.x}>
+            J<small>attack</small>
+          </kbd>
+          <kbd className={styles.a}>
+            K<small>jump</small>
+          </kbd>
+          <kbd className={styles.b}>
+            L<small>dash</small>
+          </kbd>
+        </div>
+        <p className={styles.legend}>
+          <span className={styles.start}>Enter pause</span>
+          <span className={styles.select}>Backspace debug</span>
+          <span>F fullscreen</span>
+        </p>
       </div>
     </div>
   )
