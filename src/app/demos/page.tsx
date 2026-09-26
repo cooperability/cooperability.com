@@ -122,6 +122,28 @@ export default function Demos() {
                 </div>
               </div>
 
+              {/* Game */}
+              <div className={styles.subProjectItem}>
+                <div className={styles.projectInfo}>
+                  <Link href="/demos/game">Game[💻📱🎮]</Link>
+                  <span className={styles.projectStatus}>(Ongoing)</span>
+                </div>
+                <div className={styles.techStackIcons}>
+                  <ActiveIcon
+                    href="https://www.typescriptlang.org/"
+                    iconName="ts"
+                    alt="TypeScript logo"
+                    size="small"
+                  />
+                  <ActiveIcon
+                    href="https://react.dev/"
+                    iconName="react"
+                    alt="React logo"
+                    size="small"
+                  />
+                </div>
+              </div>
+
               {/* Opioid Converter */}
               <div className={styles.subProjectItem}>
                 <div className={styles.projectInfo}>
