@@ -150,7 +150,8 @@ export function faceFromPoint(x: number, y: number): Button[] {
   const da = Math.hypot(x - a.x, y - a.y)
   const db = Math.hypot(x - b.x, y - b.y)
   const gap = Math.hypot(a.x - b.x, a.y - b.y)
-  if (Math.abs(da - db) < gap * 0.2 && da < gap) return ['a', 'b']
+  const rolling = Math.abs(da - db) < gap * 0.2
+  if (rolling && Math.max(da, db) < radius + 0.05) return ['a', 'b']
   if (da <= radius && da <= db) return ['a']
   if (db <= radius) return ['b']
   return []

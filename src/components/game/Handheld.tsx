@@ -60,19 +60,34 @@ export default function Handheld() {
 
     const onKey = (e: KeyboardEvent) => {
       const button = KEY_MAP[e.code]
-      if (!button || e.metaKey || e.ctrlKey || e.altKey) return
+      if (!button) return
+      if (e.type === 'keyup') return controls.key(button, false)
+      // Shortcuts pass through, and Enter or Space on the exit link or the
+      // hint's button must still activate it.
+      if (e.metaKey || e.ctrlKey || e.altKey) return
+      if ((e.target as Element).closest?.('a, button')) return
       e.preventDefault()
       if (e.repeat) return
-      controls.key(button, e.type === 'keydown')
-      if (e.type === 'keydown') setMode('external')
+      controls.key(button, true)
+      setMode('external')
     }
+    // macOS sends no keyup for keys released while Cmd is held.
     const onBlur = () => controls.clearKeys()
+    const onMeta = (e: KeyboardEvent) => {
+      if (e.key === 'Meta') controls.clearKeys()
+    }
 
     let wakeLock: WakeLockSentinel | null = null
+    let disposed = false
     const lockScreen = () => {
       navigator.wakeLock
         ?.request('screen')
-        .then((lock) => (wakeLock = lock))
+        .then((lock) => {
+          // Unmounted while the request was pending: nothing else will
+          // release it.
+          if (disposed) lock.release().catch(() => {})
+          else wakeLock = lock
+        })
         .catch(() => {})
     }
     const onVisibility = () => {
@@ -85,6 +100,7 @@ export default function Handheld() {
     window.addEventListener('keydown', onKey)
     window.addEventListener('keyup', onKey)
     window.addEventListener('blur', onBlur)
+    window.addEventListener('keydown', onMeta)
     window.addEventListener('gamepaddisconnected', onPadGone)
     document.addEventListener('visibilitychange', onVisibility)
     // iOS ignores user-scalable=no, so pinch has to be refused here.
@@ -96,6 +112,21 @@ export default function Handheld() {
     const html = document.documentElement
     const overflow = html.style.overflow
     html.style.overflow = 'hidden'
+
+    // Take the hidden site chrome out of the tab order and the accessibility
+    // tree, by marking everything beside this layer's ancestors inert.
+    const inerted: Element[] = []
+    for (let el: Element = root; el !== document.body; el = el.parentElement!) {
+      for (const sibling of el.parentElement!.children) {
+        if (
+          sibling !== el &&
+          !sibling.matches('script, next-route-announcer, [inert]')
+        ) {
+          sibling.setAttribute('inert', '')
+          inerted.push(sibling)
+        }
+      }
+    }
 
     // Whole-number scaling keeps every game pixel the same size. Below 2x
     // that would leave a postage stamp, so small screens fit fractionally.
@@ -130,10 +161,13 @@ export default function Handheld() {
       stop()
       resize.disconnect()
       html.style.overflow = overflow
+      inerted.forEach((el) => el.removeAttribute('inert'))
+      disposed = true
       wakeLock?.release().catch(() => {})
       window.removeEventListener('keydown', onKey)
       window.removeEventListener('keyup', onKey)
       window.removeEventListener('blur', onBlur)
+      window.removeEventListener('keydown', onMeta)
       window.removeEventListener('gamepaddisconnected', onPadGone)
       document.removeEventListener('visibilitychange', onVisibility)
       document.removeEventListener('gesturestart', preventDefault)
@@ -176,7 +210,14 @@ export default function Handheld() {
   }
 
   return (
-    <div ref={rootRef} className={styles.root} data-mode={mode}>
+    <div
+      ref={rootRef}
+      className={styles.root}
+      data-mode={mode}
+      // The on-screen pad is hidden in external mode, so a touch anywhere
+      // has to be able to bring it back.
+      onPointerDown={(e) => e.pointerType === 'touch' && setMode('touch')}
+    >
       {!standalone && (
         <div className={styles.topBar}>
           <Link href="/demos" className={styles.exit}>

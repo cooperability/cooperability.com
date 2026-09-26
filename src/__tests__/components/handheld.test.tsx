@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from '@testing-library/react'
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import Handheld from '../../components/game/Handheld'
 
 // jsdom has no canvas, layout or media queries, so each is stubbed to the
@@ -55,6 +55,40 @@ describe('Handheld', () => {
       fireEvent.keyDown(window, { code: 'ArrowUp' })
     })
     expect(root(container)).toHaveAttribute('data-mode', 'external')
+  })
+
+  it('brings the touch controls back on the next touch anywhere', () => {
+    const { container } = render(<Handheld />)
+    act(() => {
+      fireEvent.keyDown(window, { code: 'ArrowUp' })
+    })
+    // The pad is hidden now, so the touch lands on the screen instead.
+    // jsdom has no PointerEvent, so pointerType is attached by hand.
+    const touch = new MouseEvent('pointerdown', { bubbles: true })
+    Object.defineProperty(touch, 'pointerType', { value: 'touch' })
+    act(() => {
+      screen.getByRole('img').dispatchEvent(touch)
+    })
+    expect(root(container)).toHaveAttribute('data-mode', 'touch')
+  })
+
+  it('releases a key even when a modifier is down at release', async () => {
+    const { container } = render(<Handheld />)
+    const dpad = container.querySelector('.dpad')!
+    fireEvent.keyDown(window, { code: 'ArrowLeft' })
+    await waitFor(() => expect(dpad.getAttribute('data-held')).toBe('left'))
+    fireEvent.keyUp(window, { code: 'ArrowLeft', ctrlKey: true })
+    await waitFor(() => expect(dpad.getAttribute('data-held')).toBe(''))
+  })
+
+  it('takes the site chrome out of reach while the game is up', () => {
+    const header = document.createElement('header')
+    document.body.prepend(header)
+    const { unmount } = render(<Handheld />)
+    expect(header).toHaveAttribute('inert')
+    unmount()
+    expect(header).not.toHaveAttribute('inert')
+    header.remove()
   })
 
   it('keeps the touch controls when a controller connects but is not used', () => {

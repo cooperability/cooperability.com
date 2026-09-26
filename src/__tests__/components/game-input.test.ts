@@ -45,6 +45,20 @@ describe('faceFromPoint', () => {
     expect(sorted(faceFromPoint(midX, midY))).toEqual(['a', 'b'])
   })
 
+  it('presses nothing well away from both buttons', () => {
+    const { a, b, radius } = FACE_LAYOUT
+    const reach = radius + 0.05
+    for (let i = 0; i <= 50; i++) {
+      for (let j = 0; j <= 50; j++) {
+        const [x, y] = [i / 50, j / 50]
+        const far =
+          Math.hypot(x - a.x, y - a.y) > reach &&
+          Math.hypot(x - b.x, y - b.y) > reach
+        if (far) expect([x, y, faceFromPoint(x, y)]).toEqual([x, y, []])
+      }
+    }
+  })
+
   it('presses nothing in the empty corners', () => {
     expect(faceFromPoint(0.02, 0.02)).toEqual([])
     expect(faceFromPoint(0.98, 0.98)).toEqual([])

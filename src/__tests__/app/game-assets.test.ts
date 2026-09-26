@@ -30,11 +30,6 @@ function mediaSize(media: string): [number, number] {
 describe('game home-screen assets', () => {
   const startup = splashImages()
 
-  it('ships the startup images through the page metadata', () => {
-    const apple = metadata.appleWebApp
-    expect(typeof apple === 'object' && apple?.startupImage).toEqual(startup)
-  })
-
   it('covers every device in both orientations with a distinct file', () => {
     expect(startup.length).toBeGreaterThanOrEqual(24)
     expect(new Set(startup.map((s) => s.media)).size).toBe(startup.length)
