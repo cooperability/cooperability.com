@@ -233,6 +233,7 @@ why, so a reader can tell load-bearing packages from incidental ones.
 | [Performance](docs/Performance.md)              | Code splitting, CLS, debouncing, `clamp()` spacing, breakpoint strategy     |
 | [Accessibility](docs/Accessibility.md)          | WCAG 2.1 AA posture and what is automated                                   |
 | [PWA Suite](docs/PWA.md)                        | Applet architecture, manifests, service worker, install testing             |
+| [Game Rig](docs/Game-Rig.md)                    | The handheld game shell: input, scaling, launch images, offline             |
 | [Icons and SVG](docs/Icons.md)                  | skillicons.dev, and the SVG security configuration it forces                |
 | [SEO](docs/SEO.md)                              | Search Console setup and SEO maintenance                                    |
 | [Project Structure](docs/PROJECT-STRUCTURE.md)  | Root layout conventions and the unified link components                     |

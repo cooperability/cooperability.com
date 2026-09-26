@@ -1,0 +1,238 @@
+.root {
+  --shell: #1b1b22;
+  --bezel: #2b2b33;
+  --control: #3a3a44;
+  --control-held: #5c5c6b;
+  --face: #9a2257;
+  --face-held: #c23a78;
+  --label: #8e8e9c;
+
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  grid-template:
+    'screen screen' minmax(0, 1.6fr)
+    'dpad face' minmax(0, 1fr)
+    'meta meta' auto / 1fr 1fr;
+  gap: 12px;
+  padding: max(12px, env(safe-area-inset-top))
+    max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom))
+    max(16px, env(safe-area-inset-left));
+  background: var(--shell);
+  color: var(--label);
+  font-family: ui-monospace, monospace;
+  overscroll-behavior: none;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* The browser-only top bar needs its own row above the shell. */
+.root:has(.topBar) {
+  padding-top: calc(max(12px, env(safe-area-inset-top)) + 28px);
+}
+
+@media (orientation: landscape) {
+  .root {
+    grid-template:
+      'dpad screen face' minmax(0, 1fr)
+      'dpad screen meta' auto / minmax(0, 1fr) minmax(0, 3fr) minmax(0, 1fr);
+  }
+}
+
+/* A controller or keyboard is driving: give the whole shell to the screen. */
+.root[data-mode='external'] {
+  grid-template: 'screen' minmax(0, 1fr) / 1fr;
+}
+
+.root[data-mode='external'] .dpad,
+.root[data-mode='external'] .face,
+.root[data-mode='external'] .meta {
+  display: none;
+}
+
+.topBar {
+  position: absolute;
+  top: max(4px, env(safe-area-inset-top));
+  left: max(8px, env(safe-area-inset-left));
+  right: max(8px, env(safe-area-inset-right));
+  z-index: 1;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 12px;
+}
+
+/* Outranks the site-wide `html.light a` colour. */
+.root .exit {
+  color: var(--label);
+  text-decoration: none;
+  padding: 4px 0;
+}
+
+.hint {
+  margin: 0 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: var(--bezel);
+}
+
+.hint button {
+  color: inherit;
+  background: none;
+  border: 0;
+  font: inherit;
+  padding: 0 2px;
+}
+
+.screen {
+  grid-area: screen;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px 10px 32px 10px;
+  background: var(--bezel);
+  padding: 12px;
+}
+
+.root[data-mode='external'] .screen {
+  background: none;
+  padding: 0;
+}
+
+.canvas {
+  display: block;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+.dpad,
+.face {
+  align-self: center;
+  justify-self: center;
+  position: relative;
+  width: min(100%, 168px);
+  aspect-ratio: 1;
+}
+
+.dpad {
+  grid-area: dpad;
+}
+
+.dpad span {
+  position: absolute;
+  background: var(--control);
+}
+
+.up,
+.down {
+  left: 34%;
+  width: 32%;
+  height: 36%;
+}
+
+.left,
+.right {
+  top: 34%;
+  height: 32%;
+  width: 36%;
+}
+
+.up {
+  top: 0;
+  border-radius: 4px 4px 0 0;
+}
+
+.down {
+  bottom: 0;
+  border-radius: 0 0 4px 4px;
+}
+
+.left {
+  left: 0;
+  border-radius: 4px 0 0 4px;
+}
+
+.right {
+  right: 0;
+  border-radius: 0 4px 4px 0;
+}
+
+/* The hub, so the cross reads as one piece. */
+.dpad::after {
+  content: '';
+  position: absolute;
+  inset: 34%;
+  background: var(--control);
+}
+
+.dpad[data-held~='up'] .up,
+.dpad[data-held~='down'] .down,
+.dpad[data-held~='left'] .left,
+.dpad[data-held~='right'] .right {
+  background: var(--control-held);
+}
+
+.face {
+  grid-area: face;
+}
+
+/* Centres mirror FACE_LAYOUT in input.ts. */
+.a,
+.b {
+  position: absolute;
+  width: 38%;
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  border-radius: 50%;
+  background: var(--face);
+  display: grid;
+  place-items: center;
+  color: #f2d7e3;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.a {
+  left: 72%;
+  top: 36%;
+}
+
+.b {
+  left: 28%;
+  top: 64%;
+}
+
+.face[data-held~='a'] .a,
+.face[data-held~='b'] .b {
+  background: var(--face-held);
+}
+
+.meta {
+  grid-area: meta;
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+}
+
+.select,
+.start {
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: var(--control);
+}
+
+.select[data-held~='select'],
+.start[data-held~='start'] {
+  background: var(--control-held);
+}
