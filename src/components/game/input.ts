@@ -5,6 +5,8 @@ export const BUTTONS = [
   'right',
   'a',
   'b',
+  'x',
+  'y',
   'select',
   'start',
 ] as const
@@ -21,24 +23,30 @@ export const KEY_MAP: Record<string, Button> = {
   KeyS: 'down',
   KeyA: 'left',
   KeyD: 'right',
-  KeyX: 'a',
+  // IJKL mirrors the pad's face diamond: I top (Y), J left (X), L right
+  // (B), K bottom (A).
+  KeyK: 'a',
+  KeyL: 'b',
+  KeyJ: 'x',
+  KeyI: 'y',
   Space: 'a',
-  KeyZ: 'b',
+  ShiftLeft: 'b',
+  ShiftRight: 'b',
   Enter: 'start',
-  ShiftLeft: 'select',
-  ShiftRight: 'select',
+  Escape: 'start',
   Backspace: 'select',
 }
 
-// W3C "standard" gamepad layout. Game Boy A sits to the right of B, which is
-// the right face button (1) on every standard pad, and B the bottom one (0).
+// W3C "standard" gamepad layout, which is the Xbox face diamond.
 const PAD_MAP: [number, Button][] = [
   [12, 'up'],
   [13, 'down'],
   [14, 'left'],
   [15, 'right'],
-  [1, 'a'],
-  [0, 'b'],
+  [0, 'a'],
+  [1, 'b'],
+  [2, 'x'],
+  [3, 'y'],
   [8, 'select'],
   [9, 'start'],
 ]
@@ -137,22 +145,22 @@ export function dpadFromPoint(dx: number, dy: number): Button[] {
   return dirs[sector]
 }
 
-// A and B centres in the face-button zone's own normalised space. A thumb
-// between the two, the classic roll, presses both.
-export const FACE_LAYOUT = {
-  a: { x: 0.72, y: 0.36 },
-  b: { x: 0.28, y: 0.64 },
-  radius: 0.3,
+// Face-button centres in the diamond zone's own normalised space, Xbox
+// layout. Adjacent buttons sit close enough that a thumb on the gap between
+// two presses both, and the diamond's centre presses nothing.
+export const FACE_LAYOUT: Record<
+  'a' | 'b' | 'x' | 'y',
+  { x: number; y: number }
+> = {
+  y: { x: 0.5, y: 0.18 },
+  x: { x: 0.18, y: 0.5 },
+  b: { x: 0.82, y: 0.5 },
+  a: { x: 0.5, y: 0.82 },
 }
+export const FACE_REACH = 0.25
 
 export function faceFromPoint(x: number, y: number): Button[] {
-  const { a, b, radius } = FACE_LAYOUT
-  const da = Math.hypot(x - a.x, y - a.y)
-  const db = Math.hypot(x - b.x, y - b.y)
-  const gap = Math.hypot(a.x - b.x, a.y - b.y)
-  const rolling = Math.abs(da - db) < gap * 0.2
-  if (rolling && Math.max(da, db) < radius + 0.05) return ['a', 'b']
-  if (da <= radius && da <= db) return ['a']
-  if (db <= radius) return ['b']
-  return []
+  return (Object.keys(FACE_LAYOUT) as (keyof typeof FACE_LAYOUT)[]).filter(
+    (b) => Math.hypot(x - FACE_LAYOUT[b].x, y - FACE_LAYOUT[b].y) < FACE_REACH
+  )
 }

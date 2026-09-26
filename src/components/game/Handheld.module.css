@@ -1,25 +1,31 @@
 .root {
-  --shell: #1b1b22;
-  --bezel: #2b2b33;
-  --control: #3a3a44;
-  --control-held: #5c5c6b;
-  --face: #9a2257;
-  --face-held: #c23a78;
-  --label: #8e8e9c;
+  --plate: #19171f;
+  --lens: #050507;
+  --bezel: #2c2a35;
+  --cap: #282631;
+  --cap-top: #3a3745;
+  --cap-held: #4a2a22;
+  --glyph: #b3aa93;
+  --glyph-held: #ffb347;
+  --ember: #d4602a;
+  --label: #7f7a8c;
 
   position: fixed;
   inset: 0;
   z-index: 50;
   display: grid;
   grid-template:
-    'screen screen' minmax(0, 1.6fr)
+    'screen screen' auto
     'dpad face' minmax(0, 1fr)
     'meta meta' auto / 1fr 1fr;
-  gap: 12px;
+  gap: 16px 12px;
   padding: max(12px, env(safe-area-inset-top))
     max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom))
     max(16px, env(safe-area-inset-left));
-  background: var(--shell);
+  /* Cast-iron control plate: a faint glow from below over a dark body. */
+  background:
+    radial-gradient(120% 60% at 50% 100%, #221f29 0%, transparent 70%),
+    var(--plate);
   color: var(--label);
   font-family: ui-monospace, monospace;
   overscroll-behavior: none;
@@ -39,17 +45,22 @@
   .root {
     grid-template:
       'dpad screen face' minmax(0, 1fr)
-      'dpad screen meta' auto / minmax(0, 1fr) minmax(0, 3fr) minmax(0, 1fr);
+      'dpad meta face' auto / minmax(0, 1fr) minmax(0, 2.6fr) minmax(0, 1fr);
   }
 }
 
-/* A controller or keyboard is driving: give the whole shell to the screen. */
+/* Keyboard or controller: the screen takes the whole view. */
 .root[data-mode='external'] {
   grid-template: 'screen' minmax(0, 1fr) / 1fr;
+  padding: 0;
+  background: #030304;
 }
 
-.root[data-mode='external'] .dpad,
-.root[data-mode='external'] .face,
+.root[data-mode='external']:has(.topBar) {
+  padding-top: 0;
+}
+
+.root[data-mode='external'] .diamond,
 .root[data-mode='external'] .meta {
   display: none;
 }
@@ -59,7 +70,7 @@
   top: max(4px, env(safe-area-inset-top));
   left: max(8px, env(safe-area-inset-left));
   right: max(8px, env(safe-area-inset-right));
-  z-index: 1;
+  z-index: 2;
   display: flex;
   align-items: flex-start;
   gap: 8px;
@@ -91,21 +102,58 @@
   padding: 0 2px;
 }
 
+/* The screen is glass in its own bezel, set apart from the plate. */
 .screen {
   grid-area: screen;
+  position: relative;
   min-width: 0;
   min-height: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 10px 10px 32px 10px;
-  background: var(--bezel);
-  padding: 12px;
+  padding: 10px;
+  border-radius: 14px;
+  background: var(--lens);
+  box-shadow:
+    0 0 0 2px var(--bezel),
+    0 0 0 3px #0c0b10,
+    inset 0 0 18px rgba(0, 0, 0, 0.9),
+    0 10px 24px rgba(0, 0, 0, 0.55);
+}
+
+.root:not([data-mode='external']) .screen {
+  aspect-ratio: 16 / 9;
+}
+
+@media (orientation: landscape) {
+  .root:not([data-mode='external']) .screen {
+    aspect-ratio: auto;
+    height: 100%;
+  }
+}
+
+/* A glare across the glass, over the picture. */
+.screen::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    160deg,
+    rgba(255, 255, 255, 0.07) 0%,
+    rgba(255, 255, 255, 0) 38%
+  );
+  pointer-events: none;
 }
 
 .root[data-mode='external'] .screen {
-  background: none;
   padding: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.root[data-mode='external'] .screen::after {
+  display: none;
 }
 
 .canvas {
@@ -114,12 +162,12 @@
   image-rendering: crisp-edges;
 }
 
-.dpad,
-.face {
+/* Both diamonds share one layout and one button, so the plate reads as a set. */
+.diamond {
   align-self: center;
   justify-self: center;
   position: relative;
-  width: min(100%, 168px);
+  width: min(100%, 176px);
   aspect-ratio: 1;
 }
 
@@ -127,93 +175,83 @@
   grid-area: dpad;
 }
 
-.dpad span {
-  position: absolute;
-  background: var(--control);
-}
-
-.up,
-.down {
-  left: 34%;
-  width: 32%;
-  height: 36%;
-}
-
-.left,
-.right {
-  top: 34%;
-  height: 32%;
-  width: 36%;
-}
-
-.up {
-  top: 0;
-  border-radius: 4px 4px 0 0;
-}
-
-.down {
-  bottom: 0;
-  border-radius: 0 0 4px 4px;
-}
-
-.left {
-  left: 0;
-  border-radius: 4px 0 0 4px;
-}
-
-.right {
-  right: 0;
-  border-radius: 0 4px 4px 0;
-}
-
-/* The hub, so the cross reads as one piece. */
-.dpad::after {
-  content: '';
-  position: absolute;
-  inset: 34%;
-  background: var(--control);
-}
-
-.dpad[data-held~='up'] .up,
-.dpad[data-held~='down'] .down,
-.dpad[data-held~='left'] .left,
-.dpad[data-held~='right'] .right {
-  background: var(--control-held);
+/* Portrait: sit the diamonds low, where thumbs rest, like a real handheld. */
+@media (orientation: portrait) {
+  .diamond {
+    align-self: end;
+  }
 }
 
 .face {
   grid-area: face;
 }
 
-/* Centres mirror FACE_LAYOUT in input.ts. */
-.a,
-.b {
+.diamond span {
   position: absolute;
-  width: 38%;
+  width: 34%;
   aspect-ratio: 1;
   translate: -50% -50%;
   border-radius: 50%;
-  background: var(--face);
   display: grid;
   place-items: center;
-  color: #f2d7e3;
-  font-size: 14px;
+  background: radial-gradient(
+    circle at 35% 30%,
+    var(--cap-top),
+    var(--cap) 70%
+  );
+  box-shadow:
+    inset 0 -2px 0 rgba(0, 0, 0, 0.45),
+    0 2px 0 #0e0d12,
+    0 0 0 1px #0e0d12;
+  color: var(--glyph);
+  font-size: 13px;
   font-weight: 700;
 }
 
-.a {
-  left: 72%;
-  top: 36%;
+/* Positions mirror FACE_LAYOUT in input.ts. */
+.diamond .up,
+.diamond .y {
+  left: 50%;
+  top: 18%;
 }
 
-.b {
-  left: 28%;
-  top: 64%;
+.diamond .left,
+.diamond .x {
+  left: 18%;
+  top: 50%;
 }
 
+.diamond .right,
+.diamond .b {
+  left: 82%;
+  top: 50%;
+}
+
+.diamond .down,
+.diamond .a {
+  left: 50%;
+  top: 82%;
+}
+
+.dpad span {
+  font-size: 11px;
+}
+
+.dpad[data-held~='up'] .up,
+.dpad[data-held~='down'] .down,
+.dpad[data-held~='left'] .left,
+.dpad[data-held~='right'] .right,
 .face[data-held~='a'] .a,
-.face[data-held~='b'] .b {
-  background: var(--face-held);
+.face[data-held~='b'] .b,
+.face[data-held~='x'] .x,
+.face[data-held~='y'] .y {
+  translate: -50% calc(-50% + 1px);
+  background: radial-gradient(circle at 35% 30%, #5a332a, var(--cap-held) 70%);
+  color: var(--glyph-held);
+  box-shadow:
+    inset 0 2px 3px rgba(0, 0, 0, 0.5),
+    0 0 0 1px var(--ember),
+    0 0 10px rgba(212, 96, 42, 0.45);
 }
 
 .meta {
@@ -222,17 +260,122 @@
   justify-content: center;
   gap: 24px;
   font-size: 10px;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.12em;
 }
 
-.select,
-.start {
-  padding: 10px 14px;
+.meta span {
+  padding: 8px 14px;
   border-radius: 999px;
-  background: var(--control);
+  background: var(--cap);
+  box-shadow:
+    inset 0 -2px 0 rgba(0, 0, 0, 0.45),
+    0 0 0 1px #0e0d12;
 }
 
-.select[data-held~='select'],
-.start[data-held~='start'] {
-  background: var(--control-held);
+.meta .select[data-held~='select'],
+.meta .start[data-held~='start'] {
+  color: var(--glyph-held);
+  box-shadow: 0 0 0 1px var(--ember);
+}
+
+/* Desktop input overlay, shown while a keyboard or controller is in use. */
+.keys {
+  display: none;
+}
+
+.root[data-mode='external'] .keys {
+  position: absolute;
+  right: max(20px, env(safe-area-inset-right));
+  bottom: max(20px, env(safe-area-inset-bottom));
+  display: grid;
+  grid-template-columns: auto auto;
+  gap: 10px 22px;
+  padding: 14px 16px 10px;
+  border-radius: 12px;
+  background: rgba(10, 9, 14, 0.42);
+  backdrop-filter: blur(4px);
+  opacity: 0.8;
+  pointer-events: none;
+}
+
+.cluster {
+  display: grid;
+  grid-template:
+    '. top .' auto
+    'left bottom right' auto / auto auto auto;
+  gap: 4px 4px;
+  padding-bottom: 12px;
+}
+
+.keys kbd {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  border: 1px solid rgba(179, 170, 147, 0.35);
+  border-bottom-width: 3px;
+  color: rgba(179, 170, 147, 0.8);
+  font:
+    700 12px/1 ui-monospace,
+    monospace;
+}
+
+.keys kbd small {
+  position: absolute;
+  top: calc(100% + 3px);
+  font-size: 8px;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  color: rgba(179, 170, 147, 0.6);
+}
+
+.cluster .up,
+.cluster .y {
+  grid-area: top;
+}
+
+.cluster .left,
+.cluster .x {
+  grid-area: left;
+}
+
+.cluster .down,
+.cluster .a {
+  grid-area: bottom;
+}
+
+.cluster .right,
+.cluster .b {
+  grid-area: right;
+}
+
+.keys[data-held~='up'] .up,
+.keys[data-held~='down'] .down,
+.keys[data-held~='left'] .left,
+.keys[data-held~='right'] .right,
+.keys[data-held~='a'] .a,
+.keys[data-held~='b'] .b,
+.keys[data-held~='x'] .x,
+.keys[data-held~='y'] .y {
+  color: var(--glyph-held);
+  border-color: var(--ember);
+  background: rgba(212, 96, 42, 0.25);
+  box-shadow: 0 0 12px rgba(212, 96, 42, 0.45);
+}
+
+.legend {
+  grid-column: 1 / -1;
+  margin: 0;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 9px;
+  color: rgba(179, 170, 147, 0.55);
+}
+
+.keys[data-held~='start'] .start,
+.keys[data-held~='select'] .select {
+  color: var(--glyph-held);
 }
