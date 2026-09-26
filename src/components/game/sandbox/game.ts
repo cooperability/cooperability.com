@@ -1,4 +1,4 @@
-import type { Frame } from '../input'
+import type { ButtonSet, Frame } from '../input'
 import {
   bakeBackdrop,
   drawBackdrop,
@@ -73,6 +73,12 @@ type Particle = {
 type Ghost = { view: HeroView; life: number }
 type Mote = { x: number; y: number; ember: boolean; phase: number }
 
+// Wick offsets of the two candles in CANDLES, from the prop's feet.
+const FLAMES = [
+  [-2, -12],
+  [2, -9],
+]
+
 const URN_RESPAWN = 300
 const HIT_PAUSE = 4
 
@@ -144,6 +150,7 @@ export function createSandbox(): Game {
   let camX = 0
   let camY = level.pixelHeight - VIEW_H
   const hitThisSwing = new Set<Urn>()
+  const carried: ButtonSet = new Set()
 
   const view = (): HeroView => ({
     x: player.x,
@@ -259,9 +266,15 @@ export function createSandbox(): Game {
         if (m.x > VIEW_W) m.x -= VIEW_W
       }
       if (paused) return
+      // Presses made during hit-pause still count once play resumes.
       if (hitPause > 0) {
         hitPause--
+        pressed.forEach((b) => carried.add(b))
         return
+      }
+      if (carried.size) {
+        pressed = new Set([...pressed, ...carried])
+        carried.clear()
       }
 
       const events = player.step({
@@ -345,10 +358,7 @@ export function createSandbox(): Game {
 
       // Flames, redrawn every frame so they flicker.
       for (const c of candles) {
-        for (const [dx, dy] of [
-          [-2, -12],
-          [2, -9],
-        ]) {
+        for (const [dx, dy] of FLAMES) {
           const h = 2 + Math.round(hash(Math.floor(time / 4), c.x + dx, 9) * 2)
           ctx.fillStyle = PAL.e
           ctx.fillRect(c.x + dx, c.y + dy - h, 1, h)

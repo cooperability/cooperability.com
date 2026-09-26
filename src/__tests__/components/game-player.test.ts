@@ -297,6 +297,70 @@ describe('Player roll and air dash', () => {
   })
 })
 
+describe('Player review fixes', () => {
+  it('crawls back out of a dead-end tunnel it rolled into', () => {
+    // A 1-tile-high crawlspace from column 6 to 10, walled off at column 11.
+    const level = room((g) => {
+      for (let x = 6; x < 12; x++) for (let y = 0; y < 8; y++) g[y][x] = '#'
+      for (let x = 6; x < 11; x++) g[8][x] = '.'
+      for (let y = 0; y < 9; y++) g[y][11] = '#'
+    })
+    const p = new Player(level)
+    settle(p)
+    run(p, 20, { right: true })
+    p.step({ ...idle, right: true, dash: true })
+    run(p, 120, { right: true })
+    expect(p.x).toBeGreaterThan(6 * TILE)
+    run(p, 300, { left: true })
+    expect(p.x + p.w).toBeLessThanOrEqual(6 * TILE)
+    expect(p.h).toBe(PLAYER_H)
+    expect(p.pose).not.toBe('roll')
+  })
+
+  it('never hangs from a ledge with its head inside the ceiling', () => {
+    // A step at column 8 whose top is row 7, under a ceiling at row 6 that
+    // stops short of the step, so there is room to stand on top of it.
+    const level = room((g) => {
+      for (let x = 1; x < 8; x++) g[6][x] = '#'
+      for (let y = 7; y < 9; y++) for (let x = 8; x < 19; x++) g[y][x] = '#'
+    })
+    const p = new Player(level)
+    settle(p)
+    // Just under the ceiling, against the step, hands inside the grab window.
+    Object.assign(p, { x: 8 * TILE - p.w, y: 7 * TILE + 3, vy: 0 })
+    p.onGround = false
+    run(p, 3, { right: true })
+    expect(level.boxHitsSolid(p.x, p.y, p.w, p.h)).toBe(false)
+  })
+
+  it('ends an air roll before wall jumping out of it', () => {
+    // A ledge at row 4 ending at column 6, a 2-tile gap, a wall at column 9.
+    const level = room((g) => {
+      g[8][3] = '.'
+      g[3][3] = 'P'
+      for (let x = 1; x < 7; x++) g[4][x] = '#'
+      for (let y = 0; y < 9; y++) g[y][9] = '#'
+    })
+    const p = new Player(level)
+    settle(p)
+    // Roll from right at the lip, so coyote time is over by the wall.
+    for (let i = 0; i < 90 && p.x < 7 * TILE - 2; i++)
+      p.step({ ...idle, right: true })
+    p.step({ ...idle, right: true, dash: true })
+    let airborne = 0
+    for (let i = 0; i < 30 && p.x + p.w < 9 * TILE; i++) {
+      p.step({ ...idle, right: true })
+      if (!p.onGround) airborne++
+    }
+    expect(airborne).toBeGreaterThan(TUNING.coyote)
+    expect(p.pose).toBe('roll')
+    p.step({ ...idle, right: true, jump: true, jumpHeld: true })
+    run(p, 2, { jumpHeld: true })
+    expect(p.pose).not.toBe('roll')
+    expect(p.h).toBe(PLAYER_H)
+  })
+})
+
 describe('Player attack', () => {
   it('reaches in front only during the active frames', () => {
     const p = new Player(room())

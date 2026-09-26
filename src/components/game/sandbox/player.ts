@@ -199,7 +199,7 @@ export class Player {
       else if (this.airDashReady) this.startAirDash()
     }
 
-    if (this.dash) this.stepDash()
+    if (this.dash) this.stepDash(dir)
     else this.steer(dir)
 
     if (this.buffer > 0 && this.dash !== 'air') {
@@ -216,7 +216,10 @@ export class Player {
       } else {
         const side =
           this.wallContact() || (this.wallCoyote && this.wallCoyoteSide)
-        if (side) this.wallJump(side)
+        if (side && (this.dash !== 'roll' || this.canStand())) {
+          if (this.dash === 'roll') this.endRoll()
+          this.wallJump(side)
+        }
       }
     }
 
@@ -343,16 +346,21 @@ export class Player {
     this.events.push('airdash')
   }
 
-  private stepDash() {
+  private stepDash(dir: number) {
     this.dashT--
     if (this.dash === 'roll') {
       const t = this.dashT / TUNING.rollFrames
       const speed = TUNING.rollEnd + (TUNING.rollStart - TUNING.rollEnd) * t
       this.vx = this.facing * speed
-      // Under a low ceiling the roll keeps going until there is headroom.
+      // Under a low ceiling the roll becomes a crawl the player steers,
+      // either way, until there is headroom to stand.
       if (this.dashT <= 0) {
         if (this.canStand()) this.endRoll()
-        else this.dashT = 1
+        else {
+          this.dashT = 1
+          if (dir) this.facing = dir > 0 ? 1 : -1
+          this.vx = dir ? this.facing * TUNING.rollEnd : 0
+        }
       }
     } else {
       this.vx = this.facing * TUNING.airDashSpeed
@@ -453,6 +461,9 @@ export class Player {
     const standX = side > 0 ? tx * TILE : (tx + 1) * TILE - this.w
     if (this.level.boxHitsSolid(standX, top - PLAYER_H, this.w, PLAYER_H))
       return
+    // The hanging body sits up to 8px higher than now, so it must fit too.
+    const hangX = side > 0 ? tx * TILE - this.w : (tx + 1) * TILE
+    if (this.level.boxHitsSolid(hangX, top - 4, this.w, PLAYER_H)) return
     this.hanging = true
     this.hangSide = side
     this.facing = side

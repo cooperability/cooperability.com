@@ -1,4 +1,4 @@
-import { PAL, pixelLine } from './pixels'
+import { context, makeCanvas, PAL, pixelLine, type Canvas } from './pixels'
 import type { Player, Pose } from './player'
 
 // Parts are drawn facing right. Rows run top to bottom, '.' is transparent.
@@ -268,7 +268,7 @@ export function drawHero(
     ctx.save()
     ctx.translate(fx, fy - 6)
     ctx.rotate((turn * Math.PI * v.facing) / 2)
-    paintParts(ctx, TUCK, -6, -6, v.facing < 0, color)
+    paintParts(ctx, TUCK, -6, -6, v.facing < 0, look.tint)
     ctx.restore()
     return
   }
@@ -313,7 +313,7 @@ export function drawHero(
     f > 0 ? fx + bx - 5 : fx - 1 - bx - 4,
     by - 20,
     f < 0,
-    color
+    look.tint
   )
   paintParts(
     ctx,
@@ -321,7 +321,7 @@ export function drawHero(
     f > 0 ? fx + bx - 4 : fx - 1 - bx - 4,
     by - 27,
     f < 0,
-    color
+    look.tint
   )
 
   limb('i', hipFront, r.knees[1], r.feet[1])
@@ -353,23 +353,36 @@ export function drawHero(
   if (v.pose === 'attack' && !look.tint) drawSmear(ctx, v, fx, fy)
 }
 
+// Each part is baked once per facing and tint, then drawn with one
+// drawImage instead of a fillRect per pixel every frame.
+const baked = new WeakMap<string[], Map<string, Canvas>>()
+
 function paintParts(
   ctx: CanvasRenderingContext2D,
   grid: string[],
   ox: number,
   oy: number,
   flip: boolean,
-  color: (key: string) => string
+  tint?: string
 ) {
-  const w = grid[0].length
-  grid.forEach((row, y) => {
-    for (let x = 0; x < w; x++) {
-      const key = row[x]
-      if (key === '.') continue
-      ctx.fillStyle = color(key)
-      ctx.fillRect(ox + (flip ? w - 1 - x : x), oy + y, 1, 1)
-    }
-  })
+  let variants = baked.get(grid)
+  if (!variants) baked.set(grid, (variants = new Map()))
+  const key = `${flip}|${tint ?? ''}`
+  let img = variants.get(key)
+  if (!img) {
+    const w = grid[0].length
+    img = makeCanvas(w, grid.length)
+    const g = context(img)
+    grid.forEach((row, y) => {
+      for (let x = 0; x < w; x++) {
+        if (row[x] === '.') continue
+        g.fillStyle = tint ?? PAL[row[x]]
+        g.fillRect(flip ? w - 1 - x : x, y, 1, 1)
+      }
+    })
+    variants.set(key, img)
+  }
+  ctx.drawImage(img, ox, oy)
 }
 
 // The slash's crescent: bright at the leading edge, fading behind it.
