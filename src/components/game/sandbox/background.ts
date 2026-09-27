@@ -2,6 +2,8 @@ import { context, dither, hash, makeCanvas, PAL, type Canvas } from './pixels'
 
 export const VIEW_W = 320
 export const VIEW_H = 180
+// Screen position of the moon, which the sky never scrolls.
+export const MOON = { x: 238, y: 42 }
 
 // Sky bands from zenith to horizon, stepped with ordered dither.
 const SKY = ['#08070d', '#0e0c17', '#151223', '#1d1830', '#2a1f37', '#3a2433']
@@ -19,20 +21,23 @@ function bakeSky(): Canvas {
       ctx.fillRect(x, y, 1, 1)
     }
   }
-  // A pale moon behind haze, with a dithered halo.
-  const mx = 238
-  const my = 42
-  for (let y = -26; y < 27; y++) {
-    for (let x = -26; x < 27; x++) {
+  // A bright moon behind haze, with a wide dithered halo: the one cold light
+  // left in the dark.
+  const { x: mx, y: my } = MOON
+  for (let y = -34; y < 35; y++) {
+    for (let x = -34; x < 35; x++) {
       const r = Math.hypot(x, y)
       if (r < 11) {
         const shade =
-          r > 9 ? '#8f8aa0' : hash(x, y, 9) > 0.8 ? '#a9a3b8' : '#c4bed0'
+          r > 9 ? '#b7b1c9' : hash(x, y, 9) > 0.8 ? '#d3cee0' : '#f1eefa'
         ctx.fillStyle = shade
         ctx.fillRect(mx + x, my + y, 1, 1)
-      } else if (r < 26 && (26 - r) / 15 > dither(mx + x, my + y) + 0.35) {
-        ctx.fillStyle = '#2b2440'
-        ctx.fillRect(mx + x, my + y, 1, 1)
+      } else if (r < 34) {
+        const t = (34 - r) / 23
+        if (t > dither(mx + x, my + y) + 0.2) {
+          ctx.fillStyle = t > 0.7 ? '#4a4166' : '#2e2645'
+          ctx.fillRect(mx + x, my + y, 1, 1)
+        }
       }
     }
   }
@@ -40,7 +45,7 @@ function bakeSky(): Canvas {
   for (let i = 0; i < 70; i++) {
     const x = Math.floor(hash(i, 1, 7) * VIEW_W)
     const y = Math.floor(hash(i, 2, 7) * 90)
-    if (Math.hypot(x - mx, y - my) < 28) continue
+    if (Math.hypot(x - mx, y - my) < 36) continue
     ctx.fillStyle = hash(i, 3, 7) > 0.8 ? '#b9b4c9' : '#5a5570'
     ctx.fillRect(x, y, 1, 1)
   }

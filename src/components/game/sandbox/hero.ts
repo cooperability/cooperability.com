@@ -58,10 +58,19 @@ type Rig = {
 
 export type HeroView = Pick<
   Player,
-  'x' | 'y' | 'w' | 'h' | 'vx' | 'vy' | 'facing' | 'wall' | 'actionProgress'
+  | 'x'
+  | 'y'
+  | 'w'
+  | 'h'
+  | 'vx'
+  | 'vy'
+  | 'facing'
+  | 'wall'
+  | 'actionProgress'
+  | 'attackUp'
 > & { pose: Pose; time: number; runPhase: number; squash: number }
 
-function rig(v: HeroView): Rig {
+export function rig(v: HeroView): Rig {
   const f = v.facing
   const breathe = Math.sin(v.time / 22) > 0.4 ? 1 : 0
   const base: Rig = {
@@ -85,16 +94,20 @@ function rig(v: HeroView): Rig {
     case 'run': {
       const s = Math.sin(v.runPhase)
       const c = Math.cos(v.runPhase)
-      const bob = Math.abs(c) > 0.7 ? 1 : 0
+      // A foot's x follows sin, so it moves forward while cos > 0: that is
+      // when it is lifted. The planted foot slides back under the body.
+      const lift = [Math.max(0, c), Math.max(0, -c)]
+      // The body dips when the feet are furthest apart.
+      const bob = Math.abs(s) > 0.75 ? 1 : 0
       return {
         body: { x: 1, y: bob },
         feet: [
-          { x: Math.round(s * 5), y: Math.min(0, Math.round(c * 3)) },
-          { x: Math.round(-s * 5), y: Math.min(0, Math.round(-c * 3)) },
+          { x: Math.round(s * 6), y: -Math.round(lift[0] * 3) },
+          { x: Math.round(-s * 6), y: -Math.round(lift[1] * 3) },
         ],
         knees: [
-          { x: Math.round(s * 3) + 2, y: -5 + bob },
-          { x: Math.round(-s * 3) + 2, y: -5 + bob },
+          { x: Math.round(s * 3) + 2, y: -5 + bob - Math.round(lift[0]) },
+          { x: Math.round(-s * 3) + 2, y: -5 + bob - Math.round(lift[1]) },
         ],
         hands: [
           { x: Math.round(-s * 3) - 2, y: -11 + bob },
@@ -216,6 +229,32 @@ function rig(v: HeroView): Rig {
       }
     case 'attack': {
       const t = v.actionProgress
+      if (v.attackUp) {
+        // Blade low behind, swept up over the helm.
+        const windup = t < 0.2
+        return {
+          body: { x: 0, y: windup ? 1 : -1 },
+          feet: [
+            { x: -3, y: 0 },
+            { x: 3, y: 0 },
+          ],
+          knees: [
+            { x: -2, y: -5 },
+            { x: 3, y: -5 },
+          ],
+          hands: windup
+            ? [
+                { x: -4, y: -11 },
+                { x: -3, y: -9 },
+              ]
+            : [
+                { x: -4, y: -12 },
+                { x: 1, y: -24 },
+              ],
+          tip: windup ? { x: -13, y: -4 } : { x: 3, y: -38 },
+          facing: f,
+        }
+      }
       // Wind up behind the head, cut down through the front, then settle.
       const windup = t < 0.2
       const cut = t < 0.5
@@ -397,7 +436,8 @@ function drawSmear(
   const sweep = Math.min(1, (t - 0.2) / 0.2)
   const cx = fx + v.facing * 2
   const cy = fy - 16
-  const start = -115
+  // Overhead swings start behind the back instead of above the head.
+  const start = v.attackUp ? -205 : -115
   const end = start + 170 * sweep
   const fade = t > 0.4 ? 1 - (t - 0.4) / 0.2 : 1
   for (let a = start; a <= end; a += 3) {

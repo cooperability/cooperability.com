@@ -14,27 +14,55 @@ export const BUTTONS = [
 export type Button = (typeof BUTTONS)[number]
 export type ButtonSet = Set<Button>
 
-export const KEY_MAP: Record<string, Button> = {
-  ArrowUp: 'up',
-  ArrowDown: 'down',
-  ArrowLeft: 'left',
-  ArrowRight: 'right',
-  KeyW: 'up',
-  KeyS: 'down',
-  KeyA: 'left',
-  KeyD: 'right',
-  // IJKL mirrors the pad's face diamond: I top (Y), J left (X), L right
-  // (B), K bottom (A).
-  KeyK: 'a',
-  KeyL: 'b',
-  KeyJ: 'x',
-  KeyI: 'y',
+// Two keyboard layouts that share no keys, so both always work and the
+// player picks which one the on-screen legend shows. IJKL mirrors the pad's
+// face diamond: I top (Y), J left (X), L right (B), K bottom (A). ZXCV reads
+// left to right as jump, attack, dash, torch.
+export type Scheme = 'wasd' | 'arrows'
+
+const SHARED: Record<string, Button> = {
   Space: 'a',
   ShiftLeft: 'b',
   ShiftRight: 'b',
   Enter: 'start',
   Escape: 'start',
   Backspace: 'select',
+}
+
+export const SCHEMES: Record<Scheme, Record<string, Button>> = {
+  wasd: {
+    KeyW: 'up',
+    KeyS: 'down',
+    KeyA: 'left',
+    KeyD: 'right',
+    KeyK: 'a',
+    KeyL: 'b',
+    KeyJ: 'x',
+    KeyI: 'y',
+  },
+  arrows: {
+    ArrowUp: 'up',
+    ArrowDown: 'down',
+    ArrowLeft: 'left',
+    ArrowRight: 'right',
+    KeyZ: 'a',
+    KeyC: 'b',
+    KeyX: 'x',
+    KeyV: 'y',
+  },
+}
+
+export const KEY_MAP: Record<string, Button> = {
+  ...SCHEMES.wasd,
+  ...SCHEMES.arrows,
+  ...SHARED,
+}
+
+// The layout a key belongs to, or null for keys both share.
+export function schemeOf(code: string): Scheme | null {
+  if (code in SCHEMES.wasd) return 'wasd'
+  if (code in SCHEMES.arrows) return 'arrows'
+  return null
 }
 
 // W3C "standard" gamepad layout, which is the Xbox face diamond.

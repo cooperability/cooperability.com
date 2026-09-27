@@ -205,6 +205,9 @@ importers:
       lint-staged:
         specifier: ^17.5.0
         version: 17.5.0
+      playwright:
+        specifier: 1.63.0
+        version: 1.63.0
       postcss:
         specifier: ^8.5.26
         version: 8.5.28
@@ -2417,8 +2420,8 @@ packages:
     resolution: {integrity: sha512-rNjApaLzuwaOTjCiT8lSDdGN1APCiqkChLMJxJPWLunPAt5fy8xgU9/jNOchV84wfIxrA0lRQB7oCT8jrn/wrQ==}
     engines: {node: '>=6.0'}
 
-  chromedriver@153.0.2:
-    resolution: {integrity: sha512-7bGkARUbohvGOrw9ZMKsKMIP3V4Pe4Tw3vguBBRTUHLcbRThFOiMlbGtj/7p31BDG9fAPJ+JSRX8dwCiARJZ8w==}
+  chromedriver@154.0.0:
+    resolution: {integrity: sha512-kn+ENZ2lEPAmeDTNNBbVw6Xt4KAr6M4EFcgeV4lUREgJWHVZBu4fFc+OFivtuf5Q9jM/qSmAcQ3MdWtdOE6mVA==}
     engines: {node: '>=22'}
     hasBin: true
 
@@ -4411,6 +4414,16 @@ packages:
     resolution: {integrity: sha512-HRDzbaKjC+AOWVXxAU/x54COGeIv9eb+6CkDSQoNTt4XyWoIJvuPsXizxu/Fr23EiekbtZwmh1IcIG/l/a10GQ==}
     engines: {node: '>=8'}
 
+  playwright-core@1.63.0:
+    resolution: {integrity: sha512-rYCsBF/M5HjUch52bbtVONEFjv6Xu8sm8h72dNlR5bzIE1fvC/bxgspzkjSfU+MweEMmPM8KJebG6nnyxo5mCg==}
+    engines: {node: '>=20'}
+    hasBin: true
+
+  playwright@1.63.0:
+    resolution: {integrity: sha512-+7ziBLidS4NaNCdt57SUDT+wYmmd5fmiQejUic/kb+YsYSCPyOOE9sebzMjNmQrsnNpDJqd4WHvV/8lfKfUDUg==}
+    engines: {node: '>=20'}
+    hasBin: true
+
   possible-typed-array-names@1.1.0:
     resolution: {integrity: sha512-/+5VFTchJDoVj3bhoqi6UeymcD00DAwb1nJwamzPvHEszJ4FpF6SNNbUbOS8yI56qHzdV8eK0qEfOSiodkTdxg==}
     engines: {node: '>= 0.4'}
@@ -5567,7 +5580,7 @@ snapshots:
     dependencies:
       '@axe-core/webdriverjs': 4.13.0(selenium-webdriver@4.44.0)
       axe-core: 4.13.0
-      chromedriver: 153.0.2(debug@4.4.3(supports-color@9.4.0))(supports-color@9.4.0)
+      chromedriver: 154.0.0(debug@4.4.3(supports-color@9.4.0))(supports-color@9.4.0)
       colors: 1.4.0
       commander: 9.5.0
       dotenv: 17.4.2
@@ -7808,7 +7821,7 @@ snapshots:
 
   chrome-trace-event@1.0.4: {}
 
-  chromedriver@153.0.2(debug@4.4.3(supports-color@9.4.0))(supports-color@9.4.0):
+  chromedriver@154.0.0(debug@4.4.3(supports-color@9.4.0))(supports-color@9.4.0):
     dependencies:
       '@testim/chrome-version': 1.1.4
       adm-zip: 0.6.1
@@ -10411,6 +10424,12 @@ snapshots:
   pkg-dir@4.2.0:
     dependencies:
       find-up: 4.1.0
+
+  playwright-core@1.63.0: {}
+
+  playwright@1.63.0:
+    dependencies:
+      playwright-core: 1.63.0
 
   possible-typed-array-names@1.1.0: {}
 

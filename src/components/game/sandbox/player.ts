@@ -91,6 +91,8 @@ export class Player {
   hanging = false
   dash: 'roll' | 'air' | null = null
   attackT = 0
+  // The swing in progress goes overhead: up was held when it started.
+  attackUp = false
   // Impact speed of the last landing, for squash and dust.
   landSpeed = 0
 
@@ -158,6 +160,8 @@ export class Player {
   attackBox(): Box | null {
     const t = TUNING.attackFrames - this.attackT
     if (this.attackT === 0 || t < 4 || t > 10) return null
+    if (this.attackUp)
+      return { x: this.x - 8, y: this.y - 22, w: this.w + 16, h: 26 }
     const w = 30
     const x = this.facing > 0 ? this.x + this.w - 2 : this.x - w + 2
     return { x, y: this.y + 2, w, h: 20 }
@@ -189,6 +193,7 @@ export class Player {
 
     if (input.attack && this.attackT === 0 && this.dash !== 'roll') {
       this.attackT = TUNING.attackFrames
+      this.attackUp = input.up
       if (this.wall) this.facing = this.wall > 0 ? -1 : 1
       this.events.push('attack')
     }
@@ -276,6 +281,21 @@ export class Player {
     if (this.attackT > 0) this.attackT--
     this.tickBuffer()
     return this.events
+  }
+
+  // Thrown back from a hit: lets go of any ledge, dash or swing, and loses
+  // steering briefly so the knockback reads.
+  knock(dir: -1 | 1) {
+    // Mid-climb the body is inside the ledge's corner, and a roll dodges.
+    if (this.climbT > 0 || this.dash === 'roll') return
+    this.dash = null
+    this.hanging = false
+    this.attackT = 0
+    this.jumping = false
+    this.onGround = false
+    this.vx = dir * 2.2
+    this.vy = -2.6
+    this.wallLock = TUNING.wallLock
   }
 
   private tickBuffer() {

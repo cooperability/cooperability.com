@@ -5,6 +5,8 @@ import {
   FACE_LAYOUT,
   FACE_REACH,
   KEY_MAP,
+  SCHEMES,
+  schemeOf,
   readGamepad,
   type ButtonSet,
 } from '../../components/game/input'
@@ -102,6 +104,25 @@ describe('KEY_MAP', () => {
       'right',
     ])
     expect(KEY_MAP.ArrowLeft).toBe('left')
+  })
+
+  it('plays the same buttons on arrows and ZXCV', () => {
+    expect([KEY_MAP.KeyZ, KEY_MAP.KeyX, KEY_MAP.KeyC, KEY_MAP.KeyV]).toEqual([
+      'a',
+      'x',
+      'b',
+      'y',
+    ])
+  })
+
+  it('keeps the two layouts on separate keys, so both always work', () => {
+    const wasd = Object.keys(SCHEMES.wasd)
+    expect(Object.keys(SCHEMES.arrows).filter((k) => wasd.includes(k))).toEqual(
+      []
+    )
+    expect(schemeOf('KeyJ')).toBe('wasd')
+    expect(schemeOf('ArrowUp')).toBe('arrows')
+    expect(schemeOf('Space')).toBeNull()
   })
 })
 

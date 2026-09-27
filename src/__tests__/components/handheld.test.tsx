@@ -123,6 +123,63 @@ describe('Handheld', () => {
     expect(screen.getByRole('link', { name: /demos/i })).toBeInTheDocument()
   })
 
+  it('shows the legend for the layout last typed on, and remembers it', () => {
+    setTouchPoints(0)
+    const first = render(<Handheld />)
+    expect(screen.getByRole('button', { name: /wasd/i })).toBeInTheDocument()
+    fireEvent.keyDown(window, { code: 'KeyZ' })
+    expect(
+      screen.getByRole('button', { name: /arrows \+ zxcv/i })
+    ).toBeInTheDocument()
+    first.unmount()
+    render(<Handheld />)
+    expect(
+      screen.getByRole('button', { name: /arrows \+ zxcv/i })
+    ).toBeInTheDocument()
+  })
+
+  it('switches the legend from its button', () => {
+    setTouchPoints(0)
+    render(<Handheld />)
+    fireEvent.click(screen.getByRole('button', { name: /wasd/i }))
+    expect(
+      screen.getByRole('button', { name: /arrows \+ zxcv/i })
+    ).toBeInTheDocument()
+  })
+
+  it('lets Space and Enter reach a focused button instead of the game', () => {
+    Object.defineProperty(navigator, 'standalone', {
+      value: false,
+      configurable: true,
+    })
+    render(<Handheld />)
+    const dismiss = screen.getByRole('button', { name: /dismiss hint/i })
+    for (const code of ['Space', 'Enter']) {
+      const press = new KeyboardEvent('keydown', {
+        code,
+        bubbles: true,
+        cancelable: true,
+      })
+      dismiss.dispatchEvent(press)
+      expect(press.defaultPrevented).toBe(false)
+    }
+  })
+
+  it('releases a wake lock granted after the game has closed', async () => {
+    const release = jest.fn(() => Promise.resolve())
+    let grant: (lock: { release: typeof release }) => void = () => {}
+    Object.defineProperty(navigator, 'wakeLock', {
+      value: { request: () => new Promise((resolve) => (grant = resolve)) },
+      configurable: true,
+    })
+    const { unmount } = render(<Handheld />)
+    unmount()
+    await act(async () => grant({ release }))
+    expect(release).toHaveBeenCalled()
+    // @ts-expect-error removing the stub again
+    delete navigator.wakeLock
+  })
+
   it('drops the exit link when launched from the home screen', () => {
     Object.defineProperty(navigator, 'standalone', {
       value: true,

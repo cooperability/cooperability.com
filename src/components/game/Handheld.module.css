@@ -369,8 +369,10 @@
   grid-column: 1 / -1;
   margin: 0;
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
-  gap: 12px;
+  gap: 4px 12px;
+  max-width: 240px;
   font-size: 9px;
   color: rgba(179, 170, 147, 0.55);
 }
@@ -378,4 +380,48 @@
 .keys[data-held~='start'] .start,
 .keys[data-held~='select'] .select {
   color: var(--glyph-held);
+}
+
+/* Picks which keyboard layout the legend shows. Both layouts always work.
+   Bottom left, since the HUD fills the screen's top edge. */
+.scheme {
+  display: none;
+}
+
+.root[data-mode='external'] .scheme {
+  position: absolute;
+  bottom: max(20px, env(safe-area-inset-bottom));
+  left: max(20px, env(safe-area-inset-left));
+  z-index: 2;
+  display: block;
+  padding: 6px 12px;
+  border: 1px solid rgba(179, 170, 147, 0.35);
+  border-radius: 999px;
+  background: rgba(10, 9, 14, 0.42);
+  color: rgba(179, 170, 147, 0.85);
+  font:
+    11px/1 ui-monospace,
+    monospace;
+  cursor: pointer;
+}
+
+.root[data-mode='external'] .scheme:hover,
+.root[data-mode='external'] .scheme:focus-visible {
+  border-color: var(--ember);
+  color: var(--glyph-held);
+}
+
+/* The top key's label sits above it, clear of the key below. */
+.keys .y small {
+  top: auto;
+  bottom: calc(100% + 3px);
+}
+
+/* With the pad hidden the screen can fill the window, so the exit link
+   moves off the HUD to the bottom left, above the Keys button. */
+.root[data-mode='external'] .topBar {
+  top: auto;
+  right: auto;
+  bottom: calc(max(20px, env(safe-area-inset-bottom)) + 34px);
+  left: max(20px, env(safe-area-inset-left));
 }

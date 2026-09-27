@@ -7,16 +7,66 @@ import {
   dpadFromPoint,
   faceFromPoint,
   KEY_MAP,
+  schemeOf,
   type Button,
+  type Scheme,
 } from './input'
 import { startLoop } from './loop'
-import { createSandbox, HEIGHT, WIDTH } from './sandbox/game'
+import { createCandlelight, HEIGHT, WIDTH } from './sandbox/game'
+import { exposeQA } from './sandbox/qa'
 import styles from './Handheld.module.css'
 
 type Mode = 'touch' | 'external'
 type Mapper = (x: number, y: number) => Button[]
 
 const HINT_KEY = 'game:install-hint-dismissed'
+const SCHEME_KEY = 'game:keys'
+
+// The legend for each keyboard layout, by the pad button each key plays.
+const LEGEND: Record<Scheme, { name: string } & Record<Button, string>> = {
+  wasd: {
+    name: 'WASD + IJKL',
+    up: 'W',
+    left: 'A',
+    down: 'S',
+    right: 'D',
+    y: 'I',
+    x: 'J',
+    a: 'K',
+    b: 'L',
+    start: 'Enter',
+    select: 'Backspace',
+  },
+  arrows: {
+    name: 'Arrows + ZXCV',
+    up: '↑',
+    left: '←',
+    down: '↓',
+    right: '→',
+    y: 'V',
+    x: 'X',
+    a: 'Z',
+    b: 'C',
+    start: 'Enter',
+    select: 'Backspace',
+  },
+}
+
+function saveScheme(scheme: Scheme) {
+  try {
+    localStorage.setItem(SCHEME_KEY, scheme)
+  } catch {
+    // Storage blocked: the choice lasts for this visit only.
+  }
+}
+
+function savedScheme(): Scheme {
+  try {
+    return localStorage.getItem(SCHEME_KEY) === 'arrows' ? 'arrows' : 'wasd'
+  } catch {
+    return 'wasd'
+  }
+}
 
 function isStandalone() {
   return (
@@ -48,6 +98,11 @@ export default function Handheld() {
   )
   const [standalone] = useState(isStandalone)
   const [hint, setHint] = useState(shouldHint)
+  const [scheme, setScheme] = useState(savedScheme)
+  const chooseScheme = (next: Scheme) => {
+    setScheme(next)
+    saveScheme(next)
+  }
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -56,7 +111,9 @@ export default function Handheld() {
     const ctx = canvas?.getContext('2d')
     if (!canvas || !screen || !root || !ctx) return
 
-    const game = createSandbox()
+    const game = createCandlelight()
+    if (new URLSearchParams(window.location.search).has('qa'))
+      exposeQA(game, canvas, root)
 
     const onKey = (e: KeyboardEvent) => {
       if (
@@ -81,6 +138,12 @@ export default function Handheld() {
       if (e.repeat) return
       controls.key(button, true)
       setMode('external')
+      // The legend follows whichever layout the player last typed on.
+      const layout = schemeOf(e.code)
+      if (layout) {
+        setScheme(layout)
+        saveScheme(layout)
+      }
     }
     // macOS sends no keyup for keys released while Cmd is held.
     const onBlur = () => controls.clearKeys()
@@ -294,29 +357,47 @@ export default function Handheld() {
       {/* Desktop: which keys the game is hearing, from any input source. */}
       <div className={styles.keys} data-control="" aria-hidden="true">
         <div className={styles.cluster}>
-          <kbd className={styles.up}>W</kbd>
-          <kbd className={styles.left}>A</kbd>
-          <kbd className={styles.down}>S</kbd>
-          <kbd className={styles.right}>D</kbd>
+          <kbd className={styles.up}>{LEGEND[scheme].up}</kbd>
+          <kbd className={styles.left}>{LEGEND[scheme].left}</kbd>
+          <kbd className={styles.down}>{LEGEND[scheme].down}</kbd>
+          <kbd className={styles.right}>{LEGEND[scheme].right}</kbd>
         </div>
         <div className={styles.cluster}>
-          <kbd className={styles.y}>I</kbd>
+          <kbd className={styles.y}>
+            {LEGEND[scheme].y}
+            <small>torch</small>
+          </kbd>
           <kbd className={styles.x}>
-            J<small>attack</small>
+            {LEGEND[scheme].x}
+            <small>attack</small>
           </kbd>
           <kbd className={styles.a}>
-            K<small>jump</small>
+            {LEGEND[scheme].a}
+            <small>jump</small>
           </kbd>
           <kbd className={styles.b}>
-            L<small>dash</small>
+            {LEGEND[scheme].b}
+            <small>dash</small>
           </kbd>
         </div>
         <p className={styles.legend}>
           <span className={styles.start}>Enter pause</span>
           <span className={styles.select}>Backspace debug</span>
           <span>F fullscreen</span>
+          <span>Hold up + attack to strike overhead</span>
         </p>
       </div>
+      <button
+        type="button"
+        className={styles.scheme}
+        onClick={(e) => {
+          chooseScheme(scheme === 'wasd' ? 'arrows' : 'wasd')
+          // Keep Space for jumping rather than pressing this again.
+          e.currentTarget.blur()
+        }}
+      >
+        Keys: {LEGEND[scheme].name}
+      </button>
     </div>
   )
 }
