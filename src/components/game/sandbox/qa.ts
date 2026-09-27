@@ -101,6 +101,22 @@ export const SCENARIOS: Scenario[] = [
     },
   },
   {
+    name: 'snake: turns away from a wall it let go of at the top of the map',
+    run() {
+      const w = new World()
+      const s = w.snakes.reduce((a, b) => (b.x > a.x ? b : a))
+      let dropped = false
+      for (let i = 0; i < 3600; i++) {
+        const was = s.state
+        w.step(frame())
+        if (was === 'climb' && s.state === 'fall' && s.y <= 1) dropped = true
+        if (dropped && s.state === 'slither')
+          return s.facing === -1 ? null : 'walked back into the same wall'
+      }
+      return dropped ? 'never landed after letting go' : 'never reached the top'
+    },
+  },
+  {
     name: 'walk: the lifted foot swings forward, the planted foot slides back',
     run() {
       const w = new World(room())
@@ -343,6 +359,7 @@ export const SCENARIOS: Scenario[] = [
       s.wall = 1
       s.state = 'climb'
       s.facing = 1
+      s.x = 12 * TILE - SNAKE.w
       s.y = 8 * TILE - 20
       let coiledOnWall = false
       for (let i = 0; i < 200; i++) {

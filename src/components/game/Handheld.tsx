@@ -111,11 +111,14 @@ export default function Handheld() {
     if (!canvas || !screen || !root || !ctx) return
 
     const game = createCandlelight()
+    let disposed = false
     // The beta script loads only when asked for, so players never download it.
     if (new URLSearchParams(window.location.search).has('qa'))
-      import('./sandbox/qa').then(({ exposeQA }) => {
-        if (!disposed) exposeQA(game, canvas, root)
-      })
+      import('./sandbox/qa')
+        .then(({ exposeQA }) => {
+          if (!disposed) exposeQA(game, canvas, root)
+        })
+        .catch((e) => console.error('[candlelight-qa] failed to load', e))
 
     const onKey = (e: KeyboardEvent) => {
       if (
@@ -154,7 +157,6 @@ export default function Handheld() {
     }
 
     let wakeLock: WakeLockSentinel | null = null
-    let disposed = false
     const lockScreen = () => {
       navigator.wakeLock
         ?.request('screen')

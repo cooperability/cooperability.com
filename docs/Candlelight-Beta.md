@@ -16,8 +16,10 @@ fresh worlds. The scenarios cover:
 - beam reachability, overhead attack, torch arc, cooldown and burn damage
 - serpent strike, lunge and wall climb
 - serpents staying inside the map when left alone, a wall launch, pause
-- win by `hit()` and win with the sword alone on the shipped map, death and
-  restart, and hit-pause input carry
+- win by `hit()`, and every serpent on the shipped map staying hittable by
+  the sword through to a win (the player is placed beside each, so this does
+  not prove each is reachable on foot), death and restart, and hit-pause
+  input carry
 - a 20,000-update random-input soak that fails on NaN or anything inside a wall
 
 A new mechanic gets a scenario here. Deleting the line that implements it must
