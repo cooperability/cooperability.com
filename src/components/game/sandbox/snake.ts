@@ -239,12 +239,14 @@ export class Snake {
           this.letGo(-side as -1 | 1)
           break
         }
-        const blocked = this.level.boxHitsSolid(this.x, this.y - 1, this.w, 1)
+        // A ceiling, or the top of the map: the outer walls run on above it.
+        const blocked =
+          this.y <= 0 || this.level.boxHitsSolid(this.x, this.y - 1, this.w, 1)
         if (blocked) {
           this.letGo(-side as -1 | 1)
           break
         }
-        this.y -= SNAKE.climb
+        this.y = Math.max(0, this.y - SNAKE.climb)
         if (!this.touchingWall(side)) {
           // Over the lip: onto the top of the wall.
           this.wall = 0
@@ -318,8 +320,11 @@ export class Snake {
     this.cooldown = 30
   }
 
+  // Drops off the wall facing away from it, so a patrol does not walk
+  // straight back into the same climb.
   private letGo(dir: -1 | 1) {
     this.wall = 0
+    this.facing = dir
     this.state = 'fall'
     this.vx = dir * 0.6
     this.vy = 0

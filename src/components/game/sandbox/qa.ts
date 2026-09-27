@@ -88,6 +88,19 @@ export const SCENARIOS: Scenario[] = [
     },
   },
   {
+    name: 'map: left alone for a minute, every snake stays inside the map',
+    run() {
+      const w = new World()
+      for (let i = 0; i < 3600; i++) {
+        w.step(frame())
+        for (const s of w.snakes)
+          if (s.y < 0 || s.y + s.h > w.level.pixelHeight)
+            return `a snake left the map at ${i} (y ${s.y.toFixed(0)}, ${s.state})`
+      }
+      return null
+    },
+  },
+  {
     name: 'walk: the lifted foot swings forward, the planted foot slides back',
     run() {
       const w = new World(room())
@@ -288,6 +301,77 @@ export const SCENARIOS: Scenario[] = [
     },
   },
   {
+    name: 'win: the shipped map can be won with the sword alone',
+    run() {
+      const g = createCandlelight()
+      play(g, 1, {}, { a: true })
+      const w = g.world
+      for (let i = 0; i < 20000 && sceneOf(g) === 'play'; i++) {
+        const target = w.snakes.find((s) => s.alive)
+        if (target && i % 40 === 0) {
+          // Stand just beside the snake, facing it, on its level.
+          const p = w.player
+          p.x = target.x - p.w - 2
+          p.y = target.y + target.h - PLAYER_H
+          p.vx = 0
+          p.vy = 0
+          p.facing = 1
+        }
+        // Only the sword is under test here, not survival.
+        w.hp = 5
+        const above = target ? target.y + target.h < w.player.y + 4 : false
+        g.step(frame({ up: above }, i % 12 === 0 ? { x: true } : {}))
+      }
+      return sceneOf(g) === 'won'
+        ? null
+        : `${w.kills} of ${w.total} killed, scene ${g.scene}`
+    },
+  },
+  {
+    name: 'snake: coils on a wall and launches off it at the player',
+    run() {
+      const w = new World(
+        room((g) => {
+          for (let y = 1; y < 9; y++) g[y][12] = '#'
+          g[8][11] = 's'
+          g[8][3] = '.'
+          g[8][7] = 'P'
+        })
+      )
+      const s = w.snakes[0]
+      // Put it on the wall, level with the player's head.
+      s.wall = 1
+      s.state = 'climb'
+      s.facing = 1
+      s.y = 8 * TILE - 20
+      let coiledOnWall = false
+      for (let i = 0; i < 200; i++) {
+        play(w, 1)
+        const state: string = s.state
+        if (state === 'coil' && s.wall) coiledOnWall = true
+        if (coiledOnWall && state === 'lunge')
+          return s.vx < 0 ? null : 'launched toward the wall'
+      }
+      return `coiled on the wall ${coiledOnWall}, state ${s.state}`
+    },
+  },
+  {
+    name: 'pause: start freezes the run and start again resumes it',
+    run() {
+      const g = createCandlelight()
+      play(g, 1, {}, { a: true })
+      play(g, 1, {}, { start: true })
+      const x = g.world.player.x
+      const t = g.world.clock
+      play(g, 60, { right: true })
+      if (g.world.player.x !== x || g.world.clock !== t)
+        return 'the world moved while paused'
+      play(g, 1, {}, { start: true })
+      play(g, 30, { right: true })
+      return g.world.player.x > x ? null : 'did not resume'
+    },
+  },
+  {
     name: 'death: at 0 HP the run ends, and rising again restores everything',
     run() {
       const g = createCandlelight()
@@ -363,7 +447,12 @@ export const SCENARIOS: Scenario[] = [
             w.level.boxHitsSolid(s.x, s.y, s.w, s.h)
           )
             return `snake inside a wall at ${i} (${s.state})`
-          if (s.x < 0 || s.x > w.level.pixelWidth || s.y > w.level.pixelHeight)
+          if (
+            s.x < 0 ||
+            s.x > w.level.pixelWidth ||
+            s.y < 0 ||
+            s.y > w.level.pixelHeight
+          )
             return `snake left the map at ${i}`
         }
       }
@@ -603,16 +692,17 @@ export function exposeQA(
       dpr: window.devicePixelRatio,
       touch: navigator.maxTouchPoints > 0,
     },
-    scenarios: runScenarios(),
+    scenarios: [],
     layout: [],
-    light: lightChecks(),
-    cost: measureCost(),
+    light: [],
+    cost: { stepUs: 0, drawUs: 0 },
     frames: { count: 0, p50: 0, p95: 0, max: 0, slow: 0 },
     pass: false,
   }
   window.__candlelightQA = report
 
-  // Three seconds of the live loop's frame gaps, after layout settles.
+  // The live loop's frame gaps are sampled first, while nothing else runs,
+  // so the scenarios' own work and garbage cannot show up as hitches.
   const gaps: number[] = []
   let last = 0
   const started = performance.now()
@@ -624,6 +714,10 @@ export function exposeQA(
       return
     }
     report.layout = layoutChecks(canvas, root)
+    // Cost first, on a quiet heap, then the checks that make garbage.
+    report.cost = measureCost()
+    report.light = lightChecks()
+    report.scenarios = runScenarios()
     report.frames = {
       count: gaps.length,
       p50: +percentile(gaps, 0.5).toFixed(1),

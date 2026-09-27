@@ -13,7 +13,6 @@ import {
 } from './input'
 import { startLoop } from './loop'
 import { createCandlelight, HEIGHT, WIDTH } from './sandbox/game'
-import { exposeQA } from './sandbox/qa'
 import styles from './Handheld.module.css'
 
 type Mode = 'touch' | 'external'
@@ -112,8 +111,11 @@ export default function Handheld() {
     if (!canvas || !screen || !root || !ctx) return
 
     const game = createCandlelight()
+    // The beta script loads only when asked for, so players never download it.
     if (new URLSearchParams(window.location.search).has('qa'))
-      exposeQA(game, canvas, root)
+      import('./sandbox/qa').then(({ exposeQA }) => {
+        if (!disposed) exposeQA(game, canvas, root)
+      })
 
     const onKey = (e: KeyboardEvent) => {
       if (

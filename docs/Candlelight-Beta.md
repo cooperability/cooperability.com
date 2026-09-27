@@ -15,7 +15,9 @@ fresh worlds. The scenarios cover:
 - title to play, spawn safety, walk direction and stride speed
 - beam reachability, overhead attack, torch arc, cooldown and burn damage
 - serpent strike, lunge and wall climb
-- win, death and restart, and hit-pause input carry
+- serpents staying inside the map when left alone, a wall launch, pause
+- win by `hit()` and win with the sword alone on the shipped map, death and
+  restart, and hit-pause input carry
 - a 20,000-update random-input soak that fails on NaN or anything inside a wall
 
 A new mechanic gets a scenario here. Deleting the line that implements it must
