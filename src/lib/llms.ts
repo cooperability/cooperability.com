@@ -24,6 +24,11 @@ export const DEMOS = [
     description:
       'Medical opioid dosage converter and morphine equivalence calculator',
   },
+  {
+    path: '/demos/game',
+    title: 'Game',
+    description: 'A handheld-style game, built to be added to the home screen.',
+  },
 ]
 
 // Ordered by id, and deliberately unfiltered: src/app/resources/page.tsx
