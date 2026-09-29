@@ -9,7 +9,16 @@ export const metadata: Metadata = {
     'Candlelight, a survival horror platformer built to be added to the home screen.',
   openGraph: { title: 'Candlelight | Cooper Reed', type: 'website' },
   manifest: '/icons/game.webmanifest',
-  icons: { icon: '/icon.ico', apple: `${GAME_ASSET_DIR}/apple-touch-icon.png` },
+  // Versioned, like the manifest's icons: iOS caches an icon per URL, and an
+  // install that once failed to fetch it shows a "C" from then on.
+  icons: {
+    icon: '/icon.ico',
+    apple: {
+      url: `${GAME_ASSET_DIR}/apple-touch-icon-v2.png`,
+      sizes: '180x180',
+      type: 'image/png',
+    },
+  },
   appleWebApp: {
     capable: true,
     title: 'Candlelight',

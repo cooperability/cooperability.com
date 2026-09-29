@@ -60,4 +60,11 @@ describe('game home-screen assets', () => {
     expect(manifest.scope).toBe('/demos/candlelight')
     expect(metadata.manifest).toBe('/icons/game.webmanifest')
   })
+
+  // Without it iOS draws a letter on the home screen instead of the handheld.
+  it('points the page at a 180x180 apple-touch-icon that exists', () => {
+    const apple = metadata.icons as { apple: { url: string; sizes: string } }
+    expect(apple.apple.sizes).toBe('180x180')
+    expect(pngSize(apple.apple.url)).toEqual([180, 180])
+  })
 })
