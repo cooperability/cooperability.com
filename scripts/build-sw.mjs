@@ -43,7 +43,7 @@ async function main() {
     globPatterns: ['static/**/*.{js,css,svg,png,webp,woff2}'],
     modifyURLPrefix: { 'static/': '/_next/static/' },
     maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
-    additionalPrecacheEntries: [{ url: '/demos/game', revision: buildId }],
+    additionalPrecacheEntries: [{ url: '/demos/candlelight', revision: buildId }],
   })
   if (warnings?.length) {
     for (const w of warnings) console.warn(w)

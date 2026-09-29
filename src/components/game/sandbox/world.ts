@@ -67,6 +67,8 @@ export class World {
   runPhase = 0
   camX = 0
   camY: number
+  // Width of the view the camera frames, in game pixels.
+  viewW = VIEW_W
   hp = MAX_HP
   invuln = 0
   kills = 0
@@ -401,13 +403,16 @@ export class World {
     const p = this.player
     const cx = p.x + p.w / 2 + p.facing * 28
     const cy = p.y + p.h / 2 - 12
-    this.camX += (cx - VIEW_W / 2 - this.camX) * 0.1
+    this.camX += (cx - this.viewW / 2 - this.camX) * 0.1
     const targetY = cy - VIEW_H / 2
     // Vertical deadzone, so small hops do not bob the view.
     if (Math.abs(targetY - this.camY) > 18)
       this.camY +=
         (targetY - this.camY - Math.sign(targetY - this.camY) * 18) * 0.12
-    this.camX = Math.max(0, Math.min(this.level.pixelWidth - VIEW_W, this.camX))
+    this.camX = Math.max(
+      0,
+      Math.min(this.level.pixelWidth - this.viewW, this.camX)
+    )
     this.camY = Math.max(
       0,
       Math.min(this.level.pixelHeight - VIEW_H, this.camY)

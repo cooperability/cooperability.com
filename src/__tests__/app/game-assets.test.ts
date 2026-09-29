@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { metadata } from '../../app/demos/game/page'
+import { metadata } from '../../app/demos/candlelight/page'
 import { splashImages } from '../../components/game/splash'
 
 /**
@@ -56,8 +56,8 @@ describe('game home-screen assets', () => {
     const manifest = JSON.parse(
       readFileSync(join(PUBLIC, 'icons/game.webmanifest'), 'utf8')
     )
-    expect(manifest.start_url).toBe('/demos/game')
-    expect(manifest.scope).toBe('/demos/game')
+    expect(manifest.start_url).toBe('/demos/candlelight')
+    expect(manifest.scope).toBe('/demos/candlelight')
     expect(metadata.manifest).toBe('/icons/game.webmanifest')
   })
 })

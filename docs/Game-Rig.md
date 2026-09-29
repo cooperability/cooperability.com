@@ -1,6 +1,6 @@
 # Game Rig
 
-The shell and game behind `/demos/game`: Candlelight, a dark fantasy survival
+The shell and game behind `/demos/candlelight`: Candlelight, a dark fantasy survival
 horror platformer that runs in any browser and is built to be added to an
 iPhone home screen. On a phone it is a handheld, screen above and controls
 below. On a desktop the screen fills the window and a translucent key overlay
@@ -11,8 +11,8 @@ lose five candles of health and the run restarts.
 
 | File                                        | Job                                                                                        |
 | ------------------------------------------- | ------------------------------------------------------------------------------------------ |
-| `src/app/demos/game/page.tsx`               | Metadata: manifest, `black-translucent` status bar, launch images, `viewport-fit=cover`    |
-| `src/app/demos/game/game-client.tsx`        | Client-only import, with a shell-coloured placeholder so launch never flashes white        |
+| `src/app/demos/candlelight/page.tsx`        | Metadata: manifest, `black-translucent` status bar, launch images, `viewport-fit=cover`    |
+| `src/app/demos/candlelight/game-client.tsx` | Client-only import, with a shell-coloured placeholder so launch never flashes white        |
 | `src/components/game/Handheld.tsx`          | Layout switching, canvas scaling, on-screen controls, key overlay, wake lock, fullscreen   |
 | `src/components/game/input.ts`              | Keyboard map, gamepad map, D-pad and face-diamond geometry, `Controls` aggregation         |
 | `src/components/game/loop.ts`               | Fixed 60 Hz update with a capped backlog, render on every animation frame                  |
@@ -41,9 +41,15 @@ input switches to full screen while a touch anywhere switches back.
 
 - **Handheld.** The picture sits in a glass lens with its own bezel, apart
   from the cast-iron control plate. Two matching diamonds of round buttons:
-  arrows on the left, Y X B A on the right in the Xbox layout. Portrait puts
-  the screen above and the diamonds low, where thumbs rest. Landscape puts the
-  diamonds either side of the screen.
+  arrows on the left, Y X B A on the right in the Xbox layout, each diamond
+  leaning toward its own edge. Portrait puts a square screen across the full
+  width above and the diamonds low, where thumbs rest. The game then shows a
+  180×180 view, the full height cropped at the sides, scaled to whole device
+  pixels. Landscape puts the diamonds either side of a 320×180 screen.
+- **Presses.** A thumb anywhere on a drawn cap presses that button alone.
+  Only the gaps between D-pad arms read as diagonals, and only the gaps
+  between face buttons press two. Every fresh press bounces its cap on the
+  frame it lands, and a lift and retap between two updates still counts.
 - **Full screen.** The canvas fills the window at the largest whole-number
   scale. The overlay in the corner lights each key as the game receives it,
   from any source, so a controller shows up there too. F toggles browser
@@ -53,15 +59,19 @@ input switches to full screen while a touch anywhere switches back.
 
 Every source feeds one `Controls` object, read once per fixed update:
 
-| Button | WASD layout | Arrows layout | Controller (standard) | Action                                 |
-| ------ | ----------- | ------------- | --------------------- | -------------------------------------- |
-| D-pad  | WASD        | Arrows        | D-pad or left stick   | Move, down + A drops a beam            |
-| A      | K or Space  | Z or Space    | Bottom face (0)       | Jump, hold for height                  |
-| B      | L or Shift  | C or Shift    | Right face (1)        | Roll on ground, dash in air            |
-| X      | J           | X             | Left face (2)         | Sword swing, overhead while up is held |
-| Y      | I           | V             | Top face (3)          | Throw a torch (one a second)           |
-| Start  | Enter, Esc  | Enter, Esc    | Start (9)             | Pause, or begin from the title         |
-| Select | Backspace   | Backspace     | Back (8)              | Hitbox debug view                      |
+| Button | WASD layout | Arrows layout | Controller (standard) | Action                                  |
+| ------ | ----------- | ------------- | --------------------- | --------------------------------------- |
+| D-pad  | WASD        | Arrows        | D-pad or left stick   | Move, down + A drops a beam             |
+| A      | K or Space  | Z or Space    | Bottom face (0)       | Jump, hold for height                   |
+| B      | L or Shift  | C or Shift    | Right face (1)        | Roll on ground, dash in air             |
+| X      | J           | X             | Left face (2)         | Sword swing, overhead while up is held  |
+| Y      | I           | V             | Top face (3)          | Throw a torch (one a second)            |
+| Start  | Enter, Esc  | Enter, Esc    | Start (9)             | Pause                                   |
+| Select | Backspace   | Backspace     | Back (8)              | About: when and why, and how to install |
+
+Any button but select leaves the title. Select opens the About panel over the
+screen, pausing a run, and any button closes it. The hitbox view is the
+`debug` flag on the game, set from the beta script's `?qa` handle.
 
 The two keyboard layouts share no keys, so both always work. The overlay shows
 whichever the player last typed on, and the Keys button bottom left switches
@@ -98,15 +108,30 @@ roll dodges bites.
 
 ## Light
 
-`render.ts` draws a darkness layer over the scene at half strength, then cuts
-holes in it for each light: the visor (full brightness for one body length,
-0.8 at two), candles, torches, burning serpents and the moon. Tune it in the
-`LIGHT` table. The beta script measures the falloff on every run.
+`render.ts` draws two darkness layers. The sky and skyline keep half their
+brightness, and the moon lights only them. The foreground (tiles, props,
+serpents, the hero) keeps a quarter. Each layer has holes cut for every
+light: candles, torches, burning serpents, and the visor, which lights only
+the side the player faces, at full brightness for about one body height
+ahead. Tune it in the `LIGHT` table. The beta script measures the falloff on
+every run.
+
+Serpents wear crimson and gold bands so they read in the dark, and strobe
+flame white while coiled, the tell that a lunge is coming.
 
 ## Screen
 
 The canvas is 320×180, which scales 6× to 1080p and 8× to 1440p. It scales by
-whole numbers when 2× or more fits, and fits fractionally below that.
+whole numbers when 2× or more fits, and fits fractionally below that. The
+portrait handheld narrows it to 180×180 (see Layout).
+
+## Home screen
+
+The Demos page links here with a plain `<a>`, never `next/link`. A client-side
+navigation keeps the previous page's head, so iOS would save the site's
+manifest (`start_url: /`) and the icon would open the homepage. The manifest's
+scope is `/demos/candlelight`, and the exit link is hidden in standalone mode,
+so an installed copy reaches no other page. `/demos/game` redirects here.
 
 ## Art
 
@@ -118,7 +143,7 @@ noise at load, so they are identical every visit.
 ## Offline
 
 `scripts/build-sw.mjs` bundles `src/sw.js` with webpack and precaches the
-`/demos/game` HTML, revisioned by the build id.
+`/demos/candlelight` HTML, revisioned by the build id.
 
 ## Beta testing
 
@@ -128,5 +153,5 @@ See [Candlelight-Beta.md](./Candlelight-Beta.md).
 
 Chromium device emulation covers layout and input but not iOS itself. Launch
 images, the status bar and home-screen install need Safari on a real iPhone:
-open the preview deployment's `/demos/game`, Share, Add to Home Screen, then
+open the preview deployment's `/demos/candlelight`, Share, Add to Home Screen, then
 launch it with the phone in airplane mode.

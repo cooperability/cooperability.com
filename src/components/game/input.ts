@@ -114,13 +114,13 @@ export class Controls {
     this.keys.clear()
   }
 
-  // Returns true when the pointer pressed something it was not already on.
-  touch(pointerId: number, buttons: Button[]): boolean {
+  // Returns the buttons the pointer pressed that it was not already on.
+  touch(pointerId: number, buttons: Button[]): Button[] {
     const before = this.touches.get(pointerId) ?? []
     const fresh = buttons.filter((b) => !before.includes(b))
     fresh.forEach((b) => this.taps.add(b))
     this.touches.set(pointerId, buttons)
-    return fresh.length > 0
+    return fresh
   }
 
   lift(pointerId: number) {
@@ -132,8 +132,9 @@ export class Controls {
   }
 
   read(pads: Iterable<PadLike | null>): Frame & { padActive: boolean } {
-    const held: ButtonSet = new Set([...this.keys, ...this.taps])
-    this.taps.clear()
+    const taps = this.taps
+    this.taps = new Set()
+    const held: ButtonSet = new Set([...this.keys, ...taps])
     for (const buttons of this.touches.values())
       buttons.forEach((b) => held.add(b))
     let padActive = false
@@ -143,8 +144,10 @@ export class Controls {
       readGamepad(pad, held)
       if (held.size > before) padActive = true
     }
+    // A tap is always a press, even when the same button was held at the
+    // last update: a lift and a fresh tap between two updates is a new press.
     const pressed: ButtonSet = new Set(
-      [...held].filter((b) => !this.previous.has(b))
+      [...held].filter((b) => !this.previous.has(b) || taps.has(b))
     )
     this.previous = held
     return { held, pressed, padActive }
@@ -157,6 +160,14 @@ export type Frame = { held: ButtonSet; pressed: ButtonSet }
 // Eight equal sectors, so a thumb resting between two arms presses both, as
 // on a real rocker pad.
 export function dpadFromPoint(dx: number, dy: number): Button[] {
+  // A thumb on a drawn arm presses that arm alone. Only the gaps between
+  // arms read as diagonals.
+  const x = (dx + 1) / 2
+  const y = (dy + 1) / 2
+  for (const [arm, slot] of ARMS) {
+    const c = FACE_LAYOUT[slot]
+    if (Math.hypot(x - c.x, y - c.y) < CAP_RADIUS) return [arm]
+  }
   if (Math.hypot(dx, dy) < 0.2) return []
   const sector = Math.round(Math.atan2(dy, dx) / (Math.PI / 4))
   const dirs: Record<number, Button[]> = {
@@ -186,8 +197,22 @@ export const FACE_LAYOUT: Record<
   a: { x: 0.5, y: 0.82 },
 }
 export const FACE_REACH = 0.25
+// A drawn cap's radius in the same space: the CSS makes each cap 34% wide.
+export const CAP_RADIUS = 0.17
+
+// The D-pad draws its arms where the face diamond draws its buttons.
+const ARMS: [Button, keyof typeof FACE_LAYOUT][] = [
+  ['up', 'y'],
+  ['left', 'x'],
+  ['right', 'b'],
+  ['down', 'a'],
+]
 
 export function faceFromPoint(x: number, y: number): Button[] {
+  const on = (Object.keys(FACE_LAYOUT) as (keyof typeof FACE_LAYOUT)[]).find(
+    (b) => Math.hypot(x - FACE_LAYOUT[b].x, y - FACE_LAYOUT[b].y) < CAP_RADIUS
+  )
+  if (on) return [on]
   return (Object.keys(FACE_LAYOUT) as (keyof typeof FACE_LAYOUT)[]).filter(
     (b) => Math.hypot(x - FACE_LAYOUT[b].x, y - FACE_LAYOUT[b].y) < FACE_REACH
   )

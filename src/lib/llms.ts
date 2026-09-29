@@ -25,9 +25,10 @@ export const DEMOS = [
       'Medical opioid dosage converter and morphine equivalence calculator',
   },
   {
-    path: '/demos/game',
-    title: 'Game',
-    description: 'A handheld-style game, built to be added to the home screen.',
+    path: '/demos/candlelight',
+    title: 'Candlelight',
+    description:
+      'Candlelight, a survival horror platformer built to be added to the home screen.',
   },
 ]
 

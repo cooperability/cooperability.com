@@ -62,6 +62,30 @@ export default function Demos() {
             </div>
             {/* Sub-projects housed within cooperability.com */}
             <div className={styles.subProjects}>
+              {/* Candlelight: a plain link, so the page loads whole. A client-side
+                  navigation keeps this page's head, and iOS would install
+                  the site's manifest (start_url /) instead of the game's. */}
+              <div className={styles.subProjectItem}>
+                <div className={styles.projectInfo}>
+                  <a href="/demos/candlelight">Candlelight[💻📱🎮]</a>
+                  <span className={styles.projectStatus}>(Ongoing)</span>
+                </div>
+                <div className={styles.techStackIcons}>
+                  <ActiveIcon
+                    href="https://www.typescriptlang.org/"
+                    iconName="ts"
+                    alt="TypeScript logo"
+                    size="small"
+                  />
+                  <ActiveIcon
+                    href="https://react.dev/"
+                    iconName="react"
+                    alt="React logo"
+                    size="small"
+                  />
+                </div>
+              </div>
+
               {/* Prompt Composer */}
               <div className={styles.subProjectItem}>
                 <div className={styles.projectInfo}>
@@ -117,28 +141,6 @@ export default function Demos() {
                     href="https://ui.shadcn.com/"
                     imgSrc="/images/shadcn.png"
                     alt="Shadcn logo"
-                    size="small"
-                  />
-                </div>
-              </div>
-
-              {/* Game */}
-              <div className={styles.subProjectItem}>
-                <div className={styles.projectInfo}>
-                  <Link href="/demos/game">Game[💻📱🎮]</Link>
-                  <span className={styles.projectStatus}>(Ongoing)</span>
-                </div>
-                <div className={styles.techStackIcons}>
-                  <ActiveIcon
-                    href="https://www.typescriptlang.org/"
-                    iconName="ts"
-                    alt="TypeScript logo"
-                    size="small"
-                  />
-                  <ActiveIcon
-                    href="https://react.dev/"
-                    iconName="react"
-                    alt="React logo"
                     size="small"
                   />
                 </div>

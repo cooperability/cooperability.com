@@ -144,24 +144,27 @@ function strip(
   ctx: CanvasRenderingContext2D,
   img: Canvas,
   scroll: number,
-  dy: number
+  dy: number,
+  viewW: number
 ) {
   const w = img.width
   const x = -(((Math.round(scroll) % w) + w) % w)
-  for (let ox = x; ox < VIEW_W; ox += w) ctx.drawImage(img, ox, dy)
+  for (let ox = x; ox < viewW; ox += w) ctx.drawImage(img, ox, dy)
 }
 
 // Farther layers scroll slower, and all of them sink a little as the camera
-// rises, so height reads as depth.
+// rises, so height reads as depth. A narrow view crops the sky's left side,
+// so the moon keeps its place near the top right.
 export function drawBackdrop(
   ctx: CanvasRenderingContext2D,
   b: Backdrop,
   camX: number,
   camY: number,
-  maxCamY: number
+  maxCamY: number,
+  viewW = VIEW_W
 ) {
-  ctx.drawImage(b.sky, 0, 0)
+  ctx.drawImage(b.sky, viewW - VIEW_W, 0)
   const rise = maxCamY - camY
-  strip(ctx, b.spires, camX * 0.12, Math.round(rise * 0.06) + 6)
-  strip(ctx, b.arcade, camX * 0.35, Math.round(rise * 0.18) + 10)
+  strip(ctx, b.spires, camX * 0.12, Math.round(rise * 0.06) + 6, viewW)
+  strip(ctx, b.arcade, camX * 0.35, Math.round(rise * 0.18) + 10, viewW)
 }
