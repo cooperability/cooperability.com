@@ -45,6 +45,12 @@ const GLYPHS: Record<string, string[]> = {
   ' ': ['..', '..', '..', '..', '..', '..', '..'],
 }
 
+// One character's rows, '#' lit, for art built from the letters.
+export const glyphRows = (ch: string) => GLYPHS[ch.toUpperCase()] ?? GLYPHS[' ']
+
+// Width of one character in font pixels, before scaling.
+export const glyphWidth = (ch: string) => glyphRows(ch)[0].length
+
 const cache = new Map<string, Canvas>()
 
 function bakeText(text: string, color: string, scale: number): Canvas {

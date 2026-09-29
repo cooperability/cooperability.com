@@ -4,8 +4,10 @@ The shell and game behind `/demos/candlelight`: Candlelight, a dark fantasy surv
 horror platformer that runs in any browser and is built to be added to an
 iPhone home screen. On a phone it is a handheld, screen above and controls
 below. On a desktop the screen fills the window and a translucent key overlay
-shows what the game is hearing. One area, five serpents: kill them all to win,
-lose five candles of health and the run restarts.
+shows what the game is hearing. One area, five serpents: kill them all and
+the belfry gate opens on the final boss, SOCIETY. Fell it to win. Lose five
+candles of health and the run restarts, or, against the boss, restarts at
+its gate.
 
 ## Files
 
@@ -17,9 +19,12 @@ lose five candles of health and the run restarts.
 | `src/components/game/input.ts`              | Keyboard map, gamepad map, D-pad and face-diamond geometry, `Controls` aggregation         |
 | `src/components/game/loop.ts`               | Fixed 60 Hz update with a capped backlog, render on every animation frame                  |
 | `src/components/game/sandbox/game.ts`       | The `Game` contract (`step`, `draw`, `pause`) and the title, play, death and win scenes    |
+| `src/components/game/sandbox/title.ts`      | The title screen: CANDLELIGHT in dripping candle wax, lit wicks, PRESS START               |
+| `src/components/game/sandbox/ending.ts`     | The defeat (blood wave) and victory (fade to white) transitions and screens                |
 | `src/components/game/sandbox/world.ts`      | One run with no canvas: player, snakes, torches, health, camera, particles                 |
 | `src/components/game/sandbox/render.ts`     | Draws a `World`: scene, the darkness layer and its lights, bloom, HUD, debug boxes         |
 | `src/components/game/sandbox/snake.ts`      | The serpent: slither, climb walls, coil and lunge, strike, burn. `SNAKE` holds its numbers |
+| `src/components/game/sandbox/boss.ts`       | SOCIETY, the final boss: its attacks, thrown letters and art. `BOSS` holds its numbers     |
 | `src/components/game/sandbox/torch.ts`      | The thrown torch and the brand it leaves burning on the floor                              |
 | `src/components/game/sandbox/light.ts`      | The darkness layer that lights cut holes in                                                |
 | `src/components/game/sandbox/font.ts`       | A 5×7 pixel font for the title and end screens                                             |
@@ -107,12 +112,54 @@ The player has 5 HP, shown as candles. A bite knocks the player back and
 grants a second of mercy. At 0 the dark takes you and the run restarts. A
 roll dodges bites.
 
+## The boss
+
+The fifth serpent's death opens the portcullis (`G` in the map) at the
+belfry's right wall, announces it, and puts SOCIETY's name and health bar at
+the top centre of the HUD. Behind the gate is the hall marked by `B`: a sill,
+a flat floor, two low beams and one high one. `Level` finds the hall's walls,
+ceiling and floor from the `B`. Until the fight the camera never shows the
+hall. Stepping onto the sill slams the gate shut, relights all five candles,
+locks the camera on the hall, and wakes the boss.
+
+The boss is the word SOCIETY in the pixel font at 3×, each letter moving on
+its own. Its O is a face: a top hat, a monocle over an eye that follows the
+player, a brow that arches at rest and scowls mid-attack, and a white
+handlebar moustache. The letters drop in one by one, then it announces WE
+LIVE IN A SOCIETY. It is drawn after the darkness so it glows, and it lights
+the hall around it.
+
+It hovers above the player and picks an attack, never the same one twice in
+a row, naming each in a banner:
+
+| Attack                   | Kind       | Tell and answer                                                                                      |
+| ------------------------ | ---------- | ---------------------------------------------------------------------------------------------------- |
+| BRING YOU DOWN           | Melee      | Rises and tracks, then hangs strobing. Run at the strobe and jump the shockwaves, or roll the impact |
+| BREAK YOUR SPIRIT        | Projectile | Fires those fifteen letters from the monocle at where the player is. Keep moving, or cut them        |
+| PEER PRESSURE            | Melee      | Splits into SOC and IETY at the walls, strobes, then they hop inward. Jump one, roll, or take a beam |
+| UNREALISTIC EXPECTATIONS | Projectile | EXPECTATIONS falls from the ceiling, every third letter over the player's head                       |
+
+After a slam it sits dazed on the floor and safe to touch: the best time to
+hit it. Otherwise its letters hurt to touch, except for half a second after
+it reforms. A sword hit takes 1 of its 24 HP and a torch burns 2. Every
+third hit it complains (HOW RUDE, THE AUDACITY). At half health it stops
+taking damage for a beat to say SOCIETY IS DISAPPOINTED, then turns crimson.
+From then on it attacks sooner, drifts, throws and squeezes faster, and
+slams twice. At 0 its letters fall apart, SOCIETY HAS FALLEN, and the run is
+won.
+
+Dying to it names the attack on the death screen (SOCIETY BROKE YOUR
+SPIRIT), and rising again starts a fresh `World` with `atBoss`, on the sill
+with the serpents still slain and the clock still running. A map with no `B`
+keeps the old rule: the last serpent wins the run.
+
 ## Light
 
 `render.ts` draws two darkness layers. The sky and skyline keep half their
 brightness, and the moon lights only them. The foreground (tiles, props,
 serpents, the hero) keeps a quarter. Each layer has holes cut for every
-light: candles, torches, burning serpents, and the visor, which lights only
+light: candles, torches, burning serpents, the open gate, the boss and its
+thrown letters, and the visor, which lights only
 the side the player faces, at full brightness for about one body height
 ahead. Tune it in the `LIGHT` table. The beta script measures the falloff on
 every run.
@@ -133,6 +180,35 @@ navigation keeps the previous page's head, so iOS would save the site's
 manifest (`start_url: /`) and the icon would open the homepage. The manifest's
 scope is `/demos/candlelight`, and the exit link is hidden in standalone mode,
 so an installed copy reaches no other page. `/demos/game` redirects here.
+
+The icon files carry a version in their names (`apple-touch-icon-v2.png`).
+iOS keeps a home-screen icon per URL, a failed fetch included, and from then
+on draws the title's first letter instead: that is how an install came to
+show a "C" in place of the handheld. The page also declares the icon's
+`sizes`. A new name forces a fresh fetch, so bump `REV` in
+`scripts/game-assets.mjs`, regenerate, and update the manifest and page to
+match whenever the art changes or an install shows the letter again.
+
+## Title and end screens
+
+The game opens on its title, and a launch from the home screen opens there
+too unless a run is still live in memory. The title is its own screen, with
+no world drawn behind it: CANDLELIGHT cast in bone wax on black, each letter
+a candle with a flickering wick, wax swelling off the undersides of the
+strokes and dropping into a pool below, and a blinking PRESS START. Any button
+but select starts. The install steps live in the select menu.
+
+A run ends on one of two screens, timed by `ENDING` in `ending.ts`. The world
+holds for half a second, the transition takes a second, and the word fades
+in over half a second. Only then does a press count (`SCREEN_DELAY`), so a
+held button cannot skip it.
+
+- **Defeat.** A wave of blood with drips running ahead of it wipes the screen
+  top to bottom. Then DEFEAT and KILLED BY: SERPENT or SOCIETY fade in, and
+  for SOCIETY the attack that did it (SOCIETY BROKE YOUR SPIRIT).
+- **Victory.** The screen fades to white, then VICTORY, YOU DEFEATED
+  SOCIETY. and, in fine print, THIS MAKES YOU ENLIGHTENED. fade in, with the
+  run's time.
 
 ## Art
 

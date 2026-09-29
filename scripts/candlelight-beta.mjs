@@ -152,6 +152,11 @@ async function run(browser, profile) {
   let s = await snap()
   check('opens on the title', s.scene === 'title', s.scene)
   check(
+    'the title is its own screen, with no world drawn behind it',
+    await page.evaluate(() => window.__candlelight.game.shade === null),
+    'the world renderer has not run'
+  )
+  check(
     'layout mode matches the device',
     s.mode === (profile.touch ? 'touch' : 'external'),
     s.mode
@@ -255,7 +260,8 @@ async function run(browser, profile) {
     .catch(() => {})
   s = await snap()
   check('a bite at 1 HP ends the run', s.scene === 'dead', s.scene)
-  await sleep(1600)
+  // The transition, then the word fading in.
+  await sleep(2600)
   await shot('death')
   await press('a')
   await sleep(200)
@@ -266,18 +272,65 @@ async function run(browser, profile) {
     JSON.stringify({ scene: s.scene, hp: s.hp, kills: s.kills })
   )
 
-  // Victory.
+  // Five kills open the gate and bring up the boss's bar.
   await page.evaluate(() => window.__candlelight.killAll())
   await page
     .waitForFunction(
-      () => window.__candlelight.snapshot().scene === 'won',
+      () => window.__candlelight.snapshot().boss !== null,
       null,
       { timeout: 5000 }
     )
     .catch(() => {})
-  await sleep(1600)
   s = await snap()
-  check('five kills show the win screen', s.scene === 'won', s.scene)
+  check(
+    'five kills open the gate and spawn the boss',
+    s.scene === 'play' && s.gateOpen && s.boss?.state === 'dormant',
+    JSON.stringify({ scene: s.scene, gate: s.gateOpen, boss: s.boss })
+  )
+  await shot('gate')
+
+  // Through the gate: Society's entrance, then the fight.
+  await page.evaluate(() => window.__candlelight.toBoss())
+  await sleep(1800)
+  s = await snap()
+  check(
+    'the gate shuts behind and Society makes its entrance',
+    !s.gateOpen && s.boss?.state === 'intro',
+    JSON.stringify({ gate: s.gateOpen, boss: s.boss })
+  )
+  await shot('boss-intro')
+  await page
+    .waitForFunction(
+      () => {
+        // Kept alive, so the fight is still on when it is captured.
+        window.__candlelight.setHp(5)
+        return window.__candlelight.snapshot().boss?.shots > 0
+      },
+      null,
+      { timeout: 15000 }
+    )
+    .catch(() => {})
+  await sleep(500)
+  s = await snap()
+  check('Society attacks', s.boss?.attack !== null, JSON.stringify(s.boss))
+  await shot('boss-fight')
+
+  // Victory.
+  await page.evaluate(() => {
+    window.__candlelight.setHp(5)
+    window.__candlelight.beatBoss()
+  })
+  await page
+    .waitForFunction(
+      () => window.__candlelight.snapshot().scene === 'won',
+      null,
+      { timeout: 8000 }
+    )
+    .catch(() => {})
+  // The transition, then the word fading in.
+  await sleep(2600)
+  s = await snap()
+  check('felling Society shows the win screen', s.scene === 'won', s.scene)
   await shot('win')
 
   // Every cap under a real touch, at its centre and near its rim: the game

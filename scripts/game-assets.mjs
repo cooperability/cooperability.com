@@ -5,6 +5,10 @@ import { mkdir, readFile } from 'node:fs/promises'
 import sharp from 'sharp'
 
 const OUT = 'public/icons/game'
+// In every icon's file name. iOS keeps an icon per URL, a failed fetch
+// included, and then shows a letter instead: bump this when the art changes
+// or an install shows the letter, and update the manifest and page to match.
+const REV = 'v2'
 const SHELL = '#1b1b22'
 
 const screens = JSON.parse(
@@ -38,10 +42,10 @@ function icon(size, { padded = false } = {}) {
 
 await mkdir(OUT, { recursive: true })
 
-await icon(180).png().toFile(`${OUT}/apple-touch-icon.png`)
-await icon(192).png().toFile(`${OUT}/icon-192.png`)
-await icon(512).png().toFile(`${OUT}/icon-512.png`)
-await icon(512, { padded: true }).png().toFile(`${OUT}/icon-maskable-512.png`)
+await icon(180).png().toFile(`${OUT}/apple-touch-icon-${REV}.png`)
+await icon(192).png().toFile(`${OUT}/icon-192-${REV}.png`)
+await icon(512).png().toFile(`${OUT}/icon-512-${REV}.png`)
+await icon(512, { padded: true }).png().toFile(`${OUT}/icon-maskable-512-${REV}.png`)
 
 for (const { width, height, ratio } of screens) {
   for (const [w, h] of [
