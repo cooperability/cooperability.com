@@ -61,7 +61,9 @@ export class World {
   boss: Boss | null = null
   // A line across the top of the screen, counting down.
   banner: Banner | null = null
-  // What took the last candle, for the death screen.
+  // What took the last candle, for the defeat screen: the enemy, and for
+  // the boss the attack.
+  killer = ''
   cause = ''
   torches: Torch[] = []
   particles: Particle[] = []
@@ -424,7 +426,7 @@ export class World {
       if (s.burn > 0 && this.time % 3 === 0)
         this.puff(s.x + s.w / 2, s.y, 1, 0.6, PAL.E, 0.8)
       const bite = s.biteBox()
-      if (bite && overlaps(bite, p)) this.hurt(s.x + s.w / 2, 'bitten')
+      if (bite && overlaps(bite, p)) this.hurt(s.x + s.w / 2, 'SERPENT', '')
     }
     // The last serpent gone: with a hall on the map its boss rises, and
     // without one the run is won.
@@ -443,7 +445,7 @@ export class World {
 
   // Takes a candle unless the player is in mercy frames, rolling or mid
   // climb, and throws them away from `fromX`. True when it landed.
-  private hurt(fromX: number, cause: string) {
+  private hurt(fromX: number, killer: string, cause: string) {
     const p = this.player
     if (
       this.status !== 'play' ||
@@ -454,6 +456,7 @@ export class World {
       return false
     this.hp--
     this.invuln = INVULN
+    this.killer = killer
     this.cause = cause
     const away: -1 | 1 = p.x + p.w / 2 < fromX ? -1 : 1
     p.knock(away)
@@ -518,11 +521,14 @@ export class World {
       if (l) this.puff(l.x + l.w / 2, l.y, 1, 0.6, PAL.E, 0.8)
     }
     for (const box of b.contact())
-      if (overlaps(box, p) && this.hurt(box.x + box.w / 2, b.contactCause))
+      if (
+        overlaps(box, p) &&
+        this.hurt(box.x + box.w / 2, 'SOCIETY', b.contactCause)
+      )
         break
     for (const s of b.shots) {
       if (s.dead || !overlaps(shotBox(s), p)) continue
-      if (this.hurt(s.x + s.w / 2, s.cause) && s.kind !== 'wave') {
+      if (this.hurt(s.x + s.w / 2, 'SOCIETY', s.cause) && s.kind !== 'wave') {
         s.dead = true
         this.burst(s.x + s.w / 2, s.y + s.h / 2, 6, [PAL.C, PAL.B])
       }

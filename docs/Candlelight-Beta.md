@@ -53,6 +53,7 @@ home screen (full screen height, `navigator.standalone` true). On each it
 collects the in-page report:
 
 - the same scenarios
+- the title drawn as its own screen: the world renderer has not run
 - light falloff on the foreground darkness layer: 20px ahead of the visor at
   least 0.9 of full brightness, 52px ahead at least 0.45, 20px behind and
   104px ahead 0.25 ± 0.05 (the ambient)
@@ -109,8 +110,9 @@ Without `?qa`, none of it exists.
 
 Open every screenshot. For each, answer in the PR:
 
-- **Title.** Is CANDLELIGHT readable at a glance, on a phone too? Are the
-  iPhone install lines legible?
+- **Title.** Is CANDLELIGHT readable at a glance, on a phone too, and does
+  it read as dripping candle wax? Is it on black, with no world behind it,
+  and does PRESS START blink?
 - **About.** Is the panel readable over the screen, with the pad still free?
 - **Play.** Is the room ahead of the visor clearly lit and the room behind
   dark? Is the foreground dark but still parseable, with the skyline as lit
@@ -124,8 +126,10 @@ Open every screenshot. For each, answer in the PR:
   and does each thrown or falling letter stand out from the wall?
 - **HUD.** Are the five candles, the kill count and the boss bar legible and
   uncovered?
-- **Death and win.** Is the message readable, and does "press jump" blink?
-  Does a death to the boss name the attack that did it?
+- **Defeat and victory.** Does the blood wave wipe top to bottom before
+  DEFEAT fades in, with KILLED BY naming the enemy? Does victory fade to white
+  before VICTORY, YOU DEFEATED SOCIETY. and the fine print fade in? Does
+  "press jump" blink?
 - **Phone layouts.** Do the diamonds sit under the thumbs, toward the edges,
   without covering the screen, in both orientations? Is the portrait screen a
   square across the width?

@@ -129,7 +129,6 @@ export default function Handheld() {
     if (!canvas || !screen || !root || !ctx) return
 
     const game = createCandlelight()
-    game.standalone = isStandalone()
     gameRef.current = game
     let disposed = false
     // The beta script loads only when asked for, so players never download it.

@@ -799,7 +799,8 @@ export const SCENARIOS: Scenario[] = [
         play(g, 1)
       }
       if (sceneOf(g) !== 'dead') return `scene ${g.scene} at ${w.hp} HP`
-      if (!w.cause) return 'no cause for the death screen'
+      if (w.killer !== 'SOCIETY' || !w.cause)
+        return `killed by "${w.killer}", cause "${w.cause}"`
       const clock = w.clock
       play(g, SCREEN_DELAY + 2)
       play(g, 1, {}, { a: true })
@@ -923,6 +924,7 @@ export const SCENARIOS: Scenario[] = [
       w.player.y = s.y + s.h - PLAYER_H
       for (let i = 0; i < 240 && sceneOf(g) === 'play'; i++) play(g, 1)
       if (sceneOf(g) !== 'dead') return `scene is ${g.scene} at hp ${w.hp}`
+      if (w.killer !== 'SERPENT') return `killed by "${w.killer}"`
       play(g, SCREEN_DELAY + 2)
       play(g, 1, {}, { a: true })
       const fresh = g.world

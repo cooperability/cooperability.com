@@ -19,6 +19,8 @@ its gate.
 | `src/components/game/input.ts`              | Keyboard map, gamepad map, D-pad and face-diamond geometry, `Controls` aggregation         |
 | `src/components/game/loop.ts`               | Fixed 60 Hz update with a capped backlog, render on every animation frame                  |
 | `src/components/game/sandbox/game.ts`       | The `Game` contract (`step`, `draw`, `pause`) and the title, play, death and win scenes    |
+| `src/components/game/sandbox/title.ts`      | The title screen: CANDLELIGHT in dripping candle wax, lit wicks, PRESS START               |
+| `src/components/game/sandbox/ending.ts`     | The defeat (blood wave) and victory (fade to white) transitions and screens                |
 | `src/components/game/sandbox/world.ts`      | One run with no canvas: player, snakes, torches, health, camera, particles                 |
 | `src/components/game/sandbox/render.ts`     | Draws a `World`: scene, the darkness layer and its lights, bloom, HUD, debug boxes         |
 | `src/components/game/sandbox/snake.ts`      | The serpent: slither, climb walls, coil and lunge, strike, burn. `SNAKE` holds its numbers |
@@ -178,6 +180,35 @@ navigation keeps the previous page's head, so iOS would save the site's
 manifest (`start_url: /`) and the icon would open the homepage. The manifest's
 scope is `/demos/candlelight`, and the exit link is hidden in standalone mode,
 so an installed copy reaches no other page. `/demos/game` redirects here.
+
+The icon files carry a version in their names (`apple-touch-icon-v2.png`).
+iOS keeps a home-screen icon per URL, a failed fetch included, and from then
+on draws the title's first letter instead: that is how an install came to
+show a "C" in place of the handheld. The page also declares the icon's
+`sizes`. A new name forces a fresh fetch, so bump `REV` in
+`scripts/game-assets.mjs`, regenerate, and update the manifest and page to
+match whenever the art changes or an install shows the letter again.
+
+## Title and end screens
+
+The game opens on its title, and a launch from the home screen opens there
+too unless a run is still live in memory. The title is its own screen, with
+no world drawn behind it: CANDLELIGHT cast in bone wax on black, each letter
+a candle with a flickering wick, wax swelling off the undersides of the
+strokes and dropping into a pool below, and a blinking PRESS START. Any button
+but select starts. The install steps live in the select menu.
+
+A run ends on one of two screens, timed by `ENDING` in `ending.ts`. The world
+holds for half a second, the transition takes a second, and the word fades
+in over half a second. Only then does a press count (`SCREEN_DELAY`), so a
+held button cannot skip it.
+
+- **Defeat.** A wave of blood with drips running ahead of it wipes the screen
+  top to bottom. Then DEFEAT and KILLED BY: SERPENT or SOCIETY fade in, and
+  for SOCIETY the attack that did it (SOCIETY BROKE YOUR SPIRIT).
+- **Victory.** The screen fades to white, then VICTORY, YOU DEFEATED
+  SOCIETY. and, in fine print, THIS MAKES YOU ENLIGHTENED. fade in, with the
+  run's time.
 
 ## Art
 

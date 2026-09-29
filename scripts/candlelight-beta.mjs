@@ -152,6 +152,11 @@ async function run(browser, profile) {
   let s = await snap()
   check('opens on the title', s.scene === 'title', s.scene)
   check(
+    'the title is its own screen, with no world drawn behind it',
+    await page.evaluate(() => window.__candlelight.game.shade === null),
+    'the world renderer has not run'
+  )
+  check(
     'layout mode matches the device',
     s.mode === (profile.touch ? 'touch' : 'external'),
     s.mode
@@ -255,7 +260,8 @@ async function run(browser, profile) {
     .catch(() => {})
   s = await snap()
   check('a bite at 1 HP ends the run', s.scene === 'dead', s.scene)
-  await sleep(1600)
+  // The transition, then the word fading in.
+  await sleep(2600)
   await shot('death')
   await press('a')
   await sleep(200)
@@ -321,7 +327,8 @@ async function run(browser, profile) {
       { timeout: 8000 }
     )
     .catch(() => {})
-  await sleep(1600)
+  // The transition, then the word fading in.
+  await sleep(2600)
   s = await snap()
   check('felling Society shows the win screen', s.scene === 'won', s.scene)
   await shot('win')

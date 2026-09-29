@@ -1,9 +1,11 @@
 import type { Frame } from '../input'
 import { VIEW_H, VIEW_W } from './background'
+import { drawDefeat, drawVictory, ENDING } from './ending'
 import { drawText } from './font'
 import { SANDBOX_MAP } from './level'
 import { PAL } from './pixels'
 import { createRenderer, type Renderer } from './render'
+import { drawTitle } from './title'
 import { World } from './world'
 
 export const WIDTH = VIEW_W
@@ -20,9 +22,9 @@ export const SQUARE = VIEW_H
 
 export type Scene = 'title' | 'play' | 'dead' | 'won'
 
-// Updates before a death or win screen accepts a press, so a button still
-// held from play does not skip it.
-export const SCREEN_DELAY = 50
+// Updates before a death or win screen accepts a press: once its word is
+// up, so a button still held from play cannot skip it.
+export const SCREEN_DELAY = ENDING.hold + ENDING.sweep + ENDING.text
 
 export type Candlelight = Game & {
   readonly scene: Scene
@@ -35,9 +37,8 @@ export type Candlelight = Game & {
   view: number
   // Hitbox boxes, for the beta script.
   debug: boolean
-  // Launched from the home screen, so the title skips the install steps.
-  standalone: boolean
-  // The darkness layer as last drawn, or null before the first draw.
+  // The darkness layer as last drawn, or null until a run is first drawn:
+  // the title never draws the world.
   readonly shade: HTMLCanvasElement | null
 }
 
@@ -56,7 +57,6 @@ export function createCandlelight(): Candlelight {
   let about = false
   let debug = false
   let view = WIDTH
-  let standalone = false
   let render: Renderer | null = null
 
   const begin = () => {
@@ -98,12 +98,6 @@ export function createCandlelight(): Candlelight {
     set debug(on) {
       debug = on
     },
-    get standalone() {
-      return standalone
-    },
-    set standalone(on) {
-      standalone = on
-    },
     get shade() {
       return render?.shade ?? null
     },
@@ -139,72 +133,47 @@ export function createCandlelight(): Candlelight {
     },
 
     draw(ctx) {
-      render ??= createRenderer()
-      render.draw(ctx, world, { debug, hud: scene === 'play' })
       const cx = view / 2
-      // The narrow view halves the big type so every line still fits.
-      const big = view < WIDTH ? 1 : 2
-      const blink = (world.time >> 5) % 2 === 0
-
+      // A proper title: its own screen, with no world behind it.
       if (scene === 'title') {
-        ctx.fillStyle = 'rgba(3,2,8,0.45)'
-        ctx.fillRect(0, 0, VIEW_W, VIEW_H)
-        // An ember shadow under the title, flickering like a wick.
-        const flicker = (world.time >> 3) % 5 === 0 ? 0 : 1
-        drawText(ctx, 'CANDLELIGHT', cx + 1, 41 + flicker, PAL.r, big + 1)
-        drawText(ctx, 'CANDLELIGHT', cx, 40, PAL.E, big + 1)
-        drawText(ctx, 'SLAY THE FIVE SERPENTS', cx, 72, PAL.b)
-        if (blink) drawText(ctx, 'PRESS ANY BUTTON', cx, 96, PAL.B)
-        // Installed already: nothing left to explain.
-        if (!standalone) {
-          drawText(ctx, 'ON IPHONE: TAP SHARE THEN', cx, 128, PAL.T)
-          drawText(ctx, 'ADD TO HOME SCREEN TO PLAY', cx, 138, PAL.T)
-          drawText(ctx, 'FULL SCREEN AND OFFLINE', cx, 148, PAL.T)
-        }
-        drawText(ctx, 'SELECT: ABOUT', cx, 166, PAL.t)
+        drawTitle(ctx, world.time, view, VIEW_H)
         return
       }
+      render ??= createRenderer()
+      render.draw(ctx, world, { debug, hud: scene === 'play' })
       if (scene === 'play' && paused) {
         ctx.fillStyle = 'rgba(11,10,16,0.7)'
         ctx.fillRect(0, 0, VIEW_W, VIEW_H)
         drawText(ctx, 'PAUSED', cx, VIEW_H / 2 - 4, PAL.B)
         return
       }
-      if (
-        (scene === 'dead' || scene === 'won') &&
-        world.statusT > SCREEN_DELAY
-      ) {
-        const fade = Math.min(1, (world.statusT - SCREEN_DELAY) / 30)
-        ctx.fillStyle = `rgba(3,2,8,${0.75 * fade})`
-        ctx.fillRect(0, 0, VIEW_W, VIEW_H)
-        if (scene === 'dead' && world.boss?.awake) {
-          drawText(ctx, 'SOCIETY WINS', cx, 56, PAL.C, big)
-          drawText(ctx, world.cause, cx, 86, PAL.B)
-          drawText(ctx, 'YOU RISE AT THE GATE', cx, 100, PAL.b)
-          if (blink) drawText(ctx, 'PRESS JUMP TO TRY AGAIN', cx, 128, PAL.B)
-        } else if (scene === 'dead') {
-          drawText(ctx, 'THE DARK TAKES YOU', cx, 62, PAL.C, big)
-          drawText(
-            ctx,
-            `${world.kills} OF ${world.total} SERPENTS SLAIN`,
-            cx,
-            92,
-            PAL.b
-          )
-          if (blink) drawText(ctx, 'PRESS JUMP TO RISE AGAIN', cx, 128, PAL.B)
-        } else if (world.boss) {
-          drawText(ctx, 'SOCIETY HAS FALLEN', cx, 44, PAL.E, big)
-          drawText(ctx, 'THE CANDLES HOLD', cx, 72, PAL.B)
-          drawText(ctx, `ALL ${world.total} SERPENTS SLAIN`, cx, 84, PAL.b)
-          drawText(ctx, `TIME ${clock(world.clock)}`, cx, 96, PAL.b)
-          if (blink) drawText(ctx, 'PRESS JUMP TO PLAY AGAIN', cx, 128, PAL.B)
-        } else {
-          drawText(ctx, 'THE CANDLES HOLD', cx, 52, PAL.E, big)
-          drawText(ctx, `ALL ${world.total} SERPENTS SLAIN`, cx, 82, PAL.B)
-          drawText(ctx, `TIME ${clock(world.clock)}`, cx, 96, PAL.b)
-          if (blink) drawText(ctx, 'PRESS JUMP TO PLAY AGAIN', cx, 128, PAL.B)
-        }
+      const t = world.statusT
+      if (scene === 'dead') {
+        const boss = !!world.boss?.awake
+        drawDefeat(
+          ctx,
+          t,
+          view,
+          VIEW_H,
+          world.killer,
+          boss ? world.cause : '',
+          boss ? 'PRESS JUMP TO TRY AGAIN' : 'PRESS JUMP TO RISE AGAIN',
+          world.time
+        )
       }
+      if (scene === 'won')
+        drawVictory(
+          ctx,
+          t,
+          view,
+          VIEW_H,
+          world.boss
+            ? 'YOU DEFEATED SOCIETY.'
+            : `ALL ${world.total} SERPENTS SLAIN`,
+          world.boss ? 'THIS MAKES YOU ENLIGHTENED.' : '',
+          clock(world.clock),
+          world.time
+        )
     },
 
     pause() {
