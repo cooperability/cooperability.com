@@ -101,6 +101,25 @@ describe('Handheld', () => {
     expect(root(container)).toHaveAttribute('data-mode', 'touch')
   })
 
+  it('opens the menu on select, with a debug checkbox Space can toggle', async () => {
+    render(<Handheld />)
+    fireEvent.keyDown(window, { code: 'Backspace' })
+    fireEvent.keyUp(window, { code: 'Backspace' })
+    const box = await screen.findByRole('checkbox', { name: /debug view/i })
+    expect(box).not.toBeChecked()
+    fireEvent.click(box)
+    expect(box).toBeChecked()
+    // Space on the checkbox goes to it, not to the game as a jump that
+    // would close the menu.
+    const press = new KeyboardEvent('keydown', {
+      code: 'Space',
+      bubbles: true,
+      cancelable: true,
+    })
+    box.dispatchEvent(press)
+    expect(press.defaultPrevented).toBe(false)
+  })
+
   it('offers Add to Home Screen in iOS Safari, once', () => {
     Object.defineProperty(navigator, 'standalone', {
       value: false,

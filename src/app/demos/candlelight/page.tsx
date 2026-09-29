@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next'
+import HardLoad from '@/src/components/HardLoad'
 import { GAME_ASSET_DIR, splashImages } from '@/src/components/game/splash'
 import GameClient from './game-client'
 
@@ -32,5 +33,10 @@ export const viewport: Viewport = {
 }
 
 export default function GamePage() {
-  return <GameClient />
+  return (
+    <>
+      <HardLoad />
+      <GameClient />
+    </>
+  )
 }

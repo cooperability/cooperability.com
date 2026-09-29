@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next'
+import HardLoad from '@/src/components/HardLoad'
 import PromptComposerClient from './prompt-composer-client'
 
 // Overrides the root layout's manifest so this route installs as its own PWA.
@@ -25,6 +26,7 @@ export const viewport: Viewport = {
 export default function PromptComposerPage() {
   return (
     <div className="min-h-screen">
+      <HardLoad />
       <PromptComposerClient />
     </div>
   )

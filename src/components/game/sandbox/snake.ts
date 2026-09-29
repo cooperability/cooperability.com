@@ -61,6 +61,8 @@ export class Snake {
   burn = 0
   hurtT = 0
   noticed = false
+  // Updates spent in the current state, for the debug view.
+  age = 0
   // Head positions, newest first, which the body follows when drawn.
   trail: P[] = []
   private t = 0
@@ -148,7 +150,9 @@ export class Snake {
   }
 
   step(target: Box): SnakeEvent[] {
+    const before = this.state
     this.update(target)
+    this.age = this.state === before ? this.age + 1 : 0
     const out = this.events
     this.events = []
     return out
@@ -358,6 +362,9 @@ export class Snake {
 }
 
 // Crimson and gold bands, a warning that reads even in the dark.
+// The debug view's label over a serpent: its state and updates spent in it.
+export const debugLabel = (s: Snake) => `${s.state} ${s.age}`
+
 const SCALE = [PAL.C, PAL.G]
 // Pixels between body joints, so the body keeps its length at any speed.
 const SPACING = 2

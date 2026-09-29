@@ -39,8 +39,10 @@ pnpm exec playwright install chromium   # once per machine
 node scripts/candlelight-beta.mjs --url http://localhost:3100
 ```
 
-The script opens `/demos/candlelight?qa=1` at 1440×900, 1280×720, iPhone 15 portrait
-and landscape, and Pixel 7 portrait. On each it collects the in-page report:
+The script opens `/demos/candlelight?qa=1` at 1440×900, 1280×720, iPhone 15
+portrait and landscape, Pixel 7 portrait, and iPhone 15 as launched from the
+home screen (full screen height, `navigator.standalone` true). On each it
+collects the in-page report:
 
 - the same scenarios
 - light falloff on the foreground darkness layer: 20px ahead of the visor at
@@ -51,8 +53,9 @@ and landscape, and Pixel 7 portrait. On each it collects the in-page report:
   touch diamonds at least 88px and clear of the screen
 - every cap: on screen, clear of the picture, at least 44px, nothing on top
   of any of its pixels, and every pixel read by the shell as that button
-  alone. In portrait, the diamonds within 16px of the edges and the screen a
-  square at least 85% of the width
+  alone. In portrait, the diamonds within 16px of the edges, the screen a
+  square at least 85% of the width, and the control group centred within
+  24px of the middle of the space under the screen
 - 3.5 seconds of live frame gaps, where more than 2% of frames over 34ms
   fails
 - microseconds per update and per draw
@@ -64,13 +67,19 @@ It then plays through with real keys, or real touches on phones:
 3. walk
 4. throw a torch
 5. pause and resume with start
-6. meet a serpent
+6. meet a serpent, then tick Debug view in the select menu by real tap or
+   click, close the menu with B, resume with start, and screenshot the labels
 7. die at 1 HP and rise again
 8. win
 9. on phones, a real touch on every cap at its centre and eight points near
    its rim: the game must hear that button alone, the cap must be bouncing,
    and the press must reach the game within 34ms (two frames)
 10. on desktop, switch the key legend
+
+Last, it opens `/demos` and navigates client-side to each installable app
+(Candlelight, Prompt Composer, Mandelbrot Explorer, Opioid Converter). Each
+must reload as its own document with a manifest whose `start_url` is its own
+path, so an icon added from it opens the app, never the site root.
 
 It screenshots each step and writes `report.md`, `report.json` and PNGs to
 the `--out` directory (a temp directory by default). It exits 1 on any

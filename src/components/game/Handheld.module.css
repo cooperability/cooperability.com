@@ -135,10 +135,27 @@
 /* Portrait handheld: a square screen edge to edge, as tall as it can be
    while the controls below keep room for a thumb. */
 @media (orientation: portrait) {
+  /* The controls sit as one group, centred in the space under the screen,
+     with equal spacer rows above and below. Row gaps would add to the
+     spacers on short screens, so margins space the group instead. */
   .root:not([data-mode='external']) {
+    grid-template:
+      'screen screen' auto
+      '. .' minmax(0, 1fr)
+      'dpad face' auto
+      'meta meta' auto
+      '. .' minmax(0, 1fr) / 1fr 1fr;
     padding-left: max(8px, env(safe-area-inset-left));
     padding-right: max(8px, env(safe-area-inset-right));
-    column-gap: 28px;
+    gap: 0 28px;
+  }
+
+  .root:not([data-mode='external']) .screen {
+    margin-bottom: 16px;
+  }
+
+  .root:not([data-mode='external']) .meta {
+    margin-top: 16px;
   }
 
   .root:not([data-mode='external']) .screen {
@@ -195,13 +212,6 @@
 .dpad {
   grid-area: dpad;
   justify-self: start;
-}
-
-/* Portrait: sit the diamonds low, where thumbs rest, like a real handheld. */
-@media (orientation: portrait) {
-  .diamond {
-    align-self: end;
-  }
 }
 
 .face {
@@ -324,6 +334,23 @@
   font-size: 16px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
+}
+
+/* The whole row is the tap target, so a thumb can hit it on a phone. */
+.debug {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  margin-bottom: 4px;
+  color: var(--glyph-held);
+  cursor: pointer;
+}
+
+.debug input {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--ember);
 }
 
 .about h3 {
