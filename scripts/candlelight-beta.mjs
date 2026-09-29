@@ -1,4 +1,4 @@
-// Beta pass for /demos/game on desktop and phone viewports. Opens the game
+// Beta pass for /demos/candlelight on desktop and phone viewports. Opens the game
 // with ?qa=1, which runs the in-game scenarios and measures frame timing and
 // layout, then plays through with real keys or touches, screenshots each
 // screen, and writes report.md for a human or Claude to read.
@@ -7,7 +7,7 @@
 //   node scripts/candlelight-beta.mjs [--url http://localhost:3000] [--out dir]
 //
 // Needs Playwright's Chromium once: pnpm exec playwright install chromium
-/* global window */
+/* global window, document */
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -125,7 +125,9 @@ async function run(browser, profile) {
     await page.keyboard.up(key)
   }
 
-  await page.goto(`${base}/demos/game?qa=1`, { waitUntil: 'networkidle' })
+  await page.goto(`${base}/demos/candlelight?qa=1`, {
+    waitUntil: 'networkidle',
+  })
   await page.waitForFunction(() => window.__candlelightQA?.done, null, {
     timeout: 30000,
   })
@@ -140,10 +142,23 @@ async function run(browser, profile) {
     s.mode
   )
 
-  await press('a')
+  // Select opens About on the title, and a press closes it.
+  if (profile.touch) await hold('[data-button="select"]', 0.5, 0.5, 80)
+  else await page.keyboard.press('Backspace')
   await sleep(200)
   s = await snap()
-  check('jump leaves the title', s.scene === 'play', s.scene)
+  check('select opens About', s.about && s.scene === 'title', s.about)
+  await shot('about')
+  await press('b')
+  await sleep(200)
+  s = await snap()
+  check('a press closes About', !s.about && s.scene === 'title', s.scene)
+
+  // Any button starts, not just jump.
+  await press('x')
+  await sleep(200)
+  s = await snap()
+  check('any button leaves the title', s.scene === 'play', s.scene)
 
   const x0 = s.player.x
   await walk('right', 1200)
@@ -164,6 +179,18 @@ async function run(browser, profile) {
     `${s.torches} torches`
   )
   await shot('torch')
+
+  if (profile.touch) await hold('[data-button="start"]', 0.5, 0.5, 80)
+  else await page.keyboard.press('Enter')
+  await sleep(200)
+  s = await snap()
+  check('start pauses', s.paused, s.paused)
+  await shot('paused')
+  if (profile.touch) await hold('[data-button="start"]', 0.5, 0.5, 80)
+  else await page.keyboard.press('Enter')
+  await sleep(200)
+  s = await snap()
+  check('start again resumes', !s.paused, s.paused)
 
   // Stand near the cloister snake and let it come.
   await page.evaluate(() => {
@@ -217,6 +244,76 @@ async function run(browser, profile) {
   check('five kills show the win screen', s.scene === 'won', s.scene)
   await shot('win')
 
+  // Every cap under a real touch, at its centre and near its rim: the game
+  // must hear that button alone, the cap must bounce, and the press must
+  // reach the game within two frames.
+  if (profile.touch) {
+    const caps = await page.$$eval('[data-button]', (els) =>
+      els.map((el) => el.dataset.button)
+    )
+    const ring = [[0, 0]]
+    for (let k = 0; k < 8; k++) {
+      const a = (k * Math.PI) / 4
+      ring.push([0.5 + Math.cos(a) * 0.4, 0.5 + Math.sin(a) * 0.4])
+    }
+    for (const button of caps) {
+      const bad = []
+      let slowest = 0
+      for (const [fx, fy] of ring) {
+        const point = await page.evaluate(
+          ([b, fx, fy]) => {
+            const r = document
+              .querySelector(`[data-button="${b}"]`)
+              .getBoundingClientRect()
+            window.__candlelight.presses.length = 0
+            return {
+              x: r.left + r.width * (fx || 0.5),
+              y: r.top + r.height * (fy || 0.5),
+            }
+          },
+          [button, fx, fy]
+        )
+        await cdp.send('Input.dispatchTouchEvent', {
+          type: 'touchStart',
+          touchPoints: [point],
+        })
+        const bounced = await page.evaluate(
+          (b) =>
+            document.querySelector(`[data-button="${b}"]`).getAnimations()
+              .length > 0,
+          button
+        )
+        await sleep(60)
+        await cdp.send('Input.dispatchTouchEvent', {
+          type: 'touchEnd',
+          touchPoints: [],
+        })
+        await sleep(40)
+        const got = await page.evaluate(() => window.__candlelight.presses)
+        const heard = [...new Set(got.map((p) => p.button))]
+        if (heard.length !== 1 || heard[0] !== button)
+          bad.push(`${heard.join('+') || 'nothing'} at ${fx},${fy}`)
+        if (!bounced) bad.push(`no bounce at ${fx},${fy}`)
+        for (const p of got) slowest = Math.max(slowest, p.after)
+      }
+      check(
+        `a real touch anywhere on ${button} presses ${button} alone and bounces it`,
+        bad.length === 0,
+        bad.length ? bad.join('; ') : `slowest ${slowest.toFixed(0)}ms`
+      )
+      check(
+        `${button} reaches the game within two frames`,
+        slowest <= 34,
+        `${slowest.toFixed(0)}ms`
+      )
+    }
+    // The last caps pressed may have left About open or the run paused.
+    await page.evaluate(() => {
+      const g = window.__candlelight.game
+      g.closeAbout()
+    })
+  }
+
   if (!profile.touch) {
     await page.keyboard.press('ArrowLeft')
     const legend = await page
@@ -261,7 +358,7 @@ await browser.close()
 const lines = [
   '# Candlelight beta report',
   '',
-  `Target: ${base}/demos/game?qa=1`,
+  `Target: ${base}/demos/candlelight?qa=1`,
   '',
 ]
 let failed = 0

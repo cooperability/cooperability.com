@@ -4,6 +4,7 @@ import {
   faceFromPoint,
   FACE_LAYOUT,
   FACE_REACH,
+  CAP_RADIUS,
   KEY_MAP,
   SCHEMES,
   schemeOf,
@@ -35,6 +36,42 @@ describe('dpadFromPoint', () => {
     // Pointer capture delivers coordinates outside the element.
     expect(dpadFromPoint(-3, 0.2)).toEqual(['left'])
   })
+})
+
+// Every point inside a drawn cap, in its zone's 0..1 space, where the CSS
+// draws it: the same centres for both diamonds.
+function capPoints(c: { x: number; y: number }) {
+  const pts: [number, number][] = []
+  for (let i = -20; i <= 20; i++)
+    for (let j = -20; j <= 20; j++) {
+      const [dx, dy] = [(i / 20) * CAP_RADIUS, (j / 20) * CAP_RADIUS]
+      if (Math.hypot(dx, dy) < CAP_RADIUS) pts.push([c.x + dx, c.y + dy])
+    }
+  return pts
+}
+
+describe('caps', () => {
+  const ARMS = { up: 'y', left: 'x', right: 'b', down: 'a' } as const
+
+  it.each(Object.entries(ARMS))(
+    'presses %s alone anywhere on its D-pad cap',
+    (arm, slot) => {
+      for (const [x, y] of capPoints(FACE_LAYOUT[slot]))
+        expect([x, y, dpadFromPoint(x * 2 - 1, y * 2 - 1)]).toEqual([
+          x,
+          y,
+          [arm],
+        ])
+    }
+  )
+
+  it.each(['a', 'b', 'x', 'y'] as const)(
+    'presses %s alone anywhere on its face cap',
+    (b) => {
+      for (const [x, y] of capPoints(FACE_LAYOUT[b]))
+        expect([x, y, faceFromPoint(x, y)]).toEqual([x, y, [b]])
+    }
+  )
 })
 
 describe('faceFromPoint', () => {
@@ -197,6 +234,15 @@ describe('Controls', () => {
     controls.key('start', false)
     expect(sorted2(controls.read([]).pressed)).toEqual(['start'])
     expect(controls.read([]).held.size).toBe(0)
+  })
+
+  it('reports a lift and a fresh tap between two updates as a new press', () => {
+    const controls = new Controls()
+    controls.touch(1, ['a'])
+    controls.read([])
+    controls.lift(1)
+    controls.touch(2, ['a'])
+    expect(sorted2(controls.read([]).pressed)).toEqual(['a'])
   })
 
   it('reports a held button as pressed on its first update only', () => {

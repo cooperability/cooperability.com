@@ -357,7 +357,8 @@ export class Snake {
   }
 }
 
-const SCALE = [PAL.m, PAL.M, PAL.m, PAL.s]
+// Crimson and gold bands, a warning that reads even in the dark.
+const SCALE = [PAL.C, PAL.G]
 // Pixels between body joints, so the body keeps its length at any speed.
 const SPACING = 2
 
@@ -400,10 +401,20 @@ export function drawSnake(
 ) {
   const fading = s.state === 'dead'
   if (fading && s.dying <= 0) return
-  const flash = s.hurtT > 0 && s.hurtT % 4 < 2
+  // A hit blinks bone white. A coil strobes flame white, the tell that a
+  // lunge is coming.
+  const flash =
+    (s.hurtT > 0 && s.hurtT % 4 < 2) ||
+    (s.state === 'coil' && (time >> 2) % 2 === 0)
   // Dissolving into embers from the tail up.
   const color = (c: string, i = 0) =>
-    flash ? PAL.B : fading && hash(i, time >> 2, 5) > s.dying ? PAL.e : c
+    flash
+      ? s.state === 'coil'
+        ? PAL.y
+        : PAL.B
+      : fading && hash(i, time >> 2, 5) > s.dying
+        ? PAL.e
+        : c
   const segs = 9
   const head = { x: s.headX, y: s.headY }
   let raise = 0
@@ -445,11 +456,11 @@ export function drawSnake(
   const hx = Math.round(head.x)
   const hy = Math.round(head.y - raise)
   const f = s.wall ? 0 : s.facing
-  ctx.fillStyle = color(PAL.M)
+  ctx.fillStyle = color(PAL.C)
   ctx.fillRect(hx - 2, hy - 1, 4, 3)
-  ctx.fillStyle = color(PAL.m)
+  ctx.fillStyle = color(PAL.R)
   ctx.fillRect(hx - 2 + (f > 0 ? 3 : -1), hy, 1, 2)
-  ctx.fillStyle = s.noticed ? PAL.E : PAL.b
+  ctx.fillStyle = s.noticed ? PAL.y : PAL.k
   ctx.fillRect(hx + (f >= 0 ? 0 : -1), hy - 1, 1, 1)
   if (s.state === 'strike' && s.progress > 0.35 && s.progress < 0.65) {
     // Fangs out at full reach.

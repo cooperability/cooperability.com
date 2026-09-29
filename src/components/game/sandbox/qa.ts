@@ -1,4 +1,13 @@
-import type { Button, ButtonSet, Frame } from '../input'
+import {
+  CAP_RADIUS,
+  Controls,
+  dpadFromPoint,
+  faceFromPoint,
+  FACE_LAYOUT,
+  type Button,
+  type ButtonSet,
+  type Frame,
+} from '../input'
 import {
   SCREEN_DELAY,
   WIDTH,
@@ -8,14 +17,15 @@ import {
   type Scene,
 } from './game'
 import { rig } from './hero'
+import { PAL } from './pixels'
 import { SANDBOX_MAP, TILE } from './level'
 import { PLAYER_H } from './player'
-import { SNAKE } from './snake'
+import { drawSnake, SNAKE, type Snake } from './snake'
 import { World } from './world'
 
 // The beta-test script. Each scenario plays a fresh world through real
 // inputs and returns null on a pass or what went wrong. Jest runs these on
-// every commit; /demos/game?qa=1 runs them in the browser too, with frame
+// every commit; /demos/candlelight?qa=1 runs them in the browser too, with frame
 // timing and layout checks, and exposes the live game for a driver.
 
 type Hold = Partial<Record<Button, boolean>>
@@ -58,6 +68,36 @@ function room(edit: (g: string[][]) => void = () => {}) {
 
 const FLOOR = 9 * TILE
 
+// The colours one drawSnake call paints with, from a context that only
+// records.
+function snakeColours(s: Snake, time: number): Set<string> {
+  const seen = new Set<string>()
+  const ctx = {
+    fillStyle: '',
+    fillRect() {
+      seen.add(this.fillStyle)
+    },
+  }
+  drawSnake(ctx as unknown as CanvasRenderingContext2D, s, time)
+  return seen
+}
+
+// The D-pad draws its arms where the face diamond draws its buttons.
+const CAPS: [Button, keyof typeof FACE_LAYOUT, 'dpad' | 'face'][] = [
+  ['up', 'y', 'dpad'],
+  ['left', 'x', 'dpad'],
+  ['right', 'b', 'dpad'],
+  ['down', 'a', 'dpad'],
+  ['y', 'y', 'face'],
+  ['x', 'x', 'face'],
+  ['b', 'b', 'face'],
+  ['a', 'a', 'face'],
+]
+
+// What a touch at (x, y) in a zone's 0..1 space presses, as the shell reads it.
+const zoneReads = (zone: 'dpad' | 'face', x: number, y: number) =>
+  zone === 'dpad' ? dpadFromPoint(x * 2 - 1, y * 2 - 1) : faceFromPoint(x, y)
+
 export type Scenario = { name: string; run(): string | null }
 
 export const SCENARIOS: Scenario[] = [
@@ -70,6 +110,112 @@ export const SCENARIOS: Scenario[] = [
       if (sceneOf(g) !== 'title') return 'left the title without a press'
       play(g, 1, {}, { a: true })
       return sceneOf(g) === 'play' ? null : `jump led to ${g.scene}`
+    },
+  },
+  {
+    name: 'title: any button but select starts a run',
+    run() {
+      const buttons: Button[] = [
+        'a',
+        'b',
+        'x',
+        'y',
+        'up',
+        'down',
+        'left',
+        'right',
+        'start',
+      ]
+      for (const b of buttons) {
+        const g = createCandlelight()
+        play(g, 1, {}, { [b]: true })
+        if (sceneOf(g) !== 'play') return `${b} left the title on ${g.scene}`
+      }
+      return null
+    },
+  },
+  {
+    name: 'about: select opens it on the title instead of starting',
+    run() {
+      const g = createCandlelight()
+      play(g, 1, {}, { select: true })
+      if (!g.about) return 'select did not open About'
+      if (sceneOf(g) !== 'title') return `select started ${g.scene}`
+      play(g, 1, {}, { b: true })
+      if (g.about) return 'a button did not close About'
+      return sceneOf(g) === 'title' ? null : 'the closing press also started'
+    },
+  },
+  {
+    name: 'about: select mid-run freezes the world, and it stays paused after',
+    run() {
+      const g = createCandlelight()
+      play(g, 1, {}, { a: true })
+      play(g, 1, {}, { select: true })
+      if (!g.about) return 'select did not open About'
+      const x = g.world.player.x
+      play(g, 60, { right: true })
+      if (g.world.player.x !== x) return 'the world moved behind About'
+      play(g, 1, {}, { x: true })
+      if (g.about || !g.paused) return `about ${g.about}, paused ${g.paused}`
+      play(g, 1, {}, { start: true })
+      play(g, 30, { right: true })
+      return g.world.player.x > x ? null : 'start did not resume'
+    },
+  },
+  {
+    name: 'serpent: crimson and gold bands',
+    run() {
+      const w = new World(room((g) => (g[8][14] = 's')))
+      play(w, 10)
+      const c = snakeColours(w.snakes[0], 1)
+      return c.has(PAL.C) && c.has(PAL.G) ? null : `painted ${[...c].join(' ')}`
+    },
+  },
+  {
+    name: 'serpent: strobes while coiling to lunge',
+    run() {
+      const w = new World(room((g) => (g[8][7] = 's')))
+      const s = w.snakes[0]
+      for (let i = 0; i < 200 && s.state !== 'coil'; i++) play(w, 1)
+      if (s.state !== 'coil') return 'never coiled'
+      let lit = 0
+      let dark = 0
+      for (let t = 0; t < 16; t++) {
+        const c = snakeColours(s, t)
+        if (c.has(PAL.y) && !c.has(PAL.C)) lit++
+        else if (c.has(PAL.C)) dark++
+      }
+      return lit && dark ? null : `${lit} lit and ${dark} plain frames`
+    },
+  },
+  {
+    name: 'controls: every pixel of every on-screen cap presses it alone',
+    run() {
+      for (const [button, slot, zone] of CAPS) {
+        const c = FACE_LAYOUT[slot]
+        for (let i = -12; i <= 12; i++)
+          for (let j = -12; j <= 12; j++) {
+            const dx = (i / 12) * CAP_RADIUS
+            const dy = (j / 12) * CAP_RADIUS
+            if (Math.hypot(dx, dy) >= CAP_RADIUS) continue
+            const got = zoneReads(zone, c.x + dx, c.y + dy)
+            if (got.length !== 1 || got[0] !== button)
+              return `${zone} ${button} at ${(c.x + dx).toFixed(2)},${(c.y + dy).toFixed(2)} read ${got.join('+') || 'nothing'}`
+          }
+      }
+      return null
+    },
+  },
+  {
+    name: 'controls: a lift and a fresh tap between updates is a new press',
+    run() {
+      const c = new Controls()
+      c.touch(1, ['a'])
+      c.read([])
+      c.lift(1)
+      c.touch(2, ['a'])
+      return c.read([]).pressed.has('a') ? null : 'the second tap was lost'
     },
   },
   {
@@ -523,12 +669,16 @@ function layoutChecks(canvas: HTMLCanvasElement, root: HTMLElement): Check[] {
     c.left >= -1 && c.top >= -1 && c.right <= vw + 1 && c.bottom <= vh + 1,
     `${Math.round(c.width)}x${Math.round(c.height)} at ${Math.round(c.left)},${Math.round(c.top)} in ${vw}x${vh}`
   )
-  const scale = c.width / WIDTH
+  // Whole in CSS pixels, or in device pixels for the portrait square.
+  const scale = c.width / canvas.width
+  const device = scale * window.devicePixelRatio
   add(
     'pixels are square and whole where there is room',
     Math.abs(c.height / HEIGHT - scale) < 0.01 &&
-      (scale < 2 || Math.abs(scale - Math.round(scale)) < 0.01),
-    `scale ${scale.toFixed(2)}`
+      (scale < 2 ||
+        Math.abs(scale - Math.round(scale)) < 0.01 ||
+        Math.abs(device - Math.round(device)) < 0.01),
+    `scale ${scale.toFixed(2)}, ${device.toFixed(2)} device pixels`
   )
   add(
     'no horizontal scroll',
@@ -578,8 +728,97 @@ function layoutChecks(canvas: HTMLCanvasElement, root: HTMLElement): Check[] {
         `${Math.round((overlap / (c.width * c.height)) * 100)}% of the screen covered`
       )
     }
+    capChecks(root, add)
+    if (vh > vw) {
+      const dpad = root
+        .querySelector('[class*="dpad"]')!
+        .getBoundingClientRect()
+      const face = root
+        .querySelector('[class*="face"]')!
+        .getBoundingClientRect()
+      add(
+        'the diamonds sit near the outer edges',
+        dpad.left <= 16 && vw - face.right <= 16,
+        `${Math.round(dpad.left)}px and ${Math.round(vw - face.right)}px in`
+      )
+      add(
+        'the portrait screen is a square across the width',
+        Math.abs(c.width - c.height) < 1 && c.width >= vw * 0.85,
+        `${Math.round(c.width)}x${Math.round(c.height)} of ${vw} wide`
+      )
+    }
   }
   return checks
+}
+
+// Every cap, as drawn: the whole disc on screen, clear of the picture, big
+// enough for a thumb, the top element under every pixel of it, and every
+// pixel read by the shell as that button alone.
+function capChecks(
+  root: HTMLElement,
+  add: (name: string, pass: boolean, detail: string) => void
+) {
+  const canvas = root.querySelector('canvas')!.getBoundingClientRect()
+  for (const cap of root.querySelectorAll<HTMLElement>('[data-button]')) {
+    const button = cap.dataset.button as Button
+    const r = cap.getBoundingClientRect()
+    const zoneEl = cap.closest<HTMLElement>('[data-control]')!
+    const zone = zoneEl === cap ? null : zoneEl.getBoundingClientRect()
+    const kind = zoneEl.className.includes('dpad') ? 'dpad' : 'face'
+    const bad: string[] = []
+    const onScreen =
+      r.left >= 0 &&
+      r.top >= 0 &&
+      r.right <= window.innerWidth &&
+      r.bottom <= window.innerHeight
+    const clear =
+      r.right <= canvas.left ||
+      r.left >= canvas.right ||
+      r.bottom <= canvas.top ||
+      r.top >= canvas.bottom
+    const sized = Math.min(r.width, r.height) >= 44
+    // Caps are discs, and START and SELECT are pills: skip what the
+    // rounding cuts away, and the outermost pixel.
+    const rad = Math.min(r.width, r.height) / 2 - 1
+    for (let i = -8; i <= 8; i++)
+      for (let j = -8; j <= 8; j++) {
+        const x = r.left + r.width / 2 + (i / 8) * (r.width / 2 - 1)
+        const y = r.top + r.height / 2 + (j / 8) * (r.height / 2 - 1)
+        const ex = Math.max(
+          0,
+          Math.abs(x - r.left - r.width / 2) - (r.width / 2 - rad - 1)
+        )
+        const ey = Math.max(
+          0,
+          Math.abs(y - r.top - r.height / 2) - (r.height / 2 - rad - 1)
+        )
+        if (Math.hypot(ex, ey) >= rad) continue
+        const [fx, fy] = [i / 8, j / 8]
+        const top = document.elementFromPoint(x, y)
+        if (!top || !zoneEl.contains(top)) {
+          bad.push(`covered at ${Math.round(x)},${Math.round(y)}`)
+          continue
+        }
+        if (!zone) continue
+        const got = zoneReads(
+          kind,
+          (x - zone.left) / zone.width,
+          (y - zone.top) / zone.height
+        )
+        if (got.length !== 1 || got[0] !== button)
+          bad.push(`${got.join('+') || 'nothing'} at ${fx},${fy}`)
+      }
+    add(
+      `${button} cap is on screen, clear of the picture and thumb-sized`,
+      onScreen && clear && sized,
+      `${Math.round(r.width)}x${Math.round(r.height)} at ${Math.round(r.left)},${Math.round(r.top)}`
+    )
+    add(
+      `every pixel of the ${button} cap presses ${button} alone`,
+      bad.length === 0,
+      bad.length ? `${bad.length} misses, first ${bad[0]}` : 'ok'
+    )
+  }
 }
 
 // How much of the scene shows through the dark ahead of the visor, measured
@@ -608,23 +847,29 @@ function lightChecks(): Check[] {
     for (let i = 3; i < d.length; i += 4) a += d[i]
     return +(1 - a / 25 / 255).toFixed(2)
   }
-  const one = seen(26)
+  const ahead = seen(20)
   const two = seen(52)
+  const behind = seen(-20)
   const far = seen(104)
   return [
     {
-      name: 'full light within one body length',
-      pass: one >= 0.9,
-      detail: `${one} of full brightness`,
+      name: 'the visor lights a body height ahead at full',
+      pass: ahead >= 0.9,
+      detail: `${ahead} of full brightness`,
     },
     {
-      name: 'still clear at two body lengths',
-      pass: two >= 0.7,
+      name: 'the visor still lifts the dark two body lengths ahead',
+      pass: two >= 0.45,
       detail: `${two}`,
     },
     {
-      name: 'half the ambient light past four body lengths',
-      pass: Math.abs(far - 0.5) <= 0.05,
+      name: 'the visor leaves the dark behind the player',
+      pass: Math.abs(behind - 0.25) <= 0.05,
+      detail: `${behind}`,
+    },
+    {
+      name: 'a quarter of the light in the foreground away from every light',
+      pass: Math.abs(far - 0.25) <= 0.05,
       detail: `${far}`,
     },
   ]
@@ -654,6 +899,9 @@ declare global {
       snapshot(): unknown
       killAll(): void
       setHp(hp: number): void
+      // Every press the game received, with how long after the last touch
+      // or click landed on the page, in ms.
+      presses: { button: Button; after: number }[]
     }
     __candlelightQA?: QAReport
   }
@@ -664,14 +912,27 @@ export function exposeQA(
   canvas: HTMLCanvasElement,
   root: HTMLElement
 ) {
+  const presses: { button: Button; after: number }[] = []
+  let lastDown = 0
+  root.addEventListener('pointerdown', () => (lastDown = performance.now()), {
+    capture: true,
+  })
+  const step = game.step.bind(game)
+  game.step = (f) => {
+    for (const button of f.pressed)
+      presses.push({ button, after: performance.now() - lastDown })
+    step(f)
+  }
   window.__candlelight = {
     game,
+    presses,
     snapshot() {
       const w = game.world
       const p = w.player
       return {
         scene: game.scene,
         paused: game.paused,
+        about: game.about,
         hp: w.hp,
         kills: w.kills,
         total: w.total,

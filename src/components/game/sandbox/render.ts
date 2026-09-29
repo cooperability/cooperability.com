@@ -60,12 +60,14 @@ const FLAMES = [
 ]
 
 // Everything that lights the dark, in pixels. `core` is the share of the
-// radius at full brightness. Outside every light the scene keeps half its
-// brightness; the visor light sits ahead of the face, so the player sees
-// clearly for about two body lengths (52px) in the direction they look.
+// radius at full brightness. Outside every light the foreground keeps a
+// quarter of its brightness and the sky and skyline behind it keep half.
+// The visor lights only the side the player faces, at full brightness for
+// about one body height (26px) ahead of the face.
 export const LIGHT = {
-  dark: 'rgba(3,2,8,0.5)',
-  visor: { radius: 60, core: 0.45, ahead: 12 },
+  dark: 'rgba(3,2,8,0.75)',
+  backdrop: 'rgba(3,2,8,0.5)',
+  visor: { radius: 64, core: 0.45, ahead: 2 },
   candle: { radius: 52, core: 0.25 },
   torch: { radius: 44, core: 0.3 },
   burning: { radius: 28, core: 0.2 },
@@ -90,13 +92,13 @@ function bakeGlow(radius: number, color: string): Canvas {
 }
 
 // Darkens the frame's edges so the eye settles on the middle.
-function bakeVignette(): Canvas {
-  const c = makeCanvas(VIEW_W, VIEW_H)
+function bakeVignette(width: number): Canvas {
+  const c = makeCanvas(width, VIEW_H)
   const ctx = context(c)
   ctx.fillStyle = PAL.k
   for (let y = 0; y < VIEW_H; y++)
-    for (let x = 0; x < VIEW_W; x++) {
-      const dx = (x - VIEW_W / 2) / (VIEW_W / 2)
+    for (let x = 0; x < width; x++) {
+      const dx = (x - width / 2) / (width / 2)
       const dy = (y - VIEW_H / 2) / (VIEW_H / 2)
       const d = Math.hypot(dx * 0.8, dy)
       if (d > 0.75 && (d - 0.75) * 1.6 > dither(x, y)) ctx.fillRect(x, y, 1, 1)
@@ -110,7 +112,7 @@ export type Renderer = {
     world: World,
     opts?: { debug?: boolean; hud?: boolean }
   ): void
-  // The last frame's darkness layer, for measuring how far the light reaches.
+  // The last frame's foreground darkness, for measuring how far light reaches.
   shade: Canvas
 }
 
@@ -121,8 +123,13 @@ export function createRenderer(): Renderer {
   const candleArt = bake(CANDLES)
   const candleGlow = bakeGlow(LIGHT.candleGlow.radius, LIGHT.candleGlow.color)
   const eyeGlow = bakeGlow(LIGHT.eyeGlow.radius, LIGHT.eyeGlow.color)
-  const vignette = bakeVignette()
-  const darkness = new Darkness()
+  const vignettes = new Map<number, Canvas>()
+  // The sky and skyline keep their own, lighter dark, and only the
+  // foreground takes the heavier one, so they are drawn apart.
+  const back = new Darkness()
+  const fore = new Darkness()
+  const layer = makeCanvas(VIEW_W, VIEW_H)
+  const scene = context(layer)
 
   const draw: Renderer['draw'] = (
     ctx,
@@ -130,6 +137,7 @@ export function createRenderer(): Renderer {
     { debug = false, hud = true } = {}
   ) => {
     const { player, time } = world
+    const viewW = world.viewW
     let tileArt = tiles.get(world.map)
     if (!tileArt) tiles.set(world.map, (tileArt = bakeTiles(world.level)))
 
@@ -145,100 +153,119 @@ export function createRenderer(): Renderer {
       backdrop,
       world.camX,
       world.camY,
-      world.level.pixelHeight - VIEW_H
+      world.level.pixelHeight - VIEW_H,
+      viewW
     )
-    ctx.drawImage(tileArt, ox, oy)
+    scene.imageSmoothingEnabled = false
+    scene.clearRect(0, 0, VIEW_W, VIEW_H)
+    scene.drawImage(tileArt, ox, oy)
 
-    ctx.save()
-    ctx.translate(ox, oy)
-    for (const c of world.candles) ctx.drawImage(candleArt, c.x - 4, c.y - 10)
+    scene.save()
+    scene.translate(ox, oy)
+    for (const c of world.candles) scene.drawImage(candleArt, c.x - 4, c.y - 10)
     for (const urn of world.urns)
-      if (!urn.broken) ctx.drawImage(urnArt, urn.x - 6, urn.y - 14)
-    for (const t of world.torches) if (t.landed) drawTorch(ctx, t, time)
-    for (const s of world.snakes) drawSnake(ctx, s, time)
+      if (!urn.broken) scene.drawImage(urnArt, urn.x - 6, urn.y - 14)
+    for (const t of world.torches) if (t.landed) drawTorch(scene, t, time)
+    for (const s of world.snakes) drawSnake(scene, s, time)
 
     for (const g of world.ghosts) {
-      ctx.globalAlpha = (g.life / GHOST_LIFE) * 0.45
-      drawHero(ctx, g.view, { tint: PAL.R })
+      scene.globalAlpha = (g.life / GHOST_LIFE) * 0.45
+      drawHero(scene, g.view, { tint: PAL.R })
     }
-    ctx.globalAlpha = 1
+    scene.globalAlpha = 1
     // Blinks through the mercy frames after a bite.
     const blink =
       world.invuln > 0 && world.invuln < INVULN && (world.invuln >> 2) % 2
     if (!blink && world.status !== 'dead') {
-      world.scarf.draw(ctx)
-      drawHero(ctx, world.view())
+      world.scarf.draw(scene)
+      drawHero(scene, world.view())
     }
 
     for (const p of world.particles) {
-      ctx.globalAlpha = Math.min(1, (p.life / p.max) * 1.5)
-      ctx.fillStyle = p.color
-      ctx.fillRect(Math.round(p.x), Math.round(p.y), 1, 1)
+      scene.globalAlpha = Math.min(1, (p.life / p.max) * 1.5)
+      scene.fillStyle = p.color
+      scene.fillRect(Math.round(p.x), Math.round(p.y), 1, 1)
     }
-    ctx.globalAlpha = 1
-    for (const t of world.torches) if (!t.landed) drawTorch(ctx, t, time)
+    scene.globalAlpha = 1
+    for (const t of world.torches) if (!t.landed) drawTorch(scene, t, time)
 
     // Flames, redrawn every frame so they flicker.
     for (const c of world.candles) {
       for (const [dx, dy] of FLAMES) {
         const h = 2 + Math.round(hash(Math.floor(time / 4), c.x + dx, 9) * 2)
-        ctx.fillStyle = PAL.e
-        ctx.fillRect(c.x + dx, c.y + dy - h, 1, h)
-        ctx.fillStyle = PAL.E
-        ctx.fillRect(c.x + dx, c.y + dy - 1, 1, 1)
+        scene.fillStyle = PAL.e
+        scene.fillRect(c.x + dx, c.y + dy - h, 1, h)
+        scene.fillStyle = PAL.E
+        scene.fillRect(c.x + dx, c.y + dy - 1, 1, 1)
       }
     }
-    ctx.restore()
+    scene.restore()
 
     // Ash drifts in the dark; only embers glow through it.
     for (const m of world.motes) {
       if (m.ember) continue
-      ctx.fillStyle = PAL.T
-      ctx.globalAlpha = 0.35
-      ctx.fillRect(Math.round(m.x), Math.round(m.y), 1, 1)
+      scene.fillStyle = PAL.T
+      scene.globalAlpha = 0.35
+      scene.fillRect(Math.round(m.x), Math.round(m.y), 1, 1)
     }
-    ctx.globalAlpha = 1
+    scene.globalAlpha = 1
 
     // The dark, and every light cut out of it, in screen space.
-    darkness.begin(LIGHT.dark)
     const { moon, visor, candle, torch, burning } = LIGHT
-    darkness.light(MOON.x, MOON.y, moon.radius, moon.core, moon.strength)
-    if (world.status !== 'dead') {
-      const head = player.pose === 'roll' ? player.y + 4 : player.y + 6
-      darkness.light(
-        player.x + player.w / 2 + player.facing * visor.ahead + ox,
-        head + oy,
-        visor.radius,
-        visor.core
-      )
-    }
-    for (const c of world.candles) {
-      const flicker = hash(Math.floor(time / 6), c.x, 3) > 0.5 ? 0.92 : 1
-      darkness.light(
-        c.x + ox,
-        c.y - 10 + oy,
-        candle.radius,
-        candle.core,
-        flicker
-      )
-    }
-    for (const t of world.torches)
-      darkness.light(
-        t.x + t.w / 2 + ox,
-        t.y + oy,
-        torch.radius,
-        torch.core,
-        t.strength
-      )
-    for (const s of world.snakes)
-      if (s.burn > 0)
+    const cut = (darkness: Darkness) => {
+      if (world.status !== 'dead') {
+        const head = player.pose === 'roll' ? player.y + 4 : player.y + 6
         darkness.light(
-          s.x + s.w / 2 + ox,
-          s.y + oy,
-          burning.radius,
-          burning.core
+          player.x + player.w / 2 + player.facing * visor.ahead + ox,
+          head + oy,
+          visor.radius,
+          visor.core,
+          1,
+          player.facing
         )
-    darkness.end(ctx)
+      }
+      for (const c of world.candles) {
+        const flicker = hash(Math.floor(time / 6), c.x, 3) > 0.5 ? 0.92 : 1
+        darkness.light(
+          c.x + ox,
+          c.y - 10 + oy,
+          candle.radius,
+          candle.core,
+          flicker
+        )
+      }
+      for (const t of world.torches)
+        darkness.light(
+          t.x + t.w / 2 + ox,
+          t.y + oy,
+          torch.radius,
+          torch.core,
+          t.strength
+        )
+      for (const s of world.snakes)
+        if (s.burn > 0)
+          darkness.light(
+            s.x + s.w / 2 + ox,
+            s.y + oy,
+            burning.radius,
+            burning.core
+          )
+    }
+    back.begin(LIGHT.backdrop)
+    // The moon lights the sky alone.
+    back.light(
+      MOON.x + viewW - VIEW_W,
+      MOON.y,
+      moon.radius,
+      moon.core,
+      moon.strength
+    )
+    cut(back)
+    back.end(ctx)
+    fore.begin(LIGHT.dark)
+    cut(fore)
+    fore.end(scene, 'source-atop')
+    ctx.drawImage(layer, 0, 0)
 
     // Warm bloom on top of the dark.
     ctx.globalCompositeOperation = 'lighter'
@@ -265,6 +292,8 @@ export function createRenderer(): Renderer {
       ctx.fillRect(Math.round(m.x), Math.round(m.y), 1, 1)
     }
     ctx.globalAlpha = 1
+    let vignette = vignettes.get(viewW)
+    if (!vignette) vignettes.set(viewW, (vignette = bakeVignette(viewW)))
     ctx.drawImage(vignette, 0, 0)
 
     if (hud) drawHud(ctx, world)
@@ -298,7 +327,7 @@ export function createRenderer(): Renderer {
       )
     }
   }
-  return { draw, shade: darkness.canvas }
+  return { draw, shade: fore.canvas }
 }
 
 // Candles for health, a brand for the torch, and the serpent count.
@@ -326,15 +355,18 @@ function drawHud(ctx: CanvasRenderingContext2D, world: World) {
   drawText(
     ctx,
     `${world.kills}/${world.total}`,
-    VIEW_W - 6,
+    world.viewW - 6,
     6,
     PAL.B,
     1,
     'right'
   )
-  ctx.fillStyle = PAL.M
-  ctx.fillRect(VIEW_W - 36, 10, 8, 2)
-  ctx.fillRect(VIEW_W - 30, 8, 3, 3)
-  ctx.fillStyle = PAL.E
-  ctx.fillRect(VIEW_W - 28, 8, 1, 1)
+  // The serpent icon, banded like the serpents.
+  ctx.fillStyle = PAL.C
+  ctx.fillRect(world.viewW - 36, 10, 8, 2)
+  ctx.fillRect(world.viewW - 30, 8, 3, 3)
+  ctx.fillStyle = PAL.G
+  ctx.fillRect(world.viewW - 33, 10, 2, 2)
+  ctx.fillStyle = PAL.y
+  ctx.fillRect(world.viewW - 28, 8, 1, 1)
 }

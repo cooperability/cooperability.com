@@ -132,6 +132,26 @@
   }
 }
 
+/* Portrait handheld: a square screen edge to edge, as tall as it can be
+   while the controls below keep room for a thumb. */
+@media (orientation: portrait) {
+  .root:not([data-mode='external']) {
+    padding-left: max(8px, env(safe-area-inset-left));
+    padding-right: max(8px, env(safe-area-inset-right));
+    column-gap: 28px;
+  }
+
+  .root:not([data-mode='external']) .screen {
+    aspect-ratio: 1;
+    width: min(100vw, 100dvh - 290px);
+    justify-self: center;
+    /* Out through the plate's side padding, so it can reach both edges. */
+    margin-inline: calc(-1 * max(8px, env(safe-area-inset-left)));
+    padding: 0;
+    border-radius: 0;
+  }
+}
+
 /* A glare across the glass, over the picture. */
 .screen::after {
   content: '';
@@ -171,8 +191,10 @@
   aspect-ratio: 1;
 }
 
+/* Each diamond leans toward its own edge of the plate. */
 .dpad {
   grid-area: dpad;
+  justify-self: start;
 }
 
 /* Portrait: sit the diamonds low, where thumbs rest, like a real handheld. */
@@ -184,6 +206,7 @@
 
 .face {
   grid-area: face;
+  justify-self: end;
 }
 
 .diamond span {
@@ -264,7 +287,10 @@
 }
 
 .meta span {
-  padding: 8px 14px;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 22px;
   border-radius: 999px;
   background: var(--cap);
   box-shadow:
@@ -276,6 +302,53 @@
 .meta .start[data-held~='start'] {
   color: var(--glyph-held);
   box-shadow: 0 0 0 1px var(--ember);
+}
+
+/* Opened with select: when and why, and how to install. Over the screen,
+   so the pad stays free to close it. */
+.about {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  overflow-y: auto;
+  padding: 16px 18px;
+  background: rgba(8, 7, 12, 0.94);
+  color: var(--glyph);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.about h2 {
+  margin: 0 0 8px;
+  color: var(--glyph-held);
+  font-size: 16px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.about h3 {
+  margin: 12px 0 4px;
+  font-size: 13px;
+  color: var(--glyph-held);
+}
+
+.about p,
+.about ol {
+  margin: 0;
+}
+
+.about ol {
+  padding-left: 20px;
+}
+
+.about button {
+  margin-top: 12px;
+  padding: 8px 14px;
+  border: 1px solid var(--ember);
+  border-radius: 999px;
+  background: none;
+  color: var(--glyph-held);
+  font: inherit;
 }
 
 /* Desktop input overlay, shown while a keyboard or controller is in use. */

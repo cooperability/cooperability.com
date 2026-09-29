@@ -19,20 +19,34 @@ export class Darkness {
     ctx.globalCompositeOperation = 'destination-out'
   }
 
-  // `core` is the fraction of the radius at full strength.
-  light(x: number, y: number, radius: number, core: number, strength = 1) {
+  // `core` is the fraction of the radius at full strength. `side` 1 or -1
+  // lights only that half, right or left of x.
+  light(
+    x: number,
+    y: number,
+    radius: number,
+    core: number,
+    strength = 1,
+    side: -1 | 0 | 1 = 0
+  ) {
     if (strength <= 0) return
-    const key = `${radius}|${core}`
+    const key = `${radius}|${core}|${side}`
     let img = this.sprites.get(key)
-    if (!img) this.sprites.set(key, (img = bakeLight(radius, core)))
+    if (!img) this.sprites.set(key, (img = bakeLight(radius, core, side)))
     this.ctx.globalAlpha = Math.min(1, strength)
     this.ctx.drawImage(img, Math.round(x) - radius, Math.round(y) - radius)
   }
 
-  end(target: CanvasRenderingContext2D) {
+  // `source-atop` darkens only what is already drawn on the target.
+  end(
+    target: CanvasRenderingContext2D,
+    op: GlobalCompositeOperation = 'source-over'
+  ) {
     this.ctx.globalAlpha = 1
     this.ctx.globalCompositeOperation = 'source-over'
+    target.globalCompositeOperation = op
     target.drawImage(this.canvas, 0, 0)
+    target.globalCompositeOperation = 'source-over'
   }
 }
 
@@ -40,7 +54,7 @@ export class Darkness {
 // light breaks up into pixels instead of a smooth gradient.
 const STEPS = 4
 
-function bakeLight(radius: number, core: number): Canvas {
+function bakeLight(radius: number, core: number, side: number): Canvas {
   const size = radius * 2
   const c = makeCanvas(size, size)
   const ctx = context(c)
@@ -52,7 +66,10 @@ function bakeLight(radius: number, core: number): Canvas {
     for (let x = 0; x < size; x++) {
       const d = Math.hypot(x - radius + 0.5, y - radius + 0.5) / radius
       if (d >= 1) continue
-      const v = d < core ? 1 : 1 - (d - core) / (1 - core)
+      let v = d < core ? 1 : 1 - (d - core) / (1 - core)
+      // A half light fades in over four pixels either side of its edge.
+      if (side)
+        v *= Math.max(0, Math.min(1, ((x - radius + 0.5) * side) / 4 + 0.5))
       const q = Math.min(STEPS, Math.floor(v * STEPS + dither(x, y)))
       if (q > 0) levels[q].push([x, y])
     }

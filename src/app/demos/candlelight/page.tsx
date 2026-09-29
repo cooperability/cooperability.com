@@ -3,14 +3,15 @@ import { GAME_ASSET_DIR, splashImages } from '@/src/components/game/splash'
 import GameClient from './game-client'
 
 export const metadata: Metadata = {
-  title: { absolute: 'Game | Cooper Reed' },
-  description: 'A handheld-style game, built to be added to the home screen.',
-  openGraph: { title: 'Game | Cooper Reed', type: 'website' },
+  title: { absolute: 'Candlelight | Cooper Reed' },
+  description:
+    'Candlelight, a survival horror platformer built to be added to the home screen.',
+  openGraph: { title: 'Candlelight | Cooper Reed', type: 'website' },
   manifest: '/icons/game.webmanifest',
   icons: { icon: '/icon.ico', apple: `${GAME_ASSET_DIR}/apple-touch-icon.png` },
   appleWebApp: {
     capable: true,
-    title: 'Game',
+    title: 'Candlelight',
     // Draws under the status bar. The shell pads itself with the safe-area
     // insets, which viewportFit: 'cover' below makes non-zero.
     statusBarStyle: 'black-translucent',

@@ -12,13 +12,28 @@ import {
   type Scheme,
 } from './input'
 import { startLoop } from './loop'
-import { createCandlelight, HEIGHT, WIDTH } from './sandbox/game'
+import {
+  createCandlelight,
+  HEIGHT,
+  SQUARE,
+  WIDTH,
+  type Candlelight,
+} from './sandbox/game'
 import styles from './Handheld.module.css'
 
 type Mode = 'touch' | 'external'
 type Mapper = (x: number, y: number) => Button[]
 
 const HINT_KEY = 'game:install-hint-dismissed'
+
+// A press squashes the cap and springs it back, so a thumb sees the press
+// land on the frame it happens.
+const BOUNCE: Keyframe[] = [
+  { scale: '1' },
+  { scale: '0.82' },
+  { scale: '1.08' },
+  { scale: '1' },
+]
 const SCHEME_KEY = 'game:keys'
 
 // The legend for each keyboard layout, by the pad button each key plays.
@@ -98,6 +113,8 @@ export default function Handheld() {
   const [standalone] = useState(isStandalone)
   const [hint, setHint] = useState(shouldHint)
   const [scheme, setScheme] = useState(savedScheme)
+  const [about, setAbout] = useState(false)
+  const gameRef = useRef<Candlelight | null>(null)
   const chooseScheme = (next: Scheme) => {
     setScheme(next)
     saveScheme(next)
@@ -111,6 +128,8 @@ export default function Handheld() {
     if (!canvas || !screen || !root || !ctx) return
 
     const game = createCandlelight()
+    game.standalone = isStandalone()
+    gameRef.current = game
     let disposed = false
     // The beta script loads only when asked for, so players never download it.
     if (new URLSearchParams(window.location.search).has('qa'))
@@ -208,17 +227,32 @@ export default function Handheld() {
 
     // Whole-number scaling keeps every game pixel the same size. Below 2x
     // that would leave a postage stamp, so small screens fit fractionally.
+    // The portrait handheld shows a square view that fills the phone's
+    // width, scaled to whole device pixels.
     const resize = new ResizeObserver(([entry]) => {
       const { width, height } = entry.contentRect
-      const fit = Math.min(width / WIDTH, height / HEIGHT)
-      const scale = fit >= 2 ? Math.floor(fit) : fit
-      canvas.style.width = `${WIDTH * scale}px`
+      const square =
+        root.dataset.mode === 'touch' && window.innerHeight > window.innerWidth
+      const view = square ? SQUARE : WIDTH
+      if (canvas.width !== view) {
+        canvas.width = view
+        game.view = view
+      }
+      const fit = Math.min(width / view, height / HEIGHT)
+      const dpr = window.devicePixelRatio || 1
+      const scale = square
+        ? Math.floor(fit * dpr) / dpr
+        : fit >= 2
+          ? Math.floor(fit)
+          : fit
+      canvas.style.width = `${view * scale}px`
       canvas.style.height = `${HEIGHT * scale}px`
     })
     resize.observe(screen)
 
     const pads = root.querySelectorAll<HTMLElement>('[data-control]')
     let held = ''
+    let aboutShown = false
 
     const stop = startLoop(
       () => {
@@ -232,6 +266,7 @@ export default function Handheld() {
       () => {
         game.draw(ctx)
         pads.forEach((el) => el.setAttribute('data-held', held))
+        if (game.about !== aboutShown) setAbout((aboutShown = game.about))
       }
     )
 
@@ -258,7 +293,16 @@ export default function Handheld() {
       const box = e.currentTarget.getBoundingClientRect()
       const x = (e.clientX - box.left) / box.width
       const y = (e.clientY - box.top) / box.height
-      if (controls.touch(e.pointerId, map(x, y))) navigator.vibrate?.(8)
+      const fresh = controls.touch(e.pointerId, map(x, y))
+      if (!fresh.length) return
+      navigator.vibrate?.(8)
+      // The caps live in the zone that took the touch, or are the zone.
+      const zone = e.currentTarget
+      for (const b of fresh) {
+        const selector = `[data-button="${b}"]`
+        const cap = zone.matches(selector) ? zone : zone.querySelector(selector)
+        cap?.animate?.(BOUNCE, { duration: 180, easing: 'ease-out' })
+      }
     }
     const release = (e: PointerEvent<HTMLElement>) => controls.lift(e.pointerId)
     return {
@@ -325,6 +369,33 @@ export default function Handheld() {
           aria-label="Game screen"
           role="img"
         />
+        {about && (
+          <div
+            className={styles.about}
+            role="dialog"
+            aria-labelledby="candlelight-about"
+          >
+            <h2 id="candlelight-about">Candlelight</h2>
+            <p>
+              Built in September 2026 by Cooper Reed, working with Claude Code.
+              It tests how far a browser game can go as a real phone app:
+              installed from Safari, full screen, offline, with no app store in
+              between.
+            </p>
+            <h3>Install it on an iPhone</h3>
+            <ol>
+              <li>Open this page in Safari.</li>
+              <li>Tap Share, then Add to Home Screen.</li>
+              <li>
+                Launch Candlelight from its icon. It opens straight into the
+                game, full screen, and works offline.
+              </li>
+            </ol>
+            <button type="button" onClick={() => gameRef.current?.closeAbout()}>
+              Close (any button)
+            </button>
+          </div>
+        )}
       </div>
 
       <div
@@ -332,10 +403,18 @@ export default function Handheld() {
         {...zone((x, y) => dpadFromPoint(x * 2 - 1, y * 2 - 1))}
         aria-hidden="true"
       >
-        <span className={styles.up}>▲</span>
-        <span className={styles.left}>◀</span>
-        <span className={styles.right}>▶</span>
-        <span className={styles.down}>▼</span>
+        <span className={styles.up} data-button="up">
+          ▲
+        </span>
+        <span className={styles.left} data-button="left">
+          ◀
+        </span>
+        <span className={styles.right} data-button="right">
+          ▶
+        </span>
+        <span className={styles.down} data-button="down">
+          ▼
+        </span>
       </div>
 
       <div
@@ -343,17 +422,33 @@ export default function Handheld() {
         {...zone(faceFromPoint)}
         aria-hidden="true"
       >
-        <span className={styles.y}>Y</span>
-        <span className={styles.x}>X</span>
-        <span className={styles.b}>B</span>
-        <span className={styles.a}>A</span>
+        <span className={styles.y} data-button="y">
+          Y
+        </span>
+        <span className={styles.x} data-button="x">
+          X
+        </span>
+        <span className={styles.b} data-button="b">
+          B
+        </span>
+        <span className={styles.a} data-button="a">
+          A
+        </span>
       </div>
 
       <div className={styles.meta} aria-hidden="true">
-        <span className={styles.select} {...zone(() => ['select'])}>
+        <span
+          className={styles.select}
+          data-button="select"
+          {...zone(() => ['select'])}
+        >
           SELECT
         </span>
-        <span className={styles.start} {...zone(() => ['start'])}>
+        <span
+          className={styles.start}
+          data-button="start"
+          {...zone(() => ['start'])}
+        >
           START
         </span>
       </div>
@@ -386,7 +481,7 @@ export default function Handheld() {
         </div>
         <p className={styles.legend}>
           <span className={styles.start}>Enter pause</span>
-          <span className={styles.select}>Backspace debug</span>
+          <span className={styles.select}>Backspace about</span>
           <span>F fullscreen</span>
           <span>Hold up + attack to strike overhead</span>
         </p>
