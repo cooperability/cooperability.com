@@ -36,8 +36,9 @@ const BEAM = [
   'kookkooookkoookk',
 ]
 
+// A gate counts as air, so the stone around it is shaded as a doorway.
 function isAir(level: Level, tx: number, ty: number) {
-  return level.tileAt(tx, ty) !== SOLID
+  return level.tileAt(tx, ty) !== SOLID || level.isGate(tx, ty)
 }
 
 // Distance in tiles to the nearest non-solid tile, capped at 3.
@@ -60,8 +61,11 @@ export function bakeTiles(level: Level): Canvas {
       const ox = tx * TILE
       const oy = ty * TILE
       const i = ty * level.width + tx
-      if (tile === EMPTY && level.backdrop[i]) drawBackdrop(ctx, ox, oy, tx, ty)
-      if (tile === SOLID) drawStone(ctx, level, ox, oy, tx, ty)
+      // Gates bake as the wall behind them; the renderer draws the bars.
+      const gate = level.isGate(tx, ty)
+      if ((tile === EMPTY || gate) && level.backdrop[i])
+        drawBackdrop(ctx, ox, oy, tx, ty)
+      if (tile === SOLID && !gate) drawStone(ctx, level, ox, oy, tx, ty)
       if (tile === ONEWAY) drawBeam(ctx, level, ox, oy, tx, ty)
     }
   }

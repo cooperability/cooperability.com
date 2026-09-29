@@ -1,6 +1,7 @@
 import type { Frame } from '../input'
 import { VIEW_H, VIEW_W } from './background'
 import { drawText } from './font'
+import { SANDBOX_MAP } from './level'
 import { PAL } from './pixels'
 import { createRenderer, type Renderer } from './render'
 import { World } from './world'
@@ -46,7 +47,8 @@ const clock = (updates: number) => {
 }
 
 // The title, a run, and the screens that end it. A run is a fresh World, so
-// restarting cannot leak state from the last one.
+// restarting cannot leak state from the last one. Dying to the boss starts
+// the fresh World at its gate, the serpents already slain.
 export function createCandlelight(): Candlelight {
   let world = new World()
   let scene: Scene = 'title'
@@ -58,7 +60,10 @@ export function createCandlelight(): Candlelight {
   let render: Renderer | null = null
 
   const begin = () => {
-    world = new World()
+    const retry = scene === 'dead' && !!world.boss?.awake
+    world = retry
+      ? new World(SANDBOX_MAP, 1, { atBoss: true, clock: world.clock })
+      : new World()
     world.viewW = view
     scene = 'play'
     paused = false
@@ -172,7 +177,12 @@ export function createCandlelight(): Candlelight {
         const fade = Math.min(1, (world.statusT - SCREEN_DELAY) / 30)
         ctx.fillStyle = `rgba(3,2,8,${0.75 * fade})`
         ctx.fillRect(0, 0, VIEW_W, VIEW_H)
-        if (scene === 'dead') {
+        if (scene === 'dead' && world.boss?.awake) {
+          drawText(ctx, 'SOCIETY WINS', cx, 56, PAL.C, big)
+          drawText(ctx, world.cause, cx, 86, PAL.B)
+          drawText(ctx, 'YOU RISE AT THE GATE', cx, 100, PAL.b)
+          if (blink) drawText(ctx, 'PRESS JUMP TO TRY AGAIN', cx, 128, PAL.B)
+        } else if (scene === 'dead') {
           drawText(ctx, 'THE DARK TAKES YOU', cx, 62, PAL.C, big)
           drawText(
             ctx,
@@ -182,6 +192,12 @@ export function createCandlelight(): Candlelight {
             PAL.b
           )
           if (blink) drawText(ctx, 'PRESS JUMP TO RISE AGAIN', cx, 128, PAL.B)
+        } else if (world.boss) {
+          drawText(ctx, 'SOCIETY HAS FALLEN', cx, 44, PAL.E, big)
+          drawText(ctx, 'THE CANDLES HOLD', cx, 72, PAL.B)
+          drawText(ctx, `ALL ${world.total} SERPENTS SLAIN`, cx, 84, PAL.b)
+          drawText(ctx, `TIME ${clock(world.clock)}`, cx, 96, PAL.b)
+          if (blink) drawText(ctx, 'PRESS JUMP TO PLAY AGAIN', cx, 128, PAL.B)
         } else {
           drawText(ctx, 'THE CANDLES HOLD', cx, 52, PAL.E, big)
           drawText(ctx, `ALL ${world.total} SERPENTS SLAIN`, cx, 82, PAL.B)

@@ -8,29 +8,35 @@ export type Prop = { kind: 'urn' | 'candle' | 'snake'; x: number; y: number }
 
 export type Body = { x: number; y: number; w: number; h: number }
 
+// The boss's hall, in pixels: the inside faces of its walls, ceiling and floor.
+export type Arena = { left: number; right: number; top: number; floor: number }
+
 // '#' stone, '=' one-way beam, ':' backdrop wall (no collision), 'P' spawn,
 // 'u' breakable urn, 'c' candle, 's' snake in open air, 'S' snake in front of
-// a backdrop wall. Props sit on the tile below their cell.
+// a backdrop wall, 'G' a gate (stone until opened), 'B' anywhere inside the
+// boss's hall. Props sit on the tile below their cell.
 // Left to right: spawn cloister with drop-through beams, a wall taller than
 // a jump (ledge grab), a tunnel only a roll fits, a wall-jump chimney up to
-// a belfry, a pit wide enough to want the air dash, then altar steps.
+// a belfry, a pit wide enough to want the air dash, then altar steps. Past
+// the belfry's gate, a sill drops into the boss's hall: a flat floor, two
+// low beams and one high one between them.
 export const SANDBOX_MAP = [
-  '#......................................................#',
-  '#......................................................#',
-  '#........................................::::::::::::::#',
-  '#..........................#.............::::::::::::::#',
-  '#::::::::::................#.............::::::::::::::#',
-  '#::::::::::.........u.s....#.=====.......::::::::::::::#',
-  '#::::::::::.......######...#::::::.......:::::::::::ucS#',
-  '#::::::::::.......######...#::::::.......:::::::::::####',
-  '#:::::====:.......######...#::::::.......:::::::::u:####',
-  '#::::::::::...c.s.######...#::::::..===..::::::::#######',
-  '#:::====:::.#####.######...#::::::.......::::::c:#######',
-  '#::::::::::.#####.######....::::::.......:::::##########',
-  '#:cP::u::c:.#####...........::u:cS.......:cu::##########',
-  '##################################.......###############',
-  '##################################....s..###############',
-  '########################################################',
+  '#......................................................####################',
+  '#......................................................####################',
+  '#........................................::::::::::::::####################',
+  '#..........................#.............::::::::::::::#::::::::::::::::::#',
+  '#::::::::::................#.............::::::::::::::G::::::::::::::::::#',
+  '#::::::::::.........u.s....#.=====.......::::::::::::::G::::::::::::::::::#',
+  '#::::::::::.......######...#::::::.......:::::::::::ucSG::::::::::::::::::#',
+  '#::::::::::.......######...#::::::.......:::::::::::######::::::::::::::::#',
+  '#:::::====:.......######...#::::::.......:::::::::u:####::::::::B:::::::::#',
+  '#::::::::::...c.s.######...#::::::..===..::::::::#######:::::::====:::::::#',
+  '#:::====:::.#####.######...#::::::.......::::::c:#######::::::::::::::::::#',
+  '#::::::::::.#####.######....::::::.......:::::##########::===::::::::===::#',
+  '#:cP::u::c:.#####...........::u:cS.......:cu::##########:c::::::::::::::c:#',
+  '##################################.......##################################',
+  '##################################....s..##################################',
+  '###########################################################################',
 ]
 
 export class Level {
@@ -40,16 +46,24 @@ export class Level {
   readonly backdrop: Uint8Array
   readonly props: Prop[] = []
   readonly spawn = { x: 0, y: 0 }
+  readonly gate: { tx: number; ty: number }[] = []
+  // Null on a map with no 'B'.
+  readonly arena: Arena | null = null
+  // Where a player stands just inside the gate, feet on the sill.
+  readonly sill: { x: number; y: number } | null = null
+  gateOpen = false
 
   constructor(rows: string[]) {
     this.height = rows.length
     this.width = rows[0].length
     this.tiles = new Uint8Array(this.width * this.height)
     this.backdrop = new Uint8Array(this.width * this.height)
+    // Cast, so the assignment inside forEach does not narrow it to null.
+    let mark = null as { tx: number; ty: number } | null
     rows.forEach((row, ty) => {
       ;[...row].forEach((ch, tx) => {
         const i = ty * this.width + tx
-        if (ch === '#') this.tiles[i] = SOLID
+        if (ch === '#' || ch === 'G') this.tiles[i] = SOLID
         else if (ch === '=') this.tiles[i] = ONEWAY
         else if (ch !== '.' && ch !== 's') this.backdrop[i] = 1
         // Props and the spawn stand on the floor of their cell.
@@ -59,8 +73,42 @@ export class Level {
         if (ch === 'u') this.props.push({ kind: 'urn', x, y })
         if (ch === 'c') this.props.push({ kind: 'candle', x, y })
         if (ch === 's' || ch === 'S') this.props.push({ kind: 'snake', x, y })
+        if (ch === 'G') this.gate.push({ tx, ty })
+        if (ch === 'B') mark = { tx, ty }
       })
     })
+    if (mark) {
+      const m = mark
+      // The last open cell from the mark in each direction.
+      const reach = (dx: number, dy: number) => {
+        let [tx, ty] = [m.tx, m.ty]
+        while (this.tileAt(tx + dx, ty + dy) !== SOLID)
+          [tx, ty] = [tx + dx, ty + dy]
+        return dx ? tx : ty
+      }
+      this.arena = {
+        left: reach(-1, 0) * TILE,
+        right: (reach(1, 0) + 1) * TILE,
+        top: reach(0, -1) * TILE,
+        floor: (reach(0, 1) + 1) * TILE,
+      }
+    }
+    if (this.gate.length) {
+      const tx = Math.max(...this.gate.map((g) => g.tx))
+      const ty = Math.max(...this.gate.map((g) => g.ty))
+      this.sill = { x: (tx + 2) * TILE, y: (ty + 1) * TILE }
+    }
+  }
+
+  isGate(tx: number, ty: number) {
+    return this.gate.some((g) => g.tx === tx && g.ty === ty)
+  }
+
+  // Opening turns the gate's cells to air, closing back to stone.
+  setGate(open: boolean) {
+    this.gateOpen = open
+    for (const { tx, ty } of this.gate)
+      this.tiles[ty * this.width + tx] = open ? EMPTY : SOLID
   }
 
   get pixelWidth() {

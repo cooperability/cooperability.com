@@ -45,6 +45,10 @@ const GLYPHS: Record<string, string[]> = {
   ' ': ['..', '..', '..', '..', '..', '..', '..'],
 }
 
+// Width of one character in font pixels, before scaling.
+export const glyphWidth = (ch: string) =>
+  (GLYPHS[ch.toUpperCase()] ?? GLYPHS[' '])[0].length
+
 const cache = new Map<string, Canvas>()
 
 function bakeText(text: string, color: string, scale: number): Canvas {

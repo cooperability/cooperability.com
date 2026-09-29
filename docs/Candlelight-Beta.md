@@ -21,11 +21,19 @@ fresh worlds. The scenarios cover:
 - beam reachability, overhead attack, torch arc, cooldown and burn damage
 - serpent strike, lunge and wall climb
 - serpents staying inside the map when left alone, a wall launch, pause
-- win by `hit()`, and every serpent on the shipped map staying hittable by
-  the sword through to a win (the player is placed beside each, so this does
-  not prove each is reachable on foot), death and restart, and hit-pause
-  input carry
+- five kills opening the gate, and only felling the boss winning; every
+  serpent and then the boss on the shipped map staying hittable by the sword
+  through to a win (the player is placed beside each, so this does not prove
+  each is reachable on foot), death and restart, and hit-pause input carry
+- the boss: spawning with its bar at the last kill, the gate shutting behind
+  and the candles relighting, its entrance line, the camera holding on the
+  hall, all four attacks under their banners with no repeats, each able to
+  hurt and naming itself as the cause, an idle player dying within a minute,
+  sword and torch damage, cutting a thrown letter, the half-health rage,
+  PEER PRESSURE reaching the walls, and dying at the boss rising on the sill
 - a 20,000-update random-input soak that fails on NaN or anything inside a wall
+- the same soak in the boss's hall, which fails on NaN, the player leaving
+  the hall, or a letter outside it
 
 A new mechanic gets a scenario here. Deleting the line that implements it must
 turn the scenario red. Check that before trusting it.
@@ -70,11 +78,14 @@ It then plays through with real keys, or real touches on phones:
 6. meet a serpent, then tick Debug view in the select menu by real tap or
    click, close the menu with B, resume with start, and screenshot the labels
 7. die at 1 HP and rise again
-8. win
-9. on phones, a real touch on every cap at its centre and eight points near
-   its rim: the game must hear that button alone, the cap must be bouncing,
-   and the press must reach the game within 34ms (two frames)
-10. on desktop, switch the key legend
+8. kill every serpent: the gate opens and the boss bar appears
+9. step onto the sill: the gate shuts and SOCIETY makes its entrance, then
+   attacks (screenshots `boss-intro` and `boss-fight`)
+10. fell it and win
+11. on phones, a real touch on every cap at its centre and eight points near
+    its rim: the game must hear that button alone, the cap must be bouncing,
+    and the press must reach the game within 34ms (two frames)
+12. on desktop, switch the key legend
 
 Last, it opens `/demos` and navigates client-side to each installable app
 (Candlelight, Prompt Composer, Mandelbrot Explorer, Opioid Converter). Each
@@ -88,6 +99,7 @@ local-only and do not fail the run, since they come from the site, not the
 game.
 
 The `?qa` hook exposes `window.__candlelight` with `snapshot()`, `killAll()`,
+`toBoss()` (onto the sill, once the serpents are dead), `beatBoss()`,
 `setHp(n)`, `presses` (every press the game received, with its delay after
 the last touch) and `game` (set `game.debug = true` for hitboxes), for
 driving the game from a console or another tool.
@@ -107,8 +119,13 @@ Open every screenshot. For each, answer in the PR:
 - **Serpent.** Does it read as a snake (head, body, eye) in its crimson and
   gold, and does the coil strobe?
 - **Torch.** Is the thrown brand visible in flight and on the floor?
-- **HUD.** Are the five candles and the kill count legible and uncovered?
+- **Boss.** Is it funny on sight: the word SOCIETY, and its hat, monocle,
+  brow and moustache legible on a phone? Is every attack banner readable,
+  and does each thrown or falling letter stand out from the wall?
+- **HUD.** Are the five candles, the kill count and the boss bar legible and
+  uncovered?
 - **Death and win.** Is the message readable, and does "press jump" blink?
+  Does a death to the boss name the attack that did it?
 - **Phone layouts.** Do the diamonds sit under the thumbs, toward the edges,
   without covering the screen, in both orientations? Is the portrait screen a
   square across the width?
@@ -119,6 +136,7 @@ Then bug-bash by hand for five minutes on a real device if one is available:
 - throw a torch from a ledge onto a serpent below
 - fight one on a wall with up + attack
 - pause mid-lunge
+- beat SOCIETY on foot, and die to each of its attacks at least once
 - switch between keyboard, controller and touch mid-run
 - lock the phone mid-run and come back
 

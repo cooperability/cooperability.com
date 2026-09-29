@@ -6,6 +6,15 @@ import {
   VIEW_W,
   type Backdrop,
 } from './background'
+import {
+  BOSS,
+  bossLabel,
+  drawBoss,
+  drawOutlined,
+  LETTER_H,
+  shotBox,
+  WORD,
+} from './boss'
 import { drawText } from './font'
 import { drawHero } from './hero'
 import { Darkness } from './light'
@@ -19,6 +28,7 @@ import {
   type Canvas,
 } from './pixels'
 import { debugLabel, drawSnake } from './snake'
+import { TILE } from './level'
 import { bakeTiles } from './tiles'
 import { drawTorch } from './torch'
 import { GHOST_LIFE, INVULN, MAX_HP, World } from './world'
@@ -71,6 +81,11 @@ export const LIGHT = {
   candle: { radius: 52, core: 0.25 },
   torch: { radius: 44, core: 0.3 },
   burning: { radius: 28, core: 0.2 },
+  // The open gate, so the way on can be found; the boss, which lights its
+  // hall around it; and each letter it throws.
+  gate: { radius: 40, core: 0.3 },
+  boss: { radius: 96, core: 0.35 },
+  shot: { radius: 14, core: 0.3 },
   // Only as wide as the moon's own halo: it lights the sky, not the ground.
   moon: { radius: 36, core: 0.35, strength: 0.9 },
   candleGlow: { radius: 26, color: 'rgba(255,140,60,0.32)' },
@@ -167,6 +182,7 @@ export function createRenderer(): Renderer {
       if (!urn.broken) scene.drawImage(urnArt, urn.x - 6, urn.y - 14)
     for (const t of world.torches) if (t.landed) drawTorch(scene, t, time)
     for (const s of world.snakes) drawSnake(scene, s, time)
+    if (!world.level.gateOpen) drawGate(scene, world)
 
     for (const g of world.ghosts) {
       scene.globalAlpha = (g.life / GHOST_LIFE) * 0.45
@@ -250,6 +266,39 @@ export function createRenderer(): Renderer {
             burning.radius,
             burning.core
           )
+      const level = world.level
+      if (level.gateOpen && level.gate.length) {
+        const g = level.gate[Math.floor(level.gate.length / 2)]
+        darkness.light(
+          g.tx * TILE + TILE / 2 + ox,
+          g.ty * TILE + TILE / 2 + oy,
+          LIGHT.gate.radius,
+          LIGHT.gate.core
+        )
+      }
+      const b = world.boss
+      if (b?.awake && !b.gone) {
+        const boxes = b.letterBoxes()
+        if (boxes.length) {
+          const x = boxes.reduce((a, l) => a + l.x + l.w / 2, 0) / boxes.length
+          const y = boxes.reduce((a, l) => a + l.y, 0) / boxes.length
+          const fade = b.state === 'dying' ? 1 - b.t / BOSS.die : 1
+          darkness.light(
+            x + ox,
+            y + LETTER_H / 2 + oy,
+            LIGHT.boss.radius,
+            LIGHT.boss.core,
+            fade
+          )
+        }
+        for (const s of b.shots)
+          darkness.light(
+            s.x + s.w / 2 + ox,
+            s.y + s.h / 2 + oy,
+            LIGHT.shot.radius,
+            LIGHT.shot.core
+          )
+      }
     }
     back.begin(LIGHT.backdrop)
     // The moon lights the sky alone.
@@ -284,6 +333,14 @@ export function createRenderer(): Renderer {
       )
     ctx.globalCompositeOperation = 'source-over'
 
+    // The boss glows through the dark, so every attack reads.
+    if (world.boss) {
+      ctx.save()
+      ctx.translate(ox, oy)
+      drawBoss(ctx, world.boss, time)
+      ctx.restore()
+    }
+
     for (const m of world.motes) {
       if (!m.ember) continue
       ctx.fillStyle =
@@ -306,6 +363,20 @@ export function createRenderer(): Renderer {
       const box = player.attackBox()
       ctx.strokeStyle = '#f33'
       if (box) ctx.strokeRect(box.x + 0.5, box.y + 0.5, box.w - 1, box.h - 1)
+      const b = world.boss
+      if (b?.awake && !b.gone) {
+        ctx.strokeStyle = '#9f6'
+        for (const l of b.letterBoxes())
+          ctx.strokeRect(l.x + 0.5, l.y + 0.5, l.w - 1, l.h - 1)
+        ctx.strokeStyle = '#f33'
+        for (const l of b.contact())
+          ctx.strokeRect(l.x + 0.5, l.y + 0.5, l.w - 1, l.h - 1)
+        for (const s of b.shots) {
+          const r = shotBox(s)
+          ctx.strokeRect(r.x + 0.5, r.y + 0.5, r.w - 1, r.h - 1)
+        }
+        drawText(ctx, bossLabel(b), b.x + 58, b.y - 32, '#9f6')
+      }
       for (const s of world.snakes) {
         if (!s.alive) continue
         ctx.strokeStyle = '#9f6'
@@ -370,4 +441,50 @@ function drawHud(ctx: CanvasRenderingContext2D, world: World) {
   ctx.fillRect(world.viewW - 33, 10, 2, 2)
   ctx.fillStyle = PAL.y
   ctx.fillRect(world.viewW - 28, 8, 1, 1)
+
+  // An announcement under the HUD, big where it fits, blinking out.
+  const banner = world.banner
+  if (banner && (banner.t > 20 || (banner.t >> 2) % 2)) {
+    const big = banner.text.length * 12 <= world.viewW - 8 ? 2 : 1
+    drawOutlined(ctx, banner.text, world.viewW / 2, 24, banner.color, big)
+  }
+
+  // The boss's name and health, top centre between the candles and the
+  // serpent count, from the moment it spawns. The bar fills as it wakes, and
+  // a hit leaves an ember chip that drains after it.
+  const b = world.boss
+  if (!b || b.gone) return
+  const w = Math.min(160, world.viewW - 124)
+  const x0 = Math.round((world.viewW - w) / 2)
+  const y = 12
+  drawOutlined(ctx, WORD, world.viewW / 2, 2, b.phase === 2 ? PAL.C : PAL.B)
+  ctx.fillStyle = PAL.k
+  ctx.fillRect(x0 - 1, y - 1, w + 2, 6)
+  ctx.fillStyle = PAL.d
+  ctx.fillRect(x0, y, w, 4)
+  const now = Math.round((w * b.hp * b.fill) / BOSS.hp)
+  const lag = Math.round((w * b.lag * b.fill) / BOSS.hp)
+  ctx.fillStyle = PAL.E
+  ctx.fillRect(x0, y, lag, 4)
+  ctx.fillStyle = b.phase === 2 ? PAL.C : PAL.R
+  ctx.fillRect(x0, y, now, 4)
+  ctx.fillStyle = b.phase === 2 ? PAL.E : PAL.C
+  ctx.fillRect(x0, y, now, 1)
+}
+
+// A portcullis of iron bars over each shut gate cell.
+function drawGate(ctx: CanvasRenderingContext2D, world: World) {
+  for (const { tx, ty } of world.level.gate) {
+    const x = tx * TILE
+    const y = ty * TILE
+    for (const bx of [1, 5, 9, 13]) {
+      ctx.fillStyle = PAL.i
+      ctx.fillRect(x + bx, y, 2, TILE)
+      ctx.fillStyle = PAL.I
+      ctx.fillRect(x + bx, y, 1, TILE)
+    }
+    ctx.fillStyle = PAL.i
+    ctx.fillRect(x, y + 4, TILE, 2)
+    ctx.fillRect(x, y + 12, TILE, 2)
+  }
 }

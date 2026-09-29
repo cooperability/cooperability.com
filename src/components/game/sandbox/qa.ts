@@ -16,12 +16,20 @@ import {
   type Candlelight,
   type Scene,
 } from './game'
+import {
+  ATTACKS,
+  BOSS,
+  WORD_W,
+  type Attack,
+  type Boss,
+  type BossState,
+} from './boss'
 import { rig } from './hero'
 import { PAL } from './pixels'
 import { SANDBOX_MAP, TILE } from './level'
 import { PLAYER_H } from './player'
 import { debugLabel, drawSnake, SNAKE, type Snake } from './snake'
-import { World } from './world'
+import { INVULN, MAX_HP, World } from './world'
 
 // The beta-test script. Each scenario plays a fresh world through real
 // inputs and returns null on a pass or what went wrong. Jest runs these on
@@ -32,6 +40,8 @@ type Hold = Partial<Record<Button, boolean>>
 
 // Read fresh: TypeScript would otherwise keep a narrowing across steps.
 const sceneOf = (g: Candlelight): Scene => g.scene
+const stateOf = (b: Boss): BossState => b.state
+const bossOf = (w: World): Boss | null => w.boss
 
 const frame = (held: Hold = {}, pressed: Hold = {}): Frame => {
   const h: ButtonSet = new Set()
@@ -67,6 +77,30 @@ function room(edit: (g: string[][]) => void = () => {}) {
 }
 
 const FLOOR = 9 * TILE
+
+// A run already at the boss: serpents slain, the player on the sill, the
+// gate shut behind and Society waking.
+const atBoss = () => new World(SANDBOX_MAP, 1, { atBoss: true })
+
+// Steps until the boss enters `state`, keeping the player alive, or gives up.
+function until(w: World, done: (b: Boss) => boolean, limit = 7200) {
+  const b = w.boss!
+  for (let i = 0; i < limit && !done(b); i++) {
+    w.hp = MAX_HP
+    play(w, 1)
+  }
+  return done(b)
+}
+
+// Stands the player on the hall floor, at rest, `x` from the left wall.
+function standInHall(w: World, x: number) {
+  const a = w.level.arena!
+  const p = w.player
+  p.x = a.left + x
+  p.y = a.floor - PLAYER_H
+  p.vx = 0
+  p.vy = 0
+}
 
 // The colours one drawSnake call paints with, from a context that only
 // records.
@@ -457,19 +491,27 @@ export const SCENARIOS: Scenario[] = [
     },
   },
   {
-    name: 'win: the shipped map has five snakes, and killing them wins',
+    name: 'win: five serpents open the gate, and only felling Society wins',
     run() {
       const g = createCandlelight()
       play(g, 1, {}, { a: true })
       if (g.world.total !== 5) return `${g.world.total} snakes on the map`
       for (const s of g.world.snakes) s.hit(SNAKE.hp, 1)
       play(g, SNAKE.dieFrames + 5)
-      if (sceneOf(g) !== 'won') return `scene is ${g.scene} after five kills`
+      if (sceneOf(g) !== 'play') return `scene is ${g.scene} after five kills`
+      const w = g.world
+      if (!w.boss) return 'no boss after five kills'
+      w.player.x = w.level.sill!.x
+      w.player.y = w.level.sill!.y - PLAYER_H
+      play(g, BOSS.intro + 5)
+      w.boss.hit(BOSS.hp)
+      play(g, BOSS.die + 5)
+      if (sceneOf(g) !== 'won') return `scene is ${g.scene} after the boss`
       play(g, 1, {}, { a: true })
       if (sceneOf(g) !== 'won') return 'the win screen skipped on a held button'
       play(g, SCREEN_DELAY)
       play(g, 1, {}, { a: true })
-      return sceneOf(g) === 'play' && g.world.kills === 0
+      return sceneOf(g) === 'play' && g.world.kills === 0 && !g.world.boss
         ? null
         : 'play again did not start fresh'
     },
@@ -480,25 +522,348 @@ export const SCENARIOS: Scenario[] = [
       const g = createCandlelight()
       play(g, 1, {}, { a: true })
       const w = g.world
-      for (let i = 0; i < 20000 && sceneOf(g) === 'play'; i++) {
+      for (let i = 0; i < 40000 && sceneOf(g) === 'play'; i++) {
+        const p = w.player
         const target = w.snakes.find((s) => s.alive)
         if (target && i % 40 === 0) {
           // Stand just beside the snake, facing it, on its level.
-          const p = w.player
           p.x = target.x - p.w - 2
           p.y = target.y + target.h - PLAYER_H
           p.vx = 0
           p.vy = 0
           p.facing = 1
         }
+        const letter = w.boss?.vulnerable ? w.boss.letterBoxes()[0] : null
+        if (w.boss && !w.boss.awake) {
+          p.x = w.level.sill!.x
+          p.y = w.level.sill!.y - PLAYER_H
+        } else if (letter && i % 12 === 0) {
+          // Beside the S, level with its underside, as if at a jump's peak.
+          p.x = letter.x - p.w - 2
+          p.y = letter.y + letter.h - PLAYER_H
+          p.vx = 0
+          p.vy = 0
+          p.facing = 1
+        }
         // Only the sword is under test here, not survival.
         w.hp = 5
-        const above = target ? target.y + target.h < w.player.y + 4 : false
+        const above = target ? target.y + target.h < p.y + 4 : false
         g.step(frame({ up: above }, i % 12 === 0 ? { x: true } : {}))
       }
+      const b = bossOf(w)
       return sceneOf(g) === 'won'
         ? null
-        : `${w.kills} of ${w.total} killed, scene ${g.scene}`
+        : `${w.kills} of ${w.total} killed, boss ${b?.state} at ${b?.hp} HP, scene ${g.scene}`
+    },
+  },
+  {
+    name: 'boss: the last serpent spawns it, health bar and all, and opens the gate',
+    run() {
+      const w = new World()
+      if (w.boss || w.level.gateOpen) return 'boss or gate before any kill'
+      if (!w.level.boxHitsSolid(w.level.sill!.x - 2 * TILE, 5 * TILE, 4, 4))
+        return 'the gate is not solid while shut'
+      const [last, ...rest] = w.snakes
+      for (const s of rest) s.hit(SNAKE.hp, 1)
+      play(w, SNAKE.dieFrames + 5)
+      if (w.boss) return 'spawned with a serpent left'
+      last.hit(SNAKE.hp, 1)
+      play(w, SNAKE.dieFrames + 5)
+      const b = bossOf(w)
+      if (!b) return 'no boss after the last serpent'
+      if (b.awake) return 'woke before the player arrived'
+      if (b.hp !== BOSS.hp) return `spawned at ${b.hp} HP`
+      if (!w.level.gateOpen) return 'the gate stayed shut'
+      if (w.level.boxHitsSolid(w.level.sill!.x - 2 * TILE, 5 * TILE, 4, 4))
+        return 'the open gate still blocks'
+      return w.banner?.text === 'THE BELFRY GATE IS OPEN'
+        ? null
+        : `banner "${w.banner?.text}"`
+    },
+  },
+  {
+    name: 'boss: through the gate it slams shut, candles rekindle, Society wakes',
+    run() {
+      const w = new World()
+      for (const s of w.snakes) s.hit(SNAKE.hp, 1)
+      play(w, SNAKE.dieFrames + 5)
+      w.hp = 2
+      const p = w.player
+      p.x = w.level.sill!.x - p.w / 2
+      p.y = w.level.sill!.y - PLAYER_H
+      play(w, 1)
+      const b = w.boss!
+      if (b.state !== 'intro') return `boss is ${b.state}`
+      if (w.level.gateOpen) return 'the gate stayed open behind'
+      if (w.hp !== MAX_HP) return `hp ${w.hp} on entering`
+      if (b.hit(1) || b.hp !== BOSS.hp) return 'hurt during its entrance'
+      let said = false
+      for (let i = 0; i < BOSS.intro + 2; i++) {
+        play(w, 1)
+        if (w.banner?.text === 'WE LIVE IN A SOCIETY') said = true
+      }
+      if (!said) return 'never said it'
+      return stateOf(b) === 'idle' && b.fill === 1
+        ? null
+        : `after the intro: ${b.state}, bar at ${b.fill}`
+    },
+  },
+  {
+    name: 'boss: the camera holds on the hall through the fight',
+    run() {
+      const w = new World()
+      const a = w.level.arena!
+      // Before: the hall stays out of frame even from the belfry.
+      w.player.x = 54 * TILE
+      w.player.y = 7 * TILE - PLAYER_H
+      play(w, 200)
+      if (w.camX + w.viewW > a.left) return 'the hall shows before the fight'
+      const f = atBoss()
+      standInHall(f, 10)
+      play(f, 200)
+      return f.camX === a.left - TILE && Math.round(f.camY) === a.top - 8
+        ? null
+        : `camera at ${f.camX.toFixed(0)},${f.camY.toFixed(0)}`
+    },
+  },
+  {
+    name: 'boss: all four attacks come up, never the same twice in a row',
+    run() {
+      const w = atBoss()
+      const order: Attack[] = []
+      const b = w.boss!
+      for (let i = 0; i < 7200; i++) {
+        w.hp = MAX_HP
+        play(w, 1)
+        if (b.attack && b.attack !== order[order.length - 1])
+          order.push(b.attack)
+        if (b.attack && b.state === b.attack && b.t === 0) {
+          if (w.banner?.text !== ATTACKS[b.attack].name)
+            return `${b.attack} began under "${w.banner?.text}"`
+        }
+      }
+      const seen = new Set(order)
+      return seen.size === 4 ? null : `only ${[...seen].join(', ')}`
+    },
+  },
+  {
+    name: 'boss: every attack can hurt a player standing still, and says so',
+    run() {
+      const w = atBoss()
+      const causes = new Set<string>()
+      for (let i = 0; i < 12000 && causes.size < 5; i++) {
+        standInHall(w, 60)
+        w.hp = MAX_HP
+        w.invuln = 0
+        w.cause = ''
+        play(w, 1)
+        if (w.cause) causes.add(w.cause)
+      }
+      const want = Object.values(ATTACKS).map((a) => a.cause)
+      const missing = want.filter((c) => !causes.has(c))
+      return missing.length ? `never: ${missing.join(', ')}` : null
+    },
+  },
+  {
+    name: 'boss: a player who stands still dies within a minute',
+    run() {
+      const w = atBoss()
+      standInHall(w, 140)
+      for (let i = 0; i < 3600 && w.status === 'play'; i++) play(w, 1)
+      return w.status === 'dead' ? null : `alive at ${w.hp} HP after a minute`
+    },
+  },
+  {
+    name: 'boss: the sword hurts it, once per swing',
+    run() {
+      const w = atBoss()
+      const b = w.boss!
+      if (!until(w, (b) => b.state === 'stuck')) return 'never slammed down'
+      const l = b.letterBoxes()[3]
+      const p = w.player
+      p.x = l.x - p.w - 2
+      p.y = w.level.arena!.floor - PLAYER_H
+      p.facing = 1
+      const hp = b.hp
+      play(w, 20, {}, { x: true })
+      return b.hp === hp - 1 ? null : `hp ${hp} to ${b.hp} in one swing`
+    },
+  },
+  {
+    name: 'boss: the sword cuts a thrown letter out of the air',
+    run() {
+      const w = atBoss()
+      const b = w.boss!
+      if (!until(w, (b) => b.shots.some((s) => s.kind === 'letter')))
+        return 'never threw a letter'
+      const shot = b.shots.find((s) => s.kind === 'letter')!
+      // In its path, facing it, and in mercy frames so only the blade can
+      // stop it.
+      const p = w.player
+      p.facing = shot.vx < 0 ? 1 : -1
+      p.x = p.facing > 0 ? shot.x - p.w - 16 : shot.x + shot.w + 16
+      p.y = shot.y - 6
+      p.vx = 0
+      p.vy = 0
+      w.invuln = INVULN
+      play(w, 1, {}, { x: true })
+      for (let i = 0; i < 12 && b.shots.includes(shot); i++) play(w, 1)
+      return b.shots.includes(shot) ? 'the letter flew through the blade' : null
+    },
+  },
+  {
+    name: 'boss: a torch sets it burning for 2 HP',
+    run() {
+      const w = atBoss()
+      const b = w.boss!
+      if (!until(w, (b) => b.state === 'stuck')) return 'never slammed down'
+      // Once the slam's shockwaves have rolled past, on whichever side has
+      // room, facing it.
+      play(w, 20)
+      const a = w.level.arena!
+      const p = w.player
+      p.facing = b.x - a.left > 60 ? 1 : -1
+      p.x = p.facing > 0 ? b.x - 40 : b.x + WORD_W + 30
+      p.y = a.floor - PLAYER_H
+      const hp = b.hp
+      play(w, 1, {}, { y: true })
+      for (let i = 0; i < 30 && b.burn === 0; i++) play(w, 1)
+      if (b.burn === 0) return 'the torch never lit it'
+      // Out of the way, so only the fire does damage.
+      p.x = a.left + 2
+      for (let i = 0; i < BOSS.burnFrames + 2; i++) {
+        w.hp = MAX_HP
+        play(w, 1)
+      }
+      return b.hp === hp - 2 ? null : `hp ${hp} to ${b.hp}`
+    },
+  },
+  {
+    name: 'boss: at half health it rages, then waits less between attacks',
+    run() {
+      const w = atBoss()
+      const b = w.boss!
+      if (!until(w, (b) => b.state === 'idle')) return 'never woke'
+      b.hit(BOSS.hp / 2)
+      if (b.state !== 'rage') return `at half health: ${b.state}`
+      if (b.hit(1) || b.hp !== BOSS.hp / 2) return 'hurt while raging'
+      play(w, 1)
+      if (w.banner?.text !== 'SOCIETY IS DISAPPOINTED')
+        return `banner "${w.banner?.text}"`
+      if (!until(w, (b) => stateOf(b) === 'idle')) return 'never calmed'
+      if (b.phase !== 2) return 'still phase 1'
+      let n = 0
+      while (stateOf(b) === 'idle' && n < BOSS.idle + 5) {
+        w.hp = MAX_HP
+        play(w, 1)
+        n++
+      }
+      return n <= BOSS.idleRage + 1 ? null : `idled ${n} updates`
+    },
+  },
+  {
+    name: 'boss: PEER PRESSURE splits the word to the walls and crushes the middle',
+    run() {
+      const w = atBoss()
+      const b = w.boss!
+      if (!until(w, (b) => b.state === 'pressure')) return 'never pressured'
+      play(w, BOSS.gather + BOSS.brace - 1)
+      const a = w.level.arena!
+      const [s, y] = [b.letters[0], b.letters[6]]
+      if (s.x > a.left + 4 || y.x + 15 < a.right - 4)
+        return `S at ${s.x.toFixed(0)}, Y ends at ${(y.x + 15).toFixed(0)}`
+      standInHall(w, (a.right - a.left) / 2)
+      w.invuln = 0
+      w.cause = ''
+      for (let i = 0; i < 90 && !w.cause; i++) {
+        standInHall(w, (a.right - a.left) / 2)
+        play(w, 1)
+      }
+      return w.cause === ATTACKS.pressure.cause ? null : `cause "${w.cause}"`
+    },
+  },
+  {
+    name: 'boss: dying to it rises on the sill, serpents still slain, clock running',
+    run() {
+      const g = createCandlelight()
+      play(g, 1, {}, { a: true })
+      const w = g.world
+      for (const s of w.snakes) s.hit(SNAKE.hp, 1)
+      play(g, SNAKE.dieFrames + 5)
+      w.player.x = w.level.sill!.x
+      w.player.y = w.level.sill!.y - PLAYER_H
+      play(g, BOSS.intro)
+      w.hp = 1
+      for (let i = 0; i < 3600 && sceneOf(g) === 'play'; i++) {
+        standInHall(w, 140)
+        play(g, 1)
+      }
+      if (sceneOf(g) !== 'dead') return `scene ${g.scene} at ${w.hp} HP`
+      if (!w.cause) return 'no cause for the death screen'
+      const clock = w.clock
+      play(g, SCREEN_DELAY + 2)
+      play(g, 1, {}, { a: true })
+      const r = g.world
+      if (sceneOf(g) !== 'play' || r === w) return 'did not rise'
+      if (r.kills !== r.total || r.snakes.length)
+        return 'the serpents came back'
+      if (!r.boss?.awake || r.boss.hp !== BOSS.hp)
+        return 'the boss did not reset'
+      if (r.hp !== MAX_HP) return `rose at ${r.hp} HP`
+      if (r.clock < clock) return 'the clock restarted'
+      return r.player.x >= r.level.arena!.left ? null : 'rose outside the hall'
+    },
+  },
+  {
+    name: 'boss soak: 20,000 random updates keep everything finite and in the hall',
+    run() {
+      const w = atBoss()
+      const a = w.level.arena!
+      const b = w.boss!
+      let seed = 11
+      const rand = () =>
+        (seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff
+      const buttons: Button[] = [
+        'left',
+        'right',
+        'up',
+        'down',
+        'a',
+        'b',
+        'x',
+        'y',
+      ]
+      let held: Hold = {}
+      for (let i = 0; i < 20000; i++) {
+        if (i % 12 === 0) {
+          held = {}
+          for (const k of buttons) if (rand() < 0.3) held[k] = true
+        }
+        const pressed: Hold = {}
+        for (const k of buttons) if (held[k] && rand() < 0.2) pressed[k] = true
+        w.hp = MAX_HP
+        if (b.gone) break
+        w.step(frame(held, pressed))
+        const p = w.player
+        if (![p.x, p.y, p.vx, p.vy].every(Number.isFinite))
+          return `player NaN at ${i}`
+        if (p.pose !== 'climb' && w.level.boxHitsSolid(p.x, p.y, p.w, p.h))
+          return `player inside a wall at ${i}`
+        if (p.x < a.left - 1 || p.x + p.w > a.right + 1)
+          return `player left the hall at ${i}`
+        for (const l of b.letterBoxes())
+          if (
+            !Number.isFinite(l.x + l.y) ||
+            l.x < a.left - 1 ||
+            l.x + l.w > a.right + 1 ||
+            l.y + l.h > a.floor + 1
+          )
+            return `letter out of the hall at ${i} (${b.state})`
+        for (const s of b.shots)
+          if (!Number.isFinite(s.x + s.y) || s.y > a.floor + 4)
+            return `shot out of bounds at ${i}`
+      }
+      return b.x >= a.left && b.x + WORD_W <= a.right ? null : 'word outside'
     },
   },
   {
@@ -926,6 +1291,9 @@ declare global {
       game: Candlelight
       snapshot(): unknown
       killAll(): void
+      // Onto the sill of the boss's hall, once the serpents are slain.
+      toBoss(): void
+      beatBoss(): void
       setHp(hp: number): void
       // Every press the game received, with how long after the last touch
       // or click landed on the page, in ms.
@@ -980,11 +1348,29 @@ export function exposeQA(
           hp: s.hp,
           burn: s.burn,
         })),
+        gateOpen: w.level.gateOpen,
+        banner: w.banner?.text ?? null,
+        boss: w.boss && {
+          state: w.boss.state,
+          hp: w.boss.hp,
+          phase: w.boss.phase,
+          attack: w.boss.attack,
+          shots: w.boss.shots.length,
+        },
         mode: root.dataset.mode,
       }
     },
     killAll() {
       for (const s of game.world.snakes) s.hit(SNAKE.hp, 1)
+    },
+    toBoss() {
+      const w = game.world
+      if (!w.boss || !w.level.sill) return
+      w.player.x = w.level.sill.x - w.player.w / 2
+      w.player.y = w.level.sill.y - PLAYER_H
+    },
+    beatBoss() {
+      game.world.boss?.defeat()
     },
     setHp(hp: number) {
       game.world.hp = hp
