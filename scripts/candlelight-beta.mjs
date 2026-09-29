@@ -51,6 +51,17 @@ const PROFILES = [
     context: phone('iPhone 15', true),
   },
   { name: 'pixel7-portrait', touch: true, context: phone('Pixel 7') },
+  // Launched from the home screen: no Safari bars, so the full screen height,
+  // and navigator.standalone set as iOS sets it.
+  {
+    name: 'iphone15-homescreen',
+    touch: true,
+    standalone: true,
+    context: {
+      ...phone('iPhone 15'),
+      viewport: devices['iPhone 15'].screen,
+    },
+  },
 ]
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
@@ -58,6 +69,10 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 async function run(browser, profile) {
   const context = await browser.newContext(profile.context)
   const page = await context.newPage()
+  if (profile.standalone)
+    await page.addInitScript(() =>
+      Object.defineProperty(window.navigator, 'standalone', { value: true })
+    )
   const errors = []
   page.on('pageerror', (e) => errors.push(`pageerror: ${e.message}`))
   // Vercel's analytics scripts 404 and the site's report-only CSP warns on
@@ -201,6 +216,27 @@ async function run(browser, profile) {
   })
   await sleep(900)
   await shot('snake')
+
+  // Debug view from the select menu's checkbox, by real tap or click, then
+  // the menu closed with B and the run resumed with start.
+  if (profile.touch) await hold('[data-button="select"]', 0.5, 0.5, 80)
+  else await page.keyboard.press('Backspace')
+  await sleep(200)
+  if (profile.touch) await hold('input[type="checkbox"]', 0.5, 0.5, 60)
+  else await page.locator('input[type="checkbox"]').click()
+  await sleep(100)
+  await press('b')
+  if (profile.touch) await hold('[data-button="start"]', 0.5, 0.5, 80)
+  else await page.keyboard.press('Enter')
+  await sleep(600)
+  s = await snap()
+  check(
+    'the menu checkbox turns the debug view on',
+    s.debug && !s.about && !s.paused,
+    JSON.stringify({ debug: s.debug, about: s.about, paused: s.paused })
+  )
+  await shot('debug')
+  await page.evaluate(() => (window.__candlelight.game.debug = false))
 
   // Death, then rising again.
   await page.evaluate(() => {
@@ -353,6 +389,65 @@ for (const p of PROFILES) {
     })
   }
 }
+// Every installable demo app, reached by a client-side navigation, must
+// reload as its own document, so iOS saves the app's manifest and the
+// home-screen icon opens the app rather than the site's root.
+const APPS = [
+  '/demos/candlelight',
+  '/demos/prompt-composer',
+  '/demos/mandelbrot-explorer',
+  '/demos/opioid-converter',
+]
+{
+  const context = await browser.newContext(phone('iPhone 15'))
+  const page = await context.newPage()
+  const checks = []
+  for (const path of APPS) {
+    await page.goto(`${base}/demos`, { waitUntil: 'networkidle' })
+    const pushed = await page.evaluate((to) => {
+      if (!window.next?.router?.push) return false
+      window.next.router.push(to)
+      return true
+    }, path)
+    let detail = 'no client router on /demos'
+    let pass = false
+    if (pushed) {
+      await page
+        .waitForFunction(
+          (to) =>
+            new URL(performance.getEntriesByType('navigation')[0].name)
+              .pathname === to,
+          path,
+          { timeout: 10000 }
+        )
+        .catch(() => {})
+      const got = await page.evaluate(async () => {
+        const entry = performance.getEntriesByType('navigation')[0].name
+        const link = document.querySelector('link[rel="manifest"]')
+        const manifest = link ? await (await fetch(link.href)).json() : null
+        return {
+          loaded: new URL(entry).pathname,
+          start: manifest?.start_url,
+        }
+      })
+      pass = got.loaded === path && got.start === path
+      detail = `document loaded at ${got.loaded}, manifest start_url ${got.start}`
+    }
+    checks.push({
+      name: `${path} reached client-side reloads with its own manifest`,
+      pass,
+      detail,
+    })
+  }
+  await context.close()
+  results.push({
+    profile: 'home-screen apps',
+    qa: null,
+    checks,
+    errors: [],
+    shots: [],
+  })
+}
 await browser.close()
 
 const lines = [
@@ -370,9 +465,10 @@ for (const r of results) {
     ...r.checks,
   ]
   const bad = all.filter((c) => !c.pass)
+  // A crashed profile already fails its "run finished" check.
   const hitches = r.qa
     ? r.qa.frames.slow > Math.ceil(r.qa.frames.count * 0.02)
-    : true
+    : false
   failed += bad.length + r.errors.length + (hitches ? 1 : 0)
   lines.push(`## ${r.profile}`, '')
   if (r.qa) {

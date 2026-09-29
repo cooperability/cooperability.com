@@ -20,7 +20,7 @@ import { rig } from './hero'
 import { PAL } from './pixels'
 import { SANDBOX_MAP, TILE } from './level'
 import { PLAYER_H } from './player'
-import { drawSnake, SNAKE, type Snake } from './snake'
+import { debugLabel, drawSnake, SNAKE, type Snake } from './snake'
 import { World } from './world'
 
 // The beta-test script. Each scenario plays a fresh world through real
@@ -187,6 +187,18 @@ export const SCENARIOS: Scenario[] = [
         else if (c.has(PAL.C)) dark++
       }
       return lit && dark ? null : `${lit} lit and ${dark} plain frames`
+    },
+  },
+  {
+    name: 'debug: a serpent label counts updates in its current state',
+    run() {
+      const w = new World(room((g) => (g[8][7] = 's')))
+      const s = w.snakes[0]
+      for (let i = 0; i < 200 && s.state !== 'coil'; i++) play(w, 1)
+      if (s.state !== 'coil') return 'never coiled'
+      if (debugLabel(s) !== 'coil 0') return `entered as "${debugLabel(s)}"`
+      play(w, 5)
+      return debugLabel(s) === 'coil 5' ? null : `"${debugLabel(s)}" after 5`
     },
   },
   {
@@ -746,6 +758,22 @@ function layoutChecks(canvas: HTMLCanvasElement, root: HTMLElement): Check[] {
         Math.abs(c.width - c.height) < 1 && c.width >= vw * 0.85,
         `${Math.round(c.width)}x${Math.round(c.height)} of ${vw} wide`
       )
+      // The controls as one group, halfway down the space under the screen,
+      // whether that space is a Safari tab's or the taller home-screen app's.
+      const meta = root
+        .querySelector('[class*="meta"]')!
+        .getBoundingClientRect()
+      const lens = root
+        .querySelector('[class*="screen"]')!
+        .getBoundingClientRect()
+      const bottom = vh - parseFloat(getComputedStyle(root).paddingBottom)
+      const space = (lens.bottom + bottom) / 2
+      const group = (Math.min(dpad.top, face.top) + meta.bottom) / 2
+      add(
+        'the controls sit halfway down the space under the screen',
+        Math.abs(group - space) <= 24,
+        `group centre ${Math.round(group)}, space centre ${Math.round(space)}`
+      )
     }
   }
   return checks
@@ -933,6 +961,7 @@ export function exposeQA(
         scene: game.scene,
         paused: game.paused,
         about: game.about,
+        debug: game.debug,
         hp: w.hp,
         kills: w.kills,
         total: w.total,

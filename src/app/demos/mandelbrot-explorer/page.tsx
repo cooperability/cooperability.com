@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next'
+import HardLoad from '@/src/components/HardLoad'
 import MandelbrotExplorerClient from './mandelbrot-explorer-client'
 
 export const metadata: Metadata = {
@@ -36,6 +37,7 @@ export const viewport: Viewport = {
 export default function MandelbrotExplorerPage() {
   return (
     <div className="page-container">
+      <HardLoad />
       <MandelbrotExplorerClient />
     </div>
   )

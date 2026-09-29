@@ -18,7 +18,7 @@ import {
   PAL,
   type Canvas,
 } from './pixels'
-import { drawSnake } from './snake'
+import { debugLabel, drawSnake } from './snake'
 import { bakeTiles } from './tiles'
 import { drawTorch } from './torch'
 import { GHOST_LIFE, INVULN, MAX_HP, World } from './world'
@@ -314,6 +314,7 @@ export function createRenderer(): Renderer {
         ctx.strokeStyle = '#f33'
         if (bite)
           ctx.strokeRect(bite.x + 0.5, bite.y + 0.5, bite.w - 1, bite.h - 1)
+        drawText(ctx, debugLabel(s), s.x + s.w / 2, s.y - 9, '#9f6')
       }
       ctx.restore()
       drawText(

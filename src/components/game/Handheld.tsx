@@ -114,6 +114,7 @@ export default function Handheld() {
   const [hint, setHint] = useState(shouldHint)
   const [scheme, setScheme] = useState(savedScheme)
   const [about, setAbout] = useState(false)
+  const [debug, setDebug] = useState(false)
   const gameRef = useRef<Candlelight | null>(null)
   const chooseScheme = (next: Scheme) => {
     setScheme(next)
@@ -154,10 +155,16 @@ export default function Handheld() {
       const button = KEY_MAP[e.code]
       if (!button) return
       if (e.type === 'keyup') return controls.key(button, false)
-      // Shortcuts pass through, and Enter or Space on the exit link or the
-      // hint's button must still activate it.
+      // Shortcuts pass through, and Enter or Space on the exit link, the
+      // hint's button or the debug checkbox must still activate it.
       if (e.metaKey || e.ctrlKey || e.altKey) return
-      if ((e.target as Element).closest?.('a, button')) return
+      const target = e.target as Element
+      if (target.closest?.('a, button')) return
+      if (
+        target.closest?.('input') &&
+        (e.code === 'Space' || e.code === 'Enter')
+      )
+        return
       e.preventDefault()
       if (e.repeat) return
       controls.key(button, true)
@@ -376,6 +383,18 @@ export default function Handheld() {
             aria-labelledby="candlelight-about"
           >
             <h2 id="candlelight-about">Candlelight</h2>
+            <label className={styles.debug}>
+              <input
+                type="checkbox"
+                checked={debug}
+                onChange={(e) => {
+                  const on = e.currentTarget.checked
+                  if (gameRef.current) gameRef.current.debug = on
+                  setDebug(on)
+                }}
+              />
+              Debug view: hitboxes, states and frame counts
+            </label>
             <p>
               Built in September 2026 by Cooper Reed, working with Claude Code.
               It tests how far a browser game can go as a real phone app:
@@ -481,7 +500,7 @@ export default function Handheld() {
         </div>
         <p className={styles.legend}>
           <span className={styles.start}>Enter pause</span>
-          <span className={styles.select}>Backspace about</span>
+          <span className={styles.select}>Backspace menu</span>
           <span>F fullscreen</span>
           <span>Hold up + attack to strike overhead</span>
         </p>

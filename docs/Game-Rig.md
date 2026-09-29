@@ -59,19 +59,20 @@ input switches to full screen while a touch anywhere switches back.
 
 Every source feeds one `Controls` object, read once per fixed update:
 
-| Button | WASD layout | Arrows layout | Controller (standard) | Action                                  |
-| ------ | ----------- | ------------- | --------------------- | --------------------------------------- |
-| D-pad  | WASD        | Arrows        | D-pad or left stick   | Move, down + A drops a beam             |
-| A      | K or Space  | Z or Space    | Bottom face (0)       | Jump, hold for height                   |
-| B      | L or Shift  | C or Shift    | Right face (1)        | Roll on ground, dash in air             |
-| X      | J           | X             | Left face (2)         | Sword swing, overhead while up is held  |
-| Y      | I           | V             | Top face (3)          | Throw a torch (one a second)            |
-| Start  | Enter, Esc  | Enter, Esc    | Start (9)             | Pause                                   |
-| Select | Backspace   | Backspace     | Back (8)              | About: when and why, and how to install |
+| Button | WASD layout | Arrows layout | Controller (standard) | Action                                 |
+| ------ | ----------- | ------------- | --------------------- | -------------------------------------- |
+| D-pad  | WASD        | Arrows        | D-pad or left stick   | Move, down + A drops a beam            |
+| A      | K or Space  | Z or Space    | Bottom face (0)       | Jump, hold for height                  |
+| B      | L or Shift  | C or Shift    | Right face (1)        | Roll on ground, dash in air            |
+| X      | J           | X             | Left face (2)         | Sword swing, overhead while up is held |
+| Y      | I           | V             | Top face (3)          | Throw a torch (one a second)           |
+| Start  | Enter, Esc  | Enter, Esc    | Start (9)             | Pause                                  |
+| Select | Backspace   | Backspace     | Back (8)              | Menu: about, install steps, debug view |
 
-Any button but select leaves the title. Select opens the About panel over the
-screen, pausing a run, and any button closes it. The hitbox view is the
-`debug` flag on the game, set from the beta script's `?qa` handle.
+Any button but select leaves the title. Select opens the menu over the
+screen, pausing a run, and any pad button closes it. Its Debug view checkbox
+works by tap or keyboard and draws every hitbox, the player's pose and
+velocity, and over each serpent its state and the updates spent in it.
 
 The two keyboard layouts share no keys, so both always work. The overlay shows
 whichever the player last typed on, and the Keys button bottom left switches
