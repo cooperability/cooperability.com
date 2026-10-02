@@ -15,7 +15,31 @@ export const URN_RESPAWN = 300
 export const HIT_PAUSE = 4
 export const GHOST_LIFE = 12
 
+// Health candles: dark until a torch lights one, then walked into for a
+// candle of health, and back, dark again, `recharge` updates after.
+// The box both lights and takes it.
+export const PICKUP = { recharge: 300, w: 10, h: 14 }
+
 export type Status = 'play' | 'dead' | 'won'
+
+// What the player should feel: taking a hit, or landing the sword on an
+// enemy. The shell turns each into a rumble or a vibration.
+export type Haptic = 'hurt' | 'hit'
+
+export type Pickup = {
+  x: number
+  y: number
+  lit: boolean
+  // Updates until it is back, 0 while it stands.
+  recharge: number
+}
+
+export const pickupBox = (c: Pickup): Box => ({
+  x: c.x - PICKUP.w / 2,
+  y: c.y - PICKUP.h,
+  w: PICKUP.w,
+  h: PICKUP.h,
+})
 
 type Urn = { x: number; y: number; broken: boolean; respawn: number }
 export type Particle = {
@@ -27,6 +51,8 @@ export type Particle = {
   max: number
   color: string
   gravity: number
+  // Sparks glow through the dark instead of sitting under it.
+  glow?: boolean
 }
 type Ghost = { view: HeroView; life: number }
 export type Banner = { text: string; color: string; t: number }
@@ -34,6 +60,8 @@ type Mote = { x: number; y: number; ember: boolean; phase: number }
 
 export const overlaps = (a: Box, b: Box) =>
   a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y
+
+const SPARKS = [PAL.E, PAL.y, PAL.e, PAL.E]
 
 // Seeded, so a run replays the same from the same inputs.
 function rng(seed: number) {
@@ -54,6 +82,7 @@ export class World {
   readonly scarf = new Scarf()
   readonly urns: Urn[]
   readonly candles: { x: number; y: number }[]
+  readonly pickups: Pickup[]
   readonly snakes: Snake[]
   // Serpents on the map, slain or not.
   readonly total: number
@@ -67,6 +96,8 @@ export class World {
   cause = ''
   torches: Torch[] = []
   particles: Particle[] = []
+  // This update's haptics, for the shell to take after each step.
+  readonly haptics: Haptic[] = []
   ghosts: Ghost[] = []
   readonly motes: Mote[]
 
@@ -108,6 +139,9 @@ export class World {
       .filter((p) => p.kind === 'urn')
       .map((p) => ({ x: p.x, y: p.y, broken: false, respawn: 0 }))
     this.candles = props.filter((p) => p.kind === 'candle')
+    this.pickups = props
+      .filter((p) => p.kind === 'pickup')
+      .map((p) => ({ x: p.x, y: p.y, lit: false, recharge: 0 }))
     const snakes = props
       .filter((p) => p.kind === 'snake')
       .map((p) => new Snake(this.level, p.x, p.y))
@@ -168,6 +202,7 @@ export class World {
   step({ held, pressed }: Frame) {
     this.time++
     this.statusT++
+    this.haptics.length = 0
     // Presses made during hit-pause still count once play resumes.
     if (this.hitPause > 0) {
       this.hitPause--
@@ -222,6 +257,7 @@ export class World {
     this.stepSnakes()
     this.stepBoss()
     this.stepTorches()
+    this.stepPickups()
     if (this.banner && --this.banner.t <= 0) this.banner = null
 
     this.particles = this.particles.filter((p) => {
@@ -275,7 +311,14 @@ export class World {
     }
   }
 
-  private burst(x: number, y: number, n: number, colors: string[], dir = 0) {
+  private burst(
+    x: number,
+    y: number,
+    n: number,
+    colors: string[],
+    dir = 0,
+    glow = false
+  ) {
     for (let i = 0; i < n; i++) {
       const max = 30 + Math.floor(this.random() * 30)
       this.particles.push({
@@ -287,6 +330,26 @@ export class World {
         max,
         color: colors[i % colors.length],
         gravity: 0.18,
+        glow,
+      })
+    }
+  }
+
+  // Sparks off a flame: they glow through the dark. `lift` sends them up,
+  // as off a brand on the floor; without it they hang in the air behind.
+  private spark(x: number, y: number, n: number, lift = 0) {
+    for (let i = 0; i < n; i++) {
+      const max = 18 + Math.floor(this.random() * 18)
+      this.particles.push({
+        x: x + (this.random() - 0.5) * 2,
+        y: y + (this.random() - 0.5) * 2,
+        vx: (this.random() - 0.5) * 0.6,
+        vy: -this.random() * 0.4 - lift,
+        life: max,
+        max,
+        color: SPARKS[Math.floor(this.random() * SPARKS.length)],
+        gravity: lift ? 0.012 : 0.02,
+        glow: true,
       })
     }
   }
@@ -335,6 +398,7 @@ export class World {
       if (!s.alive || this.hitThisSwing.has(s) || !overlaps(box, s)) continue
       this.hitThisSwing.add(s)
       s.hit(1, p.facing)
+      this.haptics.push('hit')
       this.hitPause = HIT_PAUSE
       this.shake = 6
       this.burst(
@@ -353,6 +417,7 @@ export class World {
     if (letter && !this.hitThisSwing.has(b)) {
       this.hitThisSwing.add(b)
       b.hit(1)
+      this.haptics.push('hit')
       this.hitPause = HIT_PAUSE
       this.shake = 6
       this.burst(
@@ -391,14 +456,22 @@ export class World {
   private stepTorches() {
     for (const t of this.torches) {
       t.step()
-      if (!t.landed && this.time % 2 === 0)
-        this.puff(t.x + t.w / 2, t.y, 1, 0.4, PAL.e, 0.3)
+      // A trail of sparks in flight, and sparks rising off a brand on the
+      // floor until it burns low.
+      if (!t.landed) this.spark(t.x + t.w / 2, t.y, 1 + (this.time % 2))
+      else if (this.time % 4 === 0 && this.random() < t.strength)
+        this.spark(t.x + t.w / 2 + 2, t.y - 4, 1, 0.5)
+      for (const c of this.pickups) {
+        if (c.lit || c.recharge || !overlaps(t, pickupBox(c))) continue
+        c.lit = true
+        this.spark(c.x, c.y - 7, 8, 0.4)
+      }
       for (const s of this.snakes) {
         if (!s.alive || !overlaps(t, s)) continue
         s.ignite()
         if (!t.landed) {
           t.spent = true
-          this.burst(t.x, t.y, 10, [PAL.E, PAL.e, PAL.y])
+          this.burst(t.x, t.y, 12, SPARKS, 0, true)
         }
       }
       const b = this.boss
@@ -406,11 +479,29 @@ export class World {
         b.ignite()
         if (!t.landed) {
           t.spent = true
-          this.burst(t.x, t.y, 10, [PAL.E, PAL.e, PAL.y])
+          this.burst(t.x, t.y, 12, SPARKS, 0, true)
         }
       }
     }
     this.torches = this.torches.filter((t) => !t.spent)
+  }
+
+  // A lit candle gives a candle of health to a player short of one, then
+  // sits spent until it recharges.
+  private stepPickups() {
+    const p = this.player
+    for (const c of this.pickups) {
+      if (c.recharge > 0) {
+        if (--c.recharge === 0) this.puff(c.x, c.y - 3, 4, 0.6)
+        continue
+      }
+      if (!c.lit || this.status !== 'play' || this.hp >= MAX_HP) continue
+      if (!overlaps(pickupBox(c), p)) continue
+      this.hp++
+      c.lit = false
+      c.recharge = PICKUP.recharge
+      this.spark(c.x, c.y - 7, 14, 0.8)
+    }
   }
 
   private stepSnakes() {
@@ -455,6 +546,7 @@ export class World {
     )
       return false
     this.hp--
+    this.haptics.push('hurt')
     this.invuln = INVULN
     this.killer = killer
     this.cause = cause

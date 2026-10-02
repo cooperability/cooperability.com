@@ -51,7 +51,11 @@ export const glyphRows = (ch: string) => GLYPHS[ch.toUpperCase()] ?? GLYPHS[' ']
 // Width of one character in font pixels, before scaling.
 export const glyphWidth = (ch: string) => glyphRows(ch)[0].length
 
+// Debug labels change every frame, so the cache starts over once it holds
+// this many strings instead of keeping every one ever drawn.
+export const TEXT_CACHE_MAX = 256
 const cache = new Map<string, Canvas>()
+export const textCacheSize = () => cache.size
 
 function bakeText(text: string, color: string, scale: number): Canvas {
   const glyphs = [...text.toUpperCase()].map((ch) => GLYPHS[ch] ?? GLYPHS[' '])
@@ -83,7 +87,10 @@ export function drawText(
 ) {
   const key = `${text}|${color}|${scale}`
   let img = cache.get(key)
-  if (!img) cache.set(key, (img = bakeText(text, color, scale)))
+  if (!img) {
+    if (cache.size >= TEXT_CACHE_MAX) cache.clear()
+    cache.set(key, (img = bakeText(text, color, scale)))
+  }
   const left =
     align === 'center'
       ? x - Math.floor(img.width / 2)

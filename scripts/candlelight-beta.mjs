@@ -124,7 +124,8 @@ async function run(browser, profile) {
       const [fx, fy] = FACE[button]
       return hold('[class*="face"]', fx, fy, ms)
     }
-    const key = { a: 'KeyK', b: 'KeyL', x: 'KeyJ', y: 'KeyI' }[button]
+    // Arrows + WASD, the default layout.
+    const key = { a: 'KeyS', b: 'KeyA', x: 'KeyD', y: 'KeyW' }[button]
     await page.keyboard.down(key)
     await sleep(ms)
     await page.keyboard.up(key)
@@ -134,7 +135,7 @@ async function run(browser, profile) {
       const [fx, fy] = DPAD[dir]
       return hold('[class*="dpad"]', fx, fy, ms)
     }
-    const key = dir === 'right' ? 'KeyD' : 'KeyA'
+    const key = dir === 'right' ? 'ArrowRight' : 'ArrowLeft'
     await page.keyboard.down(key)
     await sleep(ms)
     await page.keyboard.up(key)
@@ -227,8 +228,10 @@ async function run(browser, profile) {
   if (profile.touch) await hold('[data-button="select"]', 0.5, 0.5, 80)
   else await page.keyboard.press('Backspace')
   await sleep(200)
-  if (profile.touch) await hold('input[type="checkbox"]', 0.5, 0.5, 60)
-  else await page.locator('input[type="checkbox"]').click()
+  // By its label: each cap also carries an invisible switch for the tap tick.
+  const debugBox = 'label:has-text("Debug view") input'
+  if (profile.touch) await hold(debugBox, 0.5, 0.5, 60)
+  else await page.locator(debugBox).click()
   await sleep(100)
   await press('b')
   if (profile.touch) await hold('[data-button="start"]', 0.5, 0.5, 80)
@@ -404,16 +407,15 @@ async function run(browser, profile) {
   }
 
   if (!profile.touch) {
-    await page.keyboard.press('ArrowLeft')
-    const legend = await page
-      .locator('button', { hasText: 'Keys:' })
-      .textContent()
+    const keysButton = page.locator('button', { hasText: 'Keys:' })
+    await keysButton.click()
+    const legend = await keysButton.textContent()
     check(
-      'the legend follows the arrows layout once used',
-      /Arrows/.test(legend),
+      'the Keys button switches to the WASD + IJKL layout',
+      legend.includes('WASD + IJKL'),
       legend
     )
-    await shot('legend-arrows')
+    await shot('legend-wasd')
   }
 
   await context.close()
@@ -514,6 +516,7 @@ for (const r of results) {
   const all = [
     ...(r.qa?.scenarios ?? []),
     ...(r.qa?.light ?? []),
+    ...(r.qa?.screens ?? []),
     ...(r.qa?.layout ?? []),
     ...r.checks,
   ]

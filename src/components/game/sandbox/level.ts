@@ -4,7 +4,11 @@ export const EMPTY = 0
 export const SOLID = 1
 export const ONEWAY = 2
 
-export type Prop = { kind: 'urn' | 'candle' | 'snake'; x: number; y: number }
+export type Prop = {
+  kind: 'urn' | 'candle' | 'snake' | 'pickup'
+  x: number
+  y: number
+}
 
 export type Body = { x: number; y: number; w: number; h: number }
 
@@ -13,27 +17,29 @@ export type Arena = { left: number; right: number; top: number; floor: number }
 
 // '#' stone, '=' one-way beam, ':' backdrop wall (no collision), 'P' spawn,
 // 'u' breakable urn, 'c' candle, 's' snake in open air, 'S' snake in front of
-// a backdrop wall, 'G' a gate (stone until opened), 'B' anywhere inside the
+// a backdrop wall, 'h' a health candle in open air, 'H' one in front of a
+// backdrop wall, 'G' a gate (stone until opened), 'B' anywhere inside the
 // boss's hall. Props sit on the tile below their cell.
 // Left to right: spawn cloister with drop-through beams, a wall taller than
 // a jump (ledge grab), a tunnel only a roll fits, a wall-jump chimney up to
 // a belfry, a pit wide enough to want the air dash, then altar steps. Past
 // the belfry's gate, a sill drops into the boss's hall: a flat floor, two
-// low beams and one high one between them.
+// low beams and one high one between them. Health candles stand on the
+// block floating over the roll tunnel and in the hall's far corner.
 export const SANDBOX_MAP = [
   '#......................................................####################',
   '#......................................................####################',
   '#........................................::::::::::::::####################',
   '#..........................#.............::::::::::::::#::::::::::::::::::#',
   '#::::::::::................#.............::::::::::::::G::::::::::::::::::#',
-  '#::::::::::.........u.s....#.=====.......::::::::::::::G::::::::::::::::::#',
+  '#::::::::::.......h.u.s....#.=====.......::::::::::::::G::::::::::::::::::#',
   '#::::::::::.......######...#::::::.......:::::::::::ucSG::::::::::::::::::#',
   '#::::::::::.......######...#::::::.......:::::::::::######::::::::::::::::#',
   '#:::::====:.......######...#::::::.......:::::::::u:####::::::::B:::::::::#',
   '#::::::::::...c.s.######...#::::::..===..::::::::#######:::::::====:::::::#',
   '#:::====:::.#####.######...#::::::.......::::::c:#######::::::::::::::::::#',
   '#::::::::::.#####.######....::::::.......:::::##########::===::::::::===::#',
-  '#:cP::u::c:.#####...........::u:cS.......:cu::##########:c::::::::::::::c:#',
+  '#:cP::u::c:.#####...........::u:cS.......:cu::##########:c::::::::::::::cH#',
   '##################################.......##################################',
   '##################################....s..##################################',
   '###########################################################################',
@@ -65,7 +71,7 @@ export class Level {
         const i = ty * this.width + tx
         if (ch === '#' || ch === 'G') this.tiles[i] = SOLID
         else if (ch === '=') this.tiles[i] = ONEWAY
-        else if (ch !== '.' && ch !== 's') this.backdrop[i] = 1
+        else if (ch !== '.' && ch !== 's' && ch !== 'h') this.backdrop[i] = 1
         // Props and the spawn stand on the floor of their cell.
         const x = tx * TILE + TILE / 2
         const y = (ty + 1) * TILE
@@ -73,6 +79,7 @@ export class Level {
         if (ch === 'u') this.props.push({ kind: 'urn', x, y })
         if (ch === 'c') this.props.push({ kind: 'candle', x, y })
         if (ch === 's' || ch === 'S') this.props.push({ kind: 'snake', x, y })
+        if (ch === 'h' || ch === 'H') this.props.push({ kind: 'pickup', x, y })
         if (ch === 'G') this.gate.push({ tx, ty })
         if (ch === 'B') mark = { tx, ty }
       })

@@ -9,7 +9,10 @@ import {
   type Frame,
 } from '../input'
 import {
+  BOSS_HINT,
+  HINT_AFTER,
   SCREEN_DELAY,
+  SQUARE,
   WIDTH,
   HEIGHT,
   createCandlelight,
@@ -24,12 +27,14 @@ import {
   type Boss,
   type BossState,
 } from './boss'
+import { glyphWidth } from './font'
 import { rig } from './hero'
 import { PAL } from './pixels'
 import { SANDBOX_MAP, TILE } from './level'
 import { PLAYER_H } from './player'
 import { debugLabel, drawSnake, SNAKE, type Snake } from './snake'
-import { INVULN, MAX_HP, World } from './world'
+import { dripAt, dripsFor, dripSpan, titleLayout } from './title'
+import { INVULN, MAX_HP, PICKUP, World } from './world'
 
 // The beta-test script. Each scenario plays a fresh world through real
 // inputs and returns null on a pass or what went wrong. Jest runs these on
@@ -78,6 +83,18 @@ function room(edit: (g: string[][]) => void = () => {}) {
 
 const FLOOR = 9 * TILE
 
+// A serpent walled in far from the spawn, so a room with no fight in it is
+// not won on its first update.
+function pen(g: string[][]) {
+  for (let x = 19; x <= 21; x++) g[1][x] = g[3][x] = '#'
+  g[2][19] = g[2][21] = '#'
+  g[2][20] = 's'
+}
+
+// Width of a line of the pixel font at scale 1, outline included.
+const lineWidth = (text: string) =>
+  [...text].reduce((w, ch) => w + glyphWidth(ch) + 1, -1) + 2
+
 // A run already at the boss: serpents slain, the player on the sill, the
 // gate shut behind and Society waking.
 const atBoss = () => new World(SANDBOX_MAP, 1, { atBoss: true })
@@ -100,6 +117,33 @@ function standInHall(w: World, x: number) {
   p.y = a.floor - PLAYER_H
   p.vx = 0
   p.vy = 0
+}
+
+// A run with every serpent slain and the boss awake in its hall.
+function bossRun() {
+  const g = createCandlelight()
+  play(g, 1, {}, { a: true })
+  const w = g.world
+  for (const s of w.snakes) s.hit(SNAKE.hp, 1)
+  play(g, SNAKE.dieFrames + 5)
+  w.player.x = w.level.sill!.x
+  w.player.y = w.level.sill!.y - PLAYER_H
+  play(g, BOSS.intro)
+  return g
+}
+
+// Stands at 1 HP in the hall until the boss kills, then waits for the
+// defeat screen to finish coming up. False if the boss never killed.
+function dieToBoss(g: Candlelight) {
+  const w = g.world
+  w.hp = 1
+  for (let i = 0; i < 3600 && sceneOf(g) === 'play'; i++) {
+    standInHall(w, 140)
+    play(g, 1)
+  }
+  if (sceneOf(g) !== 'dead') return false
+  play(g, SCREEN_DELAY + 2)
+  return true
 }
 
 // The colours one drawSnake call paints with, from a context that only
@@ -251,6 +295,53 @@ export const SCENARIOS: Scenario[] = [
           }
       }
       return null
+    },
+  },
+  {
+    name: 'title: every drip runs all the way down, never up, at its own pace',
+    run() {
+      for (const viewW of [WIDTH, SQUARE]) {
+        const { s } = titleLayout(viewW)
+        const drips = dripsFor(s)
+        if (drips.length < 8) return `${drips.length} drips at ${viewW} wide`
+        const paces = new Set(drips.map((d) => d.speed.toFixed(3)))
+        if (paces.size < drips.length / 2) return 'the drips share one pace'
+        for (const d of drips) {
+          const { top, end } = dripSpan(d, viewW)
+          let last: ReturnType<typeof dripAt> = null
+          let reached = false
+          for (let t = 0; t < 4000; t++) {
+            const at = dripAt(d, t, top, end, s)
+            if (at && (at.from < top || at.to > end || at.from > at.to))
+              return `a drip at ${d.x},${d.y} left its span at ${t}`
+            if (
+              at &&
+              last &&
+              at.turn === last.turn &&
+              (at.from < last.from || at.to < last.to)
+            )
+              return `a drip at ${d.x},${d.y} moved up at ${t}`
+            if (at?.to === end) reached = true
+            last = at
+          }
+          if (!reached) return `a drip at ${d.x},${d.y} never reached ${end}`
+        }
+      }
+      return null
+    },
+  },
+  {
+    name: 'controls: a finger the browser stopped listing lets go',
+    run() {
+      const c = new Controls()
+      c.syncTouches(new Map([[1, ['right']]]))
+      c.read([])
+      // Its touchend never came, and the next touch lists only the new one.
+      c.syncTouches(new Map([[2, ['left']]]))
+      const held = [...c.read([]).held]
+      if (held.join() !== 'left') return `held ${held.join('+')}`
+      c.syncTouches(new Map())
+      return c.read([]).held.size ? 'a lifted finger stayed held' : null
     },
   },
   {
@@ -435,6 +526,127 @@ export const SCENARIOS: Scenario[] = [
       return s.hp === SNAKE.hp - 2 && s.alive
         ? null
         : `hp ${s.hp}, alive ${s.alive}`
+    },
+  },
+  {
+    name: 'torch: sparks stream off it in flight and glow through the dark',
+    run() {
+      const w = new World(room())
+      play(w, 5)
+      play(w, 1, {}, { y: true })
+      play(w, 12)
+      const sparks = w.particles.filter((p) => p.glow).length
+      return sparks >= 12 ? null : `${sparks} sparks after 12 updates`
+    },
+  },
+  {
+    name: 'pickup: a torch lights a health candle, and walking in takes a candle back',
+    run() {
+      const w = new World(
+        room((g) => {
+          g[8][6] = 'h'
+          pen(g)
+        })
+      )
+      const c = w.pickups[0]
+      if (!c) return 'no health candle in the room'
+      play(w, 5)
+      w.hp = 3
+      play(w, 1, {}, { y: true })
+      for (let i = 0; i < 60 && !c.lit; i++) play(w, 1)
+      if (!c.lit) return 'the torch never lit it'
+      for (let i = 0; i < 120 && w.hp === 3; i++) play(w, 1, { right: true })
+      if (w.hp !== 4) return `hp ${w.hp} after walking in`
+      return !c.lit && c.recharge > 0 ? null : 'it was not spent'
+    },
+  },
+  {
+    name: 'pickup: dark or at full health it stays, and it is back five seconds after',
+    run() {
+      const w = new World(
+        room((g) => {
+          g[8][5] = 'h'
+          pen(g)
+        })
+      )
+      const c = w.pickups[0]
+      play(w, 5)
+      w.hp = 4
+      for (let i = 0; i < 40; i++) play(w, 1, { right: true })
+      if (w.hp !== 4) return 'a dark candle was taken'
+      // Lit by hand: the torch is under test above.
+      c.lit = true
+      w.hp = MAX_HP
+      for (let i = 0; i < 40; i++) play(w, 1, { left: true })
+      if (!c.lit || w.hp !== MAX_HP) return 'taken at full health'
+      w.hp = 4
+      for (let i = 0; i < 40 && w.hp === 4; i++) play(w, 1, { right: true })
+      if (w.hp !== MAX_HP) return 'not taken when short of health'
+      play(w, PICKUP.recharge - 50)
+      if (!c.recharge) return 'back too soon'
+      play(w, 60)
+      return !c.recharge && !c.lit
+        ? null
+        : `recharge ${c.recharge}, lit ${c.lit}`
+    },
+  },
+  {
+    name: 'pickup: the map has one on the floating block and one in the hall corner',
+    run() {
+      const w = new World()
+      const a = w.level.arena!
+      const tile = (x: number, y: number) =>
+        w.level.isSolid(Math.floor(x / TILE), Math.floor(y / TILE))
+      // On stone with open air under the stone: the block over the tunnel.
+      const block = w.pickups.filter(
+        (c) =>
+          tile(c.x, c.y) &&
+          [...Array(8).keys()].some((d) => !tile(c.x, c.y + (d + 1) * TILE))
+      )
+      const corner = w.pickups.filter(
+        (c) => c.y === a.floor && Math.min(c.x - a.left, a.right - c.x) < TILE
+      )
+      return w.pickups.length === 2 && block.length === 1 && corner.length === 1
+        ? null
+        : `${w.pickups.length} candles, ${block.length} on the block, ${corner.length} in a corner`
+    },
+  },
+  {
+    name: 'haptics: a bite and a landed sword blow each ask for a buzz that update',
+    run() {
+      const w = new World(room((g) => (g[8][5] = 's')))
+      let bitten = false
+      for (let i = 0; i < 180 && !bitten; i++) {
+        const hp = w.hp
+        play(w, 1)
+        bitten = w.hp < hp
+        if (bitten !== w.haptics.includes('hurt'))
+          return bitten ? 'a bite asked for no buzz' : 'a buzz with no bite'
+      }
+      if (!bitten) return 'never bitten'
+      const v = new World(room((g) => (g[8][5] = 's')))
+      const s = v.snakes[0]
+      for (let i = 0; i < 120 && s.hp === SNAKE.hp; i++) {
+        v.hp = MAX_HP
+        play(v, 1, {}, i % 10 === 0 ? { x: true } : {})
+        if (s.hp < SNAKE.hp && !v.haptics.includes('hit'))
+          return 'a sword hit asked for no buzz'
+      }
+      if (s.hp === SNAKE.hp) return 'the sword never landed'
+      const z = atBoss()
+      const b = z.boss!
+      if (!until(z, (b) => b.state === 'stuck')) return 'never slammed down'
+      const l = b.letterBoxes()[3]
+      z.player.x = l.x - z.player.w - 2
+      z.player.y = z.level.arena!.floor - PLAYER_H
+      z.player.facing = 1
+      const hp = b.hp
+      for (let i = 0; i < 20 && b.hp === hp; i++) {
+        play(z, 1, {}, i === 0 ? { x: true } : {})
+        if (b.hp < hp && !z.haptics.includes('hit'))
+          return 'a sword hit on the boss asked for no buzz'
+      }
+      return b.hp < hp ? null : 'the sword never landed on the boss'
     },
   },
   {
@@ -762,6 +974,26 @@ export const SCENARIOS: Scenario[] = [
     },
   },
   {
+    name: 'boss: in a rage it slams once, then sits dazed until it rises',
+    run() {
+      const w = atBoss()
+      const b = w.boss!
+      if (!until(w, (b) => b.state === 'idle')) return 'never woke'
+      b.hit(BOSS.hp / 2)
+      if (!until(w, (b) => b.phase === 2 && stateOf(b) === 'idle'))
+        return 'never calmed from its rage'
+      if (!until(w, (b) => b.state === 'stuck')) return 'never slammed'
+      let n = 0
+      while (stateOf(b) === 'stuck' && n < BOSS.stuck + 5) {
+        w.hp = MAX_HP
+        play(w, 1)
+        n++
+      }
+      if (stateOf(b) !== 'idle') return `got up into ${b.state}`
+      return n >= BOSS.stuckRage ? null : `dazed ${n} updates`
+    },
+  },
+  {
     name: 'boss: PEER PRESSURE splits the word to the walls and crushes the middle',
     run() {
       const w = atBoss()
@@ -813,6 +1045,25 @@ export const SCENARIOS: Scenario[] = [
       if (r.hp !== MAX_HP) return `rose at ${r.hp} HP`
       if (r.clock < clock) return 'the clock restarted'
       return r.player.x >= r.level.arena!.left ? null : 'rose outside the hall'
+    },
+  },
+  {
+    name: 'boss: three deaths in a row point at the hall candle, and a win clears it',
+    run() {
+      const g = bossRun()
+      for (let death = 1; death <= HINT_AFTER; death++) {
+        if (!dieToBoss(g)) return `death ${death} never came`
+        if (g.bossDeaths !== death)
+          return `counted ${g.bossDeaths} after death ${death}`
+        play(g, 1, {}, { a: true })
+      }
+      const wide = BOSS_HINT.find((line) => lineWidth(line) > SQUARE)
+      if (wide) return `"${wide}" is wider than the portrait view`
+      play(g, BOSS.intro + 5)
+      g.world.boss!.hit(BOSS.hp)
+      play(g, BOSS.die + 5)
+      if (sceneOf(g) !== 'won') return `scene ${g.scene} after felling it`
+      return g.bossDeaths === 0 ? null : `${g.bossDeaths} deaths after a win`
     },
   },
   {
@@ -1024,6 +1275,7 @@ export type QAReport = {
   scenarios: Check[]
   layout: Check[]
   light: Check[]
+  screens: Check[]
   cost: { stepUs: number; drawUs: number }
   frames: { count: number; p50: number; p95: number; max: number; slow: number }
   pass: boolean
@@ -1270,6 +1522,40 @@ function lightChecks(): Check[] {
   ]
 }
 
+// The boss hint, read off the drawn defeat screen: the band between the
+// cause and the prompt holds no ember-light pixel until the third death in
+// a row, and then the hint's.
+function screenChecks(): Check[] {
+  const g = bossRun()
+  const off = document.createElement('canvas')
+  off.width = WIDTH
+  off.height = HEIGHT
+  const ctx = off.getContext('2d', { willReadFrequently: true })!
+  const rgb = parseInt(PAL.E.slice(1), 16)
+  const ember: number[] = []
+  for (let death = 1; death <= HINT_AFTER; death++) {
+    if (!dieToBoss(g)) break
+    g.draw(ctx)
+    const d = ctx.getImageData(0, 119, WIDTH, 26).data
+    let n = 0
+    for (let i = 0; i < d.length; i += 4)
+      if (((d[i] << 16) | (d[i + 1] << 8) | d[i + 2]) === rgb) n++
+    ember.push(n)
+    play(g, 1, {}, { a: true })
+  }
+  const before = ember.slice(0, HINT_AFTER - 1)
+  return [
+    {
+      name: 'the defeat screen shows the candle hint from the third boss death',
+      pass:
+        ember.length === HINT_AFTER &&
+        before.every((n) => n === 0) &&
+        ember[HINT_AFTER - 1] > 0,
+      detail: `ember-light pixels by death: ${ember.join(', ')}`,
+    },
+  ]
+}
+
 function measureCost() {
   const g = createCandlelight()
   play(g, 1, {}, { a: true })
@@ -1390,6 +1676,7 @@ export function exposeQA(
     scenarios: [],
     layout: [],
     light: [],
+    screens: [],
     cost: { stepUs: 0, drawUs: 0 },
     frames: { count: 0, p50: 0, p95: 0, max: 0, slow: 0 },
     pass: false,
@@ -1412,6 +1699,7 @@ export function exposeQA(
     // Cost first, on a quiet heap, then the checks that make garbage.
     report.cost = measureCost()
     report.light = lightChecks()
+    report.screens = screenChecks()
     report.scenarios = runScenarios()
     report.frames = {
       count: gaps.length,
@@ -1425,6 +1713,7 @@ export function exposeQA(
       report.scenarios.every((c) => c.pass) &&
       report.layout.every((c) => c.pass) &&
       report.light.every((c) => c.pass) &&
+      report.screens.every((c) => c.pass) &&
       report.frames.slow <= Math.ceil(report.frames.count * 0.02)
     report.done = true
     console.info('[candlelight-qa]', JSON.stringify(report))

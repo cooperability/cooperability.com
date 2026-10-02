@@ -14,11 +14,12 @@ export const BUTTONS = [
 export type Button = (typeof BUTTONS)[number]
 export type ButtonSet = Set<Button>
 
-// Two keyboard layouts that share no keys, so both always work and the
-// player picks which one the on-screen legend shows. IJKL mirrors the pad's
-// face diamond: I top (Y), J left (X), L right (B), K bottom (A). ZXCV reads
-// left to right as jump, attack, dash, torch.
-export type Scheme = 'wasd' | 'arrows'
+// Two keyboard layouts, one live at a time, picked from the on-screen
+// legend: W moves in one and throws the torch in the other. IJKL mirrors the
+// pad's face diamond: I top (Y), J left (X), L right (B), K bottom (A). Beside
+// the arrows, WASD is that diamond mirrored for the left hand: W torch,
+// A dash, D attack, S jump.
+export type Scheme = 'arrows' | 'wasd'
 
 const SHARED: Record<string, Button> = {
   Space: 'a',
@@ -30,6 +31,16 @@ const SHARED: Record<string, Button> = {
 }
 
 export const SCHEMES: Record<Scheme, Record<string, Button>> = {
+  arrows: {
+    ArrowUp: 'up',
+    ArrowDown: 'down',
+    ArrowLeft: 'left',
+    ArrowRight: 'right',
+    KeyS: 'a',
+    KeyA: 'b',
+    KeyD: 'x',
+    KeyW: 'y',
+  },
   wasd: {
     KeyW: 'up',
     KeyS: 'down',
@@ -40,30 +51,11 @@ export const SCHEMES: Record<Scheme, Record<string, Button>> = {
     KeyJ: 'x',
     KeyI: 'y',
   },
-  arrows: {
-    ArrowUp: 'up',
-    ArrowDown: 'down',
-    ArrowLeft: 'left',
-    ArrowRight: 'right',
-    KeyZ: 'a',
-    KeyC: 'b',
-    KeyX: 'x',
-    KeyV: 'y',
-  },
 }
 
-export const KEY_MAP: Record<string, Button> = {
-  ...SCHEMES.wasd,
-  ...SCHEMES.arrows,
-  ...SHARED,
-}
-
-// The layout a key belongs to, or null for keys both share.
-export function schemeOf(code: string): Scheme | null {
-  if (code in SCHEMES.wasd) return 'wasd'
-  if (code in SCHEMES.arrows) return 'arrows'
-  return null
-}
+// The button a key plays in `scheme`, if any.
+export const keyFor = (scheme: Scheme, code: string): Button | undefined =>
+  SCHEMES[scheme][code] ?? SHARED[code]
 
 // W3C "standard" gamepad layout, which is the Xbox face diamond.
 const PAD_MAP: [number, Button][] = [
@@ -97,7 +89,14 @@ export function readGamepad(pad: PadLike, into: ButtonSet): void {
 // Merges keyboard, touch and gamepads into one reading per fixed update.
 export class Controls {
   private keys: ButtonSet = new Set()
-  private touches = new Map<number, Button[]>()
+  // Fingers on the on-screen pad, by touch identifier. Replaced whole from
+  // the browser's own list of touches on every touch event, never edited one
+  // down or one up at a time, so a touchend the browser never sent (a system
+  // gesture, an alert, the app switcher) holds a button only until the next
+  // touch of any kind.
+  private fingers = new Map<number, Button[]>()
+  // A mouse or pen on the on-screen pad, by pointer id.
+  private pointers = new Map<number, Button[]>()
   // Presses since the last update. A tap shorter than one update (16ms) would
   // otherwise land between two readings and never reach the game.
   private taps: ButtonSet = new Set()
@@ -114,29 +113,52 @@ export class Controls {
     this.keys.clear()
   }
 
+  // Lets go of every finger and pointer: the page lost focus or was hidden,
+  // so no release it was owed will arrive.
+  releaseAll() {
+    this.fingers.clear()
+    this.pointers.clear()
+  }
+
+  // Every finger now down, as the browser lists them. Returns the buttons
+  // pressed that their finger was not already on.
+  syncTouches(next: Map<number, Button[]>): Button[] {
+    const fresh: Button[] = []
+    for (const [id, buttons] of next) {
+      const before = this.fingers.get(id) ?? []
+      for (const b of buttons)
+        if (!before.includes(b)) {
+          fresh.push(b)
+          this.taps.add(b)
+        }
+    }
+    this.fingers = next
+    return fresh
+  }
+
   // Returns the buttons the pointer pressed that it was not already on.
   touch(pointerId: number, buttons: Button[]): Button[] {
-    const before = this.touches.get(pointerId) ?? []
+    const before = this.pointers.get(pointerId) ?? []
     const fresh = buttons.filter((b) => !before.includes(b))
     fresh.forEach((b) => this.taps.add(b))
-    this.touches.set(pointerId, buttons)
+    this.pointers.set(pointerId, buttons)
     return fresh
   }
 
   lift(pointerId: number) {
-    this.touches.delete(pointerId)
+    this.pointers.delete(pointerId)
   }
 
   tracking(pointerId: number) {
-    return this.touches.has(pointerId)
+    return this.pointers.has(pointerId)
   }
 
   read(pads: Iterable<PadLike | null>): Frame & { padActive: boolean } {
     const taps = this.taps
     this.taps = new Set()
     const held: ButtonSet = new Set([...this.keys, ...taps])
-    for (const buttons of this.touches.values())
-      buttons.forEach((b) => held.add(b))
+    for (const map of [this.fingers, this.pointers])
+      for (const buttons of map.values()) buttons.forEach((b) => held.add(b))
     let padActive = false
     for (const pad of pads) {
       if (!pad) continue

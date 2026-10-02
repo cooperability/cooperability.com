@@ -297,6 +297,7 @@
 }
 
 .meta span {
+  position: relative;
   display: inline-flex;
   align-items: center;
   min-height: 44px;
@@ -312,6 +313,23 @@
 .meta .start[data-held~='start'] {
   color: var(--glyph-held);
   box-shadow: 0 0 0 1px var(--ember);
+}
+
+/* The experimental tap tick: an invisible switch's label over each cap, so
+   a real tap lands on it (see Tick in Handheld.tsx). */
+.tick {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+
+.tick input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  visibility: hidden;
+  pointer-events: none;
 }
 
 /* Opened with select: when and why, and how to install. Over the screen,

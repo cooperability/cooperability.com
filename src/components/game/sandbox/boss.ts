@@ -12,9 +12,9 @@ export const BOSS = {
   // reaches it with an overhead swing, or from a beam.
   hover: 76,
   drift: 0.8,
-  driftRage: 1.3,
+  driftRage: 1.05,
   idle: 60,
-  idleRage: 36,
+  idleRage: 48,
   // Updates after reforming before the body hurts to touch again.
   grace: 30,
   introStagger: 12,
@@ -26,30 +26,28 @@ export const BOSS = {
   // BRING YOU DOWN: rise, follow the player, hang, fall, sit dazed.
   rise: 30,
   track: 45,
-  trackRage: 28,
+  trackRage: 37,
   hold: 22,
   fallAccel: 0.6,
   fallMax: 8,
   stuck: 80,
-  stuckRage: 50,
-  // In a rage the first slam gets up this soon, for the second.
-  restumble: 24,
+  stuckRage: 65,
   wave: 2.6,
-  waveRage: 3.2,
+  waveRage: 2.9,
   // BREAK YOUR SPIRIT: one letter per gap, aimed.
   spiritGap: 8,
-  spiritGapRage: 5,
+  spiritGapRage: 7,
   spiritSpeed: 2,
-  spiritSpeedRage: 2.6,
+  spiritSpeedRage: 2.3,
   // PEER PRESSURE: split to the walls, brace, then close while hopping.
   gather: 40,
   brace: 30,
   squeeze: 1.8,
-  squeezeRage: 2.5,
+  squeezeRage: 2.15,
   hop: 10,
   // UNREALISTIC EXPECTATIONS: letters dropped from the ceiling.
   rainGap: 9,
-  rainGapRage: 6,
+  rainGapRage: 8,
   rainGravity: 0.1,
   rainMax: 3,
   rage: 90,
@@ -153,7 +151,6 @@ export class Boss {
   look = { x: 0, y: 0 }
   private time = 0
   private fired = 0
-  private slams = 0
   private hits = 0
   private squeeze = 0
   private columns: number[] = []
@@ -372,10 +369,6 @@ export class Boss {
 
       case 'stuck': {
         this.follow(1, false)
-        if (rage && this.slams === 1 && this.t >= BOSS.restumble) {
-          this.enter('down')
-          return
-        }
         if (this.t >= (rage ? BOSS.stuckRage : BOSS.stuck)) this.enter('idle')
         return
       }
@@ -493,7 +486,6 @@ export class Boss {
     const a = options[Math.floor(this.random() * options.length)]
     this.attack = a
     this.fired = 0
-    this.slams = 0
     this.squeeze = 0
     this.columns = []
     this.say(ATTACKS[a].name, true)
@@ -552,7 +544,6 @@ export class Boss {
         dead: false,
         cause: ATTACKS.down.cause,
       })
-    this.slams++
     this.emit('slam', this.x + WORD_W / 2, this.arena.floor)
     this.enter('stuck')
   }

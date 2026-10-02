@@ -2,12 +2,12 @@
 
 import Link from 'next/link'
 import { useEffect, useRef, useState, type PointerEvent } from 'react'
+import { buzz, tick, type Source } from './haptics'
 import {
   Controls,
   dpadFromPoint,
   faceFromPoint,
-  KEY_MAP,
-  schemeOf,
+  keyFor,
   type Button,
   type Scheme,
 } from './input'
@@ -23,8 +23,25 @@ import styles from './Handheld.module.css'
 
 type Mode = 'touch' | 'external'
 type Mapper = (x: number, y: number) => Button[]
+type ZoneName = 'dpad' | 'face' | 'select' | 'start'
+
+// What a point in each control's own 0..1 box presses.
+const ZONES: Record<ZoneName, Mapper> = {
+  dpad: (x, y) => dpadFromPoint(x * 2 - 1, y * 2 - 1),
+  face: faceFromPoint,
+  select: () => ['select'],
+  start: () => ['start'],
+}
+
+function readZone(zone: HTMLElement, clientX: number, clientY: number) {
+  const box = zone.getBoundingClientRect()
+  const map = ZONES[zone.dataset.zone as ZoneName]
+  if (!map || !box.width || !box.height) return []
+  return map((clientX - box.left) / box.width, (clientY - box.top) / box.height)
+}
 
 const HINT_KEY = 'game:install-hint-dismissed'
+const TAPS_KEY = 'game:tap-haptics'
 
 // A press squashes the cap and springs it back, so a thumb sees the press
 // land on the frame it happens.
@@ -34,10 +51,25 @@ const BOUNCE: Keyframe[] = [
   { scale: '1.08' },
   { scale: '1' },
 ]
-const SCHEME_KEY = 'game:keys'
+// A new key: the old one held whichever layout was last typed on, never a
+// choice.
+const SCHEME_KEY = 'game:layout'
 
 // The legend for each keyboard layout, by the pad button each key plays.
 const LEGEND: Record<Scheme, { name: string } & Record<Button, string>> = {
+  arrows: {
+    name: 'Arrows + WASD',
+    up: '↑',
+    left: '←',
+    down: '↓',
+    right: '→',
+    y: 'W',
+    x: 'D',
+    a: 'S',
+    b: 'A',
+    start: 'Enter',
+    select: 'Backspace',
+  },
   wasd: {
     name: 'WASD + IJKL',
     up: 'W',
@@ -51,19 +83,44 @@ const LEGEND: Record<Scheme, { name: string } & Record<Button, string>> = {
     start: 'Enter',
     select: 'Backspace',
   },
-  arrows: {
-    name: 'Arrows + ZXCV',
-    up: '↑',
-    left: '←',
-    down: '↓',
-    right: '→',
-    y: 'V',
-    x: 'X',
-    a: 'Z',
-    b: 'C',
-    start: 'Enter',
-    select: 'Backspace',
-  },
+}
+
+// Every fresh press bounces its cap on the frame it lands. The caps live
+// in `within`, or are it.
+function bounce(within: HTMLElement, buttons: Button[]) {
+  for (const b of buttons) {
+    const selector = `[data-button="${b}"]`
+    const cap = within.matches(selector)
+      ? within
+      : within.querySelector(selector)
+    cap?.animate?.(BOUNCE, { duration: 180, easing: 'ease-out' })
+  }
+}
+
+// The experimental tick on every press of the on-screen pad, on unless
+// turned off in the menu.
+function savedTaps() {
+  try {
+    return localStorage.getItem(TAPS_KEY) !== 'off'
+  } catch {
+    return true
+  }
+}
+
+// A real tap on the label of a switch is the one thing iOS Safari still
+// answers with a haptic (script cannot trigger one since iOS 26.5), so
+// with ticks on each cap carries an invisible one under the thumb.
+function Tick() {
+  return (
+    <label className={styles.tick}>
+      <input
+        type="checkbox"
+        {...{ switch: '' }}
+        tabIndex={-1}
+        onFocus={(e) => e.currentTarget.blur()}
+      />
+    </label>
+  )
 }
 
 function saveScheme(scheme: Scheme) {
@@ -76,9 +133,9 @@ function saveScheme(scheme: Scheme) {
 
 function savedScheme(): Scheme {
   try {
-    return localStorage.getItem(SCHEME_KEY) === 'arrows' ? 'arrows' : 'wasd'
+    return localStorage.getItem(SCHEME_KEY) === 'wasd' ? 'wasd' : 'arrows'
   } catch {
-    return 'wasd'
+    return 'arrows'
   }
 }
 
@@ -115,8 +172,17 @@ export default function Handheld() {
   const [scheme, setScheme] = useState(savedScheme)
   const [about, setAbout] = useState(false)
   const [debug, setDebug] = useState(false)
+  const [taps, setTaps] = useState(savedTaps)
+  // Read by the loop and the touch handler, never used to render.
+  const tapsRef = useRef(taps)
+  const schemeRef = useRef(scheme)
+  const source = useRef<Source>(mode === 'touch' ? 'touch' : 'key')
   const gameRef = useRef<Candlelight | null>(null)
   const chooseScheme = (next: Scheme) => {
+    // A key held now would release as another button and leave this one
+    // held, so every key lets go.
+    controls.clearKeys()
+    schemeRef.current = next
     setScheme(next)
     saveScheme(next)
   }
@@ -151,7 +217,7 @@ export default function Handheld() {
           document.exitFullscreen().catch(() => {})
         else root.requestFullscreen?.().catch(() => {})
       }
-      const button = KEY_MAP[e.code]
+      const button = keyFor(schemeRef.current, e.code)
       if (!button) return
       if (e.type === 'keyup') return controls.key(button, false)
       // Shortcuts pass through, and Enter or Space on the exit link, the
@@ -168,15 +234,38 @@ export default function Handheld() {
       if (e.repeat) return
       controls.key(button, true)
       setMode('external')
-      // The legend follows whichever layout the player last typed on.
-      const layout = schemeOf(e.code)
-      if (layout) {
-        setScheme(layout)
-        saveScheme(layout)
-      }
+      source.current = 'key'
     }
-    // macOS sends no keyup for keys released while Cmd is held.
-    const onBlur = () => controls.clearKeys()
+    // Fingers on the pad, rebuilt from the browser's own list of touches on
+    // every touch event. A touch is read on the control it started on, as
+    // pointer capture would, wherever it has slid to since.
+    const onTouches = (e: TouchEvent) => {
+      const next = new Map<number, Button[]>()
+      for (const t of Array.from(e.touches)) {
+        const zone = (t.target as Element | null)?.closest?.<HTMLElement>(
+          '[data-zone]'
+        )
+        if (zone && root.contains(zone))
+          next.set(t.identifier, readZone(zone, t.clientX, t.clientY))
+      }
+      if (next.size) {
+        source.current = 'touch'
+        if (e.type === 'touchstart') setMode('touch')
+      }
+      const fresh = controls.syncTouches(next)
+      if (!fresh.length) return
+      if (tapsRef.current) tick()
+      bounce(root, fresh)
+    }
+    const touchEvents = ['touchstart', 'touchmove', 'touchend', 'touchcancel']
+    // A lost focus or a hidden page owes releases that will never come:
+    // macOS sends no keyup for keys released while Cmd is held, and iOS can
+    // drop a touchend when a system gesture takes the screen.
+    const onBlur = () => {
+      controls.clearKeys()
+      controls.releaseAll()
+    }
+    const onHide = () => controls.releaseAll()
     const onMeta = (e: KeyboardEvent) => {
       if (e.key === 'Meta') controls.clearKeys()
     }
@@ -194,8 +283,9 @@ export default function Handheld() {
         .catch(() => {})
     }
     const onVisibility = () => {
-      if (document.hidden) game.pause()
-      else lockScreen()
+      if (!document.hidden) return lockScreen()
+      game.pause()
+      controls.releaseAll()
     }
     const onPadGone = () => game.pause()
     const preventDefault = (e: Event) => e.preventDefault()
@@ -205,6 +295,9 @@ export default function Handheld() {
     window.addEventListener('blur', onBlur)
     window.addEventListener('keydown', onMeta)
     window.addEventListener('gamepaddisconnected', onPadGone)
+    window.addEventListener('pagehide', onHide)
+    for (const type of touchEvents)
+      root.addEventListener(type, onTouches as EventListener, { passive: true })
     document.addEventListener('visibilitychange', onVisibility)
     // iOS ignores user-scalable=no, so pinch has to be refused here.
     document.addEventListener('gesturestart', preventDefault)
@@ -265,9 +358,16 @@ export default function Handheld() {
         const frame = controls.read(navigator.getGamepads?.() ?? [])
         // Only real stick or button input counts: browsers also report
         // connected pads that nobody is holding.
-        if (frame.padActive) setMode('external')
+        if (frame.padActive) {
+          setMode('external')
+          source.current = 'pad'
+        }
         held = [...frame.held].join(' ')
         game.step(frame)
+        // Taken, not just read: a paused world keeps its last update's.
+        const felt = game.world.haptics.splice(0)
+        if (felt.length)
+          buzz(felt.includes('hurt') ? 'hurt' : 'hit', source.current)
       },
       () => {
         game.draw(ctx)
@@ -288,43 +388,44 @@ export default function Handheld() {
       window.removeEventListener('blur', onBlur)
       window.removeEventListener('keydown', onMeta)
       window.removeEventListener('gamepaddisconnected', onPadGone)
+      window.removeEventListener('pagehide', onHide)
+      for (const type of touchEvents)
+        root.removeEventListener(type, onTouches as EventListener)
       document.removeEventListener('visibilitychange', onVisibility)
       document.removeEventListener('gesturestart', preventDefault)
       root.removeEventListener('contextmenu', preventDefault)
     }
   }, [controls])
 
-  const zone = (map: Mapper) => {
+  // A mouse or pen on the pad. Fingers never come through here: they are
+  // read from touch events above.
+  const zone = (name: ZoneName) => {
     const track = (e: PointerEvent<HTMLElement>) => {
-      const box = e.currentTarget.getBoundingClientRect()
-      const x = (e.clientX - box.left) / box.width
-      const y = (e.clientY - box.top) / box.height
-      const fresh = controls.touch(e.pointerId, map(x, y))
-      if (!fresh.length) return
-      navigator.vibrate?.(8)
-      // The caps live in the zone that took the touch, or are the zone.
-      const zone = e.currentTarget
-      for (const b of fresh) {
-        const selector = `[data-button="${b}"]`
-        const cap = zone.matches(selector) ? zone : zone.querySelector(selector)
-        cap?.animate?.(BOUNCE, { duration: 180, easing: 'ease-out' })
-      }
+      const fresh = controls.touch(
+        e.pointerId,
+        readZone(e.currentTarget, e.clientX, e.clientY)
+      )
+      bounce(e.currentTarget, fresh)
     }
     const release = (e: PointerEvent<HTMLElement>) => controls.lift(e.pointerId)
     return {
       'data-control': '',
+      'data-zone': name,
       onPointerDown: (e: PointerEvent<HTMLElement>) => {
-        // Capture keeps a sliding thumb on this control after it leaves the
-        // element, so the D-pad rolls between directions without a lift.
+        if (e.pointerType === 'touch') return
+        // Capture keeps a sliding pointer on this control after it leaves
+        // the element, so the D-pad rolls between directions.
         e.currentTarget.setPointerCapture(e.pointerId)
         setMode('touch')
         track(e)
       },
       onPointerMove: (e: PointerEvent<HTMLElement>) => {
-        if (controls.tracking(e.pointerId)) track(e)
+        if (e.pointerType !== 'touch' && controls.tracking(e.pointerId))
+          track(e)
       },
       onPointerUp: release,
       onPointerCancel: release,
+      onLostPointerCapture: release,
     }
   }
 
@@ -394,6 +495,23 @@ export default function Handheld() {
               />
               Debug view: hitboxes, states and frame counts
             </label>
+            <label className={styles.debug}>
+              <input
+                type="checkbox"
+                checked={taps}
+                onChange={(e) => {
+                  const on = e.currentTarget.checked
+                  tapsRef.current = on
+                  setTaps(on)
+                  try {
+                    localStorage.setItem(TAPS_KEY, on ? 'on' : 'off')
+                  } catch {
+                    // Storage blocked: the choice lasts for this visit only.
+                  }
+                }}
+              />
+              Haptic tick on every press (experimental)
+            </label>
             <p>
               Built in September 2026 by Cooper Reed, working with Claude Code.
               It tests how far a browser game can go as a real phone app:
@@ -418,39 +536,39 @@ export default function Handheld() {
 
       <div
         className={`${styles.diamond} ${styles.dpad}`}
-        {...zone((x, y) => dpadFromPoint(x * 2 - 1, y * 2 - 1))}
+        {...zone('dpad')}
         aria-hidden="true"
       >
         <span className={styles.up} data-button="up">
-          ▲
+          ▲{taps && <Tick />}
         </span>
         <span className={styles.left} data-button="left">
-          ◀
+          ◀{taps && <Tick />}
         </span>
         <span className={styles.right} data-button="right">
-          ▶
+          ▶{taps && <Tick />}
         </span>
         <span className={styles.down} data-button="down">
-          ▼
+          ▼{taps && <Tick />}
         </span>
       </div>
 
       <div
         className={`${styles.diamond} ${styles.face}`}
-        {...zone(faceFromPoint)}
+        {...zone('face')}
         aria-hidden="true"
       >
         <span className={styles.y} data-button="y">
-          Y
+          Y{taps && <Tick />}
         </span>
         <span className={styles.x} data-button="x">
-          X
+          X{taps && <Tick />}
         </span>
         <span className={styles.b} data-button="b">
-          B
+          B{taps && <Tick />}
         </span>
         <span className={styles.a} data-button="a">
-          A
+          A{taps && <Tick />}
         </span>
       </div>
 
@@ -458,16 +576,12 @@ export default function Handheld() {
         <span
           className={styles.select}
           data-button="select"
-          {...zone(() => ['select'])}
+          {...zone('select')}
         >
-          SELECT
+          SELECT{taps && <Tick />}
         </span>
-        <span
-          className={styles.start}
-          data-button="start"
-          {...zone(() => ['start'])}
-        >
-          START
+        <span className={styles.start} data-button="start" {...zone('start')}>
+          START{taps && <Tick />}
         </span>
       </div>
 
@@ -508,7 +622,7 @@ export default function Handheld() {
         type="button"
         className={styles.scheme}
         onClick={(e) => {
-          chooseScheme(scheme === 'wasd' ? 'arrows' : 'wasd')
+          chooseScheme(scheme === 'arrows' ? 'wasd' : 'arrows')
           // Keep Space for jumping rather than pressing this again.
           e.currentTarget.blur()
         }}

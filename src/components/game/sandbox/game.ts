@@ -26,6 +26,14 @@ export type Scene = 'title' | 'play' | 'dead' | 'won'
 // up, so a button still held from play cannot skip it.
 export const SCREEN_DELAY = ENDING.hold + ENDING.sweep + ENDING.text
 
+// Deaths to the boss in a row before the defeat screen points at the hall's
+// health candle, and what it says.
+export const HINT_AFTER = 3
+export const BOSS_HINT = [
+  'THROW A TORCH AT THE CANDLE',
+  'IN THE FAR CORNER FOR HEALTH',
+]
+
 export type Candlelight = Game & {
   readonly scene: Scene
   readonly world: World
@@ -37,6 +45,8 @@ export type Candlelight = Game & {
   view: number
   // Hitbox boxes, for the beta script.
   debug: boolean
+  // Deaths to the boss in a row, since the last win or fresh run.
+  readonly bossDeaths: number
   // The darkness layer as last drawn, or null until a run is first drawn:
   // the title never draws the world.
   readonly shade: HTMLCanvasElement | null
@@ -58,9 +68,13 @@ export function createCandlelight(): Candlelight {
   let debug = false
   let view = WIDTH
   let render: Renderer | null = null
+  // Whether a run has been drawn yet: until then the title owns the screen.
+  let drawn = false
+  let bossDeaths = 0
 
   const begin = () => {
     const retry = scene === 'dead' && !!world.boss?.awake
+    if (!retry) bossDeaths = 0
     world = retry
       ? new World(SANDBOX_MAP, 1, { atBoss: true, clock: world.clock })
       : new World()
@@ -98,8 +112,11 @@ export function createCandlelight(): Candlelight {
     set debug(on) {
       debug = on
     },
+    get bossDeaths() {
+      return bossDeaths
+    },
     get shade() {
-      return render?.shade ?? null
+      return drawn ? render!.shade : null
     },
 
     step({ held, pressed }) {
@@ -124,7 +141,11 @@ export function createCandlelight(): Candlelight {
         if (pressed.has('start')) paused = !paused
         if (paused) return
         world.step({ held, pressed })
-        if (world.status !== 'play') scene = world.status
+        if (world.status !== 'play') {
+          scene = world.status
+          if (scene === 'won') bossDeaths = 0
+          else if (world.boss?.awake) bossDeaths++
+        }
         return
       }
       // Death or victory: the world keeps settling behind the screen.
@@ -137,9 +158,17 @@ export function createCandlelight(): Candlelight {
       // A proper title: its own screen, with no world behind it.
       if (scene === 'title') {
         drawTitle(ctx, world.time, view, VIEW_H)
+        // Bake the run's art while the title is up, once its first frame
+        // is on screen, so pressing start never stalls.
+        if (!render && world.time > 1) {
+          render = createRenderer()
+          render.prepare(world)
+        }
         return
       }
       render ??= createRenderer()
+      if (!drawn) render.prepare(world)
+      drawn = true
       render.draw(ctx, world, { debug, hud: scene === 'play' })
       if (scene === 'play' && paused) {
         ctx.fillStyle = 'rgba(11,10,16,0.7)'
@@ -158,7 +187,8 @@ export function createCandlelight(): Candlelight {
           world.killer,
           boss ? world.cause : '',
           boss ? 'PRESS JUMP TO TRY AGAIN' : 'PRESS JUMP TO RISE AGAIN',
-          world.time
+          world.time,
+          boss && bossDeaths >= HINT_AFTER ? BOSS_HINT : []
         )
       }
       if (scene === 'won')

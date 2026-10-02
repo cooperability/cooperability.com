@@ -37,6 +37,41 @@ afterEach(() => {
 const root = (container: HTMLElement) =>
   container.firstElementChild as HTMLElement
 
+type Finger = { id: number; on: Element; x: number; y: number }
+
+// jsdom has no Touch, so each finger is a plain object carrying what the
+// shell reads, listed the way the browser lists every finger still down.
+function touch(type: string, at: Element, fingers: Finger[]) {
+  const e = new Event(type, { bubbles: true })
+  Object.defineProperty(e, 'touches', {
+    value: fingers.map((f) => ({
+      identifier: f.id,
+      target: f.on,
+      clientX: f.x,
+      clientY: f.y,
+    })),
+  })
+  act(() => {
+    at.dispatchEvent(e)
+  })
+}
+
+// The D-pad laid out as a 100px square at the origin, with its two side arms.
+function dpadOf(container: HTMLElement) {
+  const dpad = container.querySelector<HTMLElement>('[data-zone="dpad"]')!
+  jest.spyOn(dpad, 'getBoundingClientRect').mockReturnValue({
+    left: 0,
+    top: 0,
+    width: 100,
+    height: 100,
+  } as DOMRect)
+  return {
+    dpad,
+    left: dpad.querySelector('[data-button="left"]')!,
+    right: dpad.querySelector('[data-button="right"]')!,
+  }
+}
+
 describe('Handheld', () => {
   it('shows the touch controls on a touch screen', () => {
     const { container } = render(<Handheld />)
@@ -79,6 +114,74 @@ describe('Handheld', () => {
     await waitFor(() => expect(dpad.getAttribute('data-held')).toBe('left'))
     fireEvent.keyUp(window, { code: 'ArrowLeft', ctrlKey: true })
     await waitFor(() => expect(dpad.getAttribute('data-held')).toBe(''))
+  })
+
+  it('lets go of a D-pad arm whose finger the browser stopped listing', async () => {
+    const { container } = render(<Handheld />)
+    const { dpad, left, right } = dpadOf(container)
+    touch('touchstart', right, [{ id: 1, on: right, x: 90, y: 50 }])
+    await waitFor(() => expect(dpad.getAttribute('data-held')).toBe('right'))
+    // Its touchend never came: the next touch lists only the new finger.
+    touch('touchstart', left, [{ id: 2, on: left, x: 10, y: 50 }])
+    await waitFor(() => expect(dpad.getAttribute('data-held')).toBe('left'))
+  })
+
+  it('lets go of every finger when the page hides or loses focus', async () => {
+    const { container } = render(<Handheld />)
+    const { dpad, right } = dpadOf(container)
+    const hold = () =>
+      touch('touchstart', right, [{ id: 1, on: right, x: 90, y: 50 }])
+    hold()
+    await waitFor(() => expect(dpad.getAttribute('data-held')).toBe('right'))
+    Object.defineProperty(document, 'hidden', {
+      value: true,
+      configurable: true,
+    })
+    try {
+      act(() => {
+        document.dispatchEvent(new Event('visibilitychange'))
+      })
+      await waitFor(() => expect(dpad.getAttribute('data-held')).toBe(''))
+    } finally {
+      // @ts-expect-error removing the stub, back to jsdom's own getter
+      delete document.hidden
+    }
+    touch('touchend', right, [])
+    hold()
+    await waitFor(() => expect(dpad.getAttribute('data-held')).toBe('right'))
+    act(() => {
+      window.dispatchEvent(new Event('blur'))
+    })
+    await waitFor(() => expect(dpad.getAttribute('data-held')).toBe(''))
+  })
+
+  it('ticks on every cap press until the menu turns it off', async () => {
+    const vibrate = jest.fn()
+    Object.defineProperty(navigator, 'vibrate', {
+      value: vibrate,
+      configurable: true,
+    })
+    const { container } = render(<Handheld />)
+    const { right } = dpadOf(container)
+    touch('touchstart', right, [{ id: 1, on: right, x: 90, y: 50 }])
+    expect(vibrate).toHaveBeenCalledTimes(1)
+    touch('touchend', right, [])
+
+    fireEvent.keyDown(window, { code: 'Backspace' })
+    fireEvent.keyUp(window, { code: 'Backspace' })
+    const box = await screen.findByRole('checkbox', { name: /haptic tick/i })
+    expect(box).toBeChecked()
+    // One invisible switch under each of the ten caps, for iOS.
+    expect(container.querySelectorAll('input[switch]')).toHaveLength(10)
+    fireEvent.click(box)
+    expect(box).not.toBeChecked()
+    expect(localStorage.getItem('game:tap-haptics')).toBe('off')
+    expect(container.querySelectorAll('input[switch]')).toHaveLength(0)
+
+    touch('touchstart', right, [{ id: 2, on: right, x: 90, y: 50 }])
+    expect(vibrate).toHaveBeenCalledTimes(1)
+    // @ts-expect-error removing the stub again
+    delete navigator.vibrate
   })
 
   it('takes the site chrome out of reach while the game is up', () => {
@@ -142,28 +245,40 @@ describe('Handheld', () => {
     expect(screen.getByRole('link', { name: /demos/i })).toBeInTheDocument()
   })
 
-  it('shows the legend for the layout last typed on, and remembers it', () => {
+  it('plays the layout picked in the legend, and remembers it', async () => {
     setTouchPoints(0)
     const first = render(<Handheld />)
-    expect(screen.getByRole('button', { name: /wasd/i })).toBeInTheDocument()
-    fireEvent.keyDown(window, { code: 'KeyZ' })
-    expect(
-      screen.getByRole('button', { name: /arrows \+ zxcv/i })
-    ).toBeInTheDocument()
+    const keys = first.container.querySelector('.keys')!
+    const tap = async (code: string, held: string) => {
+      fireEvent.keyDown(window, { code })
+      await waitFor(() => expect(keys.getAttribute('data-held')).toBe(held))
+      fireEvent.keyUp(window, { code })
+      await waitFor(() => expect(keys.getAttribute('data-held')).toBe(''))
+    }
+    // Arrows + WASD first, where W throws the torch.
+    await tap('KeyW', 'y')
+    // Typing on the other layout's keys does not switch to it.
+    fireEvent.keyDown(window, { code: 'KeyJ' })
+    fireEvent.keyUp(window, { code: 'KeyJ' })
+    fireEvent.click(screen.getByRole('button', { name: /arrows \+ wasd/i }))
+    await tap('KeyW', 'up')
     first.unmount()
     render(<Handheld />)
     expect(
-      screen.getByRole('button', { name: /arrows \+ zxcv/i })
+      screen.getByRole('button', { name: /wasd \+ ijkl/i })
     ).toBeInTheDocument()
   })
 
-  it('switches the legend from its button', () => {
+  it('lets go of a held key when the layout changes', async () => {
     setTouchPoints(0)
-    render(<Handheld />)
-    fireEvent.click(screen.getByRole('button', { name: /wasd/i }))
-    expect(
-      screen.getByRole('button', { name: /arrows \+ zxcv/i })
-    ).toBeInTheDocument()
+    const { container } = render(<Handheld />)
+    const keys = container.querySelector('.keys')!
+    fireEvent.keyDown(window, { code: 'KeyW' })
+    await waitFor(() => expect(keys.getAttribute('data-held')).toBe('y'))
+    fireEvent.click(screen.getByRole('button', { name: /arrows \+ wasd/i }))
+    // In WASD + IJKL the same key lets go of up, so torch must not stay held.
+    fireEvent.keyUp(window, { code: 'KeyW' })
+    await waitFor(() => expect(keys.getAttribute('data-held')).toBe(''))
   })
 
   it('lets Space and Enter reach a focused button instead of the game', () => {
