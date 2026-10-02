@@ -32,6 +32,25 @@ const customJestConfig = {
     '!**/__tests__/**',
     '!**/node_modules/**',
   ],
+
+  // Measured on 2026-10-02 with the mandelbrot util suite added: global
+  // stmts/branch/funcs/lines were 79.50/71.28/78.10/81.14.
+  // Thresholds sit at floor(measured) - 2 so real regressions fail CI without
+  // flaking on incidental line-count drift.
+  coverageThreshold: {
+    global: {
+      statements: 77,
+      branches: 69,
+      functions: 76,
+      lines: 79,
+    },
+    './src/components/mandelbrot-explorer/utils/calculations.ts': {
+      statements: 98,
+      branches: 98,
+      functions: 98,
+      lines: 98,
+    },
+  },
 }
 
 // createJestConfig is exported this way to ensure that next/jest can load the Next.js config which is async
