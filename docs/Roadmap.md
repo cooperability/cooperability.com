@@ -63,7 +63,7 @@ run of these items.
 - ~~Pin GitHub Actions to commit SHAs and set explicit least-privilege `permissions:` on each workflow~~ (done: every `uses:` carries a full SHA plus a `# vX.Y.Z` comment Dependabot keeps current, and the existing `permissions:` blocks were reviewed per job and already least-privilege, so they stay as they were)
 - Make the `high` severity audit blocking, or document why it stays advisory
 - ~~Add `SECURITY.md` and a PR template~~ (done: `SECURITY.md` and `.github/pull_request_template.md`). Still open: `CODEOWNERS` (auto-requests review) and `LICENSE` (owner's legal choice)
-- Test coverage is thin outside the AI route and Prompt Composer, which now have unit and component suites. Still to prioritize: `mandelbrot-explorer/utils/calculations.ts`, then set coverage thresholds
+- ~~Test coverage is thin outside the AI route and Prompt Composer, which now have unit and component suites. Still to prioritize: `mandelbrot-explorer/utils/calculations.ts`, then set coverage thresholds~~ (done: `calculations.ts` is at 100% from tests derived from the math, and `pnpm test:ci` enforces global and per-file thresholds two points under the 2026-10-02 measurement)
 - Add Lighthouse CI with perf/a11y budgets on PRs, replacing the manual `pnpm access` run
 - Add Playwright E2E + `@axe-core/playwright` for the theme-switch, PWA install, and converter flows (already listed as an accessibility maintenance task, and this is the mechanism)
 - Consider Vitest over Jest (faster, native ESM, less SWC/PnP config surface)
