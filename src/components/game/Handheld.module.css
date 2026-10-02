@@ -297,6 +297,7 @@
 }
 
 .meta span {
+  position: relative;
   display: inline-flex;
   align-items: center;
   min-height: 44px;
@@ -312,6 +313,23 @@
 .meta .start[data-held~='start'] {
   color: var(--glyph-held);
   box-shadow: 0 0 0 1px var(--ember);
+}
+
+/* The experimental tap tick: an invisible switch's label over each cap, so
+   a real tap lands on it (see Tick in Handheld.tsx). */
+.tick {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+
+.tick input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  visibility: hidden;
+  pointer-events: none;
 }
 
 /* Opened with select: when and why, and how to install. Over the screen,
@@ -392,9 +410,8 @@
   gap: 10px 22px;
   padding: 14px 16px 10px;
   border-radius: 12px;
-  background: rgba(10, 9, 14, 0.42);
+  background: rgba(10, 9, 14, 0.55);
   backdrop-filter: blur(4px);
-  opacity: 0.8;
   pointer-events: none;
 }
 
@@ -414,9 +431,9 @@
   width: 30px;
   height: 30px;
   border-radius: 6px;
-  border: 1px solid rgba(179, 170, 147, 0.35);
+  border: 1px solid rgba(179, 170, 147, 0.55);
   border-bottom-width: 3px;
-  color: rgba(179, 170, 147, 0.8);
+  color: rgba(179, 170, 147, 0.95);
   font:
     700 12px/1 ui-monospace,
     monospace;
@@ -428,7 +445,7 @@
   font-size: 8px;
   font-weight: 400;
   letter-spacing: 0.06em;
-  color: rgba(179, 170, 147, 0.6);
+  color: rgba(179, 170, 147, 0.85);
 }
 
 .cluster .up,
@@ -474,7 +491,7 @@
   gap: 4px 12px;
   max-width: 240px;
   font-size: 9px;
-  color: rgba(179, 170, 147, 0.55);
+  color: rgba(179, 170, 147, 0.8);
 }
 
 .keys[data-held~='start'] .start,
@@ -482,8 +499,8 @@
   color: var(--glyph-held);
 }
 
-/* Picks which keyboard layout the legend shows. Both layouts always work.
-   Bottom left, since the HUD fills the screen's top edge. */
+/* Picks the live keyboard layout, which the legend shows. Bottom left,
+   since the HUD fills the screen's top edge. */
 .scheme {
   display: none;
 }
@@ -495,10 +512,10 @@
   z-index: 2;
   display: block;
   padding: 6px 12px;
-  border: 1px solid rgba(179, 170, 147, 0.35);
+  border: 1px solid rgba(179, 170, 147, 0.55);
   border-radius: 999px;
-  background: rgba(10, 9, 14, 0.42);
-  color: rgba(179, 170, 147, 0.85);
+  background: rgba(10, 9, 14, 0.55);
+  color: rgb(179, 170, 147);
   font:
     11px/1 ui-monospace,
     monospace;
@@ -524,4 +541,10 @@
   right: auto;
   bottom: calc(max(20px, env(safe-area-inset-bottom)) + 34px);
   left: max(20px, env(safe-area-inset-left));
+}
+
+/* Over the picture now, so brighter, with a shadow to lift it off. */
+.root[data-mode='external'] .exit {
+  color: rgb(179, 170, 147);
+  text-shadow: 0 1px 3px #000;
 }

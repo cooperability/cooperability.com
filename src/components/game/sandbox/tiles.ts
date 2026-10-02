@@ -1,12 +1,5 @@
 import { EMPTY, Level, ONEWAY, SOLID, TILE } from './level'
-import {
-  context,
-  hash,
-  makeCanvas,
-  paintGrid,
-  PAL,
-  type Canvas,
-} from './pixels'
+import { bake, context, hash, makeCanvas, PAL, type Canvas } from './pixels'
 
 // Two courses of dressed stone, mortar in 'd', lit from the top left.
 const BRICK = [
@@ -50,9 +43,15 @@ function depth(level: Level, tx: number, ty: number) {
   return 3
 }
 
+// The brick, upright and mirrored, and the beam, each baked once and stamped
+// on every tile, rather than painted again run by run.
+type Stamps = { brick: [Canvas, Canvas]; beam: Canvas }
+let stamps: Stamps | null = null
+
 // Bakes every tile of the level into one canvas, drawn once per frame with a
 // single drawImage at the camera offset.
 export function bakeTiles(level: Level): Canvas {
+  stamps ??= { brick: [bake(BRICK), bake(BRICK, true)], beam: bake(BEAM) }
   const c = makeCanvas(level.pixelWidth, level.pixelHeight)
   const ctx = context(c)
   for (let ty = 0; ty < level.height; ty++) {
@@ -80,7 +79,7 @@ function drawStone(
   tx: number,
   ty: number
 ) {
-  paintGrid(ctx, BRICK, ox, oy, hash(tx, ty) > 0.5)
+  ctx.drawImage(stamps!.brick[hash(tx, ty) > 0.5 ? 1 : 0], ox, oy)
 
   // A crack now and then, so the wall does not read as a stamp.
   if (hash(tx, ty, 1) > 0.75) {
@@ -146,7 +145,7 @@ function drawBeam(
   tx: number,
   ty: number
 ) {
-  paintGrid(ctx, BEAM, ox, oy)
+  ctx.drawImage(stamps!.beam, ox, oy)
   // A chain up to the ceiling at each end of a run of beams.
   for (const side of [-1, 1]) {
     if (level.tileAt(tx + side, ty) === ONEWAY) continue
@@ -166,7 +165,7 @@ function drawBackdrop(
   tx: number,
   ty: number
 ) {
-  paintGrid(ctx, BRICK, ox, oy, hash(tx, ty, 6) > 0.5)
+  ctx.drawImage(stamps!.brick[hash(tx, ty, 6) > 0.5 ? 1 : 0], ox, oy)
   ctx.fillStyle = 'rgba(11,10,16,0.66)'
   ctx.fillRect(ox, oy, TILE, TILE)
   // Tall lancet windows every fourth column, lit faintly from outside.

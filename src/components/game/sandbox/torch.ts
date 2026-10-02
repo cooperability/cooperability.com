@@ -1,5 +1,5 @@
 import type { Level } from './level'
-import { PAL } from './pixels'
+import { hash, PAL } from './pixels'
 
 export const TORCH = {
   size: 4,
@@ -12,6 +12,8 @@ export const TORCH = {
   // Frames a landed torch keeps burning on the floor.
   lying: 150,
   max: 3,
+  // Height of a landed torch's flame at full strength, in pixels.
+  flame: 9,
 }
 
 export class Torch {
@@ -59,6 +61,28 @@ export class Torch {
   }
 }
 
+// A three-wide flame standing on (x, base), `h` tall, its tip licking to
+// one side. Fire rises whichever way the brand is turned.
+export function drawFlame(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  base: number,
+  h: number,
+  flick: number
+) {
+  ctx.fillStyle = PAL.e
+  ctx.fillRect(x - 1, base - h, 3, h)
+  ctx.fillStyle = PAL.E
+  ctx.fillRect(x - 1 + (flick === 2 ? 1 : 0), base - h + 2, 2, h - 2)
+  ctx.fillStyle = PAL.y
+  ctx.fillRect(x, base - 3, 1, 2)
+  ctx.fillStyle = PAL.e
+  ctx.fillRect(x + flick - 1, base - h - 1, 1, 1)
+}
+
+const flickOf = (time: number, salt: number) =>
+  Math.floor(hash(time >> 2, salt, 41) * 3)
+
 export function drawTorch(
   ctx: CanvasRenderingContext2D,
   t: Torch,
@@ -66,15 +90,15 @@ export function drawTorch(
 ) {
   const x = Math.round(t.x + t.w / 2)
   const y = Math.round(t.y + t.h)
+  const flick = flickOf(time, x)
   if (t.landed) {
-    // A brand on its side, flame shrinking as it burns out.
-    ctx.fillStyle = PAL.O
+    // A brand on its side, burning high, the flame sinking as it burns out.
+    ctx.fillStyle = PAL.o
     ctx.fillRect(x - 3, y - 1, 6, 1)
-    const h = Math.max(1, Math.round(t.strength * 4)) + ((time >> 2) % 2)
-    ctx.fillStyle = PAL.e
-    ctx.fillRect(x + 1, y - 1 - h, 2, h)
-    ctx.fillStyle = PAL.y
-    ctx.fillRect(x + 1, y - 2, 1, 1)
+    ctx.fillStyle = PAL.O
+    ctx.fillRect(x - 3, y - 2, 4, 1)
+    const h = Math.max(2, Math.round(t.strength * TORCH.flame)) + (flick >> 1)
+    drawFlame(ctx, x + 2, y - 1, h, flick)
     return
   }
   // Tumbling end over end.
@@ -87,8 +111,5 @@ export function drawTorch(
   ][turn]
   ctx.fillStyle = PAL.O
   ctx.fillRect(x - dx * 2, y - 2 - dy * 2, 2, 2)
-  ctx.fillStyle = PAL.E
-  ctx.fillRect(x + dx * 2, y - 2 + dy * 2 - 1, 2, 2)
-  ctx.fillStyle = PAL.y
-  ctx.fillRect(x + dx * 2, y - 2 + dy * 2 - 1, 1, 1)
+  drawFlame(ctx, x + dx * 2, y - 1 + dy * 2, 5 + (flick >> 1), flick)
 }

@@ -1,5 +1,20 @@
 import { VIEW_H, VIEW_W } from './background'
-import { context, dither, makeCanvas, type Canvas } from './pixels'
+import { bakePixels, context, dither, makeCanvas, type Canvas } from './pixels'
+
+// Light sprites, baked once and shared by every darkness layer.
+const sprites = new Map<string, Canvas>()
+
+function sprite(radius: number, core: number, side: -1 | 0 | 1) {
+  const key = `${radius}|${core}|${side}`
+  let img = sprites.get(key)
+  if (!img) sprites.set(key, (img = bakeLight(radius, core, side)))
+  return img
+}
+
+// Bakes a light ahead of its first use, so that frame does not stall.
+export function warmLight(radius: number, core: number, side: -1 | 0 | 1 = 0) {
+  sprite(radius, core, side)
+}
 
 // A dark layer over the whole frame with holes cut where light falls. Each
 // light is a baked sprite drawn with destination-out, so overlapping lights
@@ -7,15 +22,16 @@ import { context, dither, makeCanvas, type Canvas } from './pixels'
 export class Darkness {
   readonly canvas = makeCanvas(VIEW_W, VIEW_H)
   private ctx = context(this.canvas)
-  private sprites = new Map<string, Canvas>()
 
-  begin(color: string) {
+  // `width` is the view's: the layer follows it as the window changes shape.
+  begin(color: string, width: number) {
+    if (this.canvas.width !== width) this.canvas.width = width
     const ctx = this.ctx
     ctx.globalCompositeOperation = 'source-over'
     ctx.globalAlpha = 1
-    ctx.clearRect(0, 0, VIEW_W, VIEW_H)
+    ctx.clearRect(0, 0, width, VIEW_H)
     ctx.fillStyle = color
-    ctx.fillRect(0, 0, VIEW_W, VIEW_H)
+    ctx.fillRect(0, 0, width, VIEW_H)
     ctx.globalCompositeOperation = 'destination-out'
   }
 
@@ -30,11 +46,12 @@ export class Darkness {
     side: -1 | 0 | 1 = 0
   ) {
     if (strength <= 0) return
-    const key = `${radius}|${core}|${side}`
-    let img = this.sprites.get(key)
-    if (!img) this.sprites.set(key, (img = bakeLight(radius, core, side)))
     this.ctx.globalAlpha = Math.min(1, strength)
-    this.ctx.drawImage(img, Math.round(x) - radius, Math.round(y) - radius)
+    this.ctx.drawImage(
+      sprite(radius, core, side),
+      Math.round(x) - radius,
+      Math.round(y) - radius
+    )
   }
 
   // `source-atop` darkens only what is already drawn on the target.
@@ -56,26 +73,14 @@ const STEPS = 4
 
 function bakeLight(radius: number, core: number, side: number): Canvas {
   const size = radius * 2
-  const c = makeCanvas(size, size)
-  const ctx = context(c)
-  const levels: [number, number][][] = Array.from(
-    { length: STEPS + 1 },
-    () => []
-  )
-  for (let y = 0; y < size; y++)
-    for (let x = 0; x < size; x++) {
-      const d = Math.hypot(x - radius + 0.5, y - radius + 0.5) / radius
-      if (d >= 1) continue
-      let v = d < core ? 1 : 1 - (d - core) / (1 - core)
-      // A half light fades in over four pixels either side of its edge.
-      if (side)
-        v *= Math.max(0, Math.min(1, ((x - radius + 0.5) * side) / 4 + 0.5))
-      const q = Math.min(STEPS, Math.floor(v * STEPS + dither(x, y)))
-      if (q > 0) levels[q].push([x, y])
-    }
-  levels.forEach((pixels, q) => {
-    ctx.fillStyle = `rgba(0,0,0,${q / STEPS})`
-    for (const [x, y] of pixels) ctx.fillRect(x, y, 1, 1)
+  return bakePixels(size, size, (x, y) => {
+    const d = Math.hypot(x - radius + 0.5, y - radius + 0.5) / radius
+    if (d >= 1) return null
+    let v = d < core ? 1 : 1 - (d - core) / (1 - core)
+    // A half light fades in over four pixels either side of its edge.
+    if (side)
+      v *= Math.max(0, Math.min(1, ((x - radius + 0.5) * side) / 4 + 0.5))
+    const q = Math.min(STEPS, Math.floor(v * STEPS + dither(x, y)))
+    return q > 0 ? `rgba(0,0,0,${q / STEPS})` : null
   })
-  return c
 }

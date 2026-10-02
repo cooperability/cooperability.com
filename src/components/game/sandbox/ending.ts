@@ -1,3 +1,4 @@
+import { WIDE_VIEW } from './background'
 import { drawOutlined } from './boss'
 import { drawText } from './font'
 import { hash, PAL } from './pixels'
@@ -24,7 +25,9 @@ export function drawDefeat(
   killer: string,
   cause: string,
   prompt: string,
-  time: number
+  time: number,
+  // Lines of advice under the cause, in ember.
+  hint: string[] = []
 ) {
   const u = sweepOf(t)
   if (u > 0) {
@@ -58,11 +61,14 @@ export function drawDefeat(
   // The blood darkens as the word comes up, so the word stands out.
   ctx.fillStyle = `rgba(11,10,16,${0.45 * v})`
   ctx.fillRect(0, 0, viewW, height)
-  const wide = viewW >= 300
+  const wide = viewW >= WIDE_VIEW
   ctx.globalAlpha = v
   drawOutlined(ctx, 'DEFEAT', viewW / 2, wide ? 42 : 48, PAL.B, wide ? 4 : 3)
   drawOutlined(ctx, `KILLED BY: ${killer}`, viewW / 2, 96, PAL.B, wide ? 2 : 1)
   if (cause) drawOutlined(ctx, cause, viewW / 2, wide ? 118 : 110, PAL.b)
+  hint.forEach((line, i) =>
+    drawOutlined(ctx, line, viewW / 2, (wide ? 127 : 121) + i * 9, PAL.E)
+  )
   ctx.globalAlpha = 1
   if (v === 1 && (time >> 5) % 2 === 0)
     drawOutlined(ctx, prompt, viewW / 2, 146, PAL.B)
@@ -86,7 +92,7 @@ export function drawVictory(
   const v = textOf(t)
   ctx.globalAlpha = v
   if (v > 0) {
-    const wide = viewW >= 300
+    const wide = viewW >= WIDE_VIEW
     const big = wide ? 4 : 3
     const y = wide ? 40 : 46
     drawText(ctx, 'VICTORY', viewW / 2 + 1, y + 1, PAL.G, big)

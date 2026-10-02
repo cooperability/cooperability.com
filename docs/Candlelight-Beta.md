@@ -31,6 +31,20 @@ fresh worlds. The scenarios cover:
   hurt and naming itself as the cause, an idle player dying within a minute,
   sword and torch damage, cutting a thrown letter, the half-health rage,
   PEER PRESSURE reaching the walls, and dying at the boss rising on the sill
+- title drips that run all the way down at their own pace, never move up,
+  and never run longer than the drop from the letters' foot to the pool
+- the title's controller and iPhone lines fitting the portrait view
+- a desktop-wide view staying on the map in the boss fight
+- a finger the browser stopped listing letting go of its button
+- torch sparks glowing through the dark
+- health candles: a torch lights one, walking in heals, a dark one or full
+  health leaves it, it is back after 5 seconds, and the map has one on the
+  floating block and one in the hall corner
+- a bite, a sword hit on a serpent and one on the boss each asking for a
+  haptic that update
+- three boss deaths in a row counted, the hint fitting the portrait view, and
+  a win clearing the count
+- the raging boss slamming once and sitting dazed until it rises
 - a 20,000-update random-input soak that fails on NaN or anything inside a wall
 - the same soak in the boss's hall, which fails on NaN, the player leaving
   the hall, or a letter outside it
@@ -57,14 +71,20 @@ collects the in-page report:
 - light falloff on the foreground darkness layer: 20px ahead of the visor at
   least 0.9 of full brightness, 52px ahead at least 0.45, 20px behind and
   104px ahead 0.25 ± 0.05 (the ambient)
-- layout: the screen fits, pixels are square and whole (in device pixels for
-  the portrait square), no horizontal scroll, no link or button over the HUD,
-  touch diamonds at least 88px and clear of the screen
+- layout: the screen fits, pixels are square, on a desktop the screen meets
+  every edge of the window, on the handheld pixels are whole (in device
+  pixels for the portrait square), no horizontal scroll, no link or button
+  over the HUD, touch diamonds at least 88px and clear of the screen
+- the title's controller and iPhone lines drawn under PRESS START, square
+  and wide
 - every cap: on screen, clear of the picture, at least 44px, nothing on top
   of any of its pixels, and every pixel read by the shell as that button
   alone. In portrait, the diamonds within 16px of the edges, the screen a
   square at least 85% of the width, and the control group centred within
   24px of the middle of the space under the screen
+- the defeat screen, drawn after the second and third boss deaths in a row:
+  no ember-light pixel between the cause and the prompt until the third,
+  then the candle hint
 - 3.5 seconds of live frame gaps, where more than 2% of frames over 34ms
   fails
 - microseconds per update and per draw
@@ -86,7 +106,7 @@ It then plays through with real keys, or real touches on phones:
 11. on phones, a real touch on every cap at its centre and eight points near
     its rim: the game must hear that button alone, the cap must be bouncing,
     and the press must reach the game within 34ms (two frames)
-12. on desktop, switch the key legend
+12. on desktop, switch the key legend to WASD + IJKL with its button
 
 Last, it opens `/demos` and navigates client-side to each installable app
 (Candlelight, Prompt Composer, Mandelbrot Explorer, Opioid Converter). Each
@@ -111,8 +131,9 @@ Without `?qa`, none of it exists.
 Open every screenshot. For each, answer in the PR:
 
 - **Title.** Is CANDLELIGHT readable at a glance, on a phone too, and does
-  it read as dripping candle wax? Is it on black, with no world behind it,
-  and does PRESS START blink?
+  it read as dripping candle wax, every drip running down, none improbably
+  long? Is it on black, with no world behind it, and does PRESS START blink?
+  Do the gamepad and phone icons read as what they are?
 - **About.** Is the panel readable over the screen, with the pad still free?
 - **Play.** Is the room ahead of the visor clearly lit and the room behind
   dark? Is the foreground dark but still parseable, with the skyline as lit
@@ -120,14 +141,20 @@ Open every screenshot. For each, answer in the PR:
 - **Moon.** Is it the brightest cold thing on screen, lighting only the sky?
 - **Serpent.** Does it read as a snake (head, body, eye) in its crimson and
   gold, and does the coil strobe?
-- **Torch.** Is the thrown brand visible in flight and on the floor?
+- **Torch.** Is the thrown brand visible in flight and on the floor, its
+  flame tall, with sparks glowing behind it?
+- **Health candles.** Does the dark candle on the floating block read as a
+  candle like the HUD's? Lit, does it glow? Taken, is the grey stub visible?
+- **Debug.** Are torch boxes orange and health candle boxes yellow?
 - **Boss.** Is it funny on sight: the word SOCIETY, and its hat, monocle,
   brow and moustache legible on a phone? Is every attack banner readable,
   and does each thrown or falling letter stand out from the wall?
 - **HUD.** Are the five candles, the kill count and the boss bar legible and
   uncovered?
 - **Defeat and victory.** Does the blood wave wipe top to bottom before
-  DEFEAT fades in, with KILLED BY naming the enemy? Does victory fade to white
+  DEFEAT fades in, with KILLED BY naming the enemy? From the third boss
+  death, is the candle hint readable in ember, in the 180-wide portrait
+  view too? Does victory fade to white
   before VICTORY, YOU DEFEATED SOCIETY. and the fine print fade in? Does
   "press jump" blink?
 - **Phone layouts.** Do the diamonds sit under the thumbs, toward the edges,

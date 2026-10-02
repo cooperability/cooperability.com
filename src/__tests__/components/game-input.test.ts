@@ -5,9 +5,8 @@ import {
   FACE_LAYOUT,
   FACE_REACH,
   CAP_RADIUS,
-  KEY_MAP,
+  keyFor,
   SCHEMES,
-  schemeOf,
   readGamepad,
   type ButtonSet,
 } from '../../components/game/input'
@@ -123,43 +122,52 @@ describe('faceFromPoint', () => {
   })
 })
 
-describe('KEY_MAP', () => {
+describe('keyFor', () => {
   it('mirrors the face diamond on IJKL', () => {
-    expect([KEY_MAP.KeyI, KEY_MAP.KeyJ, KEY_MAP.KeyK, KEY_MAP.KeyL]).toEqual([
-      'y',
-      'x',
-      'a',
-      'b',
-    ])
+    const keys = ['KeyI', 'KeyJ', 'KeyK', 'KeyL']
+    expect(keys.map((k) => keyFor('wasd', k))).toEqual(['y', 'x', 'a', 'b'])
   })
 
-  it('moves on WASD and the arrows', () => {
-    expect([KEY_MAP.KeyW, KEY_MAP.KeyA, KEY_MAP.KeyS, KEY_MAP.KeyD]).toEqual([
-      'up',
-      'left',
-      'down',
-      'right',
-    ])
-    expect(KEY_MAP.ArrowLeft).toBe('left')
-  })
-
-  it('plays the same buttons on arrows and ZXCV', () => {
-    expect([KEY_MAP.KeyZ, KEY_MAP.KeyX, KEY_MAP.KeyC, KEY_MAP.KeyV]).toEqual([
-      'a',
-      'x',
-      'b',
-      'y',
-    ])
-  })
-
-  it('keeps the two layouts on separate keys, so both always work', () => {
-    const wasd = Object.keys(SCHEMES.wasd)
-    expect(Object.keys(SCHEMES.arrows).filter((k) => wasd.includes(k))).toEqual(
-      []
+  it('moves on WASD in one layout and on the arrows in the other', () => {
+    const wasd = ['KeyW', 'KeyA', 'KeyS', 'KeyD'].map((k) => keyFor('wasd', k))
+    const arrows = ['ArrowUp', 'ArrowLeft', 'ArrowDown', 'ArrowRight'].map(
+      (k) => keyFor('arrows', k)
     )
-    expect(schemeOf('KeyJ')).toBe('wasd')
-    expect(schemeOf('ArrowUp')).toBe('arrows')
-    expect(schemeOf('Space')).toBeNull()
+    expect(wasd).toEqual(['up', 'left', 'down', 'right'])
+    expect(arrows).toEqual(wasd)
+  })
+
+  it('beside the arrows, mirrors IJKL on WASD for the left hand', () => {
+    // Top stays top and bottom stays bottom; left and right swap sides.
+    for (const [right, left] of [
+      ['KeyI', 'KeyW'],
+      ['KeyK', 'KeyS'],
+      ['KeyJ', 'KeyD'],
+      ['KeyL', 'KeyA'],
+    ])
+      expect(keyFor('arrows', left)).toBe(keyFor('wasd', right))
+    expect(keyFor('arrows', 'KeyD')).toBe('x')
+    expect(keyFor('arrows', 'KeyW')).toBe('y')
+    expect(keyFor('arrows', 'KeyA')).toBe('b')
+  })
+
+  it('plays every button in each layout, each from one key', () => {
+    for (const scheme of ['arrows', 'wasd'] as const) {
+      const buttons = Object.values(SCHEMES[scheme])
+      expect(sorted(buttons)).toEqual(
+        sorted(['up', 'down', 'left', 'right', 'a', 'b', 'x', 'y'])
+      )
+    }
+  })
+
+  it('leaves the other layout silent, and shares the rest', () => {
+    expect(keyFor('arrows', 'KeyJ')).toBeUndefined()
+    expect(keyFor('wasd', 'ArrowUp')).toBeUndefined()
+    for (const scheme of ['arrows', 'wasd'] as const) {
+      expect(keyFor(scheme, 'Space')).toBe('a')
+      expect(keyFor(scheme, 'Enter')).toBe('start')
+      expect(keyFor(scheme, 'Backspace')).toBe('select')
+    }
   })
 })
 
@@ -252,6 +260,33 @@ describe('Controls', () => {
     const next = controls.read([])
     expect(sorted2(next.held)).toEqual(['left'])
     expect(next.pressed.size).toBe(0)
+  })
+
+  it('lets go of a finger the next touch list leaves out', () => {
+    // Its touchend was lost: the browser simply stops listing it.
+    const controls = new Controls()
+    controls.syncTouches(new Map([[1, ['right']]]))
+    controls.read([])
+    controls.syncTouches(new Map([[2, ['left']]]))
+    expect(sorted2(controls.read([]).held)).toEqual(['left'])
+  })
+
+  it('delivers a finger tap that starts and ends between two updates', () => {
+    const controls = new Controls()
+    controls.syncTouches(new Map([[1, ['a']]]))
+    controls.syncTouches(new Map())
+    const frame = controls.read([])
+    expect(sorted2(frame.pressed)).toEqual(['a'])
+    expect(controls.read([]).held.size).toBe(0)
+  })
+
+  it('releases every finger and pointer at once', () => {
+    const controls = new Controls()
+    controls.syncTouches(new Map([[1, ['left']]]))
+    controls.touch(9, ['a'])
+    controls.read([])
+    controls.releaseAll()
+    expect(controls.read([]).held.size).toBe(0)
   })
 
   it('flags a controller only when it is actually being used', () => {

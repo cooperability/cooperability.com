@@ -25,6 +25,10 @@ describe('Home page', () => {
     expect(
       screen.getByRole('link', { name: /Mandelbrot Explorer/i })
     ).toHaveAttribute('href', '/demos/mandelbrot-explorer')
+    expect(screen.getByRole('link', { name: /Candlelight/i })).toHaveAttribute(
+      'href',
+      '/demos/candlelight'
+    )
   })
 
   it('renders the profile image with correct alt text', () => {

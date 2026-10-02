@@ -475,6 +475,18 @@
   @apply inline-block rounded-md;
 }
 
+/* A row of its own under the two links above, as wide as the column. On a
+   phone, where every link stacks, it matches them. */
+.candlelightLink {
+  @apply block rounded-md text-center;
+}
+
+@media (max-width: 570px) {
+  .candlelightLink {
+    @apply inline-block text-left;
+  }
+}
+
 .arrowRight,
 .arrowDown {
   transition: transform 0.2s ease-in-out;

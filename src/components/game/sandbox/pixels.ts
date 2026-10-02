@@ -65,6 +65,48 @@ export function paintGrid(
   })
 }
 
+// Bakes a canvas through one ImageData write instead of a fillRect per
+// pixel, which is many times faster. `paint` gives each pixel a colour, a
+// hex or rgba() string, or null to leave it clear.
+export function bakePixels(
+  w: number,
+  h: number,
+  paint: (x: number, y: number) => string | null
+): Canvas {
+  const c = makeCanvas(w, h)
+  const ctx = context(c)
+  // A stubbed context, as in the unit tests, has nothing to write into.
+  const img = ctx?.createImageData?.(w, h)
+  if (!img) return c
+  const d = img.data
+  for (let y = 0; y < h; y++)
+    for (let x = 0; x < w; x++) {
+      const colour = paint(x, y)
+      if (colour) d.set(rgba(colour), (y * w + x) * 4)
+    }
+  ctx.putImageData(img, 0, 0)
+  return c
+}
+
+const parsed = new Map<string, number[]>()
+
+// '#rrggbb' or 'rgba(r,g,b,a)' as four bytes, alpha rounded as fillRect does.
+function rgba(colour: string): number[] {
+  let v = parsed.get(colour)
+  if (v) return v
+  if (colour.startsWith('#'))
+    v = [1, 3, 5].map((i) => parseInt(colour.slice(i, i + 2), 16)).concat(255)
+  else {
+    const [r, g, b, a = 1] = colour
+      .slice(colour.indexOf('(') + 1)
+      .split(',')
+      .map(parseFloat)
+    v = [r, g, b, Math.round(a * 255)]
+  }
+  parsed.set(colour, v)
+  return v
+}
+
 export function bake(grid: string[], flip = false): Canvas {
   const c = makeCanvas(grid[0].length, grid.length)
   paintGrid(context(c), grid, 0, 0, flip)

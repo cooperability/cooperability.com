@@ -1,55 +1,62 @@
-import { context, dither, hash, makeCanvas, PAL, type Canvas } from './pixels'
+import {
+  bakePixels,
+  context,
+  dither,
+  hash,
+  makeCanvas,
+  PAL,
+  type Canvas,
+} from './pixels'
 
 export const VIEW_W = 320
 export const VIEW_H = 180
+// The widest view a desktop window can ask for, at 2.4:1, and the narrowest,
+// the portrait handheld's square.
+export const MAX_VIEW_W = 432
+// Views at least this wide take the big title and end-screen text: the
+// title is 252px across at 4x, so this leaves it a margin.
+export const WIDE_VIEW = 268
 // Screen position of the moon, which the sky never scrolls.
 export const MOON = { x: 238, y: 42 }
 
 // Sky bands from zenith to horizon, stepped with ordered dither.
 const SKY = ['#08070d', '#0e0c17', '#151223', '#1d1830', '#2a1f37', '#3a2433']
 
+// Baked as wide as the widest view and drawn against the right edge, so the
+// moon keeps its place however wide the view is.
 function bakeSky(): Canvas {
-  const c = makeCanvas(VIEW_W, VIEW_H)
-  const ctx = context(c)
-  for (let y = 0; y < VIEW_H; y++) {
-    const pos = (y / VIEW_H) * (SKY.length - 1)
-    const band = Math.floor(pos)
-    const frac = pos - band
-    for (let x = 0; x < VIEW_W; x++) {
-      const i = frac > dither(x, y) ? band + 1 : band
-      ctx.fillStyle = SKY[Math.min(i, SKY.length - 1)]
-      ctx.fillRect(x, y, 1, 1)
-    }
-  }
-  // A bright moon behind haze, with a wide dithered halo: the one cold light
-  // left in the dark.
-  const { x: mx, y: my } = MOON
-  for (let y = -34; y < 35; y++) {
-    for (let x = -34; x < 35; x++) {
-      const r = Math.hypot(x, y)
-      if (r < 11) {
-        const shade =
-          r > 9 ? '#b7b1c9' : hash(x, y, 9) > 0.8 ? '#d3cee0' : '#f1eefa'
-        ctx.fillStyle = shade
-        ctx.fillRect(mx + x, my + y, 1, 1)
-      } else if (r < 34) {
-        const t = (34 - r) / 23
-        if (t > dither(mx + x, my + y) + 0.2) {
-          ctx.fillStyle = t > 0.7 ? '#4a4166' : '#2e2645'
-          ctx.fillRect(mx + x, my + y, 1, 1)
-        }
-      }
-    }
-  }
-  // Sparse stars above the haze line.
-  for (let i = 0; i < 70; i++) {
-    const x = Math.floor(hash(i, 1, 7) * VIEW_W)
+  const W = MAX_VIEW_W
+  const mx = MOON.x + W - VIEW_W
+  const my = MOON.y
+  // Sparse stars above the haze line, clear of the moon. A later star on
+  // the same pixel wins, as when they were painted in turn.
+  const stars = new Map<number, string>()
+  for (let i = 0; i < Math.round((70 * W) / VIEW_W); i++) {
+    const x = Math.floor(hash(i, 1, 7) * W)
     const y = Math.floor(hash(i, 2, 7) * 90)
     if (Math.hypot(x - mx, y - my) < 36) continue
-    ctx.fillStyle = hash(i, 3, 7) > 0.8 ? '#b9b4c9' : '#5a5570'
-    ctx.fillRect(x, y, 1, 1)
+    stars.set(y * W + x, hash(i, 3, 7) > 0.8 ? '#b9b4c9' : '#5a5570')
   }
-  return c
+  return bakePixels(W, VIEW_H, (x, y) => {
+    const star = stars.get(y * W + x)
+    if (star) return star
+    // A bright moon behind haze, with a wide dithered halo: the one cold
+    // light left in the dark.
+    const [dx, dy] = [x - mx, y - my]
+    if (Math.abs(dx) <= 34 && Math.abs(dy) <= 34) {
+      const r = Math.hypot(dx, dy)
+      if (r < 11)
+        return r > 9 ? '#b7b1c9' : hash(dx, dy, 9) > 0.8 ? '#d3cee0' : '#f1eefa'
+      if (r < 34) {
+        const t = (34 - r) / 23
+        if (t > dither(x, y) + 0.2) return t > 0.7 ? '#4a4166' : '#2e2645'
+      }
+    }
+    const pos = (y / VIEW_H) * (SKY.length - 1)
+    const band = Math.floor(pos)
+    const i = pos - band > dither(x, y) ? band + 1 : band
+    return SKY[Math.min(i, SKY.length - 1)]
+  })
 }
 
 // Height of a skyline column: spires, domes and bell towers along a tile.
@@ -163,7 +170,7 @@ export function drawBackdrop(
   maxCamY: number,
   viewW = VIEW_W
 ) {
-  ctx.drawImage(b.sky, viewW - VIEW_W, 0)
+  ctx.drawImage(b.sky, viewW - MAX_VIEW_W, 0)
   const rise = maxCamY - camY
   strip(ctx, b.spires, camX * 0.12, Math.round(rise * 0.06) + 6, viewW)
   strip(ctx, b.arcade, camX * 0.35, Math.round(rise * 0.18) + 10, viewW)

@@ -1,19 +1,62 @@
-import { drawText, glyphRows } from './font'
-import { context, dither, hash, makeCanvas, PAL, type Canvas } from './pixels'
+import { WIDE_VIEW } from './background'
+import { drawText, glyphRows, glyphWidth } from './font'
+import {
+  bakePixels,
+  context,
+  dither,
+  hash,
+  makeCanvas,
+  paintGrid,
+  PAL,
+  type Canvas,
+} from './pixels'
 
 // The title screen: CANDLELIGHT cast in candle wax on black, each letter a
-// candle with a wick and a flame, wax dripping off the letters into a pool
-// below, and PRESS START. No world is drawn behind it.
+// candle with a wick and a flame, wax running straight down off the letters
+// into a pool below, and PRESS START. No world is drawn behind it.
 
 const TITLE = 'CANDLELIGHT'
 
-type Drip = {
-  // Font-pixel cell the drip hangs from, and where in it.
+// What it plays on, under PRESS START, each line led by its icon.
+const PAD = [
+  '.bbbbbbbbb.',
+  'bbbbbbbbbbb',
+  'bb.bbbbb.bb',
+  'b...bbb.b.b',
+  'bb.bbbbb.bb',
+  'bbbb...bbbb',
+  '.bb.....bb.',
+]
+// Square corners, a dark screen and a home button, so it never reads as O.
+const PHONE = ['bbbbb', 'bsssb', 'bsssb', 'bsssb', 'bsssb', 'bbbbb', 'bb.bb']
+export const SUPPORT = [
+  { icon: PAD, text: 'CONTROLLER SUPPORTED' },
+  { icon: PHONE, text: 'PLAYS ON IPHONE' },
+]
+
+// A line's width in game pixels: its icon, a gap, and its text.
+export const supportWidth = ({ icon, text }: (typeof SUPPORT)[number]) =>
+  icon[0].length + 3 + [...text].reduce((w, ch) => w + glyphWidth(ch) + 1, -1)
+
+// A drip only ever moves down: a bead swells at the lip, runs down to the
+// stroke below or the pool, then its tail lets go and drains in after it.
+// Each runs at its own pace, so some are faster than others. Off the
+// letters' bottom row a drip runs on to the pool. Off a higher stroke it
+// gives out a few font pixels down and hangs as a bead, unless a stroke
+// below catches it first.
+export type Drip = {
+  // Font-pixel cell the drip hangs from.
   x: number
   y: number
-  // Longest it grows, in screen pixels, and updates per grow-and-fall cycle.
-  max: number
-  period: number
+  // Font row of the stroke it runs onto, or null for the pool.
+  stop: number | null
+  // Font pixels it can run before it gives out, or null to run all the way.
+  reach: number | null
+  // Font pixels per update.
+  speed: number
+  // Updates the bead swells for, and rests for once drained.
+  swell: number
+  rest: number
   phase: number
 }
 
@@ -28,25 +71,95 @@ type Cast = {
 
 const casts = new Map<number, Cast>()
 
+const glyphs = () => [...TITLE].map(glyphRows)
+
+type Letterforms = { width: number; lit: (x: number, y: number) => boolean }
+let forms: Letterforms | null = null
+
+// The title's width in font pixels, and whether a font pixel is wax.
+function letterforms(): Letterforms {
+  if (forms) return forms
+  const g = glyphs()
+  const width = g.reduce((w, rows) => w + rows[0].length + 1, -1)
+  const lit = (x: number, y: number) => {
+    let ox = 0
+    for (const rows of g) {
+      const w = rows[0].length
+      if (x >= ox && x < ox + w)
+        return y >= 0 && y < 7 && rows[y][x - ox] === '#'
+      ox += w + 1
+    }
+    return false
+  }
+  return (forms = { width, lit })
+}
+
+// Where wax runs off the underside of a stroke, at a scale. Fewer at small
+// scales, where many would only read as noise.
+export function dripsFor(scale: number): Drip[] {
+  const { width, lit } = letterforms()
+  const drips: Drip[] = []
+  for (let y = 0; y < 7; y++)
+    for (let x = 0; x < width; x++) {
+      if (!lit(x, y) || lit(x, y + 1)) continue
+      if (hash(x, y, 31) <= (scale < 3 ? 0.7 : 0.45)) continue
+      let stop: number | null = null
+      for (let below = y + 2; below < 7 && stop === null; below++)
+        if (lit(x, below)) stop = below
+      drips.push({
+        x,
+        y,
+        stop,
+        reach: y === 6 ? null : 2 + Math.floor(hash(x, y, 39) * 2),
+        speed: 0.015 + hash(x, y, 32) * 0.06,
+        swell: 40 + Math.floor(hash(x, y, 33) * 80),
+        rest: 30 + Math.floor(hash(x, y, 35) * 200),
+        phase: Math.floor(hash(x, y, 34) * 600),
+      })
+    }
+  return drips
+}
+
+// A drip at `time`, hanging from `top` and running onto `end`, in screen
+// pixels at scale `s`: the wax from `from` down to `to`, whether the bead
+// still leads it, updates since it landed, and which time round it is. Null
+// while it rests between drips.
+export function dripAt(
+  d: Drip,
+  time: number,
+  top: number,
+  end: number,
+  s: number
+) {
+  const v = d.speed * s
+  const bead = Math.max(1, Math.round(s / 2))
+  const run = Math.ceil(Math.max(0, end - top - bead) / v)
+  // The tail drains twice as fast as the head ran.
+  const drain = Math.ceil((end - top) / (v * 2))
+  const cycle = d.swell + run + drain + d.rest
+  const age = time + d.phase
+  const u = age % cycle
+  const turn = Math.floor(age / cycle)
+  let from = top
+  let to: number
+  if (u < d.swell) to = top + Math.round((bead * u) / d.swell)
+  else if (u < d.swell + run)
+    to = Math.min(end, top + bead + Math.round((u - d.swell) * v))
+  else if (u < d.swell + run + drain) {
+    to = end
+    from = Math.min(end, top + Math.round((u - d.swell - run) * v * 2))
+  } else return null
+  return { from, to, beading: to < end, landed: u - d.swell - run, turn }
+}
+
 // Font pixels to letter art, baked once per scale: bone wax lit from the
 // flames above, darker down the right edge of every stroke.
 function cast(scale: number): Cast {
   const hit = casts.get(scale)
   if (hit) return hit
-  const glyphs = [...TITLE].map(glyphRows)
-  const width = glyphs.reduce((w, g) => w + g[0].length + 1, -1)
-  const lit = (x: number, y: number) => {
-    let ox = 0
-    for (const g of glyphs) {
-      const w = g[0].length
-      if (x >= ox && x < ox + w) return y >= 0 && y < 7 && g[y][x - ox] === '#'
-      ox += w + 1
-    }
-    return false
-  }
+  const { width, lit } = letterforms()
   const letters = makeCanvas(width * scale, 7 * scale)
   const ctx = context(letters)
-  const drips: Drip[] = []
   for (let y = 0; y < 7; y++)
     for (let x = 0; x < width; x++) {
       if (!lit(x, y)) continue
@@ -63,20 +176,12 @@ function cast(scale: number): Cast {
         ctx.fillStyle = PAL.y
         ctx.fillRect(px, py, scale - (lit(x + 1, y) ? 0 : 1), 1)
       }
-      // Wax runs off the underside of a stroke.
-      if (!lit(x, y + 1) && hash(x, y, 31) > (scale < 3 ? 0.7 : 0.45))
-        drips.push({
-          x,
-          y,
-          max: scale * (2 + Math.floor(hash(x, y, 32) * 4)),
-          period: 150 + Math.floor(hash(x, y, 33) * 260),
-          phase: Math.floor(hash(x, y, 34) * 400),
-        })
     }
+  const drips = dripsFor(scale)
   // A wick on each letter's top row, over the lit pixel nearest its middle.
   const wicks: Cast['wicks'] = []
   let ox = 0
-  for (const g of glyphs) {
+  for (const g of glyphs()) {
     const w = g[0].length
     const tops = [...g[0]].flatMap((c, i) => (c === '#' ? [i] : []))
     const mid = (w - 1) / 2
@@ -95,15 +200,34 @@ const glows = new Map<number, Canvas>()
 
 // A warm dithered halo, drawn additively around each flame.
 function bakeGlow(radius: number): Canvas {
-  const c = makeCanvas(radius * 2, radius * 2)
-  const ctx = context(c)
-  ctx.fillStyle = 'rgba(255,140,60,0.35)'
-  for (let y = 0; y < radius * 2; y++)
-    for (let x = 0; x < radius * 2; x++) {
-      const d = Math.hypot(x - radius + 0.5, y - radius + 0.5) / radius
-      if (d < 1 && (1 - d) * (1 - d) > dither(x, y)) ctx.fillRect(x, y, 1, 1)
-    }
-  return c
+  return bakePixels(radius * 2, radius * 2, (x, y) => {
+    const d = Math.hypot(x - radius + 0.5, y - radius + 0.5) / radius
+    return d < 1 && (1 - d) * (1 - d) > dither(x, y)
+      ? 'rgba(255,140,60,0.35)'
+      : null
+  })
+}
+
+// Where the title sits in a view: its scale, the top left of its letters,
+// and the line of the pool under them.
+export function titleLayout(viewW: number) {
+  const s = viewW >= WIDE_VIEW ? 4 : 2
+  const y0 = viewW >= WIDE_VIEW ? 44 : 56
+  const x0 = Math.round((viewW - letterforms().width * s) / 2)
+  const pool = y0 + 7 * s + 4 * s
+  // PRESS START's top, with the support lines under it.
+  const press = pool + (viewW >= WIDE_VIEW ? 34 : 30)
+  return { s, x0, y0, pool, press }
+}
+
+// The lip a drip hangs from and where it ends, in screen pixels, and
+// whether it ends on wax or gives out in the air.
+export function dripSpan(d: Drip, viewW: number) {
+  const { s, y0, pool } = titleLayout(viewW)
+  const top = y0 + (d.y + 1) * s
+  const land = d.stop === null ? pool - 1 : y0 + d.stop * s
+  const end = d.reach === null ? land : Math.min(land, top + d.reach * s)
+  return { top, end, lands: end === land }
 }
 
 export function drawTitle(
@@ -114,11 +238,8 @@ export function drawTitle(
 ) {
   ctx.fillStyle = PAL.k
   ctx.fillRect(0, 0, viewW, height)
-  const c = cast(viewW >= 300 ? 4 : 2)
-  const s = c.scale
-  const x0 = Math.round((viewW - c.width * s) / 2)
-  const y0 = viewW >= 300 ? 44 : 56
-  const pool = y0 + 7 * s + 6 * s
+  const { s, x0, y0, pool, press } = titleLayout(viewW)
+  const c = cast(s)
 
   // The puddle the drips feed: a low, lumpy line of wax.
   for (let x = x0 - s * 2; x < x0 + (c.width + 2) * s; x++) {
@@ -132,33 +253,35 @@ export function drawTitle(
 
   ctx.drawImage(c.letters, x0, y0)
 
-  // Each drip swells to its length, lets a drop go, and starts again.
+  // Each drip swells, runs down, and drains, never back up.
   const thick = s >= 4 ? 2 : 1
   for (const d of c.drips) {
-    const u = ((time + d.phase) % d.period) / d.period
-    const x = x0 + d.x * s + Math.floor(hash(d.x, d.y, 36) * (s - thick))
-    const top = y0 + (d.y + 1) * s
-    const grow = u < 0.8 ? u / 0.8 : 1 - (u - 0.8) / 0.2
-    const len = Math.max(1, Math.round(d.max * grow * grow))
-    ctx.fillStyle = PAL.B
-    ctx.fillRect(x, top, thick, len)
-    ctx.fillStyle = PAL.b
-    ctx.fillRect(x + thick - 1, top, 1, len)
-    // A bead at the tip, bigger as it gets ready to fall.
-    if (grow > 0.5) {
+    const { top, end, lands } = dripSpan(d, viewW)
+    const at = dripAt(d, time, top, end, s)
+    if (!at) continue
+    // A fresh spot along the stroke each time round.
+    const x =
+      x0 +
+      d.x * s +
+      Math.floor(hash(d.x * 7 + at.turn, d.y, 36) * (s - thick + 1))
+    const len = at.to - at.from
+    if (len > 0) {
       ctx.fillStyle = PAL.B
-      ctx.fillRect(x, top + len, thick + 1, 2)
-      ctx.fillStyle = PAL.y
-      ctx.fillRect(x, top + len, 1, 1)
+      ctx.fillRect(x, at.from, thick, len)
+      ctx.fillStyle = PAL.b
+      ctx.fillRect(x + thick - 1, at.from, 1, len)
     }
-    if (u >= 0.8) {
-      // The drop in free fall, into the pool.
-      const f = (u - 0.8) * d.period
-      const y = top + d.max + 2 + Math.round(0.12 * f * f)
-      if (y < pool - 2) {
-        ctx.fillStyle = PAL.B
-        ctx.fillRect(x, y, thick, 2)
-      }
+    // The bead at the head until it meets the stroke or the pool, then a
+    // ripple where it lands. One that gives out keeps its bead.
+    if (!lands || (at.beading && at.landed < 0)) {
+      ctx.fillStyle = PAL.B
+      ctx.fillRect(x, at.to, thick + 1, 2)
+      ctx.fillStyle = PAL.y
+      ctx.fillRect(x, at.to, 1, 1)
+    } else if (at.landed < 8) {
+      ctx.fillStyle = PAL.B
+      ctx.fillRect(x - 1, end - 1, 1, 1)
+      ctx.fillRect(x + thick, end - 1, 1, 1)
     }
   }
 
@@ -194,11 +317,12 @@ export function drawTitle(
   ctx.globalCompositeOperation = 'source-over'
 
   if ((time >> 5) % 2 === 0)
-    drawText(
-      ctx,
-      'PRESS START',
-      viewW / 2,
-      pool + (viewW >= 300 ? 34 : 30),
-      PAL.B
-    )
+    drawText(ctx, 'PRESS START', viewW / 2, press, PAL.B)
+
+  SUPPORT.forEach((line, i) => {
+    const x = Math.round((viewW - supportWidth(line)) / 2)
+    const y = press + 18 + i * 11
+    paintGrid(ctx, line.icon, x, y)
+    drawText(ctx, line.text, x + line.icon[0].length + 3, y, PAL.b, 1, 'left')
+  })
 }

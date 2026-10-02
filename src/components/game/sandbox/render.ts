@@ -17,9 +17,10 @@ import {
 } from './boss'
 import { drawText } from './font'
 import { drawHero } from './hero'
-import { Darkness } from './light'
+import { Darkness, warmLight } from './light'
 import {
   bake,
+  bakePixels,
   context,
   dither,
   hash,
@@ -31,7 +32,15 @@ import { debugLabel, drawSnake } from './snake'
 import { TILE } from './level'
 import { bakeTiles } from './tiles'
 import { drawTorch } from './torch'
-import { GHOST_LIFE, INVULN, MAX_HP, World } from './world'
+import {
+  GHOST_LIFE,
+  INVULN,
+  MAX_HP,
+  PICKUP,
+  pickupBox,
+  World,
+  type Pickup,
+} from './world'
 
 const URN = [
   '...kkkkkk...',
@@ -79,8 +88,10 @@ export const LIGHT = {
   backdrop: 'rgba(3,2,8,0.5)',
   visor: { radius: 64, core: 0.45, ahead: 2 },
   candle: { radius: 52, core: 0.25 },
-  torch: { radius: 44, core: 0.3 },
+  torch: { radius: 56, core: 0.35 },
   burning: { radius: 28, core: 0.2 },
+  // A health candle once a torch has lit it.
+  pickup: { radius: 30, core: 0.25 },
   // The open gate, so the way on can be found; the boss, which lights its
   // hall around it; and each letter it throws.
   gate: { radius: 40, core: 0.3 },
@@ -89,36 +100,55 @@ export const LIGHT = {
   // Only as wide as the moon's own halo: it lights the sky, not the ground.
   moon: { radius: 36, core: 0.35, strength: 0.9 },
   candleGlow: { radius: 26, color: 'rgba(255,140,60,0.32)' },
+  torchGlow: { radius: 18, color: 'rgba(255,150,60,0.42)' },
+  pickupGlow: { radius: 10, color: 'rgba(255,150,60,0.4)' },
   eyeGlow: { radius: 6, color: 'rgba(255,170,80,0.7)' },
 }
 
 // A soft ember glow, dithered to stay in pixel style. Drawn additively.
 function bakeGlow(radius: number, color: string): Canvas {
   const size = radius * 2
-  const c = makeCanvas(size, size)
-  const ctx = context(c)
-  ctx.fillStyle = color
-  for (let y = 0; y < size; y++)
-    for (let x = 0; x < size; x++) {
-      const d = Math.hypot(x - radius + 0.5, y - radius + 0.5) / radius
-      if (d < 1 && (1 - d) * (1 - d) > dither(x, y)) ctx.fillRect(x, y, 1, 1)
-    }
-  return c
+  return bakePixels(size, size, (x, y) => {
+    const d = Math.hypot(x - radius + 0.5, y - radius + 0.5) / radius
+    return d < 1 && (1 - d) * (1 - d) > dither(x, y) ? color : null
+  })
 }
 
 // Darkens the frame's edges so the eye settles on the middle.
 function bakeVignette(width: number): Canvas {
-  const c = makeCanvas(width, VIEW_H)
-  const ctx = context(c)
-  ctx.fillStyle = PAL.k
-  for (let y = 0; y < VIEW_H; y++)
-    for (let x = 0; x < width; x++) {
-      const dx = (x - width / 2) / (width / 2)
-      const dy = (y - VIEW_H / 2) / (VIEW_H / 2)
-      const d = Math.hypot(dx * 0.8, dy)
-      if (d > 0.75 && (d - 0.75) * 1.6 > dither(x, y)) ctx.fillRect(x, y, 1, 1)
-    }
-  return c
+  return bakePixels(width, VIEW_H, (x, y) => {
+    const dx = (x - width / 2) / (width / 2)
+    const dy = (y - VIEW_H / 2) / (VIEW_H / 2)
+    const d = Math.hypot(dx * 0.8, dy)
+    return d > 0.75 && (d - 0.75) * 1.6 > dither(x, y) ? PAL.k : null
+  })
+}
+
+// A health candle as the HUD draws one: bone wax, and a flame once a torch
+// has lit it. Taken, it is a grey stub growing back as it recharges.
+function drawPickup(ctx: CanvasRenderingContext2D, c: Pickup, time: number) {
+  const { x, y } = c
+  if (c.recharge > 0) {
+    const h = 1 + Math.floor((1 - c.recharge / PICKUP.recharge) * 4)
+    ctx.fillStyle = PAL.t
+    ctx.fillRect(x - 1, y - h, 3, h)
+    ctx.fillStyle = PAL.s
+    ctx.fillRect(x + 1, y - h, 1, h)
+    return
+  }
+  ctx.fillStyle = PAL.B
+  ctx.fillRect(x - 1, y - 5, 3, 5)
+  ctx.fillStyle = PAL.b
+  ctx.fillRect(x + 1, y - 5, 1, 5)
+  if (!c.lit) {
+    ctx.fillStyle = PAL.d
+    ctx.fillRect(x, y - 7, 1, 2)
+    return
+  }
+  ctx.fillStyle = (time >> 3) % 2 ? PAL.E : PAL.e
+  ctx.fillRect(x, y - 8, 1, 3)
+  ctx.fillStyle = PAL.y
+  ctx.fillRect(x, y - 6, 1, 1)
 }
 
 export type Renderer = {
@@ -127,6 +157,9 @@ export type Renderer = {
     world: World,
     opts?: { debug?: boolean; hud?: boolean }
   ): void
+  // Bakes everything a run of `world` will draw, so no frame of it stalls
+  // on a first light, tile sheet or vignette.
+  prepare(world: World): void
   // The last frame's foreground darkness, for measuring how far light reaches.
   shade: Canvas
 }
@@ -137,14 +170,48 @@ export function createRenderer(): Renderer {
   const urnArt = bake(URN)
   const candleArt = bake(CANDLES)
   const candleGlow = bakeGlow(LIGHT.candleGlow.radius, LIGHT.candleGlow.color)
+  const torchGlow = bakeGlow(LIGHT.torchGlow.radius, LIGHT.torchGlow.color)
+  const pickupGlow = bakeGlow(LIGHT.pickupGlow.radius, LIGHT.pickupGlow.color)
   const eyeGlow = bakeGlow(LIGHT.eyeGlow.radius, LIGHT.eyeGlow.color)
   const vignettes = new Map<number, Canvas>()
+  const vignetteOf = (viewW: number) => {
+    let v = vignettes.get(viewW)
+    if (!v) {
+      // A window dragged wider bakes one per width: keep only the latest few.
+      if (vignettes.size > 3) vignettes.clear()
+      vignettes.set(viewW, (v = bakeVignette(viewW)))
+    }
+    return v
+  }
+  const tilesOf = (world: World) => {
+    let art = tiles.get(world.map)
+    if (!art) tiles.set(world.map, (art = bakeTiles(world.level)))
+    return art
+  }
   // The sky and skyline keep their own, lighter dark, and only the
   // foreground takes the heavier one, so they are drawn apart.
   const back = new Darkness()
   const fore = new Darkness()
   const layer = makeCanvas(VIEW_W, VIEW_H)
   const scene = context(layer)
+
+  const prepare: Renderer['prepare'] = (world) => {
+    tilesOf(world)
+    vignetteOf(world.viewW)
+    warmLight(LIGHT.visor.radius, LIGHT.visor.core, 1)
+    warmLight(LIGHT.visor.radius, LIGHT.visor.core, -1)
+    warmLight(LIGHT.moon.radius, LIGHT.moon.core)
+    for (const l of [
+      LIGHT.candle,
+      LIGHT.torch,
+      LIGHT.burning,
+      LIGHT.pickup,
+      LIGHT.gate,
+      LIGHT.boss,
+      LIGHT.shot,
+    ])
+      warmLight(l.radius, l.core)
+  }
 
   const draw: Renderer['draw'] = (
     ctx,
@@ -153,8 +220,7 @@ export function createRenderer(): Renderer {
   ) => {
     const { player, time } = world
     const viewW = world.viewW
-    let tileArt = tiles.get(world.map)
-    if (!tileArt) tiles.set(world.map, (tileArt = bakeTiles(world.level)))
+    const tileArt = tilesOf(world)
 
     ctx.imageSmoothingEnabled = false
     const shaking = world.shake > 0
@@ -171,13 +237,15 @@ export function createRenderer(): Renderer {
       world.level.pixelHeight - VIEW_H,
       viewW
     )
+    if (layer.width !== viewW) layer.width = viewW
     scene.imageSmoothingEnabled = false
-    scene.clearRect(0, 0, VIEW_W, VIEW_H)
+    scene.clearRect(0, 0, viewW, VIEW_H)
     scene.drawImage(tileArt, ox, oy)
 
     scene.save()
     scene.translate(ox, oy)
     for (const c of world.candles) scene.drawImage(candleArt, c.x - 4, c.y - 10)
+    for (const c of world.pickups) drawPickup(scene, c, time)
     for (const urn of world.urns)
       if (!urn.broken) scene.drawImage(urnArt, urn.x - 6, urn.y - 14)
     for (const t of world.torches) if (t.landed) drawTorch(scene, t, time)
@@ -198,6 +266,7 @@ export function createRenderer(): Renderer {
     }
 
     for (const p of world.particles) {
+      if (p.glow) continue
       scene.globalAlpha = Math.min(1, (p.life / p.max) * 1.5)
       scene.fillStyle = p.color
       scene.fillRect(Math.round(p.x), Math.round(p.y), 1, 1)
@@ -227,7 +296,7 @@ export function createRenderer(): Renderer {
     scene.globalAlpha = 1
 
     // The dark, and every light cut out of it, in screen space.
-    const { moon, visor, candle, torch, burning } = LIGHT
+    const { moon, visor, candle, torch, burning, pickup } = LIGHT
     const cut = (darkness: Darkness) => {
       if (world.status !== 'dead') {
         const head = player.pose === 'roll' ? player.y + 4 : player.y + 6
@@ -250,6 +319,15 @@ export function createRenderer(): Renderer {
           flicker
         )
       }
+      for (const c of world.pickups)
+        if (c.lit)
+          darkness.light(
+            c.x + ox,
+            c.y - 7 + oy,
+            pickup.radius,
+            pickup.core,
+            hash(Math.floor(time / 6), c.x, 3) > 0.5 ? 0.9 : 1
+          )
       for (const t of world.torches)
         darkness.light(
           t.x + t.w / 2 + ox,
@@ -300,7 +378,7 @@ export function createRenderer(): Renderer {
           )
       }
     }
-    back.begin(LIGHT.backdrop)
+    back.begin(LIGHT.backdrop, viewW)
     // The moon lights the sky alone.
     back.light(
       MOON.x + viewW - VIEW_W,
@@ -311,7 +389,7 @@ export function createRenderer(): Renderer {
     )
     cut(back)
     back.end(ctx)
-    fore.begin(LIGHT.dark)
+    fore.begin(LIGHT.dark, viewW)
     cut(fore)
     fore.end(scene, 'source-atop')
     ctx.drawImage(layer, 0, 0)
@@ -323,6 +401,23 @@ export function createRenderer(): Renderer {
       const r = LIGHT.candleGlow.radius
       ctx.drawImage(candleGlow, c.x - r + flicker + ox, c.y - 10 - r + oy)
     }
+    // Torches flare through the dark, dimming as a landed one burns out.
+    for (const t of world.torches) {
+      const r = LIGHT.torchGlow.radius
+      const flicker = hash(time >> 2, t.x | 0, 5) > 0.5 ? 1 : 0
+      ctx.globalAlpha = Math.max(0, Math.min(1, t.strength * 1.2))
+      ctx.drawImage(
+        torchGlow,
+        Math.round(t.x + t.w / 2) - r + ox,
+        Math.round(t.y) - 4 - r + flicker + oy
+      )
+    }
+    ctx.globalAlpha = 1
+    for (const c of world.pickups) {
+      if (!c.lit || c.recharge) continue
+      const r = LIGHT.pickupGlow.radius
+      ctx.drawImage(pickupGlow, c.x - r + ox, c.y - 7 - r + oy)
+    }
     if (player.pose !== 'roll' && world.status !== 'dead')
       ctx.drawImage(
         eyeGlow,
@@ -332,6 +427,22 @@ export function createRenderer(): Renderer {
         Math.round(player.y) - 3 + oy
       )
     ctx.globalCompositeOperation = 'source-over'
+
+    // Sparks off the torches glow through the dark.
+    for (const p of world.particles) {
+      if (!p.glow) continue
+      ctx.globalAlpha = Math.min(1, (p.life / p.max) * 1.6)
+      ctx.fillStyle = p.color
+      ctx.fillRect(Math.round(p.x) + ox, Math.round(p.y) + oy, 1, 1)
+    }
+    // A dark wick smoulders, so a candle waiting for a torch can be found.
+    for (const c of world.pickups) {
+      if (c.lit || c.recharge) continue
+      ctx.globalAlpha = 0.45 + Math.sin(time * 0.08 + c.x) * 0.3
+      ctx.fillStyle = PAL.e
+      ctx.fillRect(c.x + ox, c.y - 6 + oy, 1, 1)
+    }
+    ctx.globalAlpha = 1
 
     // The boss glows through the dark, so every attack reads.
     if (world.boss) {
@@ -349,9 +460,7 @@ export function createRenderer(): Renderer {
       ctx.fillRect(Math.round(m.x), Math.round(m.y), 1, 1)
     }
     ctx.globalAlpha = 1
-    let vignette = vignettes.get(viewW)
-    if (!vignette) vignettes.set(viewW, (vignette = bakeVignette(viewW)))
-    ctx.drawImage(vignette, 0, 0)
+    ctx.drawImage(vignetteOf(viewW), 0, 0)
 
     if (hud) drawHud(ctx, world)
 
@@ -377,6 +486,15 @@ export function createRenderer(): Renderer {
         }
         drawText(ctx, bossLabel(b), b.x + 58, b.y - 32, '#9f6')
       }
+      ctx.strokeStyle = '#f93'
+      for (const t of world.torches)
+        ctx.strokeRect(t.x + 0.5, t.y + 0.5, t.w - 1, t.h - 1)
+      ctx.strokeStyle = '#fe6'
+      for (const c of world.pickups) {
+        if (c.recharge) continue
+        const r = pickupBox(c)
+        ctx.strokeRect(r.x + 0.5, r.y + 0.5, r.w - 1, r.h - 1)
+      }
       for (const s of world.snakes) {
         if (!s.alive) continue
         ctx.strokeStyle = '#9f6'
@@ -399,7 +517,7 @@ export function createRenderer(): Renderer {
       )
     }
   }
-  return { draw, shade: fore.canvas }
+  return { draw, prepare, shade: fore.canvas }
 }
 
 // Candles for health, a brand for the torch, and the serpent count.

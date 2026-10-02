@@ -17,6 +17,7 @@ its gate.
 | `src/app/demos/candlelight/game-client.tsx` | Client-only import, with a shell-coloured placeholder so launch never flashes white        |
 | `src/components/game/Handheld.tsx`          | Layout switching, canvas scaling, on-screen controls, key overlay, wake lock, fullscreen   |
 | `src/components/game/input.ts`              | Keyboard map, gamepad map, D-pad and face-diamond geometry, `Controls` aggregation         |
+| `src/components/game/haptics.ts`            | Rumble on a pad, vibration on a phone, for a hit taken or landed                           |
 | `src/components/game/loop.ts`               | Fixed 60 Hz update with a capped backlog, render on every animation frame                  |
 | `src/components/game/sandbox/game.ts`       | The `Game` contract (`step`, `draw`, `pause`) and the title, play, death and win scenes    |
 | `src/components/game/sandbox/title.ts`      | The title screen: CANDLELIGHT in dripping candle wax, lit wicks, PRESS START               |
@@ -55,10 +56,12 @@ input switches to full screen while a touch anywhere switches back.
   Only the gaps between D-pad arms read as diagonals, and only the gaps
   between face buttons press two. Every fresh press bounces its cap on the
   frame it lands, and a lift and retap between two updates still counts.
-- **Full screen.** The canvas fills the window at the largest whole-number
-  scale. The overlay in the corner lights each key as the game receives it,
-  from any source, so a controller shows up there too. F toggles browser
-  fullscreen.
+- **Full screen.** The picture meets every edge of the window. Its 180-pixel
+  height fills the window top to bottom, and the view widens or narrows to
+  the window's shape (see Screen). The exit link, the Keys button and the key
+  overlay sit over the picture's bottom corners. The overlay lights each key
+  as the game receives it, from any source, so a controller shows up there
+  too. F toggles browser fullscreen.
 
 ## Input
 
@@ -67,10 +70,10 @@ Every source feeds one `Controls` object, read once per fixed update:
 | Button | WASD layout | Arrows layout | Controller (standard) | Action                                 |
 | ------ | ----------- | ------------- | --------------------- | -------------------------------------- |
 | D-pad  | WASD        | Arrows        | D-pad or left stick   | Move, down + A drops a beam            |
-| A      | K or Space  | Z or Space    | Bottom face (0)       | Jump, hold for height                  |
-| B      | L or Shift  | C or Shift    | Right face (1)        | Roll on ground, dash in air            |
-| X      | J           | X             | Left face (2)         | Sword swing, overhead while up is held |
-| Y      | I           | V             | Top face (3)          | Throw a torch (one a second)           |
+| A      | K or Space  | S or Space    | Bottom face (0)       | Jump, hold for height                  |
+| B      | L or Shift  | A or Shift    | Right face (1)        | Roll on ground, dash in air            |
+| X      | J           | D             | Left face (2)         | Sword swing, overhead while up is held |
+| Y      | I           | W             | Top face (3)          | Throw a torch (one a second)           |
 | Start  | Enter, Esc  | Enter, Esc    | Start (9)             | Pause                                  |
 | Select | Backspace   | Backspace     | Back (8)              | Menu: about, install steps, debug view |
 
@@ -79,15 +82,48 @@ screen, pausing a run, and any pad button closes it. Its Debug view checkbox
 works by tap or keyboard and draws every hitbox, the player's pose and
 velocity, and over each serpent its state and the updates spent in it.
 
-The two keyboard layouts share no keys, so both always work. The overlay shows
-whichever the player last typed on, and the Keys button bottom left switches
-it by hand. The choice is kept in `localStorage`.
+One keyboard layout is live at a time, because W moves in one and throws the
+torch in the other. Arrows + WASD is the default: the arrows move and WASD is
+the face diamond mirrored for the left hand, so W throws the torch, D attacks,
+A rolls and S jumps. WASD + IJKL moves on WASD with IJKL as the diamond. The
+Keys button bottom left switches between them, typing never does, and the
+switch lets go of every held key. The choice is kept in `localStorage` under
+`game:layout`.
 
 On touch the D-pad reads the thumb's angle in eight sectors, so diagonals work
 and sliding changes direction without lifting. On the face diamond a thumb on
 the gap between two neighbours presses both, and the centre presses nothing. A
 press shorter than one update still reaches the game, because presses latch
 until the next read.
+
+A lost finger cannot hold a button past the next touch. The shell rebuilds
+the held set from the browser's own list of fingers down
+(`TouchEvent.touches`) on every touch event, instead of adding on touchstart
+and removing on touchend. iOS drops a touchend when a system gesture, an
+alert or the app switcher takes the screen. Losing focus releases every
+finger and key, and hiding the page or `pagehide` releases every finger. A
+finger is read on the control it started on, wherever it slides. A mouse or
+pen still uses pointer events with capture.
+
+## Haptics
+
+The world reports `hurt` when the player takes a hit and `hit` when the sword
+lands on a serpent or SOCIETY. The shell turns each into a buzz on whatever is
+in the player's hands:
+
+| Device          | Hit taken and landed                          | Tick on each on-screen press    |
+| --------------- | --------------------------------------------- | ------------------------------- |
+| Android browser | `navigator.vibrate`, longer for a hit taken   | 8ms vibration                   |
+| iPhone Safari   | None: Safari has no Vibration API             | Invisible switch under each cap |
+| Controller      | `dual-rumble` in Chrome, Edge, desktop Safari | None                            |
+| Keyboard        | None                                          | None                            |
+
+Since iOS 26.5 a script cannot make an iPhone tick. Only a real tap on the
+label of an `<input type=checkbox switch>` does, so each cap carries an
+invisible one. A tap ticks, a slide or long hold likely does not. The menu's
+"Haptic tick on every press (experimental)" checkbox, on by default, turns the
+per-press tick and the switches off (`game:tap-haptics`). A native wrapper is
+the only route to hit haptics on an iPhone.
 
 ## Movement
 
@@ -111,6 +147,21 @@ below and ahead, and keep burning on the floor for 2.5s as a light.
 The player has 5 HP, shown as candles. A bite knocks the player back and
 grants a second of mercy. At 0 the dark takes you and the run restarts. A
 roll dodges bites.
+
+## Health candles
+
+Two candles drawn like the HUD's stand dark in the map, placed with `h` (open
+air) or `H` (in front of a backdrop wall): one on the stone block floating
+over the roll tunnel, where a serpent patrols, and one in the far right
+corner of the boss's hall. A torch that touches one lights it. Walking into a
+lit one below full health gives back a candle of health. It then burns down to
+a grey stub and stands again, dark, 5 seconds later (`PICKUP.recharge`). A
+lit candle is never taken at full health, so it is never wasted. An unlit
+wick smoulders so it can be found in the dark.
+
+From the third death to the boss in a row, the defeat screen adds THROW A
+TORCH AT THE CANDLE IN THE FAR CORNER FOR HEALTH. A win or a fresh run resets
+the count (`bossDeaths`).
 
 ## The boss
 
@@ -144,8 +195,9 @@ hit it. Otherwise its letters hurt to touch, except for half a second after
 it reforms. A sword hit takes 1 of its 24 HP and a torch burns 2. Every
 third hit it complains (HOW RUDE, THE AUDACITY). At half health it stops
 taking damage for a beat to say SOCIETY IS DISAPPOINTED, then turns crimson.
-From then on it attacks sooner, drifts, throws and squeezes faster, and
-slams twice. At 0 its letters fall apart, SOCIETY HAS FALLEN, and the run is
+From then on it attacks sooner and drifts, throws and squeezes faster. Each
+of those numbers sits halfway between phase 1 and the original rage, and it
+slams once, as in phase 1. At 0 its letters fall apart, SOCIETY HAS FALLEN, and the run is
 won.
 
 Dying to it names the attack on the death screen (SOCIETY BROKE YOUR
@@ -164,14 +216,38 @@ the side the player faces, at full brightness for about one body height
 ahead. Tune it in the `LIGHT` table. The beta script measures the falloff on
 every run.
 
+Torches burn tall (`TORCH.flame`, 9px on the floor), add a bloom over the
+dark, and trail sparks that are drawn after the darkness so they glow. In
+debug view torch boxes are orange and health candle boxes yellow.
+
+Every light sprite, the tiles and the vignette bake once, while the title is
+up (`Renderer.prepare`), so starting a run, the first torch, the gate and the
+boss's entrance draw without a stall. Per-pixel art is written through one
+`ImageData` (`bakePixels` in `pixels.ts`), not a `fillRect` per pixel. The
+pixel font keeps at most 256 baked strings, since debug labels change every
+frame.
+
 Serpents wear crimson and gold bands so they read in the dark, and strobe
 flame white while coiled, the tell that a lunge is coming.
 
 ## Screen
 
-The canvas is 320×180, which scales 6× to 1080p and 8× to 1440p. It scales by
-whole numbers when 2× or more fits, and fits fractionally below that. The
-portrait handheld narrows it to 180×180 (see Layout).
+The view is always 180 game pixels tall. Its width depends on where it runs:
+
+| Where                | View width                     | Scale                                    |
+| -------------------- | ------------------------------ | ---------------------------------------- |
+| Handheld, landscape  | 320                            | Whole numbers from 2×, fractional below  |
+| Handheld, portrait   | 180                            | Whole device pixels, filling the width   |
+| Keyboard, controller | 180 to 432, the window's shape | The window's height over 180, fractional |
+
+On a desktop the width is the window's width over that scale, so the picture
+meets every edge, the last fraction of a game pixel stretched to fit. Past
+2.4:1 the view stops at 432 and the sides keep bars, and narrower than a
+square it stops at 180 with bars top and bottom. The darkness layers and the
+scene buffer follow the view's width, and the sky is baked 432 wide and drawn
+against the right edge, so the moon keeps its place. In the boss fight a view
+wider than the hall shows more of the belfry, never past the map's edge.
+Views from 268 wide (`WIDE_VIEW`) take the big title and end-screen text.
 
 ## Home screen
 
@@ -194,9 +270,14 @@ match whenever the art changes or an install shows the letter again.
 The game opens on its title, and a launch from the home screen opens there
 too unless a run is still live in memory. The title is its own screen, with
 no world drawn behind it: CANDLELIGHT cast in bone wax on black, each letter
-a candle with a flickering wick, wax swelling off the undersides of the
-strokes and dropping into a pool below, and a blinking PRESS START. Any button
-but select starts. The install steps live in the select menu.
+a candle with a flickering wick, and a blinking PRESS START. Wax drips swell
+under the strokes and run straight down, each at its own pace, then the tail
+drains in after them. Nothing ever moves up (`dripAt` in `title.ts`). Drips
+off the letters' foot run to the pool 4 font pixels below. Drips off higher
+strokes give out 2 or 3 font pixels down and hang as a bead, unless a stroke
+below catches them first. Under PRESS START two lines, each with a pixel
+icon, say CONTROLLER SUPPORTED and PLAYS ON IPHONE. Any button but select
+starts. The install steps live in the select menu.
 
 A run ends on one of two screens, timed by `ENDING` in `ending.ts`. The world
 holds for half a second, the transition takes a second, and the word fades

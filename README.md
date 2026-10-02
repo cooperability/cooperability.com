@@ -35,6 +35,18 @@ flowchart LR
     mdx[("src/resources/*.mdx")]:::built
   end
 
+  subgraph candle ["Candlelight (src/components/game)"]
+    direction TB
+    game(["/demos/candlelight"]):::built
+    shell["Handheld shell"]:::built
+    controls["Controls: keys, touch, pads"]:::built
+    loop["60 Hz fixed loop"]:::built
+    world["World, no canvas"]:::built
+    renderer["Canvas renderer"]:::built
+    qa["QA hook"]:::built
+  end
+  gameart[["public/icons/game/*"]]:::built
+
   ui["shadcn on Radix"]:::built
   sw[["public/sw.js"]]:::built
   icons{{"skillicons.dev"}}:::built
@@ -48,6 +60,16 @@ flowchart LR
   layout --> demos
   layout --> reslist
   demos --> applets
+  demos --> game
+  game --> shell
+  shell --> controls
+  shell --> loop
+  loop -->|step| world
+  loop -->|draw| renderer
+  renderer -->|reads| world
+  shell -.->|"?qa=1"| qa
+  game -.->|"icons, launch images"| gameart
+  sw -->|precaches HTML| game
   reslist --> resdoc
   home -->|per request| quotes
   resdoc -->|"rendered by RSC"| mdx
@@ -110,8 +132,17 @@ spoken to over its REST API with plain `fetch`, so it adds no dependency.
 **The offline boundary.** `src/sw.js` is compiled to `public/sw.js` at build
 time by Serwist, which injects a precache manifest of the built `.next/static`
 assets. Each applet ships its own `.webmanifest` under `public/icons/`, so the
-three demos install to a home screen as separate apps sharing one service
+four demos install to a home screen as separate apps sharing one service
 worker. See [PWA Suite](docs/PWA.md).
+
+**The game boundary.** `/demos/candlelight` is a canvas game inside a React
+shell. The shell owns the layout, the on-screen pad and a fixed 60 Hz loop,
+and renders no React per frame. `Controls` merges keys, fingers and gamepads
+into one reading per update. The `World` steps with no canvas, so the game's
+scenarios run in Jest and, behind `?qa=1`, in a browser. The renderer only
+reads a `World`. `scripts/game-assets.mjs` generates the icons and iPhone
+launch images, and the service worker precaches the game's HTML, so an
+installed copy launches offline. See [Game Rig](docs/Game-Rig.md).
 
 ## How a change ships
 
