@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next'
+import HardLoad from '@/src/components/HardLoad'
 import OpioidConverterClient from './opioid-converter-client'
 
 export const metadata: Metadata = {
@@ -22,6 +23,7 @@ export const viewport: Viewport = {
 export default function OpioidConverterPage() {
   return (
     <div className="page-container">
+      <HardLoad />
       <OpioidConverterClient />
     </div>
   )

@@ -12,7 +12,7 @@ run of these items.
 
 ## Quick wins / hygiene
 
-- Bump `tsconfig` `target` from `es5` to `ES2022`. It's a one-line change, and es5 forces needless downleveling on every build for a Node 22 / modern-browser target
+- **Every shadcn colour token is an invalid colour.** `src/styles/global.css` defines `--primary`, `--muted`, `--input`, `--ring` and the rest as `oklch(...)`, and `tailwind.config.js` wraps each in `hsl(var(--x))`. The browser drops the declaration, so the default `Button` variant has no fill, checked `Checkbox`es have no fill, `text-muted-foreground` is not muted, and `focus-visible:ring-ring` draws no focus ring on any Radix control (a WCAG 2.4.7 problem). Fix: change the config to `var(--x)` (the values are already complete colours), then re-check every page in both themes. Prompt Composer v2 sidesteps it with explicit palette classes, marked in `ComponentSelector.tsx` and `AiReview.tsx`, which can go once this lands
 - Purge `.yarn/cache` from git history with `git filter-repo` (separate follow-up: the migration alone does not reclaim the 508 MB `.git`, which every clone and CI checkout pays for)
 - Precache `public/` assets too. The Serwist fix below scopes the manifest to `.next/static`, so icons and images are still fetched on demand, and there is no offline fallback route
 - `commitlint` for commit messages
@@ -26,20 +26,23 @@ run of these items.
 - ~~Convert the last JS files (`src/components/date.js`, `src/components/providers.js`) to TSX~~ (done: now `src/components/date.tsx` and `src/app/providers.tsx`)
 - ~~Serwist precaches `.next`-relative paths rather than the served `/_next/static/…` URLs~~ (done: confirmed every old entry 404'd, and that the manifest also swept in `.next/server` and `.next/cache`, neither of which is reachable over HTTP. Now 42 entries, all verified 200)
 - ~~Create `.editorconfig` for consistency~~ (done: root settings agree with Prettier, so `pnpm format` changes nothing because of it)
+- ~~Bump `tsconfig` `target` from `es5` to `ES2022`~~ (done: Next's SWC transpilation reads browserslist, not tsconfig `target`, and `lib` was already pinned to `esnext`, so the default-lib jump never applied. One real semantic change rides along: `target: ES2022` flips `useDefineForClassFields` to true, so class fields get `[[Define]]` rather than `[[Set]]` semantics. That is inert here, because `src/`, `components/` and `lib/` hold no class declarations. Pin it to `false` if one ever lands and the distinction matters)
 
 ## AI infrastructure (the main event)
 
-- Add an `/api` LLM route using the Anthropic SDK (`claude-opus-4-8` / `claude-sonnet-5`) with streaming responses, and a shared `src/lib/ai/` client module (foundation: every item below builds on this)
-- Add server-side prompt-injection hygiene: never echo untrusted MDX into system prompts, pin system prompts server-side, never expose the API key to the client (build in before anything is public, not after)
-- Rate-limit + abuse-guard any public AI endpoint (Vercel KV / Upstash, per-IP token bucket, max token caps, request size limits) before it costs money
-- Decide and document an AI usage/privacy stance in `PrivacyStatement.mdx` (what's sent to model providers, retention, opt-out) before any user-facing AI feature ships
-- Add `public/llms.txt` + `llms-full.txt` so agents can index the site correctly (cheap, static, no dependency on the route work above)
-- Wire **Prompt Composer** to a live model: preview/critique the composed prompt, score it against the research-backed rubric it already encodes, suggest missing components
-- Ship an **eval harness** (fixture prompts → expected properties, run in CI on a cheap model) so prompt/tooling changes can't silently regress
-- Enable prompt caching + a cheap-model fallback path for anything user-facing
-- Cost/latency observability for AI calls (token counts, p95 latency, spend per route). Log to Vercel Observability or an OTel exporter
+- **Owner action, before AI review is public:** add Upstash for Redis from the Vercel Marketplace, set `ANTHROPIC_API_KEY` and `AI_BUDGET_USD`, and put the key in its own Claude Console workspace with a spend limit. Without Upstash the spend ledger is per serverless instance. Steps in [AI Review](AI-Review.md#setup)
+- Ship an **eval harness** (fixture prompts → expected score ranges and suggested components, run in CI on a cheap model) so reviewer-prompt and schema changes cannot silently regress. Include hostile fixtures that ask the reviewer to do the task, to hold the line on the "free LLM proxy" defence ([threat #5](AI-Review.md#threat-model))
+- Give the per-IP limit global reach: a Vercel Firewall rate-limit rule on `/api/ai/critique` (no code), or the `RateLimiter` buckets moved into Upstash. Spend is already bounded globally by the ledger, so this is fairness between visitors, not cost
+- Cost/latency dashboard. Each review already logs one `ai.critique` JSON line with tokens, charge and latency. What is missing is aggregation (Vercel Observability query or an OTel exporter) and a p95
+- A cheap-model fallback for AI review (`claude-haiku-4-5` at half the price), only once the eval harness can show its reviews hold up. Prompt caching is deliberately off: see the note in `src/lib/ai/pricing.ts`
 - RAG/chat over `src/resources/**` MDX + docs (embed at build time, ship a small static index, so no vector DB is needed at this size)
 - Implement the **MCP server** that `docs/MCP.md` currently only describes. Expose site content/tools (opioid conversion, prompt composition) over MCP, or otherwise mark the doc as aspirational
+- ~~Wire **Prompt Composer** to a live model~~ (done: Prompt Composer v2's AI review streams a scorecard on the live check's six dimensions, a top fix, one-click suggested components and a one-click rewrite. See [AI Review](AI-Review.md))
+- ~~Decide and document an AI usage/privacy stance in `PrivacyStatement.mdx`~~ (done: what is sent, when, to whom, that nothing is stored or logged, and that the review is opt-in per click)
+- ~~Rate-limit + abuse-guard any public AI endpoint~~ (done: per-IP token buckets keyed on the IPv6 /64, a worst-case-reserved spend ledger with a 98% cutoff, an off switch that needs no redeploy, a `Sec-Fetch-Site` check, and a 14-item threat model in [AI Review](AI-Review.md#threat-model))
+- ~~Add `public/llms.txt` + `llms-full.txt`~~ (done in #299, served from `src/app/llms.txt` and `src/app/llms-full.txt`)
+- ~~Add an `/api` LLM route using the Anthropic SDK with streaming responses, and a shared `src/lib/ai/` client module~~ (done: `POST /api/ai/critique` streams from `claude-sonnet-5`, the cheaper of the two models this line listed, with the handler in `src/lib/ai/critique.ts` because Next 16 allows no extra exports from a route file)
+- ~~Add server-side prompt-injection hygiene~~ (done: the system prompt is a server-side constant, caller text only enters the user turn fenced in tags with any case or spacing of the fence tag escaped, and the key is read only in `src/lib/ai/client.ts`. The route also requires `application/json`, so a cross-site simple POST cannot spend budget from a visitor's browser)
 - ~~Add a root `CLAUDE.md` + repo-local skills/agents under `.claude/` / `.cursor/`~~ (done: see `CLAUDE.md`, `AGENTS.md`)
 
 ## Framework & architecture modernization
@@ -57,10 +60,10 @@ run of these items.
 ## CI/CD & quality gates
 
 - Stop the security-audit workflow from opening a false-alarm issue on any failed step. **This is the fix for [issue #253](https://github.com/cooperability/cooperability.com/issues/253):** that issue's linked run shows `yarn npm audit --severity critical` crashing with an unhandled `RequestError` (the yarn registry returned malformed JSON to the advisory-bulk endpoint), not a real advisory. `pnpm audit --audit-level critical` finds nothing today (verified 2026-09-15). The pnpm migration already swapped `yarn npm audit` for `pnpm audit` in `.github/workflows/security-audit.yml`, which fixes that specific crash, but the issue-creation step still fires on bare `if: failure()` with no check that the failure was an actual finding, so any transient audit-tool error (network blip, registry outage) can still raise the same false alarm
-- Pin GitHub Actions to commit SHAs and set explicit least-privilege `permissions:` on each workflow
+- ~~Pin GitHub Actions to commit SHAs and set explicit least-privilege `permissions:` on each workflow~~ (done: every `uses:` carries a full SHA plus a `# vX.Y.Z` comment Dependabot keeps current, and the existing `permissions:` blocks were reviewed per job and already least-privilege, so they stay as they were)
 - Make the `high` severity audit blocking, or document why it stays advisory
-- Add `SECURITY.md`, `CODEOWNERS`, a PR template, and a `LICENSE` (repo has issue templates but none of these)
-- Test coverage is four files (home page, quote box, opioid-converter equivalences, `useResponsive`). Still to prioritize: `mandelbrot-explorer/utils/calculations.ts` and `prompt-composer/utils/helpers.ts`, then set coverage thresholds
+- ~~Add `SECURITY.md` and a PR template~~ (done: `SECURITY.md` and `.github/pull_request_template.md`). Still open: `CODEOWNERS` (auto-requests review) and `LICENSE` (owner's legal choice)
+- Test coverage is thin outside the AI route and Prompt Composer, which now have unit and component suites. Still to prioritize: `mandelbrot-explorer/utils/calculations.ts`, then set coverage thresholds
 - Add Lighthouse CI with perf/a11y budgets on PRs, replacing the manual `pnpm access` run
 - Add Playwright E2E + `@axe-core/playwright` for the theme-switch, PWA install, and converter flows (already listed as an accessibility maintenance task, and this is the mechanism)
 - Consider Vitest over Jest (faster, native ESM, less SWC/PnP config surface)

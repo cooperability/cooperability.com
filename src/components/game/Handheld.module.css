@@ -1,0 +1,527 @@
+.root {
+  --plate: #19171f;
+  --lens: #050507;
+  --bezel: #2c2a35;
+  --cap: #282631;
+  --cap-top: #3a3745;
+  --cap-held: #4a2a22;
+  --glyph: #b3aa93;
+  --glyph-held: #ffb347;
+  --ember: #d4602a;
+  --label: #7f7a8c;
+
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  grid-template:
+    'screen screen' auto
+    'dpad face' minmax(0, 1fr)
+    'meta meta' auto / 1fr 1fr;
+  gap: 16px 12px;
+  padding: max(12px, env(safe-area-inset-top))
+    max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom))
+    max(16px, env(safe-area-inset-left));
+  /* Cast-iron control plate: a faint glow from below over a dark body. */
+  background:
+    radial-gradient(120% 60% at 50% 100%, #221f29 0%, transparent 70%),
+    var(--plate);
+  color: var(--label);
+  font-family: ui-monospace, monospace;
+  overscroll-behavior: none;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* The browser-only top bar needs its own row above the shell. */
+.root:has(.topBar) {
+  padding-top: calc(max(12px, env(safe-area-inset-top)) + 28px);
+}
+
+@media (orientation: landscape) {
+  .root {
+    grid-template:
+      'dpad screen face' minmax(0, 1fr)
+      'dpad meta face' auto / minmax(0, 1fr) minmax(0, 2.6fr) minmax(0, 1fr);
+  }
+}
+
+/* Keyboard or controller: the screen takes the whole view. */
+.root[data-mode='external'] {
+  grid-template: 'screen' minmax(0, 1fr) / 1fr;
+  padding: 0;
+  background: #030304;
+}
+
+.root[data-mode='external']:has(.topBar) {
+  padding-top: 0;
+}
+
+.root[data-mode='external'] .diamond,
+.root[data-mode='external'] .meta {
+  display: none;
+}
+
+.topBar {
+  position: absolute;
+  top: max(4px, env(safe-area-inset-top));
+  left: max(8px, env(safe-area-inset-left));
+  right: max(8px, env(safe-area-inset-right));
+  z-index: 2;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 12px;
+}
+
+/* Outranks the site-wide `html.light a` colour. */
+.root .exit {
+  color: var(--label);
+  text-decoration: none;
+  padding: 4px 0;
+}
+
+.hint {
+  margin: 0 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: var(--bezel);
+}
+
+.hint button {
+  color: inherit;
+  background: none;
+  border: 0;
+  font: inherit;
+  padding: 0 2px;
+}
+
+/* The screen is glass in its own bezel, set apart from the plate. */
+.screen {
+  grid-area: screen;
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  border-radius: 14px;
+  background: var(--lens);
+  box-shadow:
+    0 0 0 2px var(--bezel),
+    0 0 0 3px #0c0b10,
+    inset 0 0 18px rgba(0, 0, 0, 0.9),
+    0 10px 24px rgba(0, 0, 0, 0.55);
+}
+
+.root:not([data-mode='external']) .screen {
+  aspect-ratio: 16 / 9;
+}
+
+@media (orientation: landscape) {
+  .root:not([data-mode='external']) .screen {
+    aspect-ratio: auto;
+    height: 100%;
+  }
+}
+
+/* Portrait handheld: a square screen edge to edge, as tall as it can be
+   while the controls below keep room for a thumb. */
+@media (orientation: portrait) {
+  /* The controls sit as one group, centred in the space under the screen,
+     with equal spacer rows above and below. Row gaps would add to the
+     spacers on short screens, so margins space the group instead. */
+  .root:not([data-mode='external']) {
+    grid-template:
+      'screen screen' auto
+      '. .' minmax(0, 1fr)
+      'dpad face' auto
+      'meta meta' auto
+      '. .' minmax(0, 1fr) / 1fr 1fr;
+    padding-left: max(8px, env(safe-area-inset-left));
+    padding-right: max(8px, env(safe-area-inset-right));
+    gap: 0 28px;
+  }
+
+  .root:not([data-mode='external']) .screen {
+    margin-bottom: 16px;
+  }
+
+  .root:not([data-mode='external']) .meta {
+    margin-top: 16px;
+  }
+
+  .root:not([data-mode='external']) .screen {
+    aspect-ratio: 1;
+    width: min(100vw, 100dvh - 290px);
+    justify-self: center;
+    /* Out through the plate's side padding, so it can reach both edges. */
+    margin-inline: calc(-1 * max(8px, env(safe-area-inset-left)));
+    padding: 0;
+    border-radius: 0;
+  }
+}
+
+/* A glare across the glass, over the picture. */
+.screen::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    160deg,
+    rgba(255, 255, 255, 0.07) 0%,
+    rgba(255, 255, 255, 0) 38%
+  );
+  pointer-events: none;
+}
+
+.root[data-mode='external'] .screen {
+  padding: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.root[data-mode='external'] .screen::after {
+  display: none;
+}
+
+.canvas {
+  display: block;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+/* Both diamonds share one layout and one button, so the plate reads as a set. */
+.diamond {
+  align-self: center;
+  justify-self: center;
+  position: relative;
+  width: min(100%, 176px);
+  aspect-ratio: 1;
+}
+
+/* Each diamond leans toward its own edge of the plate. */
+.dpad {
+  grid-area: dpad;
+  justify-self: start;
+}
+
+.face {
+  grid-area: face;
+  justify-self: end;
+}
+
+.diamond span {
+  position: absolute;
+  width: 34%;
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(
+    circle at 35% 30%,
+    var(--cap-top),
+    var(--cap) 70%
+  );
+  box-shadow:
+    inset 0 -2px 0 rgba(0, 0, 0, 0.45),
+    0 2px 0 #0e0d12,
+    0 0 0 1px #0e0d12;
+  color: var(--glyph);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* Positions mirror FACE_LAYOUT in input.ts. */
+.diamond .up,
+.diamond .y {
+  left: 50%;
+  top: 18%;
+}
+
+.diamond .left,
+.diamond .x {
+  left: 18%;
+  top: 50%;
+}
+
+.diamond .right,
+.diamond .b {
+  left: 82%;
+  top: 50%;
+}
+
+.diamond .down,
+.diamond .a {
+  left: 50%;
+  top: 82%;
+}
+
+.dpad span {
+  font-size: 11px;
+}
+
+.dpad[data-held~='up'] .up,
+.dpad[data-held~='down'] .down,
+.dpad[data-held~='left'] .left,
+.dpad[data-held~='right'] .right,
+.face[data-held~='a'] .a,
+.face[data-held~='b'] .b,
+.face[data-held~='x'] .x,
+.face[data-held~='y'] .y {
+  translate: -50% calc(-50% + 1px);
+  background: radial-gradient(circle at 35% 30%, #5a332a, var(--cap-held) 70%);
+  color: var(--glyph-held);
+  box-shadow:
+    inset 0 2px 3px rgba(0, 0, 0, 0.5),
+    0 0 0 1px var(--ember),
+    0 0 10px rgba(212, 96, 42, 0.45);
+}
+
+.meta {
+  grid-area: meta;
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+}
+
+.meta span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 22px;
+  border-radius: 999px;
+  background: var(--cap);
+  box-shadow:
+    inset 0 -2px 0 rgba(0, 0, 0, 0.45),
+    0 0 0 1px #0e0d12;
+}
+
+.meta .select[data-held~='select'],
+.meta .start[data-held~='start'] {
+  color: var(--glyph-held);
+  box-shadow: 0 0 0 1px var(--ember);
+}
+
+/* Opened with select: when and why, and how to install. Over the screen,
+   so the pad stays free to close it. */
+.about {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  overflow-y: auto;
+  padding: 16px 18px;
+  background: rgba(8, 7, 12, 0.94);
+  color: var(--glyph);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.about h2 {
+  margin: 0 0 8px;
+  color: var(--glyph-held);
+  font-size: 16px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* The whole row is the tap target, so a thumb can hit it on a phone. */
+.debug {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  margin-bottom: 4px;
+  color: var(--glyph-held);
+  cursor: pointer;
+}
+
+.debug input {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--ember);
+}
+
+.about h3 {
+  margin: 12px 0 4px;
+  font-size: 13px;
+  color: var(--glyph-held);
+}
+
+.about p,
+.about ol {
+  margin: 0;
+}
+
+.about ol {
+  padding-left: 20px;
+}
+
+.about button {
+  margin-top: 12px;
+  padding: 8px 14px;
+  border: 1px solid var(--ember);
+  border-radius: 999px;
+  background: none;
+  color: var(--glyph-held);
+  font: inherit;
+}
+
+/* Desktop input overlay, shown while a keyboard or controller is in use. */
+.keys {
+  display: none;
+}
+
+.root[data-mode='external'] .keys {
+  position: absolute;
+  right: max(20px, env(safe-area-inset-right));
+  bottom: max(20px, env(safe-area-inset-bottom));
+  display: grid;
+  grid-template-columns: auto auto;
+  gap: 10px 22px;
+  padding: 14px 16px 10px;
+  border-radius: 12px;
+  background: rgba(10, 9, 14, 0.42);
+  backdrop-filter: blur(4px);
+  opacity: 0.8;
+  pointer-events: none;
+}
+
+.cluster {
+  display: grid;
+  grid-template:
+    '. top .' auto
+    'left bottom right' auto / auto auto auto;
+  gap: 4px 4px;
+  padding-bottom: 12px;
+}
+
+.keys kbd {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  border: 1px solid rgba(179, 170, 147, 0.35);
+  border-bottom-width: 3px;
+  color: rgba(179, 170, 147, 0.8);
+  font:
+    700 12px/1 ui-monospace,
+    monospace;
+}
+
+.keys kbd small {
+  position: absolute;
+  top: calc(100% + 3px);
+  font-size: 8px;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  color: rgba(179, 170, 147, 0.6);
+}
+
+.cluster .up,
+.cluster .y {
+  grid-area: top;
+}
+
+.cluster .left,
+.cluster .x {
+  grid-area: left;
+}
+
+.cluster .down,
+.cluster .a {
+  grid-area: bottom;
+}
+
+.cluster .right,
+.cluster .b {
+  grid-area: right;
+}
+
+.keys[data-held~='up'] .up,
+.keys[data-held~='down'] .down,
+.keys[data-held~='left'] .left,
+.keys[data-held~='right'] .right,
+.keys[data-held~='a'] .a,
+.keys[data-held~='b'] .b,
+.keys[data-held~='x'] .x,
+.keys[data-held~='y'] .y {
+  color: var(--glyph-held);
+  border-color: var(--ember);
+  background: rgba(212, 96, 42, 0.25);
+  box-shadow: 0 0 12px rgba(212, 96, 42, 0.45);
+}
+
+.legend {
+  grid-column: 1 / -1;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 4px 12px;
+  max-width: 240px;
+  font-size: 9px;
+  color: rgba(179, 170, 147, 0.55);
+}
+
+.keys[data-held~='start'] .start,
+.keys[data-held~='select'] .select {
+  color: var(--glyph-held);
+}
+
+/* Picks which keyboard layout the legend shows. Both layouts always work.
+   Bottom left, since the HUD fills the screen's top edge. */
+.scheme {
+  display: none;
+}
+
+.root[data-mode='external'] .scheme {
+  position: absolute;
+  bottom: max(20px, env(safe-area-inset-bottom));
+  left: max(20px, env(safe-area-inset-left));
+  z-index: 2;
+  display: block;
+  padding: 6px 12px;
+  border: 1px solid rgba(179, 170, 147, 0.35);
+  border-radius: 999px;
+  background: rgba(10, 9, 14, 0.42);
+  color: rgba(179, 170, 147, 0.85);
+  font:
+    11px/1 ui-monospace,
+    monospace;
+  cursor: pointer;
+}
+
+.root[data-mode='external'] .scheme:hover,
+.root[data-mode='external'] .scheme:focus-visible {
+  border-color: var(--ember);
+  color: var(--glyph-held);
+}
+
+/* The top key's label sits above it, clear of the key below. */
+.keys .y small {
+  top: auto;
+  bottom: calc(100% + 3px);
+}
+
+/* With the pad hidden the screen can fill the window, so the exit link
+   moves off the HUD to the bottom left, above the Keys button. */
+.root[data-mode='external'] .topBar {
+  top: auto;
+  right: auto;
+  bottom: calc(max(20px, env(safe-area-inset-bottom)) + 34px);
+  left: max(20px, env(safe-area-inset-left));
+}

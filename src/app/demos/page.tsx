@@ -1,5 +1,4 @@
 import type { Metadata } from 'next'
-import Link from 'next/link'
 import {
   Accordion,
   AccordionItem,
@@ -60,14 +59,37 @@ export default function Demos() {
                 size="small"
               />
             </div>
-            {/* Sub-projects housed within cooperability.com */}
+            {/* Sub-projects housed within cooperability.com. Each app is a
+                plain link, so it loads whole. A client-side navigation keeps
+                this page's head, and iOS would install the site's manifest
+                (start_url /) instead of the app's. */}
             <div className={styles.subProjects}>
+              {/* Candlelight */}
+              <div className={styles.subProjectItem}>
+                <div className={styles.projectInfo}>
+                  <a href="/demos/candlelight">Candlelight[💻📱🎮]</a>
+                  <span className={styles.projectStatus}>(Ongoing)</span>
+                </div>
+                <div className={styles.techStackIcons}>
+                  <ActiveIcon
+                    href="https://www.typescriptlang.org/"
+                    iconName="ts"
+                    alt="TypeScript logo"
+                    size="small"
+                  />
+                  <ActiveIcon
+                    href="https://react.dev/"
+                    iconName="react"
+                    alt="React logo"
+                    size="small"
+                  />
+                </div>
+              </div>
+
               {/* Prompt Composer */}
               <div className={styles.subProjectItem}>
                 <div className={styles.projectInfo}>
-                  <Link href="/demos/prompt-composer">
-                    Prompt Composer[💻📱]
-                  </Link>
+                  <a href="/demos/prompt-composer">Prompt Composer[💻📱]</a>
                   <span className={styles.projectStatus}>(Ongoing)</span>
                 </div>
                 <div className={styles.techStackIcons}>
@@ -95,9 +117,9 @@ export default function Demos() {
               {/* Mandelbrot Explorer */}
               <div className={styles.subProjectItem}>
                 <div className={styles.projectInfo}>
-                  <Link href="/demos/mandelbrot-explorer">
+                  <a href="/demos/mandelbrot-explorer">
                     Mandelbrot Explorer[💻📱]
-                  </Link>
+                  </a>
                   <span className={styles.projectStatus}>(2025)</span>
                 </div>
                 <div className={styles.techStackIcons}>
@@ -125,9 +147,7 @@ export default function Demos() {
               {/* Opioid Converter */}
               <div className={styles.subProjectItem}>
                 <div className={styles.projectInfo}>
-                  <Link href="/demos/opioid-converter">
-                    Opioid Converter[💻📱]
-                  </Link>
+                  <a href="/demos/opioid-converter">Opioid Converter[💻📱]</a>
                   <span className={styles.projectStatus}>(2021)</span>
                 </div>
                 <div className={styles.techStackIcons}>

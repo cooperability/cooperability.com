@@ -1,11 +1,12 @@
 import type { Metadata, Viewport } from 'next'
+import HardLoad from '@/src/components/HardLoad'
 import PromptComposerClient from './prompt-composer-client'
 
 // Overrides the root layout's manifest so this route installs as its own PWA.
 export const metadata: Metadata = {
   title: 'Prompt Composer',
   description:
-    'A visual prompt building tool that demonstrates the modular nature of effective prompts for AI interactions.',
+    'Build prompts from the components current evidence says matter, check them live, and get an AI review with a suggested rewrite.',
   openGraph: { title: 'Prompt Composer | Cooper Reed | Co-Operability' },
   manifest: '/icons/prompt-composer.webmanifest',
   // Metadata keys replace the parent's value rather than merging into it, so
@@ -25,6 +26,7 @@ export const viewport: Viewport = {
 export default function PromptComposerPage() {
   return (
     <div className="min-h-screen">
+      <HardLoad />
       <PromptComposerClient />
     </div>
   )

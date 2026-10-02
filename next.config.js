@@ -89,6 +89,11 @@ const nextConfig = {
         destination: '/demos/opioid-converter',
         permanent: true,
       },
+      {
+        source: '/demos/game',
+        destination: '/demos/candlelight',
+        permanent: true,
+      },
     ]
   },
 }

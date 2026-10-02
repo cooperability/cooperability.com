@@ -105,22 +105,19 @@ export default function Home() {
           the same spirit.
         </p>
 
-        <Link
-          href="/demos/prompt-composer"
-          className={styles.promptComposerLink}
-        >
+        <a href="/demos/prompt-composer" className={styles.promptComposerLink}>
           <div className={styles.promptComposerWrapper}>
             Try 🧩 Prompt Composer →
           </div>
-        </Link>
-        <Link
+        </a>
+        <a
           href="/demos/mandelbrot-explorer"
           className={styles.promptComposerLink}
         >
           <div className={styles.promptComposerWrapper}>
             Try ♾️ Mandelbrot Explorer →
           </div>
-        </Link>
+        </a>
 
         <QuoteBox initialQuote={initialQuote} />
       </section>
