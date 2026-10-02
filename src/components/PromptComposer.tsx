@@ -1293,17 +1293,17 @@ const PromptComposer: React.FC<PromptComposerProps> = ({ className }) => {
                   <div className={tw.statsGrid}>
                     <div>
                       <div className={tw.statsWord}>
-                        {statistics.wordCount} Words
+                        Words: {statistics.wordCount}
                       </div>
                     </div>
                     <div>
                       <div className={tw.statsComponent}>
-                        {statistics.components} Components
+                        Components: {statistics.components}
                       </div>
                     </div>
                     <div>
                       <div className={tw.statsCategory}>
-                        {statistics.categories} Categories
+                        Categories: {statistics.categories}
                       </div>
                     </div>
                   </div>
@@ -1312,257 +1312,262 @@ const PromptComposer: React.FC<PromptComposerProps> = ({ className }) => {
             </div>
           </CardContent>
         </Card>
-        <Card>
-          <div className={promptComposerStyles.previewContent}>
-            {/* Research-Based Design Documentation */}
-            <Accordion type="single" collapsible-classname="w-full">
-              <AccordionItem
-                value="research-documentation"
-                className={promptComposerStyles.researchDocumentation}
-              >
-                <AccordionTrigger
-                  className={promptComposerStyles.categoryButton}
+        <Card className={promptComposerStyles.componentGroup}>
+          <CardHeader>
+            <CardTitle>Research-Backed Design Documentation</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className={promptComposerStyles.previewContent}>
+              {/* Research-Based Design Documentation */}
+              <Accordion type="single" collapsible-classname="w-full">
+                <AccordionItem
+                  value="research-documentation"
+                  className={promptComposerStyles.researchDocumentation}
                 >
-                  🔬 Research-Backed Design Documentation
-                </AccordionTrigger>
-                <AccordionContent>
-                  <div className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed space-y-4">
-                    <div>
-                      <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">
-                        Design Philosophy & Research Foundation
-                      </h4>
-                      <p>
-                        This Prompt Composer integrates research in LLM
-                        effectiveness and UI/UX design.
-                        <strong> Radio buttons</strong> are used for mutually
-                        exclusive choices (role specification, reasoning
-                        strategy) because research shows conflicting
-                        instructions can reduce LLM performance.
-                        <strong> Checkboxes</strong> enable beneficial component
-                        combinations for context, output formatting, and
-                        constraints. The <strong>binary toggle</strong> for
-                        audience targeting follows established UX patterns and
-                        reflects the fundamental technical/non-technical
-                        communication divide. Component ordering follows task
-                        decomposition research showing role → context →
-                        reasoning → output → constraints as the optimal sequence
-                        for LLM comprehension.
-                      </p>
+                  <AccordionTrigger
+                    className={promptComposerStyles.categoryButton}
+                  >
+                    🔬 Research-Backed Design Documentation
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <div className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed space-y-4">
+                      <div>
+                        <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                          Design Philosophy & Research Foundation
+                        </h4>
+                        <p>
+                          This Prompt Composer integrates research in LLM
+                          effectiveness and UI/UX design.
+                          <strong> Radio buttons</strong> are used for mutually
+                          exclusive choices (role specification, reasoning
+                          strategy) because research shows conflicting
+                          instructions can reduce LLM performance.
+                          <strong> Checkboxes</strong> enable beneficial component
+                          combinations for context, output formatting, and
+                          constraints. The <strong>binary toggle</strong> for
+                          audience targeting follows established UX patterns and
+                          reflects the fundamental technical/non-technical
+                          communication divide. Component ordering follows task
+                          decomposition research showing role → context →
+                          reasoning → output → constraints as the optimal sequence
+                          for LLM comprehension.
+                        </p>
+                      </div>
+
+                      <div>
+                        <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                          Evidence-Based Component Categories
+                        </h4>
+                        <p>
+                          Each category represents a distinct cognitive function
+                          based on prompt engineering research:
+                          <strong>Role Specification</strong> establishes the AI
+                          persona, <strong>Context Provision</strong> leverages
+                          few-shot learning principles,{' '}
+                          <strong>Reasoning Strategy</strong> applies
+                          chain-of-thought research for complex tasks,{' '}
+                          <strong>Output Instructions</strong> ensure structured
+                          responses, <strong>Constraints</strong> maintain focus,
+                          and <strong>Meta-Prompt Enhancements</strong> enable
+                          self-improvement capabilities.
+                        </p>
+                      </div>
+
+                      <div>
+                        <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                          UI/UX Component Selection Strategy
+                        </h4>
+                        <p>
+                          The interface design follows established usability
+                          principles: radio buttons for mutually exclusive
+                          cognitive roles prevent conflicting instructions, toggle
+                          switches for binary states provide immediate visual
+                          feedback, and checkboxes for additive elements allow
+                          beneficial layering of context and constraints. Visual
+                          hierarchy and color coding reduce cognitive load while
+                          maintaining accessibility standards.
+                        </p>
+                      </div>
+
+                      <div className="border-t border-gray-200 dark:border-gray-600 pt-4">
+                        <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-3">
+                          References
+                        </h4>
+                        <div className="text-xs space-y-2 text-gray-600 dark:text-gray-400">
+                          <p>
+                            Brown, T., Mann, B., Ryder, N., Subbiah, M., Kaplan,
+                            J. D., Dhariwal, P., ... & Amodei, D. (2020). Language
+                            models are few-shot learners.{' '}
+                            <em>
+                              Advances in Neural Information Processing Systems
+                            </em>
+                            , 33, 1877-1901. Available:{' '}
+                            <a
+                              href="https://arxiv.org/abs/2005.14165"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-600 hover:text-blue-800 underline"
+                            >
+                              https://arxiv.org/abs/2005.14165
+                            </a>
+                          </p>
+
+                          <p>
+                            Khot, T., Trivedi, H., Finlayson, M., Sabharwal, A., &
+                            Clark, P. (2023). Decomposed prompting: A modular
+                            approach for solving complex tasks.{' '}
+                            <em>
+                              Proceedings of the International Conference on
+                              Learning Representations
+                            </em>
+                            . Available:{' '}
+                            <a
+                              href="https://arxiv.org/abs/2210.02406"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-600 hover:text-blue-800 underline"
+                            >
+                              https://arxiv.org/abs/2210.02406
+                            </a>
+                          </p>
+
+                          <p>
+                            Lu, Y., Bartolo, M., Moore, A., Riedel, S., &
+                            Stenetorp, P. (2022). Fantastically ordered prompts
+                            and where to find them: Overcoming few-shot prompt
+                            order sensitivity.{' '}
+                            <em>
+                              Proceedings of the 60th Annual Meeting of the
+                              Association for Computational Linguistics
+                            </em>
+                            , 1, 8086-8098. Available:{' '}
+                            <a
+                              href="https://arxiv.org/abs/2104.08786"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-600 hover:text-blue-800 underline"
+                            >
+                              https://arxiv.org/abs/2104.08786
+                            </a>
+                          </p>
+
+                          <p>
+                            Min, S., Lyu, X., Holtzman, A., Artetxe, M., Lewis,
+                            M., Hajishirzi, H., & Zettlemoyer, L. (2022).
+                            Rethinking the role of demonstrations: What makes
+                            in-context learning work?{' '}
+                            <em>
+                              Proceedings of the 2022 Conference on Empirical
+                              Methods in Natural Language Processing
+                            </em>
+                            , 11048-11064. Available:{' '}
+                            <a
+                              href="https://arxiv.org/abs/2202.12837"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-600 hover:text-blue-800 underline"
+                            >
+                              https://arxiv.org/abs/2202.12837
+                            </a>
+                          </p>
+
+                          <p>
+                            Nielsen, J., & Budiu, R. (2012).{' '}
+                            <em>Mobile usability</em>. New Riders Publishing.
+                            Available:{' '}
+                            <a
+                              href="https://www.nngroup.com/books/mobile-usability/"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-600 hover:text-blue-800 underline"
+                            >
+                              https://www.nngroup.com/books/mobile-usability/
+                            </a>
+                          </p>
+
+                          <p>
+                            Tullis, T., & Albert, B. (2013).{' '}
+                            <em>
+                              Measuring the user experience: Collecting,
+                              analyzing, and presenting usability metrics
+                            </em>
+                            . Morgan Kaufmann.
+                          </p>
+
+                          <p>
+                            Wang, X., Wei, J., Schuurmans, D., Le, Q., Chi, E.,
+                            Narang, S., ... & Zhou, D. (2023). Self-consistency
+                            improves chain of thought reasoning in language
+                            models.{' '}
+                            <em>
+                              International Conference on Learning Representations
+                            </em>
+                            . Available:{' '}
+                            <a
+                              href="https://arxiv.org/abs/2203.11171"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-600 hover:text-blue-800 underline"
+                            >
+                              https://arxiv.org/abs/2203.11171
+                            </a>
+                          </p>
+
+                          <p>
+                            Wei, J., Wang, X., Schuurmans, D., Bosma, M., Chi, E.,
+                            Le, Q. V., ... & Zhou, D. (2022). Chain-of-thought
+                            prompting elicits reasoning in large language models.{' '}
+                            <em>
+                              Advances in Neural Information Processing Systems
+                            </em>
+                            , 35, 24824-24837. Available:{' '}
+                            <a
+                              href="https://arxiv.org/abs/2201.11903"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-600 hover:text-blue-800 underline"
+                            >
+                              https://arxiv.org/abs/2201.11903
+                            </a>
+                          </p>
+                        </div>
+                      </div>
                     </div>
-
-                    <div>
-                      <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">
-                        Evidence-Based Component Categories
-                      </h4>
-                      <p>
-                        Each category represents a distinct cognitive function
-                        based on prompt engineering research:
-                        <strong>Role Specification</strong> establishes the AI
-                        persona, <strong>Context Provision</strong> leverages
-                        few-shot learning principles,{' '}
-                        <strong>Reasoning Strategy</strong> applies
-                        chain-of-thought research for complex tasks,{' '}
-                        <strong>Output Instructions</strong> ensure structured
-                        responses, <strong>Constraints</strong> maintain focus,
-                        and <strong>Meta-Prompt Enhancements</strong> enable
-                        self-improvement capabilities.
-                      </p>
-                    </div>
-
-                    <div>
-                      <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">
-                        UI/UX Component Selection Strategy
-                      </h4>
-                      <p>
-                        The interface design follows established usability
-                        principles: radio buttons for mutually exclusive
-                        cognitive roles prevent conflicting instructions, toggle
-                        switches for binary states provide immediate visual
-                        feedback, and checkboxes for additive elements allow
-                        beneficial layering of context and constraints. Visual
-                        hierarchy and color coding reduce cognitive load while
-                        maintaining accessibility standards.
-                      </p>
-                    </div>
-
-                    <div className="border-t border-gray-200 dark:border-gray-600 pt-4">
-                      <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-3">
-                        References
-                      </h4>
-                      <div className="text-xs space-y-2 text-gray-600 dark:text-gray-400">
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+              <br />
+              {/*Want to use Prompt Composer as an App? */}
+              <Accordion type="single" collapsible-classname="w-full">
+                <AccordionItem
+                  value="research-documentation"
+                  className={promptComposerStyles.researchDocumentation}
+                >
+                  <AccordionTrigger
+                    className={promptComposerStyles.categoryButton}
+                  >
+                    🧩Want to use Prompt-Composer as an app?
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <div className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed space-y-4">
+                      <div>
+                        <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                          Now you can!
+                        </h4>
                         <p>
-                          Brown, T., Mann, B., Ryder, N., Subbiah, M., Kaplan,
-                          J. D., Dhariwal, P., ... & Amodei, D. (2020). Language
-                          models are few-shot learners.{' '}
-                          <em>
-                            Advances in Neural Information Processing Systems
-                          </em>
-                          , 33, 1877-1901. Available:{' '}
-                          <a
-                            href="https://arxiv.org/abs/2005.14165"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-600 hover:text-blue-800 underline"
-                          >
-                            https://arxiv.org/abs/2005.14165
-                          </a>
-                        </p>
-
-                        <p>
-                          Khot, T., Trivedi, H., Finlayson, M., Sabharwal, A., &
-                          Clark, P. (2023). Decomposed prompting: A modular
-                          approach for solving complex tasks.{' '}
-                          <em>
-                            Proceedings of the International Conference on
-                            Learning Representations
-                          </em>
-                          . Available:{' '}
-                          <a
-                            href="https://arxiv.org/abs/2210.02406"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-600 hover:text-blue-800 underline"
-                          >
-                            https://arxiv.org/abs/2210.02406
-                          </a>
-                        </p>
-
-                        <p>
-                          Lu, Y., Bartolo, M., Moore, A., Riedel, S., &
-                          Stenetorp, P. (2022). Fantastically ordered prompts
-                          and where to find them: Overcoming few-shot prompt
-                          order sensitivity.{' '}
-                          <em>
-                            Proceedings of the 60th Annual Meeting of the
-                            Association for Computational Linguistics
-                          </em>
-                          , 1, 8086-8098. Available:{' '}
-                          <a
-                            href="https://arxiv.org/abs/2104.08786"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-600 hover:text-blue-800 underline"
-                          >
-                            https://arxiv.org/abs/2104.08786
-                          </a>
-                        </p>
-
-                        <p>
-                          Min, S., Lyu, X., Holtzman, A., Artetxe, M., Lewis,
-                          M., Hajishirzi, H., & Zettlemoyer, L. (2022).
-                          Rethinking the role of demonstrations: What makes
-                          in-context learning work?{' '}
-                          <em>
-                            Proceedings of the 2022 Conference on Empirical
-                            Methods in Natural Language Processing
-                          </em>
-                          , 11048-11064. Available:{' '}
-                          <a
-                            href="https://arxiv.org/abs/2202.12837"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-600 hover:text-blue-800 underline"
-                          >
-                            https://arxiv.org/abs/2202.12837
-                          </a>
-                        </p>
-
-                        <p>
-                          Nielsen, J., & Budiu, R. (2012).{' '}
-                          <em>Mobile usability</em>. New Riders Publishing.
-                          Available:{' '}
-                          <a
-                            href="https://www.nngroup.com/books/mobile-usability/"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-600 hover:text-blue-800 underline"
-                          >
-                            https://www.nngroup.com/books/mobile-usability/
-                          </a>
-                        </p>
-
-                        <p>
-                          Tullis, T., & Albert, B. (2013).{' '}
-                          <em>
-                            Measuring the user experience: Collecting,
-                            analyzing, and presenting usability metrics
-                          </em>
-                          . Morgan Kaufmann.
-                        </p>
-
-                        <p>
-                          Wang, X., Wei, J., Schuurmans, D., Le, Q., Chi, E.,
-                          Narang, S., ... & Zhou, D. (2023). Self-consistency
-                          improves chain of thought reasoning in language
-                          models.{' '}
-                          <em>
-                            International Conference on Learning Representations
-                          </em>
-                          . Available:{' '}
-                          <a
-                            href="https://arxiv.org/abs/2203.11171"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-600 hover:text-blue-800 underline"
-                          >
-                            https://arxiv.org/abs/2203.11171
-                          </a>
-                        </p>
-
-                        <p>
-                          Wei, J., Wang, X., Schuurmans, D., Bosma, M., Chi, E.,
-                          Le, Q. V., ... & Zhou, D. (2022). Chain-of-thought
-                          prompting elicits reasoning in large language models.{' '}
-                          <em>
-                            Advances in Neural Information Processing Systems
-                          </em>
-                          , 35, 24824-24837. Available:{' '}
-                          <a
-                            href="https://arxiv.org/abs/2201.11903"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-600 hover:text-blue-800 underline"
-                          >
-                            https://arxiv.org/abs/2201.11903
-                          </a>
+                          On iOS: <br />
+                          1. open in Safari, <br />
+                          2. click the share button and <br />
+                          3. select <b>Add to Home Screen</b>.
+                          <br />I THINK android works but I need to do QA.
                         </p>
                       </div>
                     </div>
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
-            <br />
-            {/*Want to use Prompt Composer as an App? */}
-            <Accordion type="single" collapsible-classname="w-full">
-              <AccordionItem
-                value="research-documentation"
-                className={promptComposerStyles.researchDocumentation}
-              >
-                <AccordionTrigger
-                  className={promptComposerStyles.categoryButton}
-                >
-                  🧩Want to use Prompt-Composer as an app?
-                </AccordionTrigger>
-                <AccordionContent>
-                  <div className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed space-y-4">
-                    <div>
-                      <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">
-                        Now you can!
-                      </h4>
-                      <p>
-                        On iOS: <br />
-                        1. open in Safari, <br />
-                        2. click the share button and <br />
-                        3. select <b>Add to Home Screen</b>.
-                        <br />I THINK android works but I need to do QA.
-                      </p>
-                    </div>
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
-          </div>
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+            </div>
+          </CardContent>
         </Card>
       </div>
     </div>
