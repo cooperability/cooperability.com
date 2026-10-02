@@ -17,6 +17,9 @@ interface Viewport {
   maxImag: number
 }
 
+// Shared by double-click and double-tap so the two gestures cannot drift apart.
+const DOUBLE_CLICK_ZOOM = 3
+
 const MandelbrotExplorer = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const offscreenCanvasRef = useRef<HTMLCanvasElement | null>(null)
@@ -252,7 +255,7 @@ const MandelbrotExplorer = () => {
 
   /**
    * Handles double-click to zoom into the Mandelbrot set.
-   * Zooms 2× centered on the clicked point, revealing more detail.
+   * Zooms 3× centered on the clicked point, revealing more detail.
    */
   const handleDoubleClick = useCallback(
     (event: React.MouseEvent<HTMLCanvasElement>) => {
@@ -282,16 +285,18 @@ const MandelbrotExplorer = () => {
         viewport.maxImag
       )
 
-      // Create new viewport: 2× zoom centered on click point
-      // (divide range by 2, so we're zooming in by 2×)
+      // Create new viewport: 3× zoom centered on click point
+      // (divide range by 3, so each half-width is range / 6)
       const rangeReal = viewport.maxReal - viewport.minReal
       const rangeImag = viewport.maxImag - viewport.minImag
+      const halfReal = rangeReal / (2 * DOUBLE_CLICK_ZOOM)
+      const halfImag = rangeImag / (2 * DOUBLE_CLICK_ZOOM)
 
       setViewport({
-        minReal: clickReal - rangeReal / 4,
-        maxReal: clickReal + rangeReal / 4,
-        minImag: clickImag - rangeImag / 4,
-        maxImag: clickImag + rangeImag / 4,
+        minReal: clickReal - halfReal,
+        maxReal: clickReal + halfReal,
+        minImag: clickImag - halfImag,
+        maxImag: clickImag + halfImag,
       })
     },
     [viewport, canvasSize, isRendering]
@@ -339,12 +344,14 @@ const MandelbrotExplorer = () => {
 
           const rangeReal = viewport.maxReal - viewport.minReal
           const rangeImag = viewport.maxImag - viewport.minImag
+          const halfReal = rangeReal / (2 * DOUBLE_CLICK_ZOOM)
+          const halfImag = rangeImag / (2 * DOUBLE_CLICK_ZOOM)
 
           setViewport({
-            minReal: clickReal - rangeReal / 4,
-            maxReal: clickReal + rangeReal / 4,
-            minImag: clickImag - rangeImag / 4,
-            maxImag: clickImag + rangeImag / 4,
+            minReal: clickReal - halfReal,
+            maxReal: clickReal + halfReal,
+            minImag: clickImag - halfImag,
+            maxImag: clickImag + halfImag,
           })
 
           setLastTapTime(0) // Reset to prevent triple-tap
@@ -511,8 +518,8 @@ const MandelbrotExplorer = () => {
         <h1 className={styles.title}>Mandelbrot Explorer</h1>
         <div className={styles.instructions}>
           <p>
-            <b>Click or tap</b> + <b>drag</b> to pan, <b>double-click</b> to
-            zoom 2×.
+            <b>Click or tap</b> + <b>drag</b> to pan, <b>double-click</b> or{' '}
+            <b>double-tap</b> to zoom 3×.
           </p>
         </div>
       </div>

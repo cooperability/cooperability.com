@@ -70,13 +70,13 @@ mandelbrot-explorer/
 ### Desktop Interaction
 
 - **Click-drag panning**: Smooth viewport translation without re-rendering
-- **Double-click zoom**: 2× zoom centered on clicked point
+- **Double-click zoom**: 3× zoom centered on clicked point
 - **Mouse cursor feedback**: Grab/grabbing states, wait during render
 
 ### Mobile Interaction ✓ NEW
 
 - **Single-finger drag**: Pan around the fractal
-- **Double-tap zoom**: 2× zoom at tap location (300ms detection window)
+- **Double-tap zoom**: 3× zoom at tap location (300ms detection window)
 - **Pinch-to-zoom**: Two-finger gesture for variable zoom in/out
 - **Touch-optimized**: Prevents default scrolling, responsive to touch velocity
 
@@ -228,10 +228,10 @@ function MyPage() {
 ### Demo Flow
 
 1. **Initial render**: "The classic Mandelbrot - main cardioid and circular bulb"
-2. **Click boundary**: "2× zoom centered on that point"
+2. **Click boundary**: "3× zoom centered on that point"
 3. **Show detail**: "Self-similar patterns at different scales - this continues infinitely"
 4. **Iteration control**: "Higher iterations reveal finer detail but take longer"
-5. **Mobile demo**: "Pinch to zoom, double-tap for fixed 2× zoom, drag to pan smoothly"
+5. **Mobile demo**: "Pinch to zoom, double-tap for fixed 3× zoom, drag to pan smoothly"
 
 ### Code Walkthrough Highlights
 
