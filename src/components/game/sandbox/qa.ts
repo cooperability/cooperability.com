@@ -11,6 +11,7 @@ import {
 import {
   BOSS_HINT,
   HINT_AFTER,
+  MAX_WIDTH,
   SCREEN_DELAY,
   SQUARE,
   WIDTH,
@@ -33,7 +34,15 @@ import { PAL } from './pixels'
 import { SANDBOX_MAP, TILE } from './level'
 import { PLAYER_H } from './player'
 import { debugLabel, drawSnake, SNAKE, type Snake } from './snake'
-import { dripAt, dripsFor, dripSpan, titleLayout } from './title'
+import {
+  dripAt,
+  dripsFor,
+  dripSpan,
+  drawTitle,
+  SUPPORT,
+  supportWidth,
+  titleLayout,
+} from './title'
 import { INVULN, MAX_HP, PICKUP, World } from './world'
 
 // The beta-test script. Each scenario plays a fresh world through real
@@ -300,7 +309,7 @@ export const SCENARIOS: Scenario[] = [
   {
     name: 'title: every drip runs all the way down, never up, at its own pace',
     run() {
-      for (const viewW of [WIDTH, SQUARE]) {
+      for (const viewW of [WIDTH, SQUARE, MAX_WIDTH]) {
         const { s } = titleLayout(viewW)
         const drips = dripsFor(s)
         if (drips.length < 8) return `${drips.length} drips at ${viewW} wide`
@@ -308,6 +317,9 @@ export const SCENARIOS: Scenario[] = [
         if (paces.size < drips.length / 2) return 'the drips share one pace'
         for (const d of drips) {
           const { top, end } = dripSpan(d, viewW)
+          // No trail longer than the drop from the letters' foot to the pool.
+          if (end - top >= 4 * s)
+            return `a drip at ${d.x},${d.y} runs ${(end - top) / s} font pixels`
           let last: ReturnType<typeof dripAt> = null
           let reached = false
           for (let t = 0; t < 4000; t++) {
@@ -1048,6 +1060,29 @@ export const SCENARIOS: Scenario[] = [
     },
   },
   {
+    name: 'title: the controller and iPhone lines fit the portrait view',
+    run() {
+      const wide = SUPPORT.find((line) => supportWidth(line) > SQUARE - 8)
+      return wide ? `"${wide.text}" is wider than the portrait view` : null
+    },
+  },
+  {
+    name: 'boss: a view as wide as a desktop allows stays on the map in the fight',
+    run() {
+      const w = atBoss()
+      w.viewW = MAX_WIDTH
+      if (!until(w, (b) => b.state === 'idle')) return 'never woke'
+      for (let i = 0; i < 600; i++) {
+        w.hp = MAX_HP
+        play(w, 1)
+        const right = Math.round(w.camX) + w.viewW
+        if (right > w.level.pixelWidth)
+          return `the view reaches ${right} of ${w.level.pixelWidth}`
+      }
+      return null
+    },
+  },
+  {
     name: 'boss: three deaths in a row point at the hall candle, and a win clears it',
     run() {
       const g = bossRun()
@@ -1300,17 +1335,31 @@ function layoutChecks(canvas: HTMLCanvasElement, root: HTMLElement): Check[] {
     c.left >= -1 && c.top >= -1 && c.right <= vw + 1 && c.bottom <= vh + 1,
     `${Math.round(c.width)}x${Math.round(c.height)} at ${Math.round(c.left)},${Math.round(c.top)} in ${vw}x${vh}`
   )
-  // Whole in CSS pixels, or in device pixels for the portrait square.
+  // Square everywhere. On a desktop the picture meets every edge of the
+  // window, short of the bars past 2.4:1 or narrower than a square. On the
+  // handheld, whole in CSS pixels, or in device pixels for the portrait
+  // square.
   const scale = c.width / canvas.width
   const device = scale * window.devicePixelRatio
-  add(
-    'pixels are square and whole where there is room',
-    Math.abs(c.height / HEIGHT - scale) < 0.01 &&
-      (scale < 2 ||
-        Math.abs(scale - Math.round(scale)) < 0.01 ||
-        Math.abs(device - Math.round(device)) < 0.01),
-    `scale ${scale.toFixed(2)}, ${device.toFixed(2)} device pixels`
-  )
+  const square = Math.abs(c.height / HEIGHT - scale) / scale < 0.01
+  if (root.dataset.mode === 'external') {
+    const across = c.left <= 1 && c.right >= vw - 1
+    const down = c.top <= 1 && c.bottom >= vh - 1
+    const capped = canvas.width === MAX_WIDTH || canvas.width === SQUARE
+    add(
+      'the screen fills the window, with square pixels',
+      square && (capped ? across || down : across && down),
+      `${Math.round(c.width)}x${Math.round(c.height)} in ${vw}x${vh}, view ${canvas.width}, scale ${scale.toFixed(2)}`
+    )
+  } else
+    add(
+      'pixels are square and whole where there is room',
+      square &&
+        (scale < 2 ||
+          Math.abs(scale - Math.round(scale)) < 0.01 ||
+          Math.abs(device - Math.round(device)) < 0.01),
+      `scale ${scale.toFixed(2)}, ${device.toFixed(2)} device pixels`
+    )
   add(
     'no horizontal scroll',
     document.documentElement.scrollWidth <= vw + 1,
@@ -1544,7 +1593,26 @@ function screenChecks(): Check[] {
     play(g, 1, {}, { a: true })
   }
   const before = ember.slice(0, HINT_AFTER - 1)
+  // The title's support lines, in bone, under PRESS START, at both widths.
+  const bone = parseInt(PAL.b.slice(1), 16)
+  const support = [SQUARE, WIDTH].map((view) => {
+    const t = document.createElement('canvas')
+    t.width = view
+    t.height = HEIGHT
+    const tctx = t.getContext('2d', { willReadFrequently: true })!
+    drawTitle(tctx, 0, view, HEIGHT)
+    const d = tctx.getImageData(0, titleLayout(view).press + 16, view, 24).data
+    let n = 0
+    for (let i = 0; i < d.length; i += 4)
+      if (((d[i] << 16) | (d[i + 1] << 8) | d[i + 2]) === bone) n++
+    return n
+  })
   return [
+    {
+      name: 'the title names controller and iPhone support, square and wide',
+      pass: support.every((n) => n > 0),
+      detail: `bone pixels under PRESS START: ${support.join(', ')}`,
+    },
     {
       name: 'the defeat screen shows the candle hint from the third boss death',
       pass:

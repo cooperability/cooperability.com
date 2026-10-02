@@ -176,7 +176,11 @@ export function createRenderer(): Renderer {
   const vignettes = new Map<number, Canvas>()
   const vignetteOf = (viewW: number) => {
     let v = vignettes.get(viewW)
-    if (!v) vignettes.set(viewW, (v = bakeVignette(viewW)))
+    if (!v) {
+      // A window dragged wider bakes one per width: keep only the latest few.
+      if (vignettes.size > 3) vignettes.clear()
+      vignettes.set(viewW, (v = bakeVignette(viewW)))
+    }
     return v
   }
   const tilesOf = (world: World) => {
@@ -233,8 +237,9 @@ export function createRenderer(): Renderer {
       world.level.pixelHeight - VIEW_H,
       viewW
     )
+    if (layer.width !== viewW) layer.width = viewW
     scene.imageSmoothingEnabled = false
-    scene.clearRect(0, 0, VIEW_W, VIEW_H)
+    scene.clearRect(0, 0, viewW, VIEW_H)
     scene.drawImage(tileArt, ox, oy)
 
     scene.save()
@@ -373,7 +378,7 @@ export function createRenderer(): Renderer {
           )
       }
     }
-    back.begin(LIGHT.backdrop)
+    back.begin(LIGHT.backdrop, viewW)
     // The moon lights the sky alone.
     back.light(
       MOON.x + viewW - VIEW_W,
@@ -384,7 +389,7 @@ export function createRenderer(): Renderer {
     )
     cut(back)
     back.end(ctx)
-    fore.begin(LIGHT.dark)
+    fore.begin(LIGHT.dark, viewW)
     cut(fore)
     fore.end(scene, 'source-atop')
     ctx.drawImage(layer, 0, 0)

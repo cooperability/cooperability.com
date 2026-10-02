@@ -1,5 +1,5 @@
 import type { ButtonSet, Frame } from '../input'
-import { VIEW_H, VIEW_W } from './background'
+import { MAX_VIEW_W, VIEW_H, VIEW_W } from './background'
 import { Boss, shotBox, WORD_W } from './boss'
 import { Scarf, type HeroView } from './hero'
 import { Level, SANDBOX_MAP, TILE } from './level'
@@ -148,8 +148,10 @@ export class World {
     this.total = snakes.length
     const retry = !!opts.atBoss && !!this.level.sill
     this.snakes = retry ? [] : snakes
-    this.motes = Array.from({ length: 48 }, (_, i) => ({
-      x: hash(i, 1, 40) * VIEW_W,
+    // Across the widest view, as thick as 48 across the usual one.
+    const motes = Math.round((48 * MAX_VIEW_W) / VIEW_W)
+    this.motes = Array.from({ length: motes }, (_, i) => ({
+      x: hash(i, 1, 40) * MAX_VIEW_W,
       y: hash(i, 2, 40) * VIEW_H,
       ember: hash(i, 3, 40) > 0.82,
       phase: hash(i, 4, 40) * 6.28,
@@ -195,7 +197,7 @@ export class World {
       m.x += Math.sin(m.phase) * 0.2 + (m.ember ? 0 : 0.1)
       if (m.y > VIEW_H) m.y -= VIEW_H
       if (m.y < 0) m.y += VIEW_H
-      if (m.x > VIEW_W) m.x -= VIEW_W
+      if (m.x > MAX_VIEW_W) m.x -= MAX_VIEW_W
     }
   }
 
@@ -647,7 +649,9 @@ export class World {
     const fighting = arena && this.boss?.awake
     let lo = 0
     let hi = this.level.pixelWidth - this.viewW
-    if (arena && fighting) lo = arena.left - TILE
+    // A view wider than the hall shows more of the belfry, never the void
+    // past the map's right edge.
+    if (arena && fighting) lo = Math.min(arena.left - TILE, hi)
     else if (arena) hi = Math.min(hi, arena.left - this.viewW)
     const targetY = fighting ? arena.top - 8 : cy - VIEW_H / 2
     // Vertical deadzone, so small hops do not bob the view.

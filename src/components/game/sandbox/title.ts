@@ -1,10 +1,12 @@
-import { drawText, glyphRows } from './font'
+import { WIDE_VIEW } from './background'
+import { drawText, glyphRows, glyphWidth } from './font'
 import {
   bakePixels,
   context,
   dither,
   hash,
   makeCanvas,
+  paintGrid,
   PAL,
   type Canvas,
 } from './pixels'
@@ -15,15 +17,41 @@ import {
 
 const TITLE = 'CANDLELIGHT'
 
+// What it plays on, under PRESS START, each line led by its icon.
+const PAD = [
+  '.bbbbbbbbb.',
+  'bbbbbbbbbbb',
+  'bb.bbbbb.bb',
+  'b...bbb.b.b',
+  'bb.bbbbb.bb',
+  'bbbb...bbbb',
+  '.bb.....bb.',
+]
+// Square corners, a dark screen and a home button, so it never reads as O.
+const PHONE = ['bbbbb', 'bsssb', 'bsssb', 'bsssb', 'bsssb', 'bbbbb', 'bb.bb']
+export const SUPPORT = [
+  { icon: PAD, text: 'CONTROLLER SUPPORTED' },
+  { icon: PHONE, text: 'PLAYS ON IPHONE' },
+]
+
+// A line's width in game pixels: its icon, a gap, and its text.
+export const supportWidth = ({ icon, text }: (typeof SUPPORT)[number]) =>
+  icon[0].length + 3 + [...text].reduce((w, ch) => w + glyphWidth(ch) + 1, -1)
+
 // A drip only ever moves down: a bead swells at the lip, runs down to the
 // stroke below or the pool, then its tail lets go and drains in after it.
-// Each runs at its own pace, so some are faster than others.
+// Each runs at its own pace, so some are faster than others. Off the
+// letters' bottom row a drip runs on to the pool. Off a higher stroke it
+// gives out a few font pixels down and hangs as a bead, unless a stroke
+// below catches it first.
 export type Drip = {
   // Font-pixel cell the drip hangs from.
   x: number
   y: number
   // Font row of the stroke it runs onto, or null for the pool.
   stop: number | null
+  // Font pixels it can run before it gives out, or null to run all the way.
+  reach: number | null
   // Font pixels per update.
   speed: number
   // Updates the bead swells for, and rests for once drained.
@@ -82,6 +110,7 @@ export function dripsFor(scale: number): Drip[] {
         x,
         y,
         stop,
+        reach: y === 6 ? null : 2 + Math.floor(hash(x, y, 39) * 2),
         speed: 0.015 + hash(x, y, 32) * 0.06,
         swell: 40 + Math.floor(hash(x, y, 33) * 80),
         rest: 30 + Math.floor(hash(x, y, 35) * 200),
@@ -182,19 +211,23 @@ function bakeGlow(radius: number): Canvas {
 // Where the title sits in a view: its scale, the top left of its letters,
 // and the line of the pool under them.
 export function titleLayout(viewW: number) {
-  const s = viewW >= 300 ? 4 : 2
-  const y0 = viewW >= 300 ? 44 : 56
+  const s = viewW >= WIDE_VIEW ? 4 : 2
+  const y0 = viewW >= WIDE_VIEW ? 44 : 56
   const x0 = Math.round((viewW - letterforms().width * s) / 2)
-  return { s, x0, y0, pool: y0 + 7 * s + 6 * s }
+  const pool = y0 + 7 * s + 4 * s
+  // PRESS START's top, with the support lines under it.
+  const press = pool + (viewW >= WIDE_VIEW ? 34 : 30)
+  return { s, x0, y0, pool, press }
 }
 
-// The lip a drip hangs from and what it runs onto, in screen pixels.
+// The lip a drip hangs from and where it ends, in screen pixels, and
+// whether it ends on wax or gives out in the air.
 export function dripSpan(d: Drip, viewW: number) {
   const { s, y0, pool } = titleLayout(viewW)
-  return {
-    top: y0 + (d.y + 1) * s,
-    end: d.stop === null ? pool - 1 : y0 + d.stop * s,
-  }
+  const top = y0 + (d.y + 1) * s
+  const land = d.stop === null ? pool - 1 : y0 + d.stop * s
+  const end = d.reach === null ? land : Math.min(land, top + d.reach * s)
+  return { top, end, lands: end === land }
 }
 
 export function drawTitle(
@@ -205,7 +238,7 @@ export function drawTitle(
 ) {
   ctx.fillStyle = PAL.k
   ctx.fillRect(0, 0, viewW, height)
-  const { s, x0, y0, pool } = titleLayout(viewW)
+  const { s, x0, y0, pool, press } = titleLayout(viewW)
   const c = cast(s)
 
   // The puddle the drips feed: a low, lumpy line of wax.
@@ -223,7 +256,7 @@ export function drawTitle(
   // Each drip swells, runs down, and drains, never back up.
   const thick = s >= 4 ? 2 : 1
   for (const d of c.drips) {
-    const { top, end } = dripSpan(d, viewW)
+    const { top, end, lands } = dripSpan(d, viewW)
     const at = dripAt(d, time, top, end, s)
     if (!at) continue
     // A fresh spot along the stroke each time round.
@@ -239,8 +272,8 @@ export function drawTitle(
       ctx.fillRect(x + thick - 1, at.from, 1, len)
     }
     // The bead at the head until it meets the stroke or the pool, then a
-    // ripple where it lands.
-    if (at.beading && at.landed < 0) {
+    // ripple where it lands. One that gives out keeps its bead.
+    if (!lands || (at.beading && at.landed < 0)) {
       ctx.fillStyle = PAL.B
       ctx.fillRect(x, at.to, thick + 1, 2)
       ctx.fillStyle = PAL.y
@@ -284,11 +317,12 @@ export function drawTitle(
   ctx.globalCompositeOperation = 'source-over'
 
   if ((time >> 5) % 2 === 0)
-    drawText(
-      ctx,
-      'PRESS START',
-      viewW / 2,
-      pool + (viewW >= 300 ? 34 : 30),
-      PAL.B
-    )
+    drawText(ctx, 'PRESS START', viewW / 2, press, PAL.B)
+
+  SUPPORT.forEach((line, i) => {
+    const x = Math.round((viewW - supportWidth(line)) / 2)
+    const y = press + 18 + i * 11
+    paintGrid(ctx, line.icon, x, y)
+    drawText(ctx, line.text, x + line.icon[0].length + 3, y, PAL.b, 1, 'left')
+  })
 }

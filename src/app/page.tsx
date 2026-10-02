@@ -118,6 +118,11 @@ export default function Home() {
             Try ♾️ Mandelbrot Explorer →
           </div>
         </a>
+        <a href="/demos/candlelight" className={styles.candlelightLink}>
+          <div className={styles.promptComposerWrapper}>
+            Try 🎮 Candlelight →
+          </div>
+        </a>
 
         <QuoteBox initialQuote={initialQuote} />
       </section>

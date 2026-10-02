@@ -15,6 +15,7 @@ import { startLoop } from './loop'
 import {
   createCandlelight,
   HEIGHT,
+  MAX_WIDTH,
   SQUARE,
   WIDTH,
   type Candlelight,
@@ -324,20 +325,36 @@ export default function Handheld() {
       }
     }
 
-    // Whole-number scaling keeps every game pixel the same size. Below 2x
+    // On a desktop the picture fills the window: its height sets the scale,
+    // and the view widens or narrows to the window's shape, the last fraction
+    // of a game pixel stretched so it meets every edge. On the handheld,
+    // whole-number scaling keeps every game pixel the same size. Below 2x
     // that would leave a postage stamp, so small screens fit fractionally.
     // The portrait handheld shows a square view that fills the phone's
     // width, scaled to whole device pixels.
     const resize = new ResizeObserver(([entry]) => {
       const { width, height } = entry.contentRect
-      const square =
-        root.dataset.mode === 'touch' && window.innerHeight > window.innerWidth
-      const view = square ? SQUARE : WIDTH
+      if (!width || !height) return
+      const external = root.dataset.mode === 'external'
+      const square = !external && window.innerHeight > window.innerWidth
+      const fill = Math.round(width / (height / HEIGHT))
+      const view = external
+        ? Math.max(SQUARE, Math.min(MAX_WIDTH, fill))
+        : square
+          ? SQUARE
+          : WIDTH
       if (canvas.width !== view) {
         canvas.width = view
         game.view = view
       }
       const fit = Math.min(width / view, height / HEIGHT)
+      if (external) {
+        // Past 2.4:1, or narrower than a square, the long sides keep bars.
+        const edge = view === fill
+        canvas.style.width = `${edge ? width : view * fit}px`
+        canvas.style.height = `${edge ? height : HEIGHT * fit}px`
+        return
+      }
       const dpr = window.devicePixelRatio || 1
       const scale = square
         ? Math.floor(fit * dpr) / dpr

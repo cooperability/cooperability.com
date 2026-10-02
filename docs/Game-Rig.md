@@ -56,10 +56,12 @@ input switches to full screen while a touch anywhere switches back.
   Only the gaps between D-pad arms read as diagonals, and only the gaps
   between face buttons press two. Every fresh press bounces its cap on the
   frame it lands, and a lift and retap between two updates still counts.
-- **Full screen.** The canvas fills the window at the largest whole-number
-  scale. The overlay in the corner lights each key as the game receives it,
-  from any source, so a controller shows up there too. F toggles browser
-  fullscreen.
+- **Full screen.** The picture meets every edge of the window. Its 180-pixel
+  height fills the window top to bottom, and the view widens or narrows to
+  the window's shape (see Screen). The exit link, the Keys button and the key
+  overlay sit over the picture's bottom corners. The overlay lights each key
+  as the game receives it, from any source, so a controller shows up there
+  too. F toggles browser fullscreen.
 
 ## Input
 
@@ -230,9 +232,22 @@ flame white while coiled, the tell that a lunge is coming.
 
 ## Screen
 
-The canvas is 320×180, which scales 6× to 1080p and 8× to 1440p. It scales by
-whole numbers when 2× or more fits, and fits fractionally below that. The
-portrait handheld narrows it to 180×180 (see Layout).
+The view is always 180 game pixels tall. Its width depends on where it runs:
+
+| Where                | View width                     | Scale                                    |
+| -------------------- | ------------------------------ | ---------------------------------------- |
+| Handheld, landscape  | 320                            | Whole numbers from 2×, fractional below  |
+| Handheld, portrait   | 180                            | Whole device pixels, filling the width   |
+| Keyboard, controller | 180 to 432, the window's shape | The window's height over 180, fractional |
+
+On a desktop the width is the window's width over that scale, so the picture
+meets every edge, the last fraction of a game pixel stretched to fit. Past
+2.4:1 the view stops at 432 and the sides keep bars, and narrower than a
+square it stops at 180 with bars top and bottom. The darkness layers and the
+scene buffer follow the view's width, and the sky is baked 432 wide and drawn
+against the right edge, so the moon keeps its place. In the boss fight a view
+wider than the hall shows more of the belfry, never past the map's edge.
+Views from 268 wide (`WIDE_VIEW`) take the big title and end-screen text.
 
 ## Home screen
 
@@ -256,10 +271,13 @@ The game opens on its title, and a launch from the home screen opens there
 too unless a run is still live in memory. The title is its own screen, with
 no world drawn behind it: CANDLELIGHT cast in bone wax on black, each letter
 a candle with a flickering wick, and a blinking PRESS START. Wax drips swell
-under the strokes and run straight down to the stroke below or the pool, each
-at its own pace, then the tail drains in after them. Nothing ever moves up
-(`dripAt` in `title.ts`). Any button
-but select starts. The install steps live in the select menu.
+under the strokes and run straight down, each at its own pace, then the tail
+drains in after them. Nothing ever moves up (`dripAt` in `title.ts`). Drips
+off the letters' foot run to the pool 4 font pixels below. Drips off higher
+strokes give out 2 or 3 font pixels down and hang as a bead, unless a stroke
+below catches them first. Under PRESS START two lines, each with a pixel
+icon, say CONTROLLER SUPPORTED and PLAYS ON IPHONE. Any button but select
+starts. The install steps live in the select menu.
 
 A run ends on one of two screens, timed by `ENDING` in `ending.ts`. The world
 holds for half a second, the transition takes a second, and the word fades

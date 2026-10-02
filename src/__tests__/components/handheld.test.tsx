@@ -184,6 +184,35 @@ describe('Handheld', () => {
     delete navigator.vibrate
   })
 
+  it('fills a desktop window edge to edge, the view taking its shape', () => {
+    setTouchPoints(0)
+    let fire = (width: number, height: number) => {
+      void [width, height]
+    }
+    window.ResizeObserver = class {
+      constructor(callback: ResizeObserverCallback) {
+        fire = (width, height) =>
+          callback(
+            [{ contentRect: { width, height } } as ResizeObserverEntry],
+            this as unknown as ResizeObserver
+          )
+      }
+      observe = noop
+      disconnect = noop
+    } as unknown as typeof ResizeObserver
+    render(<Handheld />)
+    const canvas = screen.getByRole('img') as HTMLCanvasElement
+    const size = () => [canvas.width, canvas.style.width, canvas.style.height]
+    // 180 game pixels tall in 950: 364 across fill 1920.
+    act(() => fire(1920, 950))
+    expect(size()).toEqual([364, '1920px', '950px'])
+    act(() => fire(1440, 900))
+    expect(size()).toEqual([288, '1440px', '900px'])
+    // Past 2.4:1 the view stops widening, and the sides keep bars.
+    act(() => fire(3440, 1000))
+    expect(size()).toEqual([432, '2400px', '1000px'])
+  })
+
   it('takes the site chrome out of reach while the game is up', () => {
     const header = document.createElement('header')
     document.body.prepend(header)

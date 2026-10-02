@@ -23,13 +23,15 @@ export class Darkness {
   readonly canvas = makeCanvas(VIEW_W, VIEW_H)
   private ctx = context(this.canvas)
 
-  begin(color: string) {
+  // `width` is the view's: the layer follows it as the window changes shape.
+  begin(color: string, width: number) {
+    if (this.canvas.width !== width) this.canvas.width = width
     const ctx = this.ctx
     ctx.globalCompositeOperation = 'source-over'
     ctx.globalAlpha = 1
-    ctx.clearRect(0, 0, VIEW_W, VIEW_H)
+    ctx.clearRect(0, 0, width, VIEW_H)
     ctx.fillStyle = color
-    ctx.fillRect(0, 0, VIEW_W, VIEW_H)
+    ctx.fillRect(0, 0, width, VIEW_H)
     ctx.globalCompositeOperation = 'destination-out'
   }
 

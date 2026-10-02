@@ -1,5 +1,5 @@
 import type { Frame } from '../input'
-import { VIEW_H, VIEW_W } from './background'
+import { MAX_VIEW_W, VIEW_H, VIEW_W } from './background'
 import { drawDefeat, drawVictory, ENDING } from './ending'
 import { drawText } from './font'
 import { SANDBOX_MAP } from './level'
@@ -9,6 +9,8 @@ import { drawTitle } from './title'
 import { World } from './world'
 
 export const WIDTH = VIEW_W
+// The widest view, for a desktop window up to 2.4:1.
+export const MAX_WIDTH = MAX_VIEW_W
 export const HEIGHT = VIEW_H
 
 export type Game = {
@@ -41,7 +43,9 @@ export type Candlelight = Game & {
   // The About panel, opened with select. The page draws it over the screen.
   readonly about: boolean
   closeAbout(): void
-  // Width of the view in game pixels: WIDTH, or SQUARE on a portrait phone.
+  // Width of the view in game pixels: WIDTH on the handheld, SQUARE on a
+  // portrait phone, and anything from SQUARE to MAX_WIDTH on a desktop,
+  // matching the window's shape.
   view: number
   // Hitbox boxes, for the beta script.
   debug: boolean
@@ -172,7 +176,7 @@ export function createCandlelight(): Candlelight {
       render.draw(ctx, world, { debug, hud: scene === 'play' })
       if (scene === 'play' && paused) {
         ctx.fillStyle = 'rgba(11,10,16,0.7)'
-        ctx.fillRect(0, 0, VIEW_W, VIEW_H)
+        ctx.fillRect(0, 0, view, VIEW_H)
         drawText(ctx, 'PAUSED', cx, VIEW_H / 2 - 4, PAL.B)
         return
       }

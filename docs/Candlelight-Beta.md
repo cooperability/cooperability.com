@@ -31,7 +31,10 @@ fresh worlds. The scenarios cover:
   hurt and naming itself as the cause, an idle player dying within a minute,
   sword and torch damage, cutting a thrown letter, the half-health rage,
   PEER PRESSURE reaching the walls, and dying at the boss rising on the sill
-- title drips that run all the way down at their own pace and never move up
+- title drips that run all the way down at their own pace, never move up,
+  and never run longer than the drop from the letters' foot to the pool
+- the title's controller and iPhone lines fitting the portrait view
+- a desktop-wide view staying on the map in the boss fight
 - a finger the browser stopped listing letting go of its button
 - torch sparks glowing through the dark
 - health candles: a torch lights one, walking in heals, a dark one or full
@@ -68,9 +71,12 @@ collects the in-page report:
 - light falloff on the foreground darkness layer: 20px ahead of the visor at
   least 0.9 of full brightness, 52px ahead at least 0.45, 20px behind and
   104px ahead 0.25 ± 0.05 (the ambient)
-- layout: the screen fits, pixels are square and whole (in device pixels for
-  the portrait square), no horizontal scroll, no link or button over the HUD,
-  touch diamonds at least 88px and clear of the screen
+- layout: the screen fits, pixels are square, on a desktop the screen meets
+  every edge of the window, on the handheld pixels are whole (in device
+  pixels for the portrait square), no horizontal scroll, no link or button
+  over the HUD, touch diamonds at least 88px and clear of the screen
+- the title's controller and iPhone lines drawn under PRESS START, square
+  and wide
 - every cap: on screen, clear of the picture, at least 44px, nothing on top
   of any of its pixels, and every pixel read by the shell as that button
   alone. In portrait, the diamonds within 16px of the edges, the screen a
@@ -125,8 +131,9 @@ Without `?qa`, none of it exists.
 Open every screenshot. For each, answer in the PR:
 
 - **Title.** Is CANDLELIGHT readable at a glance, on a phone too, and does
-  it read as dripping candle wax, every drip running down? Is it on black, with no world behind it,
-  and does PRESS START blink?
+  it read as dripping candle wax, every drip running down, none improbably
+  long? Is it on black, with no world behind it, and does PRESS START blink?
+  Do the gamepad and phone icons read as what they are?
 - **About.** Is the panel readable over the screen, with the pad still free?
 - **Play.** Is the room ahead of the visor clearly lit and the room behind
   dark? Is the foreground dark but still parseable, with the skyline as lit
