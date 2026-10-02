@@ -15,7 +15,6 @@ run of these items.
 - **Every shadcn colour token is an invalid colour.** `src/styles/global.css` defines `--primary`, `--muted`, `--input`, `--ring` and the rest as `oklch(...)`, and `tailwind.config.js` wraps each in `hsl(var(--x))`. The browser drops the declaration, so the default `Button` variant has no fill, checked `Checkbox`es have no fill, `text-muted-foreground` is not muted, and `focus-visible:ring-ring` draws no focus ring on any Radix control (a WCAG 2.4.7 problem). Fix: change the config to `var(--x)` (the values are already complete colours), then re-check every page in both themes. Prompt Composer v2 sidesteps it with explicit palette classes, marked in `ComponentSelector.tsx` and `AiReview.tsx`, which can go once this lands
 - Purge `.yarn/cache` from git history with `git filter-repo` (separate follow-up: the migration alone does not reclaim the 508 MB `.git`, which every clone and CI checkout pays for)
 - Precache `public/` assets too. The Serwist fix below scopes the manifest to `.next/static`, so icons and images are still fetched on demand, and there is no offline fallback route
-- Create `.editorconfig` for consistency
 - `commitlint` for commit messages
 - somehow clean up root repo with symlinks to subdirectories
 - SEO: audit what `site:cooperability.com` returns
@@ -26,6 +25,7 @@ run of these items.
 - ~~Remove `prop-types`~~ (done: Yarn's zero-install cache was already unused, and the pnpm migration deleted the Yarn machinery rather than preserving it)
 - ~~Convert the last JS files (`src/components/date.js`, `src/components/providers.js`) to TSX~~ (done: now `src/components/date.tsx` and `src/app/providers.tsx`)
 - ~~Serwist precaches `.next`-relative paths rather than the served `/_next/static/…` URLs~~ (done: confirmed every old entry 404'd, and that the manifest also swept in `.next/server` and `.next/cache`, neither of which is reachable over HTTP. Now 42 entries, all verified 200)
+- ~~Create `.editorconfig` for consistency~~ (done: root settings agree with Prettier, so `pnpm format` changes nothing because of it)
 - ~~Bump `tsconfig` `target` from `es5` to `ES2022`~~ (done: Next's SWC transpilation reads browserslist, not tsconfig `target`, and `lib` was already pinned to `esnext`, so the default-lib jump never applied. One real semantic change rides along: `target: ES2022` flips `useDefineForClassFields` to true, so class fields get `[[Define]]` rather than `[[Set]]` semantics. That is inert here, because `src/`, `components/` and `lib/` hold no class declarations. Pin it to `false` if one ever lands and the distinction matters)
 
 ## AI infrastructure (the main event)
