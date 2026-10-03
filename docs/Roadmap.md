@@ -12,7 +12,7 @@ run of these items.
 
 ## Quick wins / hygiene
 
-- **Every shadcn colour token is an invalid colour.** `src/styles/global.css` defines `--primary`, `--muted`, `--input`, `--ring` and the rest as `oklch(...)`, and `tailwind.config.js` wraps each in `hsl(var(--x))`. The browser drops the declaration, so the default `Button` variant has no fill, checked `Checkbox`es have no fill, `text-muted-foreground` is not muted, and `focus-visible:ring-ring` draws no focus ring on any Radix control (a WCAG 2.4.7 problem). Fix: change the config to `var(--x)` (the values are already complete colours), then re-check every page in both themes. Prompt Composer v2 sidesteps it with explicit palette classes, marked in `ComponentSelector.tsx` and `AiReview.tsx`, which can go once this lands
+- **Every shadcn colour token is an invalid colour.** `src/styles/global.css` defines `--primary`, `--muted`, `--input`, `--ring` and the rest as `oklch(...)`, and the `@theme` block in the same file wraps each in `hsl(var(--x))`. The browser drops the declaration, so the default `Button` variant has no fill, checked `Checkbox`es have no fill, `text-muted-foreground` is not muted, and `focus-visible:ring-ring` draws no focus ring on any Radix control (a WCAG 2.4.7 problem). Fix: change the `@theme` entries to `var(--x)` (the values are already complete colours), then re-check every page in both themes. Prompt Composer v2 sidesteps it with explicit palette classes, marked in `ComponentSelector.tsx` and `AiReview.tsx`, which can go once this lands
 - Purge `.yarn/cache` from git history with `git filter-repo` (separate follow-up: the migration alone does not reclaim the 508 MB `.git`, which every clone and CI checkout pays for)
 - Precache `public/` assets too. The Serwist fix below scopes the manifest to `.next/static`, so icons and images are still fetched on demand, and there is no offline fallback route
 - `commitlint` for commit messages
@@ -49,7 +49,7 @@ run of these items.
 
 - Replace the `useResponsive` client boundary on `/resources` with CSS media queries. This is a live bug, not just an optimization: mobile gets the desktop layout until JS mounts. It also lets the page be fully server-rendered
 - Collapse the dual component tree: root `components/ui` + `lib/` vs `src/components` + `src/lib`, with `@/*` → `./*` resolving to root. Point `components.json` at `src/` and delete the duplication (this is the real fix for the "symlinks" TODO in Quick wins)
-- Upgrade Tailwind 3 → 4 (CSS-first config, faster engine), then audit `tailwind.config.js` and add `tw-animate-css` in place of `tailwindcss-animate` afterward
+- Replace `tailwindcss-animate`, a v3 plugin that Tailwind 4 still loads through `@plugin`, with `tw-animate-css`
 - Adopt `next/font` for self-hosted, layout-shift-free fonts
 - Reconsider `next-mdx-remote` vs. compile-time MDX now that RSC makes static MDX cheaper. Half done: `/resources/[slug]` uses `next-mdx-remote/rsc`, so no MDX compiler ships to the client, but `@next/mdx` compile-time MDX is still unexplored
 - ~~**Migrate Pages Router → App Router**~~ (done: see [App Router migration notes](#app-router-migration-notes))

@@ -479,7 +479,7 @@ npx shadcn-ui@latest add <component>
 **What happens:**
 
 1. Component files are generated in `components/ui/`
-2. Tailwind theme tokens are added to `tailwind.config.js` (if needed)
+2. Tailwind theme tokens are added to the `@theme` block in `src/styles/global.css` (if needed)
 3. Dependencies are automatically added to `package.json`
 
 **After adding:**
@@ -490,25 +490,18 @@ npx shadcn-ui@latest add <component>
 
 ### Tailwind Configuration
 
-Style tokens are defined in `tailwind.config.js` under `extend.colors`:
+Tailwind 4 has no JS config. Style tokens live in the `@theme` block of `src/styles/global.css`:
 
-```javascript
-/* eslint-disable @typescript-eslint/no-require-imports */
-module.exports = {
-  theme: {
-    extend: {
-      colors: {
-        // shadcn/ui tokens
-        border: 'hsl(var(--border))',
-        input: 'hsl(var(--input))',
-        // ... etc
-      },
-    },
-  },
+```css
+@theme {
+  /* shadcn/ui tokens */
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  /* ... etc */
 }
 ```
 
-**Note:** The ESLint disable comment is intentional - Tailwind's docs require CommonJS format (`module.exports`).
+`postcss.config.js` loads the one plugin, `@tailwindcss/postcss`.
 
 ---
 
@@ -640,7 +633,7 @@ Runs on PRs, pushes to main, weekly cron, and manual dispatch. See [Security Aud
 | `.prettierrc.json`   | Prettier configuration            |
 | `jest.config.js`     | Jest configuration                |
 | `jest.setup.js`      | Jest setup (imports jest-dom)     |
-| `tailwind.config.js` | Tailwind CSS configuration        |
+| `postcss.config.js`  | Loads `@tailwindcss/postcss`      |
 | `tsconfig.json`      | TypeScript configuration          |
 | `next.config.js`     | Next.js configuration             |
 | `vercel.json`        | Vercel deployment configuration   |
@@ -686,21 +679,13 @@ const isDark = theme === 'dark'
 
 **Causes & Fixes:**
 
-1. **`content` array missing paths:** Ensure `tailwind.config.js` includes all directories:
+1. **File not scanned:** Tailwind 4 detects sources automatically and skips anything gitignored. Add a missed path with `@source '<path>';` in `global.css`.
 
-   ```javascript
-   content: ['./src/**/*.{js,ts,jsx,tsx}', './components/**/*.{js,ts,jsx,tsx}']
-   ```
+2. **Missing import:** Verify `global.css` starts with `@import 'tailwindcss';`.
 
-2. **Missing directives:** Verify `global.css` contains:
+3. **`@apply` in a CSS module fails** with "Cannot apply unknown utility class": the module needs `@reference './global.css';` at the top, as `src/styles/utils.module.css` has.
 
-   ```css
-   @tailwind base;
-   @tailwind components;
-   @tailwind utilities;
-   ```
-
-3. **PostCSS conflict:** Modern Next.js handles Tailwind without `postcss.config.js`. Remove it if encountering issues.
+4. **PostCSS:** `postcss.config.js` must load `@tailwindcss/postcss`. Next.js does not run Tailwind 4 without it.
 
 ### MDX Component Integration
 
