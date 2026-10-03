@@ -15,7 +15,6 @@ These files MUST remain in root per tool/framework conventions:
 | `next-env.d.ts`          | Next.js type definitions (auto-generated) | ✅ Yes            |
 | `tsconfig.json`          | TypeScript base config                    | ✅ Yes            |
 | `tsconfig.tsbuildinfo`   | TypeScript build cache (auto-generated)   | ✅ Yes            |
-| `tailwind.config.js`     | Tailwind CSS config                       | ✅ Yes            |
 | `postcss.config.js`      | PostCSS config (Tailwind dependency)      | ✅ Yes            |
 | `eslint.config.mjs`      | ESLint configuration                      | ✅ Yes            |
 | `jest.config.js`         | Jest configuration                        | ✅ Yes            |

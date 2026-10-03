@@ -243,7 +243,7 @@ why, so a reader can tell load-bearing packages from incidental ones.
 | Package                                                                                                     | Role                                                                 |
 | ----------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
 | `next`, `react`, `react-dom`                                                                                | The framework and its renderer                                       |
-| `tailwindcss`, `tailwindcss-animate`, `@tailwindcss/typography`                                             | Styling: utility CSS, animation utilities, prose defaults            |
+| `tailwindcss`, `@tailwindcss/postcss`, `tailwindcss-animate`, `@tailwindcss/typography`                     | Styling: utility CSS, animation utilities, prose defaults            |
 | `@radix-ui/react-accordion`, `-checkbox`, `-label`, `-radio-group`, `-slot`, `-switch`, `-tabs`, `-tooltip` | Unstyled accessible primitives that shadcn/ui wraps                  |
 | `class-variance-authority`, `clsx`, `tailwind-merge`                                                        | Variant and className composition the shadcn components rely on      |
 | `@heroicons/react`, `lucide-react`                                                                          | Icon sets used in the chrome and the applets                         |
@@ -268,7 +268,7 @@ why, so a reader can tell load-bearing packages from incidental ones.
 | `serwist`, `@serwist/build`                                                                                                                                | Service worker and its precache manifest                                                  |
 | `@next/bundle-analyzer`, `webpack`                                                                                                                         | `pnpm analyze`. Both are webpack-only, which is why that one script opts out of Turbopack |
 | `husky`, `lint-staged`                                                                                                                                     | Git hooks                                                                                 |
-| `postcss`, `postcss-import`, `autoprefixer`                                                                                                                | CSS processing for Tailwind                                                               |
+| `postcss`                                                                                                                                                  | CSS processing for Tailwind                                                               |
 | `@swc/core`, `cross-env`                                                                                                                                   | Transform speed, and cross-platform env vars in scripts                                   |
 | `acorn`, `punycode`, `@types/punycode`                                                                                                                     | Pinned through overrides to keep deprecated transitives off the tree                      |
 
