@@ -47,6 +47,11 @@ allowBuilds:
   # changes mechanism and not behaviour. See docs/PNPM-MIGRATION.md.
   chromedriver: true
 
+  # Denied. jest-haste-map 30.5 depends on it, and its install script only
+  # compiles from source when no prebuilt binary matches. Every platform we
+  # run on (win32-x64 locally, linux-x64-glibc in CI and on Vercel) has one.
+  '@parcel/watcher': false
+
 # --- Version pinning carried over from Yarn `resolutions` ----------------
 # Semantics are identical to Yarn's field; only the name changed. An override
 # is not proof the advisory is gone: `pnpm audit` is the measurement.

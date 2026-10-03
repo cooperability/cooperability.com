@@ -111,6 +111,7 @@ describe('pnpm 11 contract', () => {
       sharp: 'true',
       'unrs-resolver': 'true',
       chromedriver: 'true',
+      '@parcel/watcher': 'false',
     })
   })
 
