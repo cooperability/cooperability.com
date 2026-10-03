@@ -18,7 +18,6 @@ run of these items.
 - `commitlint` for commit messages
 - somehow clean up root repo with symlinks to subdirectories
 - SEO: audit what `site:cooperability.com` returns
-- OC input fields block numbers but should pop up numpad on mobile
 - ~~pnpm 11 migration, in full~~ (done: see [PNPM Migration](PNPM-MIGRATION.md))
 - ~~Drop the leftover `ls -la && ls -la .yarn` debug prefix from the `build` script~~ (done)
 - ~~Fix `engines.yarn: ">=1.22.0"`~~ (done: the field is gone with the pnpm migration)
@@ -27,6 +26,7 @@ run of these items.
 - ~~Serwist precaches `.next`-relative paths rather than the served `/_next/static/…` URLs~~ (done: confirmed every old entry 404'd, and that the manifest also swept in `.next/server` and `.next/cache`, neither of which is reachable over HTTP. Now 42 entries, all verified 200)
 - ~~Create `.editorconfig` for consistency~~ (done: root settings agree with Prettier, so `pnpm format` changes nothing because of it)
 - ~~Bump `tsconfig` `target` from `es5` to `ES2022`~~ (done: Next's SWC transpilation reads browserslist, not tsconfig `target`, and `lib` was already pinned to `esnext`, so the default-lib jump never applied. One real semantic change rides along: `target: ES2022` flips `useDefineForClassFields` to true, so class fields get `[[Define]]` rather than `[[Set]]` semantics. That is inert here, because `src/`, `components/` and `lib/` hold no class declarations. Pin it to `false` if one ever lands and the distinction matters)
+- ~~OC input fields block numbers but should pop up numpad on mobile~~ (done: added `inputMode="decimal"` and a matching `pattern` to the dose inputs)
 
 ## AI infrastructure (the main event)
 
