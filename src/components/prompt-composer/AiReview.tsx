@@ -11,7 +11,7 @@ import { overallScore } from './review'
 import type { Availability, CritiqueState } from './useCritique'
 
 // Explicit colours: the theme's --primary is an oklch() value that
-// tailwind.config.js wraps in hsl(), so the default Button variant renders
+// the @theme block in global.css wraps in hsl(), so the default Button renders
 // with no fill. Tracked in docs/Roadmap.md rather than fixed here.
 const PRIMARY =
   'bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-400'

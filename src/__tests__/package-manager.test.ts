@@ -85,12 +85,13 @@ describe('pnpm 11 contract', () => {
     expect(exists('pnpm-lock.yaml')).toBe(true)
   })
 
-  it('keeps Tailwind 3 animation CSS, not Tailwind 4 at-rules', () => {
+  it('keeps Tailwind 4 at-rules, not Tailwind 3 directives', () => {
     const css = read('src/styles/global.css')
-    expect(css).not.toMatch(/@import\s+['"]tw-animate-css['"]/)
-    expect(css).not.toMatch(/@theme\b/)
-    expect(css).not.toMatch(/@custom-variant\b/)
-    expect(pkg.devDependencies?.['tw-animate-css']).toBeUndefined()
+    expect(pkg.dependencies?.tailwindcss).toMatch(/^\^4\./)
+    expect(css).toMatch(/@import\s+['"]tailwindcss['"]/)
+    expect(css).not.toMatch(/@tailwind\s+(base|components|utilities)/)
+    expect(read('postcss.config.js')).toMatch(/['"]@tailwindcss\/postcss['"]/)
+    expect(css).toMatch(/@plugin\s+['"]tailwindcss-animate['"]/)
     expect(pkg.dependencies?.['tailwindcss-animate']).toMatch(/^\^1\./)
   })
 

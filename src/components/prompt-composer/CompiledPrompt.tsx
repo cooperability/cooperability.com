@@ -52,6 +52,15 @@ export default function CompiledPrompt({
 
   return (
     <div className="space-y-3">
+      {/* First, not last: Tailwind 4's space-y puts margin below every child
+          but the last, and this one is out of flow. */}
+      <p role="status" className="sr-only">
+        {flash === 'copied'
+          ? 'Prompt copied to clipboard'
+          : flash === 'cleared'
+            ? 'Composer cleared'
+            : ''}
+      </p>
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h2 id="pc-compiled-label" className="text-lg font-bold">
           Compiled prompt
@@ -94,7 +103,7 @@ export default function CompiledPrompt({
         placeholder="Fill in a task above and your prompt assembles here. You can also type or paste a prompt directly."
         // Grows with its content where field-sizing is supported, so the whole
         // prompt is visible without scrolling inside the box.
-        className={`${textareaClass} min-h-[240px] font-mono [field-sizing:content]`}
+        className={`${textareaClass} min-h-[240px] font-mono field-sizing-content`}
       />
 
       {edited && (
@@ -116,13 +125,6 @@ export default function CompiledPrompt({
         </span>
       </p>
 
-      <p role="status" className="sr-only">
-        {flash === 'copied'
-          ? 'Prompt copied to clipboard'
-          : flash === 'cleared'
-            ? 'Composer cleared'
-            : ''}
-      </p>
       {flash === 'copy-failed' && (
         <p role="alert" className="text-sm text-red-600">
           Copy failed. Select the text and copy it manually.

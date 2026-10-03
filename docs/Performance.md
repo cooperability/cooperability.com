@@ -440,7 +440,7 @@ The `useResponsive` hook includes:
 
 ### Current Configuration
 
-**File:** `tailwind.config.js`
+**File:** the `@theme` block in `src/styles/global.css`
 
 Uses Tailwind's default breakpoints: `sm: 640px`, `md: 768px`, `lg: 1024px`, `xl: 1280px`, `2xl: 1536px`
 
@@ -448,16 +448,10 @@ Uses Tailwind's default breakpoints: `sm: 640px`, `md: 768px`, `lg: 1024px`, `xl
 
 If 525px is needed frequently in Tailwind classes:
 
-```javascript
-// tailwind.config.js
-module.exports = {
-  theme: {
-    extend: {
-      screens: {
-        xs: '525px', // Matches useResponsive threshold
-      },
-    },
-  },
+```css
+/* src/styles/global.css */
+@theme {
+  --breakpoint-xs: 525px; /* Matches useResponsive threshold */
 }
 ```
 
@@ -553,7 +547,7 @@ pnpm analyze  # Runs next build with ANALYZE=true
 
 - `src/hooks/useResponsive.ts` - JavaScript breakpoint detection
 - `src/styles/global.css` - CSS custom properties
-- `tailwind.config.js` - Tailwind breakpoints
+- `src/styles/global.css` `@theme` block - Tailwind breakpoints (defaults, none overridden)
 - This document - Patterns and best practices
 
 ---
