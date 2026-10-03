@@ -15,7 +15,6 @@
     "noEmit": true,
     "incremental": true,
     "jsx": "react-jsx",
-    "baseUrl": ".",
     "paths": {
       "@/*": ["./*"]
     },
