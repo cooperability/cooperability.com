@@ -127,6 +127,7 @@ describe('pnpm 11 contract', () => {
       socks: '^2.8.9',
       postcss: '^8.5.26',
       sharp: '^0.35.4',
+      'basic-ftp': '^6.2.1',
     }
     const workspace = parseTopLevelMap(read('pnpm-workspace.yaml'), 'overrides')
     const lockfile = parseTopLevelMap(read('pnpm-lock.yaml'), 'overrides')
