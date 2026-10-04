@@ -10,7 +10,7 @@ export default function QuoteBox({ initialQuote }: { initialQuote: string }) {
   const [quote, setQuote] = useState(initialQuote)
 
   return (
-    <div className="rounded-lg border border-current p-4 space-y-3">
+    <div className="rounded-lg border border-current p-4">
       <div className={styles.socialIconRow}>
         <b>This spoke to me:</b>
         <Button

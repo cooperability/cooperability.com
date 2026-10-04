@@ -32,7 +32,6 @@ const APP = [
 // CommonJS build/tool configs. Plain espree, Node globals, no React rules.
 const NODE_CJS = [
   'next.config.js',
-  'tailwind.config.js',
   'jest.config.js',
   'postcss.config.js',
   'next-sitemap.config.js',
