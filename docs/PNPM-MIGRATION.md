@@ -126,25 +126,22 @@ all 1,332 of them — could execute arbitrary code at install time, on developer
 machines and on every CI runner.
 
 pnpm denies all install scripts by default and takes an explicit allowlist.
-Four packages need theirs, each because it compiles or downloads a native
-binary:
+Three packages need theirs, each because it compiles a native binary:
 
-| Package         | Why                                         | Reach        |
-| --------------- | ------------------------------------------- | ------------ |
-| `@swc/core`     | Rust binary; the Jest transform             | dev + build  |
-| `sharp`         | libvips; Next.js image optimization         | build        |
-| `unrs-resolver` | Rust binary behind ESLint's import resolver | dev          |
-| `chromedriver`  | Downloads a browser driver over the network | **dev only** |
+| Package         | Why                                         | Reach       |
+| --------------- | ------------------------------------------- | ----------- |
+| `@swc/core`     | Rust binary; the Jest transform             | dev + build |
+| `sharp`         | libvips; Next.js image optimization         | build       |
+| `unrs-resolver` | Rust binary behind ESLint's import resolver | dev         |
 
 Everything else in the tree now gets **no install-time code execution**. This
 is the single largest supply-chain improvement in the migration and it came for
 free with the default.
 
-> **`chromedriver` is the first thing worth deleting.** It arrives via
-> `@axe-core/cli`, is used only by `pnpm access`, and fetches a browser driver
-> from the internet on every clean install. It is allowlisted purely so this
-> migration changed mechanism and not behaviour. If the accessibility audits
-> move to a Lighthouse-only flow, drop both the package and this entry.
+> **`chromedriver` is gone.** It arrived via `@axe-core/cli` and fetched a
+> browser driver from the internet on every clean install. The axe step now
+> runs through `@axe-core/playwright` on Playwright's Chromium, which needs no
+> driver, so both the package and its allowlist entry are deleted.
 
 ---
 
@@ -332,9 +329,10 @@ being dragged in transitively by `next`.
 
 The fix is the one §5 already teaches: override the versions so the old
 transitive copies cannot resolve. `pnpm audit` exits 0. The last moderate
-(`adm-zip` via `@axe-core/cli` → `chromedriver`) is forced to `^0.6.1`
-(GHSA-vwc7-r8mq-g2x9). That release published 2026-09-11. The 72-hour
-rule yields to a CVE patch.
+(`adm-zip` via `@axe-core/cli` → `chromedriver`) was forced to `^0.6.1`
+(GHSA-vwc7-r8mq-g2x9), a release published 2026-09-11, so the 72-hour rule
+yielded to a CVE patch. That override and its release-age exclusion left with
+`chromedriver`.
 
 ### Turbopack vs webpack — a trade-off, not a win
 
@@ -478,8 +476,8 @@ ids to GHSA ids (`auditConfig.ignoreCves` → `ignoreGhsas`).
 4. **Close leftover Dependabot PRs that still carry `yarn.lock`.** Those
    updates retarget `pnpm-lock.yaml` after this lands. Closing them here
    is intentional: the Yarn PnP tree is gone.
-5. **Drop `chromedriver`** if the accessibility flow can run on Lighthouse
-   alone (§4).
+5. **Drop `chromedriver`.** Done: axe runs through `@axe-core/playwright`
+   instead (§4).
 6. **Raise test coverage.** `collectCoverageFrom` is now set, so the report
    covers all 41 source modules rather than only the 14 some test happened to
    import -- untested files show as 0% instead of vanishing. No

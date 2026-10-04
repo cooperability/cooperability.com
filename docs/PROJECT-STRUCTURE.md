@@ -124,7 +124,7 @@ cooperability.com/
 ├── public/                     # Static assets
 ├── scripts/                    # ✨ Consolidated scripts
 │   ├── build-sw.mjs
-│   ├── create-report-dir.js   # ✨ Moved from root
+│   ├── a11y-audit.mjs         # axe + Lighthouse for `pnpm a11y`
 │   └── setup-env.sh           # ✨ Moved from root
 ├── src/                        # Application source
 ├── [config files]              # All configs in root (necessary)

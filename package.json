@@ -20,8 +20,8 @@
     "test:ci": "jest --ci --watchAll=false --coverage",
     "prepare": "husky",
     "analyze": "cross-env ANALYZE=true next build --webpack",
-    "access:run-audits": "cross-env NEXT_PUBLIC_AXE_FORCE_THEME='light' node scripts/create-report-dir.js && pnpm lint && axe http://localhost:3000 http://localhost:3000/demos http://localhost:3000/resources --tags wcag2aa --save ./accessibility-reports/axe-report.json --exit && lighthouse http://localhost:3000 --output json --output html --output-path ./accessibility-reports/lighthouse-report-home --only-categories=accessibility --chrome-flags='--headless --no-sandbox --disable-dev-shm-usage' && lighthouse http://localhost:3000/demos --output json --output html --output-path ./accessibility-reports/lighthouse-report-demos --only-categories=accessibility --chrome-flags='--headless --no-sandbox --disable-dev-shm-usage' && lighthouse http://localhost:3000/resources --output json --output html --output-path ./accessibility-reports/lighthouse-report-resources --only-categories=accessibility --chrome-flags='--headless --no-sandbox --disable-dev-shm-usage'",
-    "access": "start-server-and-test dev http://localhost:3000 access:run-audits",
+    "a11y:run-audits": "pnpm lint && node scripts/a11y-audit.mjs",
+    "a11y": "cross-env NEXT_PUBLIC_AXE_FORCE_THEME=light start-server-and-test dev http://localhost:3000 a11y:run-audits",
     "audit": "pnpm audit",
     "audit:critical": "pnpm audit --audit-level critical",
     "audit:fix": "pnpm audit --fix",
@@ -66,7 +66,7 @@
     "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
-    "@axe-core/cli": "^4.10.1",
+    "@axe-core/playwright": "^4.13.0",
     "@eslint/js": "^10",
     "@next/bundle-analyzer": "^16.3.6",
     "@next/eslint-plugin-next": "^16.3.6",
@@ -99,7 +99,7 @@
     "prettier": "^3.9.9",
     "punycode": "^2.3.1",
     "serwist": "^9.2.1",
-    "start-server-and-test": "^2.1.5",
+    "start-server-and-test": "^3.0.12",
     "ts-node": "^10.9.2",
     "typescript": "^6.0.3",
     "typescript-eslint": "8.70.1",

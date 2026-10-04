@@ -22,7 +22,7 @@ pnpm format:mdx           # MDX prettier
 pnpm test
 
 # Full a11y suite: lint + axe (WCAG2 AA) + Lighthouse a11y on /, /demos, /resources
-pnpm access
+pnpm a11y
 ```
 
 ## Security
@@ -50,7 +50,7 @@ pnpm lint && pnpm typecheck && pnpm test
 pnpm audit:critical && pnpm lint && pnpm typecheck && pnpm test
 
 # When user asks for accessibility / Lighthouse / ARIA runtime checks
-pnpm access
+pnpm a11y
 ```
 
 ## Discover in any local project

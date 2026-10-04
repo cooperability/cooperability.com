@@ -64,7 +64,7 @@ run of these items.
 - Make the `high` severity audit blocking, or document why it stays advisory
 - ~~Add `SECURITY.md` and a PR template~~ (done: `SECURITY.md` and `.github/pull_request_template.md`). Still open: `CODEOWNERS` (auto-requests review) and `LICENSE` (owner's legal choice)
 - ~~Test coverage is thin outside the AI route and Prompt Composer, which now have unit and component suites. Still to prioritize: `mandelbrot-explorer/utils/calculations.ts`, then set coverage thresholds~~ (done: `calculations.ts` is at 100% from tests derived from the math, and `pnpm test:ci` enforces global and per-file thresholds two points under the 2026-10-02 measurement)
-- Add Lighthouse CI with perf/a11y budgets on PRs, replacing the manual `pnpm access` run
+- Add Lighthouse CI with perf/a11y budgets on PRs, replacing the manual `pnpm a11y` run
 - Add Playwright E2E + `@axe-core/playwright` for the theme-switch, PWA install, and converter flows (already listed as an accessibility maintenance task, and this is the mechanism)
 - Consider Vitest over Jest (faster, native ESM, less SWC/PnP config surface)
 - ~~**`yarn lint` is broken**~~ (fixed: see [Why ESLint 10 is kept](#why-eslint-10-is-kept). `pnpm lint` exits 0)

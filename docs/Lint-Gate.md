@@ -22,10 +22,11 @@ Two related things were fixed in the same pass, and both are worth knowing:
 `eslint-config-prettier` also moved to the **end** of the config array. It has
 to come after every config whose stylistic rules it exists to switch off.
 
-**`pnpm access` is unblocked but still unverified.** It runs `pnpm lint` first
-and used to die there, and it now gets through to `axe`. Completing it needs a
-Chrome binary on `PATH`, which the agent sandbox this was fixed in did not have,
-so the a11y numbers have not actually been re-measured. Run it locally, and
-treat the result as a new baseline, not a regression, because collapsing the
-nested `ThemeProvider` made `NEXT_PUBLIC_AXE_FORCE_THEME` effective for the
-first time.
+**`pnpm a11y` runs end to end** (measured 2026-10-04, Windows). It runs
+`pnpm lint` first and used to die there. It later stalled at `axe` for want of
+a Chrome binary. axe and Lighthouse now both run on Playwright's Chromium:
+axe found 0 `wcag2aa` violations on the three pages, and Lighthouse scored
+accessibility 1.00, 0.98 and 1.00. Collapsing the nested `ThemeProvider` was
+expected to make `NEXT_PUBLIC_AXE_FORCE_THEME` effective, but it was not: the
+script set the variable only on the audit process, never on `next dev`. Moving
+it onto `pnpm a11y` itself is what forces the light theme.

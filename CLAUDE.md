@@ -16,7 +16,7 @@ Prefer catalogs in `.claude/cli/` (mirrored under `.cursor/cli/`).
 | Types                        | `pnpm typecheck`                         |
 | Unit tests (non-interactive) | `pnpm test`                              |
 | Unit tests + coverage        | `pnpm test:ci`                           |
-| A11y (axe + Lighthouse)      | `pnpm access`                            |
+| A11y (axe + Lighthouse)      | `pnpm a11y`                              |
 | Security audit               | `pnpm audit:critical`                    |
 | Format                       | `pnpm format` (ask before huge rewrites) |
 
