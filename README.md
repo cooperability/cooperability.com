@@ -240,21 +240,21 @@ why, so a reader can tell load-bearing packages from incidental ones.
 
 ### Runtime (`dependencies`)
 
-| Package                                                                                                     | Role                                                                 |
-| ----------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
-| `next`, `react`, `react-dom`                                                                                | The framework and its renderer                                       |
-| `tailwindcss`, `@tailwindcss/postcss`, `tailwindcss-animate`, `@tailwindcss/typography`                     | Styling: utility CSS, animation utilities, prose defaults            |
-| `@radix-ui/react-accordion`, `-checkbox`, `-label`, `-radio-group`, `-slot`, `-switch`, `-tabs`, `-tooltip` | Unstyled accessible primitives that shadcn/ui wraps                  |
-| `class-variance-authority`, `clsx`, `tailwind-merge`                                                        | Variant and className composition the shadcn components rely on      |
-| `@heroicons/react`, `lucide-react`                                                                          | Icon sets used in the chrome and the applets                         |
-| `@mdx-js/loader`, `@mdx-js/react`, `@next/mdx`, `next-mdx-remote`                                           | MDX pipeline. `next-mdx-remote/rsc` is what `/resources/[slug]` uses |
-| `gray-matter`, `remark`, `remark-html`                                                                      | Front-matter parsing and markdown processing                         |
-| `next-themes`                                                                                               | Light/dark theme, read by the icons and the CSS variables            |
-| `next-sitemap`                                                                                              | Generates `sitemap.xml` and `robots.txt` after the build             |
-| `@vercel/analytics`, `@vercel/speed-insights`                                                               | Cookieless page and Web Vitals metrics                               |
-| `date-fns`                                                                                                  | Formats resource dates                                               |
-| `sharp`                                                                                                     | Image optimization backend for `next/image`                          |
-| `@anthropic-ai/sdk`                                                                                         | Claude API client for `/api/ai/critique`. Server-only                |
+| Package                                                                                            | Role                                                                 |
+| -------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| `next`, `react`, `react-dom`                                                                       | The framework and its renderer                                       |
+| `tailwindcss`, `@tailwindcss/postcss`, `tailwindcss-animate`, `@tailwindcss/typography`            | Styling: utility CSS, animation utilities, prose defaults            |
+| `@radix-ui/react-accordion`, `-checkbox`, `-label`, `-radio-group`, `-slot`, `-switch`, `-tooltip` | Unstyled accessible primitives that shadcn/ui wraps                  |
+| `class-variance-authority`, `clsx`, `tailwind-merge`                                               | Variant and className composition the shadcn components rely on      |
+| `@heroicons/react`, `lucide-react`                                                                 | Icon sets used in the chrome and the applets                         |
+| `@mdx-js/loader`, `@mdx-js/react`, `@next/mdx`, `next-mdx-remote`                                  | MDX pipeline. `next-mdx-remote/rsc` is what `/resources/[slug]` uses |
+| `gray-matter`, `remark`, `remark-html`                                                             | Front-matter parsing and markdown processing                         |
+| `next-themes`                                                                                      | Light/dark theme, read by the icons and the CSS variables            |
+| `next-sitemap`                                                                                     | Generates `sitemap.xml` and `robots.txt` after the build             |
+| `@vercel/analytics`, `@vercel/speed-insights`                                                      | Cookieless page and Web Vitals metrics                               |
+| `date-fns`                                                                                         | Formats resource dates                                               |
+| `sharp`                                                                                            | Image optimization backend for `next/image`                          |
+| `@anthropic-ai/sdk`                                                                                | Claude API client for `/api/ai/critique`. Server-only                |
 
 ### Development (`devDependencies`)
 
