@@ -30,7 +30,7 @@
     "ai:on": "node --env-file-if-exists=.env.local scripts/ai-switch.mjs on"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "0.125.0",
+    "@anthropic-ai/sdk": "0.131.0",
     "@heroicons/react": "^2.2.0",
     "@mdx-js/loader": "^3.1.1",
     "@mdx-js/react": "^3.1.1",
