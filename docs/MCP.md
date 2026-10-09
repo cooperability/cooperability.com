@@ -43,7 +43,7 @@ Your portfolio website has a **unique combination of requirements** that make MC
 
 ### 1. **Accessibility-First Development**
 
-- **Current State**: You run comprehensive accessibility audits (`axe-core`, Lighthouse) manually via `pnpm access`.
+- **Current State**: You run comprehensive accessibility audits (`axe-core`, Lighthouse) manually via `pnpm a11y`.
 - **MCP Opportunity**: Build an MCP server that integrates accessibility testing into your AI development workflow. Imagine asking Claude: _"Review the contrast ratios on my new landing page"_ or _"Suggest ARIA improvements for this component"_ and getting instant, context-aware feedback powered by your existing axe-core infrastructure.
 
 ### 2. **Testing Infrastructure (Jest + Testing Library)**
@@ -382,7 +382,7 @@ server.setRequestHandler('tools/vercel_deploy', async (request) => {
 
 **Implementation Strategy**:
 
-- Wrap your existing `pnpm access` script as MCP tools
+- Wrap your existing `pnpm a11y` script as MCP tools
 - Parse axe-core JSON reports and return structured violations
 - Use `jsdom` or `playwright` for component-level testing
 - Cache audit results to avoid redundant scans
@@ -391,7 +391,7 @@ server.setRequestHandler('tools/vercel_deploy', async (request) => {
 
 ```bash
 # Before MCP
-$ pnpm access
+$ pnpm a11y
 # Review reports manually in ./accessibility-reports/
 
 # With MCP
@@ -2007,7 +2007,7 @@ Then in your Vercel Analytics dashboard, you can filter by `mcp_tool_call` event
 3. **Build Accessibility Server** (POC)
    - Implement `run_axe_audit` tool
    - Implement `run_lighthouse_audit` tool
-   - Test with existing `pnpm access` script
+   - Test with existing `pnpm a11y` script
    - Validate against localhost:3000
 
 4. **Configure Cursor/IDE**
@@ -2021,7 +2021,7 @@ Then in your Vercel Analytics dashboard, you can filter by `mcp_tool_call` event
 **Success Criteria**:
 
 - ✅ Can run accessibility audits via Claude in Cursor
-- ✅ Audit results match manual `pnpm access` output
+- ✅ Audit results match manual `pnpm a11y` output
 - ✅ Logs are captured in `mcp-audit.log`
 
 ### Phase 2: Expand Coverage (Week 3-4)

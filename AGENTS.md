@@ -51,5 +51,5 @@ Shared — **not in this repo.** These install once into your home directory fro
 ## CLI catalogs
 
 - `cli/test/` — Jest
-- `cli/accessibility/` — lint a11y, axe, Lighthouse (`pnpm access`)
+- `cli/accessibility/` — lint a11y, axe, Lighthouse (`pnpm a11y`)
 - `cli/quality/` — lint, types, audit, build gates

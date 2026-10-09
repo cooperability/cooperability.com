@@ -335,11 +335,11 @@ Three complementary tools ensure WCAG 2.1 AA compliance:
 - **What it catches:** Missing alt text, invalid ARIA attributes, non-semantic HTML
 - **When it runs:** During `pnpm lint` and pre-commit hooks
 
-#### 2. axe-core CLI
+#### 2. axe-core (`@axe-core/playwright`)
 
-- **Type:** Runtime WCAG testing
+- **Type:** Runtime WCAG testing, on Playwright's Chromium
 - **What it catches:** Contrast issues, focus management, live region problems
-- **Command:** `pnpm access` (starts dev server → runs audits → saves reports)
+- **Command:** `pnpm a11y` (starts dev server → runs audits → saves reports)
 
 #### 3. Lighthouse
 
@@ -352,15 +352,15 @@ Three complementary tools ensure WCAG 2.1 AA compliance:
 **Full Suite:**
 
 ```bash
-pnpm access
+pnpm a11y
 ```
 
 This command:
 
 1. Starts the development server at `http://localhost:3000`
 2. Runs ESLint for static analysis
-3. Runs Axe-core for WCAG checks (tags: `wcag2aa`)
-4. Runs Lighthouse audits on key pages
+3. Runs Axe-core for WCAG checks (tags: `wcag2aa`), failing on any violation
+4. Runs Lighthouse audits on key pages, on the same Chromium
 5. Saves reports to `./accessibility-reports/`
 
 **Review Reports:**
@@ -373,7 +373,7 @@ Update `src/resources/AccessibilityStatement.mdx` with findings and remediation 
 
 ### Known Testing Limitations
 
-- Axe CLI sometimes reports false positives for contrast on dynamically themed content
+- Axe sometimes reports false positives for contrast on dynamically themed content
 - Pre-hydration testing doesn't always capture themed states accurately
 - **Manual browser testing remains the most reliable method for theme-specific accessibility**
 
@@ -515,7 +515,7 @@ Tailwind 4 has no JS config. Style tokens live in the `@theme` block of `src/sty
 | `pnpm-workspace.yaml`     | hand-edited  | Linker, overrides, allowBuilds | Yes               |
 | `components/ui/**`        | `shadcn-ui`  | UI component source files     | Yes                |
 | `node_modules/`           | pnpm         | Installed tree                | No (gitignored)    |
-| `accessibility-reports/**` | `pnpm access` | Accessibility audit reports  | No (gitignored)    |
+| `accessibility-reports/**` | `pnpm a11y` | Accessibility audit reports  | No (gitignored)    |
 | `.next/analyze/*.html`    | `pnpm analyze` | Bundle size visualizations  | No (gitignored)    |
 | `tsconfig.tsbuildinfo`    | TypeScript   | Build cache                   | No (gitignored)    |
 
@@ -552,7 +552,7 @@ pnpm format           # Format all files
 pnpm typecheck        # Check types
 pnpm build            # Build for production
 pnpm analyze          # Analyze bundle size
-pnpm access           # Run accessibility audits
+pnpm a11y           # Run accessibility audits
 ```
 
 ### Dependency Management
@@ -621,7 +621,7 @@ Runs on PRs, pushes to main, weekly cron, and manual dispatch. See [Security Aud
 | `pnpm test`           | Run tests once                |
 | `pnpm test:watch`     | Run tests in watch mode       |
 | `pnpm analyze`        | Analyze bundle size           |
-| `pnpm access`         | Run accessibility audits      |
+| `pnpm a11y`         | Run accessibility audits      |
 | `pnpm audit`          | Full security audit           |
 | `pnpm audit:critical` | Critical vulnerabilities only |
 

@@ -5,8 +5,8 @@ Three layers in this repo (WCAG 2.1 AA oriented). Package manager: **pnpm 11**.
 | Layer | What | Command |
 |-------|------|---------|
 | Static ARIA / a11y | `eslint-plugin-jsx-a11y` via ESLint | `pnpm lint` |
-| Runtime WCAG | `@axe-core/cli` (`wcag2aa`) | part of `pnpm access` |
-| Lighthouse a11y | Lighthouse `--only-categories=accessibility` | part of `pnpm access` |
+| Runtime WCAG | `@axe-core/playwright` (`wcag2aa`) | part of `pnpm a11y` |
+| Lighthouse a11y | Lighthouse `--only-categories=accessibility` | part of `pnpm a11y` |
 
 Reports are gitignored under `accessibility-reports/`.
 
@@ -15,25 +15,26 @@ Reports are gitignored under `accessibility-reports/`.
 Starts Next dev server, then lint + axe + Lighthouse on key routes:
 
 ```bash
-pnpm access
+pnpm a11y
 ```
 
-Under the hood (`access` → `access:run-audits`):
+Under the hood (`a11y` → `a11y:run-audits`):
 
-1. `NEXT_PUBLIC_AXE_FORCE_THEME=light`
-2. Ensure `accessibility-reports/` exists
-3. `pnpm lint` (includes jsx-a11y / ARIA static rules)
-4. **axe-core** on:
+1. `NEXT_PUBLIC_AXE_FORCE_THEME=light`, set on `a11y` itself so the dev server renders the light theme
+2. `pnpm lint` (includes jsx-a11y / ARIA static rules)
+3. `scripts/a11y-audit.mjs`, on Playwright's Chromium (no system Chrome or chromedriver)
+4. **axe-core** (`@axe-core/playwright`) on:
    - `http://localhost:3000`
    - `http://localhost:3000/demos`
    - `http://localhost:3000/resources`
    - tags: `wcag2aa` → `accessibility-reports/axe-report.json`
-5. **Lighthouse** (accessibility category only, headless Chrome) on the same three pages →
+   - any violation fails the run here, before Lighthouse
+5. **Lighthouse** (accessibility category only, `CHROME_PATH` set to the same Chromium) on the same three pages →
    - `accessibility-reports/lighthouse-report-home.{json,html}`
    - `accessibility-reports/lighthouse-report-demos.{json,html}`
    - `accessibility-reports/lighthouse-report-resources.{json,html}`
 
-**Agent notes:** Slow (minutes). Needs a free port `3000` (or stop an existing `pnpm dev`). Run when the user asks for a11y / Lighthouse / axe — not on every unit-test pass.
+**Agent notes:** Slow (minutes). Needs Playwright's Chromium (`pnpm exec playwright install chromium`). Needs a free port `3000` (or stop an existing `pnpm dev`). Run when the user asks for a11y / Lighthouse / axe — not on every unit-test pass.
 
 ## Static ARIA / jsx-a11y only (fast)
 
@@ -47,16 +48,10 @@ pnpm lint:mdx             # MDX subset
 If `pnpm dev` is already serving `http://localhost:3000`:
 
 ```bash
-# Create report dir
-node scripts/create-report-dir.js
+# axe + Lighthouse on Playwright's Chromium, without the lint step
+node scripts/a11y-audit.mjs
 
-# axe only (WCAG 2 AA)
-pnpm exec axe http://localhost:3000 http://localhost:3000/demos http://localhost:3000/resources \
-  --tags wcag2aa \
-  --save ./accessibility-reports/axe-report.json \
-  --exit
-
-# Lighthouse accessibility only — one page
+# Lighthouse accessibility only, one page (needs Chrome, or CHROME_PATH)
 pnpm exec lighthouse http://localhost:3000 \
   --output json --output html \
   --output-path ./accessibility-reports/lighthouse-report-home \
@@ -67,7 +62,7 @@ pnpm exec lighthouse http://localhost:3000 \
 Or run the packaged audit step (still expects server on :3000):
 
 ```bash
-pnpm access:run-audits
+pnpm a11y:run-audits
 ```
 
 ## Review outputs
@@ -90,7 +85,7 @@ pnpm test
 pnpm lint && pnpm test
 
 # Full a11y (axe + Lighthouse) when requested
-pnpm access
+pnpm a11y
 ```
 
 ## Discover in any local project

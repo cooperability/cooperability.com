@@ -8,7 +8,7 @@ alwaysApply: true
 - **Stack:** Next.js (App Router in `src/app`), React 19, TypeScript, Tailwind, pnpm 11, Node 22
 - **Package manager:** pnpm only (`pnpm`). Do not use npm or yarn
 - **Tests:** `pnpm test` — never leave Jest in watch mode (`pnpm test:watch`)
-- **A11y suite:** `pnpm access` (axe + Lighthouse); static ARIA via `pnpm lint`
+- **A11y suite:** `pnpm a11y` (axe + Lighthouse); static ARIA via `pnpm lint`
 - **Prefer** `src/components` and `src/lib` over legacy root `components/` / `lib/`
 - **Docs:** `docs/Tooling.md`, agent catalogs in `.cursor/cli/`, skills in `.cursor/skills/`
 - Match existing patterns; no drive-by refactors; no secrets in commits

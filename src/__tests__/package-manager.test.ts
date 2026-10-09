@@ -102,7 +102,7 @@ describe('pnpm 11 contract', () => {
     expect(yaml).toMatch(/packages:\s*\n\s*-\s*['"]?\./)
   })
 
-  it('allowlists the install scripts Next, ESLint, and access actually need', () => {
+  it('allowlists the install scripts Next, Jest, and ESLint actually need', () => {
     const allowBuilds = parseTopLevelMap(
       read('pnpm-workspace.yaml'),
       'allowBuilds'
@@ -111,7 +111,6 @@ describe('pnpm 11 contract', () => {
       '@swc/core': 'true',
       sharp: 'true',
       'unrs-resolver': 'true',
-      chromedriver: 'true',
       '@parcel/watcher': 'false',
     })
   })
@@ -128,16 +127,14 @@ describe('pnpm 11 contract', () => {
       socks: '^2.8.9',
       postcss: '^8.5.26',
       sharp: '^0.35.4',
-      'adm-zip': '^0.6.1',
       'basic-ftp': '^6.2.1',
     }
     const workspace = parseTopLevelMap(read('pnpm-workspace.yaml'), 'overrides')
     const lockfile = parseTopLevelMap(read('pnpm-lock.yaml'), 'overrides')
     expect(workspace).toEqual(expected)
     expect(lockfile).toEqual(expected)
-    expect(read('pnpm-workspace.yaml')).toMatch(
-      /minimumReleaseAge:\s*4320\nminimumReleaseAgeExclude:\n\s+-\s+adm-zip@0\.6\.1/
-    )
+    expect(read('pnpm-workspace.yaml')).toMatch(/^minimumReleaseAge:\s*4320$/m)
+    expect(read('pnpm-workspace.yaml')).not.toMatch(/minimumReleaseAgeExclude/)
   })
 
   it('bootstraps pnpm 11 on Vercel through corepack, not detection', () => {

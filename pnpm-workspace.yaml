@@ -40,13 +40,6 @@ allowBuilds:
   sharp: true # libvips; Next.js image optimization at build time
   unrs-resolver: true # Rust binary backing ESLint's import resolver
 
-  # DEV-ONLY, and the first entry worth deleting. chromedriver is pulled in by
-  # @axe-core/cli and used solely by `pnpm access`. Its install script
-  # downloads a browser driver over the network on every clean install. It is
-  # allowlisted only because Yarn already ran it, so that this migration
-  # changes mechanism and not behaviour. See docs/PNPM-MIGRATION.md.
-  chromedriver: true
-
   # Denied. jest-haste-map 30.5 depends on it, and its install script only
   # compiles from source when no prebuilt binary matches. Every platform we
   # run on (win32-x64 locally, linux-x64-glibc in CI and on Vercel) has one.
@@ -55,9 +48,7 @@ allowBuilds:
 # --- Version pinning carried over from Yarn `resolutions` ----------------
 # Semantics are identical to Yarn's field; only the name changed. An override
 # is not proof the advisory is gone: `pnpm audit` is the measurement.
-# sharp 0.35.4 and js-yaml 3.15.2 cleared the previous highs. adm-zip 0.6.1
-# (published 2026-09-11, same-day CVE patch for GHSA-vwc7-r8mq-g2x9) is
-# forced here because chromedriver still pins 0.6.0.
+# sharp 0.35.4 and js-yaml 3.15.2 cleared the previous highs.
 overrides:
   punycode: ^2.3.1
   form-data: ^4.0.4
@@ -82,8 +73,8 @@ overrides:
   # reached test-exclude@6. socks 2.8.9 already declares `ip-address: ^10.1.1`,
   # so bumping the PARENT lets the fixed child come in legitimately.
   #
-  # Dev-only either way: the chain is lighthouse and @axe-core/cli, so nothing
-  # here reaches the deployed bundle.
+  # Dev-only either way: the chain is lighthouse, so nothing here reaches the
+  # deployed bundle.
   socks: ^2.8.9
 
   # next also pulls older transitive copies of these. Raising them matches
@@ -93,14 +84,10 @@ overrides:
   postcss: ^8.5.26
   sharp: ^0.35.4
 
-  # Same-day 0.6.1 (2026-09-11). GHSA-vwc7-r8mq-g2x9, patched_versions >=0.6.1.
-  # chromedriver still resolves 0.6.0. Dev-only: @axe-core/cli -> chromedriver.
-  adm-zip: ^0.6.1
-
   # GHSA-c475-qrg2-pj4r (CPU DoS in Client.list), fixed only in 6.2.1. Crosses
   # a major: get-uri 8.0.1, the latest, still asks for ^5.3.1. The one 6.0 break
   # turns off separate transfer hosts by default, and the get-uri calls are
-  # unchanged. Dev-only: lighthouse and @axe-core/cli -> proxy-agent -> get-uri.
+  # unchanged. Dev-only: lighthouse -> proxy-agent -> get-uri.
   basic-ftp: ^6.2.1
 
 # --- Peer dependencies ---------------------------------------------------
@@ -109,8 +96,6 @@ overrides:
 strictPeerDependencies: false
 autoInstallPeers: true
 
-# 72 hours. Writing the number makes the exclude below live and turns on
-# strict mode (pnpm 11's implicit 1440-minute default is non-strict).
+# 72 hours. Writing the number turns on strict mode (pnpm 11's implicit
+# 1440-minute default is non-strict).
 minimumReleaseAge: 4320
-minimumReleaseAgeExclude:
-  - adm-zip@0.6.1

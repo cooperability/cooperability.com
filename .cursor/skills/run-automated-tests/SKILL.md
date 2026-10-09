@@ -27,10 +27,10 @@ Read (in order):
 | One area | path or `--testPathPattern=` |
 | Related to edits | `--findRelatedTests --passWithNoTests` on touched files |
 | Static ARIA / a11y | `pnpm lint` |
-| Full axe + Lighthouse | `pnpm access` (slow; needs :3000) |
+| Full axe + Lighthouse | `pnpm a11y` (slow; needs :3000) |
 | + types/lint | see quality catalog |
 
-**Never** run `pnpm test:watch` in an agent session. Do not run `pnpm access` unless a11y/Lighthouse was requested.
+**Never** run `pnpm test:watch` in an agent session. Do not run `pnpm a11y` unless a11y/Lighthouse was requested.
 
 ## 3. Execute and report
 

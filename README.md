@@ -215,7 +215,7 @@ Full documentation in **[docs/Tooling.md](docs/Tooling.md)**.
 | `pnpm test:ci`                    | The same run plus coverage                        |
 | `pnpm test:watch`                 | The watcher. **Never run this unattended**        |
 | `pnpm analyze`                    | Webpack bundle analyzer                           |
-| `pnpm access`                     | Accessibility audit: ESLint, axe-core, Lighthouse |
+| `pnpm a11y`                       | Accessibility audit: ESLint, axe-core, Lighthouse |
 | `pnpm audit:critical`             | Security scan, critical severity only             |
 
 **Key technologies:**
@@ -264,7 +264,7 @@ why, so a reader can tell load-bearing packages from incidental ones.
 | `eslint`, `@eslint/js`, `typescript-eslint`, `eslint-config-next`, `@next/eslint-plugin-next`, `eslint-plugin-react-hooks`, `eslint-plugin-mdx`, `globals` | The lint gate. See [Lint Gate](docs/Lint-Gate.md)                                         |
 | `prettier`, `eslint-config-prettier`                                                                                                                       | Formatting, and switching off the rules it conflicts with                                 |
 | `jest`, `jest-environment-jsdom`, `@testing-library/react`, `@testing-library/dom`, `@testing-library/jest-dom`                                            | Unit tests                                                                                |
-| `@axe-core/cli`, `lighthouse`, `start-server-and-test`                                                                                                     | The `pnpm access` accessibility run against a live server                                 |
+| `@axe-core/playwright`, `playwright`, `lighthouse`, `start-server-and-test`                                                                                | The `pnpm a11y` accessibility run against a live server                                   |
 | `serwist`, `@serwist/build`                                                                                                                                | Service worker and its precache manifest                                                  |
 | `@next/bundle-analyzer`, `webpack`                                                                                                                         | `pnpm analyze`. Both are webpack-only, which is why that one script opts out of Turbopack |
 | `husky`, `lint-staged`                                                                                                                                     | Git hooks                                                                                 |
