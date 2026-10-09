@@ -20,10 +20,14 @@ updates:
 
     # Group minor/patch updates to reduce PR noise
     groups:
-      # Group all patch updates together
+      # Group production patch updates together. Without the dependency-type,
+      # both groups match every dev dependency on '*' and Dependabot gives it
+      # to the first group only, so dev-dependencies stays empty and each dev
+      # minor bump opens its own PR.
       patch-updates:
         patterns:
           - '*'
+        dependency-type: 'production'
         update-types:
           - 'patch'
 
