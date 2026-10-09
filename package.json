@@ -99,7 +99,7 @@
     "prettier": "^3.9.9",
     "punycode": "^2.3.1",
     "serwist": "^9.2.1",
-    "start-server-and-test": "^2.1.5",
+    "start-server-and-test": "^3.0.12",
     "ts-node": "^10.9.2",
     "typescript": "^6.0.3",
     "typescript-eslint": "8.70.1",
