@@ -5,7 +5,7 @@ Three layers in this repo (WCAG 2.1 AA oriented). Package manager: **pnpm 11**.
 | Layer | What | Command |
 |-------|------|---------|
 | Static ARIA / a11y | `eslint-plugin-jsx-a11y` via ESLint | `pnpm lint` |
-| Runtime WCAG | `@axe-core/playwright` (`wcag2aa`) | part of `pnpm a11y` |
+| Runtime WCAG | `@axe-core/playwright` (`wcag2a`, `wcag2aa`, `wcag21a`, `wcag21aa`) | part of `pnpm a11y` |
 | Lighthouse a11y | Lighthouse `--only-categories=accessibility` | part of `pnpm a11y` |
 
 Reports are gitignored under `accessibility-reports/`.
@@ -27,7 +27,7 @@ Under the hood (`a11y` → `a11y:run-audits`):
    - `http://localhost:3000`
    - `http://localhost:3000/demos`
    - `http://localhost:3000/resources`
-   - tags: `wcag2aa` → `accessibility-reports/axe-report.json`
+   - tags: `wcag2a`, `wcag2aa`, `wcag21a`, `wcag21aa` → `accessibility-reports/axe-report.json`
    - any violation fails the run here, before Lighthouse
 5. **Lighthouse** (accessibility category only, `CHROME_PATH` set to the same Chromium) on the same three pages →
    - `accessibility-reports/lighthouse-report-home.{json,html}`

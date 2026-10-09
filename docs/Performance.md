@@ -379,11 +379,11 @@ Uses `useResponsive()` for mobile vs. desktop layout:
 
 #### Example 2: Header Navigation
 
-**File:** `src/sections/Header.tsx:21,104-128`
+**File:** `src/sections/Header.tsx:69,139-163`
 
 Uses `useResponsive()` for navigation behavior:
 
-- **Desktop:** Horizontal tab navigation
+- **Desktop:** Horizontal link navigation
 - **Mobile:** Hamburger menu with sidebar
 
 #### Example 3: Pure Tailwind Approach

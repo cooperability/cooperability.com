@@ -359,7 +359,8 @@ This command:
 
 1. Starts the development server at `http://localhost:3000`
 2. Runs ESLint for static analysis
-3. Runs Axe-core for WCAG checks (tags: `wcag2aa`), failing on any violation
+3. Runs Axe-core for WCAG 2.1 A and AA checks (tags: `wcag2a`, `wcag2aa`,
+   `wcag21a`, `wcag21aa`), failing on any violation
 4. Runs Lighthouse audits on key pages, on the same Chromium
 5. Saves reports to `./accessibility-reports/`
 
@@ -467,7 +468,6 @@ The project uses [shadcn/ui](https://ui.shadcn.com) for accessible, customizable
 - Label (`components/ui/label.tsx`)
 - Radio Group (`components/ui/radio-group.tsx`)
 - Switch (`components/ui/switch.tsx`)
-- Tabs (`components/ui/tabs.tsx`)
 - Tooltip (`components/ui/tooltip.tsx`)
 
 ### Adding New Components

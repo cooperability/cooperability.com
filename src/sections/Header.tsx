@@ -1,13 +1,14 @@
 'use client'
 import { useState } from 'react'
+import Link from 'next/link'
 import { Bars3Icon } from '@heroicons/react/24/solid'
 import { Button } from '@/components/ui/button'
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { cn } from '@/lib/utils'
 import styles from '../styles/utils.module.css'
 import Sidebar from './Sidebar'
 import ThemeSwitch from '../components/ThemeSwitch'
 import { useResponsive } from '../hooks/useResponsive'
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 import ActiveIcon from '../components/ActiveIcon'
 
 const resumeUrl =
@@ -16,20 +17,65 @@ const allLinksUrl = '/resources/linktree'
 const privacyStatementUrl = '/resources/PrivacyStatement'
 const accessibilityStatementUrl = '/resources/AccessibilityStatement'
 
+const navLinks = [
+  { href: '/', label: 'Home' },
+  { href: '/demos', label: 'Demos' },
+  { href: '/resources', label: 'Resources' },
+]
+
+const NavLink = ({
+  href,
+  current,
+  children,
+}: {
+  href: string
+  current?: 'page' | 'true'
+  children: React.ReactNode
+}) => {
+  const [isHovered, setIsHovered] = useState(false)
+
+  return (
+    <Link
+      href={href}
+      aria-current={current}
+      className={cn(
+        'inline-flex items-center justify-center whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-medium transition-all focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring/50',
+        // Opts out of the global blue link color and hover underline, which
+        // would double the animated underline below.
+        'text-inherit no-underline',
+        // Inverted colors: white bg in dark mode, dark bg in light mode
+        current
+          ? 'bg-black text-white shadow-xs dark:bg-white dark:text-black'
+          : 'hover:bg-accent/50 hover:text-accent-foreground'
+      )}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      <span className={styles.linkTextWrapper}>
+        {children}
+        <span
+          className={cn(
+            styles.animatedUnderline,
+            isHovered && styles.animatedUnderlineHover
+          )}
+        />
+      </span>
+    </Link>
+  )
+}
+
 const Header = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const { isMobile } = useResponsive()
-  const { push } = useRouter()
   // `usePathname` is already query-free, unlike the pages router's `asPath`.
   const currentPath = usePathname() || '/'
-  const currentTab =
-    currentPath === '/'
-      ? '/'
-      : currentPath.startsWith('/demos')
-        ? '/demos'
-        : currentPath.startsWith('/resources')
-          ? '/resources'
-          : '/'
+  // `page` marks the route itself, `true` its section from a subpage.
+  const ariaCurrent = (href: string) =>
+    currentPath === href
+      ? 'page'
+      : currentPath.startsWith(`${href}/`)
+        ? 'true'
+        : undefined
 
   const navigator = () => {
     if (isMobile) {
@@ -47,26 +93,15 @@ const Header = () => {
     } else {
       return (
         <div className="flex flex-row space-between">
-          <Tabs
-            value={currentTab}
-            onValueChange={(v: string) => push(v)}
-            className="w-full"
-          >
-            <TabsList aria-label="Primary navigation">
-              <TabsTrigger value="/" onClick={() => push('/')}>
-                Home
-              </TabsTrigger>
-              <TabsTrigger value="/demos" onClick={() => push('/demos')}>
-                Demos
-              </TabsTrigger>
-              <TabsTrigger
-                value="/resources"
-                onClick={() => push('/resources')}
-              >
-                Resources
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
+          <ul className="inline-flex h-9 items-center justify-center rounded-xl border p-1 text-muted-foreground">
+            {navLinks.map(({ href, label }) => (
+              <li key={href} className="flex">
+                <NavLink href={href} current={ariaCurrent(href)}>
+                  {label}
+                </NavLink>
+              </li>
+            ))}
+          </ul>
         </div>
       )
     }

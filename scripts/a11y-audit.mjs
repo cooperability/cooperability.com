@@ -8,6 +8,9 @@ import { chromium } from 'playwright'
 const BASE = 'http://localhost:3000'
 const PAGES = { home: '/', demos: '/demos', resources: '/resources' }
 const REPORTS = 'accessibility-reports'
+// WCAG 2.1 A and AA, the site's stated target. `wcag2aa` alone selects 3
+// rules and skips every level-A check.
+const TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']
 
 const chrome = chromium.executablePath()
 if (!existsSync(chrome)) {
@@ -22,7 +25,7 @@ const results = []
 for (const path of Object.values(PAGES)) {
   const page = await context.newPage()
   await page.goto(BASE + path)
-  results.push(await new AxeBuilder({ page }).withTags(['wcag2aa']).analyze())
+  results.push(await new AxeBuilder({ page }).withTags(TAGS).analyze())
   await page.close()
 }
 await browser.close()
@@ -35,7 +38,7 @@ if (violations.length) {
   console.error(`axe found ${violations.length} violation(s):\n${violations.join('\n')}`)
   process.exit(1)
 }
-console.log(`axe: no wcag2aa violations on ${results.length} pages`)
+console.log(`axe: no ${TAGS.join(' + ')} violations on ${results.length} pages`)
 
 for (const [name, path] of Object.entries(PAGES)) {
   const run = spawnSync(
