@@ -243,7 +243,7 @@ why, so a reader can tell load-bearing packages from incidental ones.
 | Package                                                                                            | Role                                                                 |
 | -------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
 | `next`, `react`, `react-dom`                                                                       | The framework and its renderer                                       |
-| `tailwindcss`, `@tailwindcss/postcss`, `tailwindcss-animate`, `@tailwindcss/typography`            | Styling: utility CSS, animation utilities, prose defaults            |
+| `tailwindcss`, `@tailwindcss/postcss`, `tailwindcss-animate`                                       | Styling: utility CSS, animation utilities                            |
 | `@radix-ui/react-accordion`, `-checkbox`, `-label`, `-radio-group`, `-slot`, `-switch`, `-tooltip` | Unstyled accessible primitives that shadcn/ui wraps                  |
 | `class-variance-authority`, `clsx`, `tailwind-merge`                                               | Variant and className composition the shadcn components rely on      |
 | `@heroicons/react`, `lucide-react`                                                                 | Icon sets used in the chrome and the applets                         |
