@@ -1,5 +1,6 @@
 import fs from 'fs'
 import { getAllResourcesData, getResourceBySlug } from '../../lib/resources'
+import { RESUME_URL } from '../../lib/links'
 
 jest.mock('fs')
 const mockedFs = jest.mocked(fs)
@@ -62,6 +63,15 @@ describe('getResourceBySlug', () => {
 
   it('still reads a .mdx resource', () => {
     expect(getResourceBySlug('alpha')?.content.trim()).toBe('alpha body')
+  })
+
+  it('fills in the canonical resume link', () => {
+    mockedFs.readFileSync.mockReturnValueOnce(
+      '---\ntitle: Alpha\n---\n[Resume](RESUME_URL)' as never
+    )
+    expect(getResourceBySlug('alpha')?.content.trim()).toBe(
+      `[Resume](${RESUME_URL})`
+    )
   })
 
   it('returns null for an unknown slug without touching the disk', () => {
