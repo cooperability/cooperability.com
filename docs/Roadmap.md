@@ -95,7 +95,7 @@ run of these items.
 
 - Verify focus-ring visibility and contrast on interactive elements against the pure-black background (nav pill, theme toggle, quote refresh icon), and double-check the muted gray "(Ongoing)"/"(2025)" labels on Demos meet WCAG AA contrast. They read borderline light-gray-on-black in the screenshot
 - Give the homepage a real `<h1>`. "Hi, I'm **Cooper**!" is currently an inline bold word inside a body paragraph, so the page has no visually distinct entry point. Promote it to a larger/bolder heading separate from the intro text
-- Introduce one accent color beyond link-blue. Home/Demos/Resources are pure black/white plus default anchor blue and the small stack-icon badges, and nothing distinguishes a primary CTA like "Try Prompt Composer →" from an ordinary inline link
+- Introduce one accent color beyond link-blue. Home/Demos/Resources are pure black/white plus default anchor blue and the small stack-icon badges, and nothing distinguishes a primary CTA like "Prompt Composer →" from an ordinary inline link
 - Add a hover/active state to list rows on Demos and Resources. These are currently plain text links with no visible row-level affordance, and a background highlight or left-border on hover reinforces that each row is clickable
 - Unify card styling across pages. The homepage quote box uses a bordered/transparent card, but the Demos page's "Academic Papers…" and "Other Stack Elements…" accordions use filled navy rectangles that don't match any other surface color on the site. Pick one treatment and apply it everywhere
 - Cap content width on wide viewports. Body copy currently has no max-measure constraint, so constrain paragraphs to roughly 65 to 75 characters (`max-w-prose`) for readability per standard typographic guidance
