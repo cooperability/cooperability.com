@@ -104,6 +104,16 @@ describe('compilePrompt', () => {
     )
   })
 
+  it('compiles only instructions meant for the model', () => {
+    // Advice for the person writing the prompt belongs in the option's
+    // description, not in text the model receives.
+    for (const o of OPTIONS) {
+      expect(o.template).not.toMatch(
+        /\b(?:describe|show) (?:the fields|them)\b.*\b(?:task|example)\b/i
+      )
+    }
+  })
+
   it('lists requirements as bullets, stripping bullets the user typed', () => {
     const out = compilePrompt(
       state({ constraints: '- Cite figures\n\n* Keep names' }, ['length-brief'])
@@ -177,6 +187,16 @@ describe('lintPrompt', () => {
     expect(check.fix).toEqual({ kind: 'option', id: 'quality-grounding' })
   })
 
+  it('points an unspecified output at the Requirements field', () => {
+    const s = state({ task: 'Summarize it' })
+    const check = lintPrompt(s, compilePrompt(s)).checks.find(
+      (c) => c.dimension === 'output'
+    )!
+
+    expect(check.status).toBe('missing')
+    expect(check.fix).toEqual({ kind: 'field', field: 'constraints' })
+  })
+
   it('wants examples when the format matters', () => {
     expect(statusOf(state({}, ['format-json']), 'examples')).toBe('weak')
     expect(statusOf(state(), 'examples')).toBe('na')
@@ -227,6 +247,18 @@ describe('warningsFor', () => {
 
   it('flags scripted chain of thought', () => {
     expect(ids('Think step by step.')).toContain('cot-script')
+    expect(ids("Let's work through this step-by-step.")).toContain('cot-script')
+  })
+
+  it('does not mistake a step-by-step deliverable for scripted reasoning', () => {
+    expect(ids('Write a step-by-step guide to resetting a router.')).toEqual([])
+  })
+
+  it('flags tips, threats and deep breaths', () => {
+    expect(ids("I'll tip you $200 for a perfect answer.")).toContain('tricks')
+    expect(ids('Take a deep breath and answer.')).toContain('tricks')
+    expect(ids('My job depends on this, so get it right.')).toContain('tricks')
+    expect(ids('Add a tip about saving energy.')).not.toContain('tricks')
   })
 })
 
