@@ -518,8 +518,10 @@ const MandelbrotExplorer = () => {
         <h1 className={styles.title}>Mandelbrot Explorer</h1>
         <div className={styles.instructions}>
           <p>
-            <b>Click or tap</b> + <b>drag</b> to pan, <b>double-click</b> or{' '}
-            <b>double-tap</b> to zoom 3×.
+            <b>Click/tap</b> + <b>drag</b> to pan
+          </p>
+          <p>
+            <b>Double-click/tap</b> to zoom 3×.
           </p>
         </div>
       </div>
