@@ -125,7 +125,7 @@ describe('pnpm 11 contract', () => {
       'js-yaml': '^3.15.2',
       'test-exclude': '^7.0.2',
       socks: '^2.8.9',
-      postcss: '^8.5.26',
+      postcss: '^8.5.29',
       sharp: '^0.35.4',
       'basic-ftp': '^6.2.1',
     }

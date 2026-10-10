@@ -81,7 +81,7 @@ overrides:
   # the direct dependency ranges in package.json. sharp@0.35.4 clears the
   # libheif GHSAs. js-yaml@3.15.2 clears the 3.x merge-keys advisory without
   # a 4.x API bump.
-  postcss: ^8.5.26
+  postcss: ^8.5.29
   sharp: ^0.35.4
 
   # GHSA-c475-qrg2-pj4r (CPU DoS in Client.list), fixed only in 6.2.1. Crosses
