@@ -251,15 +251,15 @@ export default function Demos() {
           </div>
           <div className={styles.techStackIcons}>
             <ActiveIcon
-              href="https://redux.js.org/"
-              iconName="redux"
-              alt="Redux logo"
-              size="small"
-            />
-            <ActiveIcon
               href="https://react.dev/"
               iconName="react"
               alt="React logo"
+              size="small"
+            />
+            <ActiveIcon
+              href="https://redux.js.org/"
+              iconName="redux"
+              alt="Redux logo"
               size="small"
             />
             <ActiveIcon
