@@ -175,16 +175,16 @@ export default function Demos() {
           </div>
           <div className={styles.projectItem}>
             <div className={styles.projectInfo}>
-              <a href="https://github.com/cooperability/BMX-bookmark-extractor">
-                BookMark eXtractor
+              <a href="https://github.com/cooperability/remediate.app">
+                remediate.app
               </a>
               <span className={styles.projectStatus}>(Ongoing)</span>
             </div>
             <div className={styles.techStackIcons}>
               <ActiveIcon
-                href="https://www.docker.com/"
-                iconName="docker"
-                alt="Docker logo"
+                href="https://www.typescriptlang.org/"
+                iconName="ts"
+                alt="TypeScript logo"
                 size="small"
               />
               <ActiveIcon
@@ -194,21 +194,9 @@ export default function Demos() {
                 size="small"
               />
               <ActiveIcon
-                href="https://www.python.org/"
-                iconName="py"
-                alt="Python logo"
-                size="small"
-              />
-              <ActiveIcon
-                href="https://python-poetry.org/"
-                imgSrc="/images/poetry.png"
-                alt="Poetry logo"
-                size="small"
-              />
-              <ActiveIcon
-                href="https://www.djangoproject.com/"
-                iconName="django"
-                alt="Django logo"
+                href="https://tailwindcss.com/"
+                iconName="tailwind"
+                alt="Tailwind CSS logo"
                 size="small"
               />
               <ActiveIcon
@@ -218,9 +206,15 @@ export default function Demos() {
                 size="small"
               />
               <ActiveIcon
-                href="https://nodejs.org/en"
-                iconName="nodejs"
-                alt="Node.js logo"
+                href="https://www.docker.com/"
+                iconName="docker"
+                alt="Docker logo"
+                size="small"
+              />
+              <ActiveIcon
+                href="https://vercel.com/"
+                iconName="vercel"
+                alt="Vercel logo"
                 size="small"
               />
             </div>
@@ -257,15 +251,15 @@ export default function Demos() {
           </div>
           <div className={styles.techStackIcons}>
             <ActiveIcon
-              href="https://redux.js.org/"
-              iconName="redux"
-              alt="Redux logo"
-              size="small"
-            />
-            <ActiveIcon
               href="https://react.dev/"
               iconName="react"
               alt="React logo"
+              size="small"
+            />
+            <ActiveIcon
+              href="https://redux.js.org/"
+              iconName="redux"
+              alt="Redux logo"
               size="small"
             />
             <ActiveIcon

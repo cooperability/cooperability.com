@@ -204,9 +204,9 @@ export const OPTIONS: PromptOption[] = [
     section: 'output',
     group: 'format',
     label: 'JSON',
-    description: 'Machine-readable output only',
+    description: 'Machine-readable only. Name the fields in an example',
     template:
-      'Respond with valid JSON only, with no text before or after it. Describe the fields you expect in the task or show them in an example.',
+      'Respond with valid JSON only, with no text before or after it, because the output will be parsed by code.',
   },
 
   {

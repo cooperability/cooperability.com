@@ -370,16 +370,14 @@ Does this need a mobile/desktop split?
 
 #### Example 1: Footer Layout
 
-**File:** `src/sections/Footer.tsx:6-7,15-79`
+**File:** `src/sections/Footer.tsx`
 
-Uses `useResponsive()` for mobile vs. desktop layout:
-
-- **Desktop (>525px):** Social icons + navigation links
-- **Mobile (≤525px):** Only centered social icons
+Uses Tailwind only. Desktop and mobile show the same six icons, so one
+`flex-wrap justify-between` row serves both and no hook is needed.
 
 #### Example 2: Header Navigation
 
-**File:** `src/sections/Header.tsx:69,139-163`
+**File:** `src/sections/Header.tsx:65,130-154`
 
 Uses `useResponsive()` for navigation behavior:
 

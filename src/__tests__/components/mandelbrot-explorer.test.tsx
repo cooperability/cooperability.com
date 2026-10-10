@@ -49,10 +49,12 @@ describe('MandelbrotExplorer zoom', () => {
     expectZoomedThreeTimesOnTarget()
   })
 
-  it('tells the user a double-click or double-tap zooms 3x', () => {
+  it('tells the user how to pan and zoom 3x, one instruction per line', () => {
     setup()
-    expect(document.body).toHaveTextContent(
-      /double-click or double-tap to zoom 3×/i
+    const lines = Array.from(document.querySelectorAll('p'), (p) =>
+      p.textContent?.trim()
     )
+    expect(lines).toContain('Click/tap + drag to pan')
+    expect(lines).toContain('Double-click/tap to zoom 3×.')
   })
 })

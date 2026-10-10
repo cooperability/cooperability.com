@@ -12,11 +12,12 @@ const PromptComposer = dynamic(
       <div className="container mx-auto p-4 animate-pulse">
         <div className="text-center mb-6">
           <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-64 mx-auto mb-2" />
-          <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-96 mx-auto" />
+          <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-full max-w-96 mx-auto" />
         </div>
-        <div className="flex flex-col lg:flex-row gap-4">
-          <div className="flex-1 h-96 bg-gray-200 dark:bg-gray-700 rounded-lg" />
-          <div className="flex-1 h-96 bg-gray-200 dark:bg-gray-700 rounded-lg" />
+        {/* One column, matching the composer, so nothing jumps on load. */}
+        <div className="flex flex-col gap-3">
+          <div className="h-96 bg-gray-200 dark:bg-gray-700 rounded-lg" />
+          <div className="h-96 bg-gray-200 dark:bg-gray-700 rounded-lg" />
         </div>
       </div>
     ),
