@@ -180,12 +180,13 @@
   border: 1px solid #ffffff;
 }
 
-.button:hover:not(:disabled) {
+.button:hover:not([aria-disabled='true']) {
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(96, 165, 250, 0.3);
 }
 
-.button:disabled {
+.button[aria-disabled='true'],
+.resetButton[aria-disabled='true'] {
   opacity: 0.5;
   cursor: not-allowed;
 }
@@ -197,7 +198,7 @@
   border: 1px solid #ffffff;
 }
 
-.resetButton:hover:not(:disabled) {
+.resetButton:hover:not([aria-disabled='true']) {
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(96, 165, 250, 0.3);
 }

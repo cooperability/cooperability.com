@@ -58,3 +58,49 @@ describe('MandelbrotExplorer zoom', () => {
     expect(lines).toContain('Double-click/tap to zoom 3×.')
   })
 })
+
+// A natively disabled button drops keyboard focus to <body> the moment it
+// disables, so the controls must stay focusable whenever they are unavailable.
+describe('MandelbrotExplorer controls', () => {
+  afterEach(() => jest.restoreAllMocks())
+
+  const iterations = () => screen.getByText('Max Iterations:').nextSibling
+
+  it('keeps focus on a control pressed mid-render and ignores the press', () => {
+    const ctx = {
+      createImageData: (w: number, h: number) => ({
+        data: new Uint8ClampedArray(w * h * 4),
+      }),
+      putImageData() {},
+      clearRect() {},
+      drawImage() {},
+    }
+    jest
+      .spyOn(HTMLCanvasElement.prototype, 'getContext')
+      .mockReturnValue(ctx as unknown as CanvasRenderingContext2D)
+    // Never schedule the next chunk, so the first render stays in progress.
+    jest.spyOn(window, 'requestAnimationFrame').mockReturnValue(0)
+    render(<MandelbrotExplorer />)
+
+    const plus = screen.getByRole('button', { name: '+ Iterations' })
+    plus.focus()
+    fireEvent.click(plus)
+
+    expect(plus).toHaveFocus()
+    expect(plus).toBeEnabled()
+    expect(plus).toHaveAttribute('aria-disabled', 'true')
+    expect(iterations()).toHaveTextContent('256')
+  })
+
+  it('keeps focus on - Iterations at its floor of 50 and ignores further presses', () => {
+    setup()
+    const minus = screen.getByRole('button', { name: '- Iterations' })
+    minus.focus()
+    for (let i = 0; i < 6; i++) fireEvent.click(minus)
+
+    expect(iterations()).toHaveTextContent('50')
+    expect(minus).toHaveFocus()
+    expect(minus).toBeEnabled()
+    expect(minus).toHaveAttribute('aria-disabled', 'true')
+  })
+})
