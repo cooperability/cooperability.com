@@ -68,7 +68,7 @@ export default async function ResourcePage({
       <h1 className={utilStyles.headingXl}>{frontMatter.title}</h1>
       {frontMatter.date && (
         <div className={utilStyles.lightText}>
-          <DateDisplay dateString={frontMatter.date} />
+          Last updated <DateDisplay dateString={frontMatter.date} />
         </div>
       )}
       <MDXRemote
