@@ -71,7 +71,7 @@ opioid-converter/
 
 ### Dynamic Import & Code Splitting
 
-The Opioid Converter is loaded using Next.js `dynamic()` import with SSR disabled. See `src/pages/demos/opioid-converter.tsx` for the implementation, which includes a loading skeleton to reduce server bundle size.
+The Opioid Converter is loaded using Next.js `dynamic()` import with SSR disabled. See `src/app/demos/opioid-converter/opioid-converter-client.tsx` for the implementation, which includes a loading skeleton to reduce server bundle size.
 
 **Benefits**:
 

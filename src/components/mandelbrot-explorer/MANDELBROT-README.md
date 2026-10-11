@@ -409,7 +409,7 @@ A: "Absolutely! For any point c in the Mandelbrot set, render its corresponding 
 
 ### Dynamic Import & Code Splitting
 
-The Mandelbrot Explorer is loaded using Next.js `dynamic()` import with SSR disabled. See `src/pages/demos/mandelbrot-explorer.tsx` for the implementation, which includes a loading skeleton and disables server-side rendering since canvas rendering requires browser APIs.
+The Mandelbrot Explorer is loaded using Next.js `dynamic()` import with SSR disabled. See `src/app/demos/mandelbrot-explorer/mandelbrot-explorer-client.tsx` for the implementation, which includes a loading skeleton and disables server-side rendering since canvas rendering requires browser APIs.
 
 **Benefits**:
 

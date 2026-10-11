@@ -43,7 +43,7 @@ Dynamic imports allow components to load on-demand rather than being included in
 
 ### Implementation Pattern
 
-**Reference Implementation:** `src/pages/demos/prompt-composer.tsx`
+**Reference Implementation:** `src/app/demos/prompt-composer/prompt-composer-client.tsx`
 
 ```tsx
 import dynamic from 'next/dynamic'
@@ -76,9 +76,9 @@ Disable SSR (`ssr: false`) when:
 
 **See:**
 
-- `src/pages/demos/prompt-composer.tsx`
-- `src/pages/demos/opioid-converter.tsx`
-- `src/pages/demos/mandelbrot-explorer.tsx`
+- `src/app/demos/prompt-composer/prompt-composer-client.tsx`
+- `src/app/demos/opioid-converter/opioid-converter-client.tsx`
+- `src/app/demos/mandelbrot-explorer/mandelbrot-explorer-client.tsx`
 
 ---
 
@@ -92,7 +92,7 @@ CLS measures visual stability—how much content shifts during page load. Poor C
 
 Loading skeletons reserve space for dynamically loaded components, preventing layout shift when they render.
 
-**Reference Implementation:** `src/pages/demos/prompt-composer.tsx:10-20`
+**Reference Implementation:** `src/app/demos/prompt-composer/prompt-composer-client.tsx:11-22`
 
 ```tsx
 loading: () => (
@@ -309,7 +309,7 @@ The hook provides SSR-safe, debounced breakpoint detection with Tailwind-aligned
 **Usage:**
 
 ```tsx
-import { useResponsive } from '@/hooks/useResponsive'
+import { useResponsive } from '@/src/hooks/useResponsive'
 
 const { isMobile, isDesktop } = useResponsive()
 ```
@@ -465,13 +465,13 @@ If 525px is needed frequently in Tailwind classes:
 
 The project uses `@vercel/speed-insights` for Real User Monitoring (RUM).
 
-**Configuration:** `src/pages/_app.tsx`
+**Configuration:** `src/app/layout.tsx`
 
 ```tsx
 import { SpeedInsights } from '@vercel/speed-insights/next'
 
-// Route prop enables per-page metrics
-;<SpeedInsights route={router.pathname} />
+// The App Router entry point reads the route itself, so it takes no route prop
+;<SpeedInsights />
 ```
 
 ### Bundle Analysis

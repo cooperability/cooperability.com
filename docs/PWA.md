@@ -140,21 +140,22 @@ Traditional PWA approach: **one manifest per site**
 ```
 Co-Operability PWA Suite
 ├── public/icons/
-│   ├── site.webmanifest              # Main site identity
-│   ├── prompt-composer.webmanifest   # Prompt Composer identity
-│   ├── opioid-converter.webmanifest  # Opioid Converter identity
-│   ├── web-app-manifest-192x192.png  # Shared icons
+│   ├── site.webmanifest                 # Main site identity
+│   ├── prompt-composer.webmanifest      # Prompt Composer identity
+│   ├── opioid-converter.webmanifest     # Opioid Converter identity
+│   ├── mandelbrot-explorer.webmanifest  # Mandelbrot Explorer identity
+│   ├── game.webmanifest                 # Candlelight identity, own icons in game/
+│   ├── web-app-manifest-192x192.png     # Shared icons for the three applets
 │   ├── web-app-manifest-512x512.png
 │   └── apple-touch-icon.png
-├── public/sw.js                      # Compiled service worker
+├── public/sw.js                         # Compiled service worker (gitignored)
 ├── src/
-│   ├── sw.js                         # Service worker source
-│   ├── components/layout.tsx         # Layout with skipManifest prop
-│   └── pages/
-│       ├── index.tsx                 # Main site (uses site.webmanifest)
-│       ├── prompt-composer.tsx       # Applet (uses prompt-composer.webmanifest)
-│       └── opioid-converter.tsx      # Applet (uses opioid-converter.webmanifest)
-└── scripts/build-sw.mjs              # Service worker build script
+│   ├── sw.js                            # Service worker source
+│   └── app/
+│       ├── layout.tsx                   # metadata.manifest = site.webmanifest
+│       ├── service-worker.tsx           # Registers /sw.js in a useEffect
+│       └── demos/<applet>/page.tsx      # metadata.manifest = <applet>.webmanifest
+└── scripts/build-sw.mjs                 # Service worker build script
 ```
 
 ### How Manifest Precedence Works
@@ -174,17 +175,19 @@ Co-Operability PWA Suite
 <!-- Result: Browser uses site.webmanifest → shows "Co-Operability" -->
 ```
 
-**Solution (Current):**
+**Solution (Current):** each applet route exports its own `metadata.manifest`.
+App Router metadata does not deep-merge: a child segment's `manifest` replaces
+the root layout's, so the page renders exactly one `<link rel="manifest">`. Each applet page also renders
+`<HardLoad />`, which reloads a page reached by client-side navigation, since
+that document keeps the previous page's `<head>` and iOS would save its manifest.
 
 ```tsx
-// Layout component with conditional manifest
-<Layout home={false} skipManifest={true}>
-  <Head>
-    <!-- Only page manifest present -->
-    <link rel="manifest" href="/icons/prompt-composer.webmanifest" />
-  </Head>
-</Layout>
-<!-- Result: Browser uses prompt-composer.webmanifest → shows "Prompt Composer" -->
+// src/app/demos/opioid-converter/page.tsx
+export const metadata: Metadata = {
+  manifest: '/icons/opioid-converter.webmanifest',
+  appleWebApp: { capable: true, title: 'Opioid Converter' },
+}
+// Result: the browser installs "Opioid Converter", not "Co-Operability"
 ```
 
 ### Service Worker Architecture
@@ -206,10 +209,11 @@ pnpm build
 **Service Worker Scope:**
 
 ```javascript
-// Registration in _app.tsx
-navigator.serviceWorker.register('/sw.js', { scope: '/' })
-//                                            ↑
-//                                  Scope: "/" = caches ALL routes
+// src/app/service-worker.tsx, rendered by the root layout
+navigator.serviceWorker.register('/sw.js')
+// No scope argument: the default is the script's directory, "/", so the
+// worker controls every route. It precaches only /_next/static assets and the
+// Candlelight page (scripts/build-sw.mjs), so other routes still need the network
 ```
 
 **Key Concept:** Service worker scope (`/`) is **independent** of manifest scope:
@@ -371,51 +375,50 @@ navigator.serviceWorker.register('/sw.js', { scope: '/' })
 
 ### Step 2: Create the Page Component
 
-**File:** `src/pages/my-new-applet.tsx`
+**File:** `src/app/demos/my-new-applet/page.tsx`, a server component. Put the
+interactive part in a sibling `my-new-applet-client.tsx` marked `'use client'`,
+as the other applets do.
 
 ```tsx
-import Head from 'next/head'
-import Layout from '@/src/components/layout'
-import MyAppletComponent from '@/src/components/MyAppletComponent'
-import { NextPageWithLayout } from './_app'
+import type { Metadata, Viewport } from 'next'
+import HardLoad from '@/src/components/HardLoad'
+import MyNewAppletClient from './my-new-applet-client'
 
-const MyAppletPage: NextPageWithLayout = () => {
-  return (
-    <Layout home={false} skipManifest={true}>
-      {' '}
-      {/* KEY: skipManifest={true} */}
-      <Head>
-        <title>My New Applet | Co-Operability</title>
-        <meta name="description" content="Description of what this tool does" />
-
-        {/* PWA-specific manifest for this applet */}
-        <link rel="manifest" href="/icons/my-new-applet.webmanifest" />
-        <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
-
-        {/* iOS-specific meta tags (required for proper naming on Safari) */}
-        <meta name="apple-mobile-web-app-title" content="My New Applet" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="theme-color" content="#8b5cf6" />
-      </Head>
-      <div className="min-h-screen">
-        <MyAppletComponent />
-      </div>
-    </Layout>
-  )
+export const metadata: Metadata = {
+  title: { absolute: 'My New Applet' },
+  description: 'Description of what this tool does',
+  manifest: '/icons/my-new-applet.webmanifest',
+  icons: { icon: '/icon.ico', apple: '/icons/apple-touch-icon.png' },
+  appleWebApp: {
+    capable: true,
+    title: 'My New Applet',
+    statusBarStyle: 'default',
+  },
 }
 
-export default MyAppletPage
+export const viewport: Viewport = {
+  themeColor: '#8b5cf6',
+}
+
+export default function MyNewAppletPage() {
+  return (
+    <div className="page-container">
+      <HardLoad />
+      <MyNewAppletClient />
+    </div>
+  )
+}
 ```
 
 **Critical Requirements:**
 
-1. ✅ Use main `Layout` component (provides Header, ThemeSwitch, Footer)
-2. ✅ Pass `skipManifest={true}` to Layout (prevents global manifest conflict)
-3. ✅ Include page-specific manifest link
-4. ✅ Include apple-touch-icon link
-5. ✅ Include all iOS-specific meta tags
-6. ✅ Match `theme-color` between manifest and meta tag
+1. Header, sidebar and footer come from the root layout. Do not wrap the page in a layout component
+2. Set `metadata.manifest`. It replaces the root layout's manifest, so there is no conflict to suppress
+3. Set `icons.apple`, and `icons.icon` too: metadata does not deep-merge, so setting one key of `icons` drops the layout's others
+4. Set `appleWebApp.title` and `capable` for Safari's home-screen name
+5. Match `viewport.themeColor` to the manifest's `theme_color`
+6. Render `<HardLoad />`. A client-side navigation keeps the previous page's `<head>`, so without a reload iOS Add to Home Screen saves the site's manifest instead of the applet's
+7. Add the route to `scripts/build-sw.mjs` `additionalPrecacheEntries` if it must open offline. Only Candlelight does today
 
 ### Step 3: Add to Shortcuts (Optional)
 
@@ -514,7 +517,7 @@ git push origin main  # Triggers Vercel deployment
 
 ```bash
 # Verify only ONE manifest link present
-curl http://localhost:3000/prompt-composer | grep 'rel="manifest"'
+curl http://localhost:3000/demos/prompt-composer | grep 'rel="manifest"'
 
 # Expected: Only prompt-composer.webmanifest
 # Should NOT see site.webmanifest
@@ -622,10 +625,9 @@ jq . public/icons/site.webmanifest
 **Check page includes manifest link:**
 
 ```bash
-grep -n 'rel="manifest"' src/pages/prompt-composer.tsx
-grep -n 'rel="manifest"' src/pages/opioid-converter.tsx
+grep -n 'manifest:' src/app/demos/*/page.tsx
 
-# Expected: Should find the manifest links
+# Expected: one metadata.manifest per applet route
 ```
 
 ### Testing Matrix
@@ -656,7 +658,7 @@ grep -n 'rel="manifest"' src/pages/opioid-converter.tsx
 
 ```bash
 # Check HTML source for duplicate manifests
-curl http://localhost:3000/prompt-composer | grep 'rel="manifest"'
+curl http://localhost:3000/demos/prompt-composer | grep 'rel="manifest"'
 
 # Problem: Multiple manifest links
 # <link rel="manifest" href="/icons/site.webmanifest" />        ← Layout's manifest (wrong)
@@ -665,7 +667,7 @@ curl http://localhost:3000/prompt-composer | grep 'rel="manifest"'
 
 **Solutions:**
 
-1. ✅ Verify `skipManifest={true}` passed to Layout component
+1. Verify the route's `page.tsx` exports `metadata.manifest`
 2. ✅ Check manifest file exists at correct path
 3. ✅ Clear browser cache (Ctrl+Shift+R / Cmd+Shift+R)
 4. ✅ Restart dev server
@@ -1212,13 +1214,13 @@ pnpm dev                    # Start dev server
 pnpm build                  # Build for production
 
 # Testing
-open http://localhost:3000/prompt-composer    # Test applet
+open http://localhost:3000/demos/prompt-composer    # Test applet
 jq . public/icons/*.webmanifest               # Validate manifest JSON
 curl http://localhost:3000/sw.js              # Check service worker
 
 # Validation
 ls -la public/icons/*.webmanifest              # List manifests
-grep 'rel="manifest"' src/pages/*.tsx          # Find manifest links
+grep 'manifest:' src/app/demos/*/page.tsx     # Find manifest metadata
 ```
 
 ### File Locations
@@ -1229,8 +1231,8 @@ grep 'rel="manifest"' src/pages/*.tsx          # Find manifest links
 | `public/sw.js`               | Compiled service worker (served to browsers) |
 | `src/sw.js`                  | Service worker source (edit this)            |
 | `scripts/build-sw.mjs`       | Service worker build script                  |
-| `src/components/layout.tsx`  | Layout with `skipManifest` prop              |
-| `src/pages/*-applet.tsx`     | Applet page components                       |
+| `src/app/service-worker.tsx` | Service worker registration                  |
+| `src/app/demos/*/page.tsx`   | Applet routes, each with `metadata.manifest` |
 
 ### Deployment Checklist
 
@@ -1294,7 +1296,7 @@ grep 'rel="manifest"' src/pages/*.tsx          # Find manifest links
 
 2. **Manifest Precedence is Critical**
    - Browsers use the **first** `<link rel="manifest">` they encounter
-   - Solution: Conditional manifests with `skipManifest` prop
+   - Solution: each applet route sets `metadata.manifest`, which replaces the layout's
 
 3. **iOS Needs Extra Love**
    - Apple's manifest support is incomplete

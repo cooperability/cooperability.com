@@ -13,7 +13,7 @@ shadcn/ui on Radix · MDX · Serwist · pnpm 11 · Node 22 · Vercel.
 ## How the site fits together
 
 ```mermaid
-flowchart LR
+flowchart TB
   classDef built fill:#dff5e1,stroke:#2e7d32,color:#1b3d20
   classDef planned fill:#f2f2f2,stroke:#9e9e9e,color:#3d3d3d,stroke-dasharray:4 3
 
@@ -150,7 +150,7 @@ installed copy launches offline. See [Game Rig](docs/Game-Rig.md).
 ## How a change ships
 
 ```mermaid
-flowchart LR
+flowchart TB
   classDef built fill:#dff5e1,stroke:#2e7d32,color:#1b3d20
 
   dev((Developer)):::built
@@ -175,7 +175,8 @@ flowchart LR
 ```
 
 **The CI gate.** `.github/workflows/ci.yml` runs two jobs on every pull request
-and every push to `main`. The first is lint, typecheck, tests with coverage,
+into `main` and every push to `main`. A PR based on another PR's branch gets
+no CI run. The first is lint, typecheck, tests with coverage,
 and a production build. The second reproduces Vercel's install shape
 (`corepack prepare pnpm@11.24.0`, then `--frozen-lockfile`) and builds again,
 because Vercel does not yet detect pnpm 11 from a 9.0 lockfile, so a local
@@ -230,7 +231,7 @@ Full documentation in **[docs/Tooling.md](docs/Tooling.md)**.
 - **Package management:** pnpm 11 with an isolated `node_modules` tree and one `pnpm-lock.yaml`
 - **UI components:** shadcn/ui (Tailwind plus Radix primitives)
 - **Bundle analysis:** Webpack Bundle Analyzer
-- **Accessibility:** axe-core CLI and Lighthouse, run against a live dev server
+- **Accessibility:** `@axe-core/playwright` and Lighthouse, run against a live dev server
 - **Icons:** skillicons.dev, sourced from simple-icons.org
 
 Pre-push hooks and GitHub Actions block vulnerable code. See
@@ -243,55 +244,56 @@ why, so a reader can tell load-bearing packages from incidental ones.
 
 ### Runtime (`dependencies`)
 
-| Package                                                                                            | Role                                                                 |
-| -------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
-| `next`, `react`, `react-dom`                                                                       | The framework and its renderer                                       |
-| `tailwindcss`, `@tailwindcss/postcss`, `tailwindcss-animate`                                       | Styling: utility CSS, animation utilities                            |
-| `@radix-ui/react-accordion`, `-checkbox`, `-label`, `-radio-group`, `-slot`, `-switch`, `-tooltip` | Unstyled accessible primitives that shadcn/ui wraps                  |
-| `class-variance-authority`, `clsx`, `tailwind-merge`                                               | Variant and className composition the shadcn components rely on      |
-| `@heroicons/react`, `lucide-react`                                                                 | Icon sets used in the chrome and the applets                         |
-| `@mdx-js/loader`, `@mdx-js/react`, `@next/mdx`, `next-mdx-remote`                                  | MDX pipeline. `next-mdx-remote/rsc` is what `/resources/[slug]` uses |
-| `gray-matter`, `remark`, `remark-html`                                                             | Front-matter parsing and markdown processing                         |
-| `next-themes`                                                                                      | Light/dark theme, read by the icons and the CSS variables            |
-| `next-sitemap`                                                                                     | Generates `sitemap.xml` and `robots.txt` after the build             |
-| `@vercel/analytics`, `@vercel/speed-insights`                                                      | Cookieless page and Web Vitals metrics                               |
-| `date-fns`                                                                                         | Formats resource dates                                               |
-| `sharp`                                                                                            | Image optimization backend for `next/image`                          |
-| `@anthropic-ai/sdk`                                                                                | Claude API client for `/api/ai/critique`. Server-only                |
+| Package                                                                                            | Role                                                                                                                                                        |
+| -------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `next`, `react`, `react-dom`                                                                       | The framework and its renderer                                                                                                                              |
+| `tailwindcss`, `@tailwindcss/postcss`, `tailwindcss-animate`                                       | Styling: utility CSS, animation utilities                                                                                                                   |
+| `@radix-ui/react-accordion`, `-checkbox`, `-label`, `-radio-group`, `-slot`, `-switch`, `-tooltip` | Unstyled accessible primitives that shadcn/ui wraps                                                                                                         |
+| `class-variance-authority`, `clsx`, `tailwind-merge`                                               | Variant and className composition the shadcn components rely on                                                                                             |
+| `@heroicons/react`, `lucide-react`                                                                 | Icon sets used in the chrome and the applets                                                                                                                |
+| `@mdx-js/loader`, `@mdx-js/react`, `@next/mdx`, `next-mdx-remote`                                  | MDX. Only `next-mdx-remote/rsc` renders anything (`/resources/[slug]`). `@next/mdx` is wired in `next.config.js` but no route is MDX: Roadmap `mdx-cleanup` |
+| `gray-matter`, `remark`, `remark-html`                                                             | `gray-matter` parses front matter. Nothing imports `remark` or `remark-html`: Roadmap `mdx-cleanup`                                                         |
+| `next-themes`                                                                                      | Light/dark theme, read by the icons and the CSS variables                                                                                                   |
+| `next-sitemap`                                                                                     | Generates `sitemap.xml` and `robots.txt` after the build                                                                                                    |
+| `@vercel/analytics`, `@vercel/speed-insights`                                                      | Cookieless page and Web Vitals metrics                                                                                                                      |
+| `date-fns`                                                                                         | Formats resource dates                                                                                                                                      |
+| `sharp`                                                                                            | Image optimization backend for `next/image`                                                                                                                 |
+| `@anthropic-ai/sdk`                                                                                | Claude API client for `/api/ai/critique`. Server-only                                                                                                       |
 
 ### Development (`devDependencies`)
 
-| Package                                                                                                                                                    | Role                                                                                      |
-| ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
-| `typescript`, `ts-node`, `@types/node`, `@types/react`, `@types/react-dom`, `@types/eslint`, `@types/jest`                                                 | Type checking and ambient types                                                           |
-| `eslint`, `@eslint/js`, `typescript-eslint`, `eslint-config-next`, `@next/eslint-plugin-next`, `eslint-plugin-react-hooks`, `eslint-plugin-mdx`, `globals` | The lint gate. See [Lint Gate](docs/Lint-Gate.md)                                         |
-| `prettier`, `eslint-config-prettier`                                                                                                                       | Formatting, and switching off the rules it conflicts with                                 |
-| `jest`, `jest-environment-jsdom`, `@testing-library/react`, `@testing-library/dom`, `@testing-library/jest-dom`                                            | Unit tests                                                                                |
-| `@axe-core/playwright`, `playwright`, `lighthouse`, `start-server-and-test`                                                                                | The `pnpm a11y` accessibility run against a live server                                   |
-| `serwist`, `@serwist/build`                                                                                                                                | Service worker and its precache manifest                                                  |
-| `@next/bundle-analyzer`, `webpack`                                                                                                                         | `pnpm analyze`. Both are webpack-only, which is why that one script opts out of Turbopack |
-| `husky`, `lint-staged`                                                                                                                                     | Git hooks                                                                                 |
-| `postcss`                                                                                                                                                  | CSS processing for Tailwind                                                               |
-| `@swc/core`, `cross-env`                                                                                                                                   | Transform speed, and cross-platform env vars in scripts                                   |
-| `acorn`, `punycode`, `@types/punycode`                                                                                                                     | Pinned through overrides to keep deprecated transitives off the tree                      |
+| Package                                                                                                                                                    | Role                                                                                                                                                   |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `typescript`, `ts-node`, `@types/node`, `@types/react`, `@types/react-dom`, `@types/eslint`, `@types/jest`                                                 | Type checking and ambient types                                                                                                                        |
+| `eslint`, `@eslint/js`, `typescript-eslint`, `eslint-config-next`, `@next/eslint-plugin-next`, `eslint-plugin-react-hooks`, `eslint-plugin-mdx`, `globals` | The lint gate. See [Lint Gate](docs/Lint-Gate.md)                                                                                                      |
+| `prettier`, `eslint-config-prettier`                                                                                                                       | Formatting, and switching off the rules it conflicts with                                                                                              |
+| `jest`, `jest-environment-jsdom`, `@testing-library/react`, `@testing-library/dom`, `@testing-library/jest-dom`                                            | Unit tests                                                                                                                                             |
+| `@axe-core/playwright`, `playwright`, `lighthouse`, `start-server-and-test`                                                                                | The `pnpm a11y` accessibility run against a live server                                                                                                |
+| `serwist`, `@serwist/build`                                                                                                                                | Service worker and its precache manifest                                                                                                               |
+| `@next/bundle-analyzer`, `webpack`                                                                                                                         | `pnpm analyze`, which is why that one script opts out of Turbopack. `webpack` also bundles the service worker in `scripts/build-sw.mjs` on every build |
+| `husky`, `lint-staged`                                                                                                                                     | Git hooks                                                                                                                                              |
+| `postcss`                                                                                                                                                  | CSS processing for Tailwind                                                                                                                            |
+| `@swc/core`, `cross-env`                                                                                                                                   | Transform speed, and cross-platform env vars in scripts                                                                                                |
+| `acorn`, `punycode`, `@types/punycode`                                                                                                                     | Keep deprecated transitives off the tree. Only `punycode` is also an override in `pnpm-workspace.yaml`                                                 |
 
 ## Documentation
 
-| Document                                        | What is in it                                                               |
-| ----------------------------------------------- | --------------------------------------------------------------------------- |
-| [Roadmap](docs/Roadmap.md)                      | Everything outstanding, grouped by kind of work                             |
-| [AI Review](docs/AI-Review.md)                  | The review route: setup, off switch, spend budget, cost, threat model       |
-| [App Router Notes](docs/App-Router.md)          | The migration nuances that bite twice                                       |
-| [PNPM Migration](docs/PNPM-MIGRATION.md)        | Yarn 4 PnP to pnpm 11: what changed, what it exposed, what it did not fix   |
-| [Lint Gate](docs/Lint-Gate.md)                  | Why ESLint stays on 10, and the config work that came with it               |
-| [Tooling](docs/Tooling.md)                      | Linting, formatting, testing, hooks, security auditing, bundle analysis     |
-| [Performance](docs/Performance.md)              | Code splitting, CLS, debouncing, `clamp()` spacing, breakpoint strategy     |
-| [Accessibility](docs/Accessibility.md)          | WCAG 2.1 AA posture and what is automated                                   |
-| [PWA Suite](docs/PWA.md)                        | Applet architecture, manifests, service worker, install testing             |
-| [Game Rig](docs/Game-Rig.md)                    | The handheld game shell: input, scaling, launch images, offline             |
-| [Icons and SVG](docs/Icons.md)                  | skillicons.dev, and the SVG security configuration it forces                |
-| [SEO](docs/SEO.md)                              | Search Console setup and SEO maintenance                                    |
-| [Project Structure](docs/PROJECT-STRUCTURE.md)  | Root layout conventions and the unified link components                     |
-| [MCP](docs/MCP.md)                              | Model Context Protocol integration guide. **Aspirational, not implemented** |
-| [References](docs/References.md)                | Sources this site was built from, and an index of project learnings         |
-| [AGENTS.md](AGENTS.md) / [CLAUDE.md](CLAUDE.md) | Agent skills, subagents and repo conventions                                |
+| Document                                        | What is in it                                                                |
+| ----------------------------------------------- | ---------------------------------------------------------------------------- |
+| [Roadmap](docs/Roadmap.md)                      | Everything outstanding, ranked P0 to P3 as task cards an agent can pick up   |
+| [AI Review](docs/AI-Review.md)                  | The review route: setup, off switch, spend budget, cost, threat model        |
+| [App Router Notes](docs/App-Router.md)          | The migration nuances that bite twice                                        |
+| [PNPM Migration](docs/PNPM-MIGRATION.md)        | Yarn 4 PnP to pnpm 11: what changed, what it exposed, what it did not fix    |
+| [Lint Gate](docs/Lint-Gate.md)                  | Why ESLint stays on 10, and the config work that came with it                |
+| [Tooling](docs/Tooling.md)                      | Linting, formatting, testing, hooks, security auditing, bundle analysis      |
+| [Performance](docs/Performance.md)              | Code splitting, CLS, debouncing, `clamp()` spacing, breakpoint strategy      |
+| [Accessibility](docs/Accessibility.md)          | WCAG 2.1 AA posture and what is automated                                    |
+| [PWA Suite](docs/PWA.md)                        | Applet architecture, manifests, service worker, install testing              |
+| [Game Rig](docs/Game-Rig.md)                    | The handheld game shell: input, scaling, launch images, offline              |
+| [Candlelight Beta](docs/Candlelight-Beta.md)    | The beta-test playbook for the game: scenarios, browser pass, judgement pass |
+| [Icons and SVG](docs/Icons.md)                  | skillicons.dev, and the SVG security configuration it forces                 |
+| [SEO](docs/SEO.md)                              | Search Console setup and SEO maintenance                                     |
+| [Project Structure](docs/PROJECT-STRUCTURE.md)  | Root layout conventions and the unified link components                      |
+| [MCP](docs/MCP.md)                              | Model Context Protocol integration guide. **Aspirational, not implemented**  |
+| [References](docs/References.md)                | Sources this site was built from, and an index of project learnings          |
+| [AGENTS.md](AGENTS.md) / [CLAUDE.md](CLAUDE.md) | Agent skills, subagents and repo conventions                                 |
