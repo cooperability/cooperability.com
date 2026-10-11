@@ -66,51 +66,54 @@ new capability.
 
 ## Ranked index
 
-| #   | Id                                                | Kind  | Pri | Effort | Depends on                        | Status                 |
-| --- | ------------------------------------------------- | ----- | --- | ------ | --------------------------------- | ---------------------- |
-| 1   | [`opioid-methadone`](#opioid-methadone)           | Bug   | P0  | S      | none                              | Open                   |
-| 2   | [`opioid-input`](#opioid-input)                   | Bug   | P0  | S      | none                              | Open                   |
-| 3   | [`opioid-factors`](#opioid-factors)               | Bug   | P1  | M      | `opioid-methadone`                | Open                   |
-| 4   | [`theme-tokens`](#theme-tokens)                   | Bug   | P1  | S      | none                              | In review, #348        |
-| 5   | [`focus-contrast`](#focus-contrast)               | Bug   | P1  | S      | `theme-tokens`                    | Open                   |
-| 6   | [`responsive-css`](#responsive-css)               | Bug   | P1  | M      | none                              | Open                   |
-| 7   | [`skillicons-local`](#skillicons-local)           | Bug   | P1  | S      | none                              | Open                   |
-| 8   | [`ai-store-guard`](#ai-store-guard)               | Bug   | P1  | S      | none                              | Open                   |
-| 9   | [`ai-caller-cap`](#ai-caller-cap)                 | Bug   | P1  | M      | none                              | Open                   |
-| 10  | [`ai-go-live`](#ai-go-live)                       | Chore | P1  | S      | `ai-store-guard`, `ai-caller-cap` | Owner only             |
-| 11  | [`offline-applets`](#offline-applets)             | Bug   | P2  | S      | none                              | Open                   |
-| 12  | [`mandelbrot-theme`](#mandelbrot-theme)           | Bug   | P2  | S      | none                              | Open                   |
-| 13  | [`mandelbrot-fixes`](#mandelbrot-fixes)           | Bug   | P2  | M      | none                              | Open                   |
-| 14  | [`resources-frontmatter`](#resources-frontmatter) | Bug   | P2  | S      | none                              | Open                   |
-| 15  | [`a11y-in-ci`](#a11y-in-ci)                       | Chore | P2  | M      | `theme-tokens`                    | Open                   |
-| 16  | [`ai-switch-failsafe`](#ai-switch-failsafe)       | Bug   | P2  | S      | none                              | Open                   |
-| 17  | [`ai-billing-check`](#ai-billing-check)           | Chore | P2  | S      | none                              | Open                   |
-| 18  | [`error-tracking`](#error-tracking)               | Epic  | P2  | M      | none                              | Open                   |
-| 19  | [`csp-enforce`](#csp-enforce)                     | Chore | P2  | S      | `error-tracking`                  | Open                   |
-| 20  | [`ai-evals`](#ai-evals)                           | Epic  | P2  | M      | none                              | Open                   |
-| 21  | [`json-ld-demos`](#json-ld-demos)                 | Epic  | P2  | S      | none                              | Open                   |
-| 22  | [`case-study`](#case-study)                       | Epic  | P2  | M      | `ai-go-live`                      | Open                   |
-| 23  | [`ai-fence-escape`](#ai-fence-escape)             | Chore | P3  | S      | none                              | Open                   |
-| 24  | [`ai-reservation-margin`](#ai-reservation-margin) | Chore | P3  | S      | none                              | Open                   |
-| 25  | [`audit-workflow`](#audit-workflow)               | Chore | P3  | S      | none                              | Open                   |
-| 26  | [`pnpm-integrity`](#pnpm-integrity)               | Chore | P3  | S      | none                              | Open                   |
-| 27  | [`mdx-cleanup`](#mdx-cleanup)                     | Chore | P3  | S      | none                              | Open                   |
-| 28  | [`dead-code`](#dead-code)                         | Chore | P3  | S      | none                              | Open                   |
-| 29  | [`src-tree-merge`](#src-tree-merge)               | Chore | P3  | M      | `dead-code`                       | Open                   |
-| 30  | [`swc-gitignore`](#swc-gitignore)                 | Chore | P3  | S      | none                              | Open                   |
-| 31  | [`sw-kill-switch`](#sw-kill-switch)               | Chore | P3  | S      | none                              | Open                   |
-| 32  | [`offline-fallback`](#offline-fallback)           | Epic  | P3  | S      | `offline-applets`                 | Open                   |
-| 33  | [`tw-animate-css`](#tw-animate-css)               | Chore | P3  | S      | none                              | Open                   |
-| 34  | [`small-fixes`](#small-fixes)                     | Bug   | P3  | S each | none                              | Open                   |
-| 35  | [`prompt-composer-v3`](#prompt-composer-v3)       | Epic  | P3  | M      | none                              | Open, proposed in #347 |
-| 36  | [`ai-cost-dashboard`](#ai-cost-dashboard)         | Epic  | P3  | S      | `ai-go-live`                      | Open                   |
-| 37  | [`ai-haiku-fallback`](#ai-haiku-fallback)         | Epic  | P3  | S      | `ai-evals`                        | Open                   |
-| 38  | [`og-images`](#og-images)                         | Epic  | P3  | M      | none                              | Open                   |
-| 39  | [`applet-icons`](#applet-icons)                   | Epic  | P3  | S      | none                              | Open                   |
-| 40  | [`rss-feed`](#rss-feed)                           | Epic  | P3  | S      | none                              | Open                   |
-| 41  | [`visual-polish`](#visual-polish)                 | Chore | P3  | S each | `focus-contrast` for some         | Open                   |
-| 42  | [`seo-site-audit`](#seo-site-audit)               | Chore | P3  | S      | none                              | Owner only             |
-| 43  | [`license`](#license)                             | Chore | P3  | S      | none                              | Owner only             |
+| #   | Id                                                    | Kind  | Pri | Effort | Depends on                        | Status                 |
+| --- | ----------------------------------------------------- | ----- | --- | ------ | --------------------------------- | ---------------------- |
+| 1   | [`opioid-methadone`](#opioid-methadone)               | Bug   | P0  | S      | none                              | In review, #350        |
+| 2   | [`opioid-input`](#opioid-input)                       | Bug   | P0  | S      | none                              | In review, #350        |
+| 3   | [`opioid-factors`](#opioid-factors)                   | Bug   | P1  | M      | `opioid-methadone`                | Open                   |
+| 4   | [`theme-tokens`](#theme-tokens)                       | Bug   | P1  | S      | none                              | In review, #348        |
+| 5   | [`focus-contrast`](#focus-contrast)                   | Bug   | P1  | S      | `theme-tokens`                    | Open                   |
+| 6   | [`responsive-css`](#responsive-css)                   | Bug   | P1  | M      | none                              | Open                   |
+| 7   | [`candlelight-ios-select`](#candlelight-ios-select)   | Bug   | P1  | S      | none                              | Open                   |
+| 8   | [`skillicons-local`](#skillicons-local)               | Bug   | P1  | S      | none                              | Open                   |
+| 9   | [`ai-store-guard`](#ai-store-guard)                   | Bug   | P1  | S      | none                              | Open                   |
+| 10  | [`ai-caller-cap`](#ai-caller-cap)                     | Bug   | P1  | M      | none                              | Open                   |
+| 11  | [`ai-go-live`](#ai-go-live)                           | Chore | P1  | S      | `ai-store-guard`, `ai-caller-cap` | Owner only             |
+| 12  | [`offline-applets`](#offline-applets)                 | Bug   | P2  | S      | none                              | Open                   |
+| 13  | [`mandelbrot-theme`](#mandelbrot-theme)               | Bug   | P2  | S      | none                              | Open                   |
+| 14  | [`candlelight-controls`](#candlelight-controls)       | Bug   | P2  | S      | none                              | Open                   |
+| 15  | [`mandelbrot-fixes`](#mandelbrot-fixes)               | Bug   | P2  | M      | none                              | Open                   |
+| 16  | [`prompt-composer-desktop`](#prompt-composer-desktop) | Epic  | P2  | M      | none                              | Open                   |
+| 17  | [`resources-frontmatter`](#resources-frontmatter)     | Bug   | P2  | S      | none                              | Open                   |
+| 18  | [`a11y-in-ci`](#a11y-in-ci)                           | Chore | P2  | M      | `theme-tokens`                    | Open                   |
+| 19  | [`ai-switch-failsafe`](#ai-switch-failsafe)           | Bug   | P2  | S      | none                              | Open                   |
+| 20  | [`ai-billing-check`](#ai-billing-check)               | Chore | P2  | S      | none                              | Open                   |
+| 21  | [`error-tracking`](#error-tracking)                   | Epic  | P2  | M      | none                              | Open                   |
+| 22  | [`csp-enforce`](#csp-enforce)                         | Chore | P2  | S      | `error-tracking`                  | Open                   |
+| 23  | [`ai-evals`](#ai-evals)                               | Epic  | P2  | M      | none                              | Open                   |
+| 24  | [`json-ld-demos`](#json-ld-demos)                     | Epic  | P2  | S      | none                              | Open                   |
+| 25  | [`case-study`](#case-study)                           | Epic  | P2  | M      | `ai-go-live`                      | Open                   |
+| 26  | [`ai-fence-escape`](#ai-fence-escape)                 | Chore | P3  | S      | none                              | Open                   |
+| 27  | [`ai-reservation-margin`](#ai-reservation-margin)     | Chore | P3  | S      | none                              | Open                   |
+| 28  | [`audit-workflow`](#audit-workflow)                   | Chore | P3  | S      | none                              | Open                   |
+| 29  | [`pnpm-integrity`](#pnpm-integrity)                   | Chore | P3  | S      | none                              | Open                   |
+| 30  | [`mdx-cleanup`](#mdx-cleanup)                         | Chore | P3  | S      | none                              | Open                   |
+| 31  | [`dead-code`](#dead-code)                             | Chore | P3  | S      | none                              | Open                   |
+| 32  | [`src-tree-merge`](#src-tree-merge)                   | Chore | P3  | M      | `dead-code`                       | Open                   |
+| 33  | [`swc-gitignore`](#swc-gitignore)                     | Chore | P3  | S      | none                              | Open                   |
+| 34  | [`sw-kill-switch`](#sw-kill-switch)                   | Chore | P3  | S      | none                              | Open                   |
+| 35  | [`offline-fallback`](#offline-fallback)               | Epic  | P3  | S      | `offline-applets`                 | Open                   |
+| 36  | [`tw-animate-css`](#tw-animate-css)                   | Chore | P3  | S      | none                              | Open                   |
+| 37  | [`small-fixes`](#small-fixes)                         | Bug   | P3  | S each | none                              | Open                   |
+| 38  | [`prompt-composer-v3`](#prompt-composer-v3)           | Epic  | P3  | M      | none                              | Open, proposed in #347 |
+| 39  | [`ai-cost-dashboard`](#ai-cost-dashboard)             | Epic  | P3  | S      | `ai-go-live`                      | Open                   |
+| 40  | [`ai-haiku-fallback`](#ai-haiku-fallback)             | Epic  | P3  | S      | `ai-evals`                        | Open                   |
+| 41  | [`og-images`](#og-images)                             | Epic  | P3  | M      | none                              | Open                   |
+| 42  | [`applet-icons`](#applet-icons)                       | Epic  | P3  | S      | none                              | Open                   |
+| 43  | [`rss-feed`](#rss-feed)                               | Epic  | P3  | S      | none                              | Open                   |
+| 44  | [`visual-polish`](#visual-polish)                     | Chore | P3  | S each | `focus-contrast` for some         | Open                   |
+| 45  | [`seo-site-audit`](#seo-site-audit)                   | Chore | P3  | S      | none                              | Owner only             |
+| 46  | [`license`](#license)                                 | Chore | P3  | S      | none                              | Owner only             |
 
 ## P0
 
@@ -141,8 +144,12 @@ the PR
   10 mg methadone equals 100 MME. A correct fix turns it red. Rewrite it
   against the cited source.
 - **Do.** Replace the square with a sourced method: the CDC 2022 linear
-  factor (4.7), or the CDC opioid-cds tiered table
-  ([Library-ConversionFactors](https://fhir.org/guides/cdc/opioid-cds/Library-ConversionFactors.html)).
+  factor (4.7, in the guideline's Table,
+  [MMWR rr7103a1](https://www.cdc.gov/mmwr/volumes/71/rr/rr7103a1.htm)), or a
+  tiered table. The CDC opioid-cds library
+  ([Library-ConversionFactors](https://fhir.org/guides/cdc/opioid-cds/Library-ConversionFactors.html))
+  still carries the 2016 tiers (4, 8, 10, 12 by dose band), not 4.7, as
+  fetched on 2026-10-11.
   Make the morphine-to-methadone output the exact inverse, or remove it:
   CDC warns against using MME totals for opioid rotation. Show the source
   on the page, with a visible "not a substitute for clinical judgment"
@@ -253,9 +260,9 @@ Replace `useResponsive` layout switching with CSS breakpoints.
   (`src/hooks/useResponsive.ts:63-72`). `src/sections/Header.tsx:69`
   therefore server-renders the desktop nav on phones and swaps to the
   hamburger once JS loads. That is a layout shift on every mobile page load,
-  on every route. `src/sections/Footer.tsx:9` and
-  `src/app/resources/resources-list.tsx:11` do the same. PR #347 removes the
-  Footer use.
+  on every route. `src/app/resources/resources-list.tsx:11` does the same. The Footer
+  used the hook too until #347 (merged 2026-10-11) removed it, which moved
+  the Header line to `:65`.
 - **Do.** Render both layouts and pick with Tailwind breakpoint classes
   (`md:hidden`, `hidden md:flex`). Make `resources-list.tsx` a server
   component once it no longer needs the hook. Delete the hook if nothing
@@ -265,6 +272,33 @@ Replace `useResponsive` layout switching with CSS breakpoints.
   a jsdom test with no `window.innerWidth` set renders both nav variants
   with the right breakpoint classes. That test fails against the current
   hook.
+
+### `candlelight-ios-select`
+
+Held buttons on iOS highlight like selected text and lag.
+
+`Bug` · P1 · S · Depends on: none
+
+- **Why.** On iOS, a Candlelight button held down keeps highlighting as
+  though it were text being selected, and input lags at game-critical
+  moments (reported by the owner on an iPhone). The shell root already sets
+  `user-select: none`, `-webkit-user-select: none`,
+  `-webkit-touch-callout: none` and a transparent tap highlight
+  (`src/components/game/Handheld.module.css:33-36`), and the root cancels
+  `contextmenu` (`src/components/game/Handheld.tsx:305`). So the highlight
+  comes from something those rules do not reach. Suspects, none confirmed:
+  a child that resets `user-select`, a passive `touchstart` listener that
+  lets Safari start its long-press selection, or an element outside the
+  root such as the top bar.
+- **Do.** Reproduce on a real iPhone in Safari and as an installed app.
+  Find which element takes the selection (Safari Web Inspector over USB).
+  Fix at that element, for example `user-select: none` on every control and
+  its label, or a non-passive `touchstart` that calls `preventDefault` on
+  the controls only. Keep scrolling and pinch blocked as today.
+- **Done when.** Holding each button for 3 seconds on iOS Safari and in the
+  installed app shows no highlight, loupe or callout, and the game reads the
+  press with no visible delay. Record the device and iOS version in the PR.
+  The QA scenarios in [Candlelight Beta](Candlelight-Beta.md) still pass.
 
 ### `skillicons-local`
 
@@ -401,6 +435,31 @@ Make Mandelbrot Explorer follow the site's theme toggle.
 - **Done when.** Toggling the theme on `/demos/mandelbrot-explorer` changes
   its palette on a dark-OS browser.
 
+### `candlelight-controls`
+
+Move Candlelight's touch controls toward the bottom of the screen in
+landscape, and up slightly in portrait.
+
+`Bug` · P2 · S · Depends on: none
+
+- **Why.** In landscape the d-pad and face buttons fill full-height columns
+  either side of the screen
+  (`src/components/game/Handheld.module.css:44-50`, grid areas
+  `'dpad screen face'`), which puts them higher than a thumb rests. In
+  portrait the control group sits centred between two equal spacer rows
+  (`Handheld.module.css:137-160`). The owner reports portrait is almost
+  right but could sit slightly higher.
+- **Do.** In landscape, anchor `dpad` and `face` to the bottom of their
+  columns, clear of `env(safe-area-inset-bottom)`. In portrait, make the
+  spacer row below the controls a little taller than the one above, so the
+  group rises slightly. Touch only the `@media (orientation: ...)` blocks
+  for touch mode, not the `data-mode='external'` layout.
+- **Done when.** Screenshots from the browser pass in
+  [Candlelight Beta](Candlelight-Beta.md) at a phone landscape viewport
+  (844 by 390) show both control clusters in the lower part of the screen,
+  and at portrait (390 by 844) show the group slightly above centre. The
+  scenario that checks every drawn cap presses its own button still passes.
+
 ### `mandelbrot-fixes`
 
 Fix the Mandelbrot render loop and gestures, and test them.
@@ -430,6 +489,26 @@ Fix the Mandelbrot render loop and gestures, and test them.
 - **Done when.** With a stub context and stub rAF: 500 rows produce 50
   `putImageData` calls, unmount leaves 0 pending frames, and a 50 px drag
   on a 250 px-wide canvas draws at x = 100. Each fails on today's code.
+
+### `prompt-composer-desktop`
+
+A desktop layout for Prompt Composer.
+
+`Epic` · P2 · M · Depends on: none
+
+- **Why.** `src/components/prompt-composer/PromptComposer.tsx` stacks every
+  card in one column at all widths (`flex flex-col`). That suits a phone. On
+  a wide screen the compiled prompt, Live Check and AI review sit below the
+  Components card, so a visitor scrolls away from the fields they are
+  editing to see the result.
+- **Do.** From the `lg` breakpoint, use two columns: the Components card on
+  the left, and on the right the Compiled Prompt, Live Check and AI review
+  cards, sticky so they stay in view while the left column scrolls. Keep the
+  single column below `lg`. Use Tailwind breakpoint classes only, no
+  `useResponsive`.
+- **Done when.** At 1440 px wide the Compiled Prompt card is visible beside
+  the Components card without scrolling, and at 390 px the order matches
+  today. A component test asserts the `lg:` grid classes on the container.
 
 ### `resources-frontmatter`
 
