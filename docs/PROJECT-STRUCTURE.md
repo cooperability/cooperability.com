@@ -105,7 +105,7 @@ function UnifiedLink({ href, external, children }: LinkProps) {
 - **Performance**: Next.js `Link` provides prefetching for internal routes only
 - **Consistency**: Single source of truth for all link styling and behavior
 
-**Implementation**: See `src/sections/Sidebar.tsx` for the `SidebarLink` component.
+**Implementation**: See `src/components/ActiveIcon.tsx`, whose `external` prop picks between the two.
 
 ---
 

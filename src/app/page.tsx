@@ -92,14 +92,14 @@ export default function Home() {
             width={150}
             alt="Cooper Reed - Full Stack Engineer"
             placeholder="blur"
-            blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
+            blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAA0JCgsKCA0LCgsODg0PEyAVExISEyccHhcgLikxMC4pLSwzOko+MzZGNywtQFdBRkxOUlNSMj5aYVpQYEpRUk//2wBDAQ4ODhMREyYVFSZPNS01T09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0//wAARCAAKAAoDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwCKG3uTpsCRFmaRjsYNgH1zVc2Wog4Nu2R15Fa2m/8AIOiHYR8e3LVs2yqbWEkAkopJI9qFHQTZ/9k="
           />
         </div>
         <p>
-          Hi, I&apos;m <b>Cooper!</b> To me, <b>Co-Operability</b>&nbsp; means
+          Hi, I&apos;m <b>Cooper!</b> To me, <b>Co-Operability</b> means
           long-term synergy between my ambitions and morals. I&apos;ve spent 5
           years writing software with real-world impact. I open-source my{' '}
-          <Link href="/demos">tools</Link> and{' '}
+          <Link href="/demos">personal projects</Link> and{' '}
           <Link href="/resources">knowledge</Link>. My{' '}
           <a href="https://www.youtube.com/@cooperability">interviews</a> follow
           the same spirit.
@@ -107,7 +107,7 @@ export default function Home() {
 
         <a href="/demos/prompt-composer" className={styles.promptComposerLink}>
           <div className={styles.promptComposerWrapper}>
-            Try 🧩 Prompt Composer →
+            🧩 Prompt Composer →
           </div>
         </a>
         <a
@@ -115,13 +115,11 @@ export default function Home() {
           className={styles.promptComposerLink}
         >
           <div className={styles.promptComposerWrapper}>
-            Try ♾️ Mandelbrot Explorer →
+            ♾️ Mandelbrot Explorer →
           </div>
         </a>
-        <a href="/demos/candlelight" className={styles.candlelightLink}>
-          <div className={styles.promptComposerWrapper}>
-            Try 🎮 Candlelight →
-          </div>
+        <a href="/demos/candlelight" className={styles.promptComposerLink}>
+          <div className={styles.promptComposerWrapper}>🎮 Candlelight →</div>
         </a>
 
         <QuoteBox initialQuote={initialQuote} />

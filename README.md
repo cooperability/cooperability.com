@@ -1,10 +1,11 @@
 # [Co-Operability.com](https://www.cooperability.com)
 
 My Next.js portfolio on Vercel, with several smaller projects inside it: a
-prompt-composition tool, an opioid dose converter, and a Mandelbrot explorer.
-Each one also installs as its own Progressive Web App.
+prompt-composition tool, an opioid dose converter, a Mandelbrot explorer, and
+Candlelight, a canvas game. Each one also installs as its own Progressive Web
+App.
 
-**Stack:** Next.js 16 App Router · React 19 · TypeScript · Tailwind 3 ·
+**Stack:** Next.js 16 App Router · React 19 · TypeScript · Tailwind 4 ·
 shadcn/ui on Radix · MDX · Serwist · pnpm 11 · Node 22 · Vercel.
 
 ---
@@ -102,10 +103,12 @@ Metadata does not deep-merge, so a child that sets `icons` replaces the
 layout's whole `icons` object. See [App Router Notes](docs/App-Router.md).
 
 **The content boundary.** Nothing here is a database. Quotes are a TypeScript
-array, and resource pages are MDX files on disk, read at request time by
+array, and resource pages are MDX files on disk, prerendered at build time by
 `src/lib/resources.ts` with `gray-matter` for front matter and
 `next-mdx-remote/rsc` for the body. Because the MDX is compiled on the server,
-no MDX compiler ships to the browser.
+no MDX compiler ships to the browser. The loader also fills each `RESUME_URL`
+token from `src/lib/links.ts`, the site's one copy of the resume link, so the
+Linktree page and `llms-full.txt` cannot drift apart.
 
 **The AI boundary.** `/api/ai/critique` is the only route that leaves the
 origin with caller input. Prompt Composer's AI review calls it on demand, and

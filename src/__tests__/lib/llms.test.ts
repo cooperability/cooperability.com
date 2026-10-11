@@ -3,6 +3,7 @@ import path from 'path'
 import matter from 'gray-matter'
 
 import { DEMOS, buildLlmsFullTxt, buildLlmsTxt } from '../../lib/llms'
+import { RESUME_URL } from '../../lib/links'
 
 // Real files on purpose: these tests exist to catch llms.txt drifting from the
 // pages and MDX the site actually serves.
@@ -20,7 +21,7 @@ const resources = fs
       id: name.replace(/\.mdx?$/, ''),
       raw,
       title: matter(raw).data.title as string,
-      body: matter(raw).content.trim(),
+      body: matter(raw).content.replaceAll('RESUME_URL', RESUME_URL).trim(),
     }
   })
   .sort((a, b) => a.id.localeCompare(b.id))
@@ -117,6 +118,11 @@ describe('buildLlmsFullTxt', () => {
         body: r.body,
       }))
     )
+  })
+
+  it('fills in the resume link rather than shipping the placeholder', () => {
+    expect(full).toContain(`[Resume](${RESUME_URL})`)
+    expect(full).not.toMatch(/\bRESUME_URL\b/)
   })
 
   it.each(resources)('does not leak the front matter of $id', (resource) => {

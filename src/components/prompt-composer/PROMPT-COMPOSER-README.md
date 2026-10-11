@@ -90,7 +90,9 @@ composer's structure, so it can tell that the task names "the attached report"
 but Input is empty, and offer a one-click fix that opens and focuses the field.
 It also reads the final text for patterns current guidance says to drop:
 personas, emphatic capitals, piles of prohibitions, scripted step-by-step
-reasoning.
+reasoning, and tips, threats or "take a deep breath" (Wharton's Prompting
+Science Report 3 found tipping and threats had no significant effect, 2025).
+The Output check's fix opens Output and focuses Requirements.
 
 **AI review** (`useCritique.ts`, `AiReview.tsx`): on demand, metered. It reads
 the prompt itself and streams back a scorecard, a top fix, up to three

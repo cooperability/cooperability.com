@@ -11,11 +11,7 @@ import { useResponsive } from '../hooks/useResponsive'
 import { usePathname } from 'next/navigation'
 import ActiveIcon from '../components/ActiveIcon'
 
-const resumeUrl =
-  'https://drive.google.com/file/d/1-mHF7SH3ym9QI8jKBtpKKzvbJM8L1Ovc/view?usp=sharing'
 const allLinksUrl = '/resources/linktree'
-const privacyStatementUrl = '/resources/PrivacyStatement'
-const accessibilityStatementUrl = '/resources/AccessibilityStatement'
 
 const navLinks = [
   { href: '/', label: 'Home' },
@@ -121,12 +117,7 @@ const Header = () => {
         <Sidebar
           isOpen={isSidebarOpen}
           toggleSidebar={toggleSidebar}
-          resumeUrl={isMobile ? resumeUrl : undefined}
           allLinksUrl={isMobile ? allLinksUrl : undefined}
-          privacyStatementUrl={isMobile ? privacyStatementUrl : undefined}
-          accessibilityStatementUrl={
-            isMobile ? accessibilityStatementUrl : undefined
-          }
         />
         <ActiveIcon
           href="/"

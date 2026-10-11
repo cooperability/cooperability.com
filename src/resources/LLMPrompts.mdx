@@ -1,116 +1,98 @@
 ---
 title: '📝 LLM Prompts'
-date: '2025-10-03'
+date: '2026-10-10'
 ---
 
 <Accordion type="single" collapsible className="w-full">
 <AccordionItem value="google-docs">
 <AccordionTrigger>Format output for Google Docs</AccordionTrigger>
 <AccordionContent>
-**Objective:** Generate a response formatted as a clean, hierarchical outline, optimized for direct copy-pasting into Google Docs. The ENTIRE response containing the outline must be delivered within a single, unstyled, copyable text block.
+**Goal:** Give me the response as a clean, hierarchical outline that I can
+paste straight into Google Docs. Put the whole outline inside one plain-text
+code block, so the chat interface does not render it and a single copy grabs
+all of it.
 
-**Formatting Guidelines (within the copyable text block):**
+**Why the rules below exist:** Google Docs pastes plain text literally. Markdown
+symbols such as `#`, `**` or `---` show up as stray characters, and a hard line
+break inside a bullet breaks its indentation. I apply Docs' own heading and list
+styles after pasting, so the outline only has to make the hierarchy obvious.
 
-1.  **Structure & Headings:**
-    - Employ a clear hierarchical outline structure.
-    - **Major Section Headings (e.g., "I. Main Section", "II. Another Main
-      Section"):**
-      - These should NOT be bullet-pointed.
-      - They should sit at the actual left margin of the text block.
-      - Use bold text for these main headings.
-    - **Sub-Section Headings (e.g., "A. Subsection", "B. Subsection"):**
-      - These should also NOT be bullet-pointed.
-      - They should be indented one level from the Major Section Headings.
-      - Use standard weight text (not bold) for these.
+**Formatting inside the code block:**
 
-2.  **Bullet Points:**
-    - All content under Sub-Section Headings (or directly under Major Section
-      Headings if there are no sub-sections for that point) should be bullet
-      points.
-    - Use a single, consistent bullet character (e.g., a hyphen `-` or an
-      asterisk `*`) for all bullet points.
-    - Indent bullet points appropriately based on their level in the hierarchy
-      (e.g., first-level bullets indented under Sub-Section Headings,
-      second-level bullets further indented under first-level bullets).
-    - **Crucially for wrapping:** When a bullet point's text wraps to a new
-      line, that new line should visually align with the _start of the text_ of
-      the bullet point on the line above, NOT with the bullet character itself
-      or the far-left margin of the document. (Achieve this by ensuring the LLM
-      continues the paragraph naturally with appropriate indentation for the
-      list level).
+1.  **Major sections:** a Roman numeral at the left margin ("I. Main Section"),
+    with no bullet. A code block cannot hold bold text, so the numeral is what
+    marks this level.
+2.  **Sub-sections:** a capital letter ("A. Subsection"), indented one level,
+    with no bullet.
+3.  **Content:** bullet points under each sub-section, or directly under a major
+    section that has no sub-sections. Use a hyphen for every bullet, and indent
+    each nested level two spaces further than its parent.
+4.  **Wrapping:** write each bullet as one unbroken line, however long, and let
+    Google Docs wrap it. That keeps wrapped text aligned with the start of the
+    bullet's text rather than with the bullet character or the margin.
+5.  **Plain text only:** no markdown syntax, decoration, colour or highlighting.
+6.  **Spacing:** a single line break between items, and one blank line before
+    each major section.
 
-3.  **Text Styling (Minimalist Approach - within the copyable block):**
-    - **NO Markdown Syntax:** Avoid all markdown-specific syntax (e.g., `#` for
-      headers, `_` for italics, `---` for horizontal rules, backticks for inline
-      code).
-    - **NO Text Decoration, Coloring, or Highlighting.** The text block should
-      be plain.
-    - **Bold:** Use bold text _only_ for the Major Section Headings as specified
-      above.
+**Example of the structure I want:**
 
-4.  **Spacing and Readability (within the copyable text block):**
-    - Use single, clean line breaks between headings, sub-headings, and list
-      items.
-    - Avoid excessive blank lines.
+```text
+I. Main Section Heading One
+  A. Sub-Section Heading
+    - A first-level bullet. However long it gets, it stays on one line so Google Docs can wrap it under its own text.
+    - Another first-level bullet.
+      - A nested, second-level bullet.
 
-**Output Requirement:**
-
-- The entire outline must be contained within one single copyable text block.
-- The text within this block must adhere strictly to the formatting guidelines
-  above. The visual structure should make it easy to apply Google Docs' own
-  heading and list styles manually if desired after pasting.
-
-**Example of Desired Output Structure (Conceptual for wrapping):**
-
-**I. Main Section Heading One** A. Sub-Section Heading - This is a first-level
-bullet point. If this bullet point is long enough to wrap onto a second line,
-this second line should align here, under the 'T' of 'This'. - Another
-first-level bullet point. - This is a nested, second-level bullet. Its wrapped
-lines should align under the 'T' of 'This' in its own first line.
-
-**II. Main Section Heading Two** B. Another Sub-Section Heading - A bullet point
-here.
+II. Main Section Heading Two
+  A. Another Sub-Section Heading
+    - A bullet point here.
+```
 
 </AccordionContent>
 </AccordionItem>
 
 <AccordionItem value="cursorrules">
-<AccordionTrigger>Exemplary .cursorrules Configuration</AccordionTrigger>
+<AccordionTrigger>Exemplary agent rules file (CLAUDE.md, AGENTS.md, Cursor rules)</AccordionTrigger>
 <AccordionContent>
-# Project Context & Personality
+# Project Context
 
-You are an expert full-stack developer working on a Next.js TypeScript portfolio
-project. This is a production-quality codebase with high standards for code
-quality, accessibility, and performance.
+This is a Next.js TypeScript portfolio site in production. It is public, so
+accessibility, performance and code quality matter as much as a feature working.
+You are working in it as a coding agent with access to the repository and a
+terminal.
 
 # Core Principles
 
-- Always prioritize working, running code over perfect code
-- Diagnose root causes before suggesting fixes
-- Suggest dependency installation when modules are missing
-- Maintain existing code style and patterns
-- Ask for confirmation on potentially destructive operations
+- Get to working, running code first, then refine it
+- Find the root cause before proposing a fix, so the bug does not come back in
+  another form
+- Match the existing code style and patterns rather than introducing new ones
+- Keep each change to what the task needs. Mention unrelated problems you notice
+  instead of fixing them in the same change
+- Ask before anything destructive or hard to undo (listed below)
 
 # Project-Specific Guidelines
 
 ## Shell & Environment
 
-- Always use Git Bash for terminal commands (not PowerShell or cmd)
-- Ensure pnpm is enabled through corepack before running package management
-  commands
+- On Windows, run terminal commands in Git Bash rather than PowerShell or cmd,
+  because the project's scripts assume POSIX shell syntax
+- Use pnpm for all package management. `pnpm-lock.yaml` is the lockfile, and npm
+  or yarn would create a second one
 
 ## Dependencies & Setup
 
-- Use pnpm (`pnpm-lock.yaml` exists) for package management
-- Always check if node_modules exists before suggesting code fixes
-- Common commands: `pnpm install`, `pnpm dev`, `pnpm build`, `pnpm typecheck`
-- Suggest running these commands when encountering module resolution errors
+- When imports fail to resolve, check that `node_modules` exists and run
+  `pnpm install` before changing any code
+- Common commands: `pnpm install`, `pnpm dev`, `pnpm build`, `pnpm typecheck`,
+  `pnpm lint`, `pnpm test`
 
 ## Code Standards
 
-- TypeScript strict mode enabled - address all type errors
-- ESLint + Prettier configured - follow existing formatting
-- React 19+ with Next.js 15+ - use modern patterns
+- TypeScript strict mode is on. Fix type errors rather than suppressing them
+- ESLint and Prettier are configured. Follow the existing formatting
+- React 19 and Next.js 16 with the App Router. Prefer Server Components, and add
+  `'use client'` only where a component needs state, effects or browser APIs
 - Tailwind CSS + CSS modules for styling
 - MDX for content with custom components
 
@@ -124,21 +106,22 @@ quality, accessibility, and performance.
 
 ## Development Workflow
 
-1. First check if dependencies are installed (`ls node_modules` or similar)
-2. Run `pnpm typecheck` to identify TypeScript issues
-3. Use `pnpm dev` to test changes locally
-4. Lint with `pnpm lint` before suggesting code complete
+1. Make sure dependencies are installed
+2. Make the change
+3. Run `pnpm typecheck`, `pnpm lint` and `pnpm test`, and fix what they report
+4. For UI changes, check the page in `pnpm dev`
+5. Call the work done only once those pass, and say which checks you ran
 
 ## When to Ask vs. Act
 
-ASK before:
+Ask before:
 
-- Installing/upgrading dependencies
+- Installing or upgrading dependencies
 - Modifying package.json scripts
 - Deleting files or folders
 - Making breaking changes to public APIs
 
-ACT immediately for:
+Go ahead without asking:
 
 - Fixing TypeScript errors in existing code
 - Adding missing imports
@@ -147,19 +130,18 @@ ACT immediately for:
 
 ## Error Diagnosis Priority
 
-1. Missing dependencies (suggest pnpm install)
-2. Missing files (check if they exist elsewhere)
+1. Missing dependencies (run `pnpm install`)
+2. Missing files (check whether they exist elsewhere)
 3. TypeScript configuration issues
 4. Import/export mismatches
 5. Runtime errors
 
 # Response Style
 
-- Lead with the root cause diagnosis
-- Provide specific, actionable solutions
-- Include relevant file paths and line numbers
-- Explain WHY, not just WHAT to change
-- Offer to verify fixes worked after implementation
+- Lead with the root cause
+- Give specific, actionable fixes with file paths and line numbers
+- Explain why a change is needed, not only what changes
+- After a fix, say how you verified it, or what still needs verifying
 
 </AccordionContent>
 </AccordionItem>
@@ -167,28 +149,34 @@ ACT immediately for:
 <AccordionItem value="synthesize-transcript">
 <AccordionTrigger>Synthesize Report from Long Transcript</AccordionTrigger>
 <AccordionContent>
-These are full transcripts of a long lecture.
-Please condense and summarize them into a single document with the following structure:
+The transcripts of a long lecture are above, each in `<transcript>` tags.
+Condense them into a single document that I can use instead of rewatching the
+lecture, so anything I would need to act on has to survive the condensing.
 
-1. A concise summary which synthesizes the corpus' main arguments and rhetorical
-   flow. One paragraph per major argument. Central themes and arguments should
-   be included; include direct quotes that directly reinforce.
-2. Bullet points, as many as you see fit, to enumerate the sub-points of each
-   major argument. Also list any "big number" talking points verbatim; stats and
-   percentages are useful. Actionable advice or resources referenced should be
-   included verbatim among these bullet points, with links if applicable.
+Structure the document as:
 
-The summary can be composed at your discretion in order to capture both its main
-arguments and rhetorical flow, but must include verbatim quotes from the
-transcript when the transcript mentions:
+1. A summary that synthesizes the main arguments and the rhetorical flow between
+   them, one paragraph per major argument. Include direct quotes where they
+   reinforce a central theme.
+2. Bullet points under each major argument, as many as it needs, enumerating its
+   sub-points. List any "big number" talking points (stats, percentages)
+   verbatim.
 
-- i. Actionable, applicable advice the speaker gives, explicitly or implicitly.
-  If the speaker recommends a course of action, I want to know exactly what and
-  why.
-- ii. ANY external resource or tool that the speaker references or recommends,
-  and rationale for why it was recommended.
-- iii. Some of this course material will be old, so if your training set
-  includes more recent material, you should use that instead.
+Beyond that, shape the summary however best captures the arguments and their
+flow, with one exception. Quote the transcript verbatim whenever the speaker:
+
+- i. Gives actionable, applicable advice, explicitly or implicitly. If the
+  speaker recommends a course of action, I want to know exactly what and why.
+- ii. References or recommends any external resource or tool. Include the
+  rationale given for it, and a link if one is mentioned.
+
+Keep quotes exact, because I may cite them. If the transcription is garbled at a
+point you need to quote, quote what is there and mark it [unclear].
+
+Some of this course material is old. Where you know of more recent information
+that changes a claim or recommendation, add it as a clearly labelled "Update:"
+note beside the original rather than rewriting what the speaker said. If you are
+not sure whether something has changed, say so.
 
 </AccordionContent>
 </AccordionItem>
@@ -197,8 +185,10 @@ transcript when the transcript mentions:
 <AccordionTrigger>Generate Product-Market Research</AccordionTrigger>
 <AccordionContent>
 
-Act as a product manager, browse the web, and perform market research in the
-[enter your niche] niche as well as the specific [vertical] vertical.
+I am deciding whether to build a product in the [enter your niche] niche, in the
+specific [vertical] vertical, and I need market research to make that call.
+Search the web, and favour recent sources, because market figures go stale
+quickly.
 
 **Give me:**
 
@@ -211,8 +201,13 @@ Act as a product manager, browse the web, and perform market research in the
 - Market segmentation and target audience
 - Marketing and sales strategies
 - Regulatory and legal considerations
-- A score for how easy it is to enter the market, plus rationale
+- A score from 1 to 10 for how easy it is to enter the market, plus rationale
 - A list of potential MVPs, with a pseudo-PRD for each
+
+For every figure, cite the source and its date, and say whether it is reported
+or your own estimate. Where sources disagree, give the range and who says what.
+End with your overall recommendation on whether to enter this market, and the
+two or three assumptions it depends on most.
 
 </AccordionContent>
 </AccordionItem>
@@ -220,22 +215,27 @@ Act as a product manager, browse the web, and perform market research in the
 <AccordionItem value="compose-prd">
 <AccordionTrigger>Compose PRD from Source Codebase</AccordionTrigger>
 <AccordionContent>
-Based on the code/details here, compose a PRD for this project:
+Read this project's code (the repository, or the code and details shared in this
+chat) and compose a PRD for it. I will reuse this PRD as the starting context
+for many new chats, so accuracy and specificity matter more than polish: a wrong
+detail here gets repeated in every one of them.
 
 1. The application's purpose, broadly, and how each component contributes. One
-   paragraph summary; bullet points for components.
-2. The entire tech stack. Bullet points. Outlined & cleanly indented to
-   demonstrate frontend, backend, database components. One bullet point/sentence
-   per library, framework or piece of tech.
+   paragraph summary, then bullet points for components.
+2. The entire tech stack. Bullet points, outlined and cleanly indented to
+   separate frontend, backend and database components. One bullet point or
+   sentence per library, framework or piece of tech, with its version.
 3. The application's complete data schema, including nested projects, database
-   models, and inherited types. If possible, include flowcharts for common user
-   actions and the data processes they initiate (user clicks button → data
-   processed → response returned, etc)
-4. CI/CD and process flow, procedure/protocol details for things like making
-   migrations and migrating.
+   models, and inherited types. Where you can, include flowcharts as Mermaid
+   diagrams for common user actions and the data processes they initiate (user
+   clicks button → data processed → response returned, etc.).
+4. CI/CD and process flow, with procedure details for things like creating and
+   running migrations.
 
-This PRD should have both broad topic coverage and extreme specificity where
-possible, as I will use it as a jumping-off point for countless new chats.
+Cover the whole project broadly, and be exact wherever you can: real file paths,
+names, versions and commands. Base each claim on what the code shows. Where you
+are inferring rather than reading, mark it as an inference, and end with a list
+of anything you could not determine instead of guessing at it.
 
 </AccordionContent>
 </AccordionItem>
@@ -244,34 +244,36 @@ possible, as I will use it as a jumping-off point for countless new chats.
 <AccordionTrigger>Summarize this chat as a new prompt</AccordionTrigger>
 <AccordionContent>
 
-Distill the insights from this chat into a condensed, organized and informative
-summary which could be seamlessly appended to this project's documentation, or
-used as a new prompt. I want future-proof closure of this chat. In the future, I
-mainly want to save TIME and EFFORT on the errors, technicalities and details we
-uncovered here with great time and effort. A data point from this chat should be
-prioritized for the summary when it is:
+Distill this chat into a condensed, organized summary that I can append to the
+project's documentation or paste in as the first prompt of a new chat. The point
+is to close this chat for good: next time, I want to skip the time and effort it
+took us to uncover the errors, technicalities and details we worked through
+here.
 
-1. Insights uncovered or researched through this chat which would be difficult
-   to uncover WITHOUT repeating this chat.
-2. Prior-posterior beliefs about the system which have changed over the course
-   of this chat, yielding a different understanding than when we began.
-3. (optional)Changes made to the code within this chat, as well as a short
-   explanation for why each change was made.
+Prioritize a point for the summary when it is:
 
-Do NOT include anything already included in the Documentation. Again, your goal
-is to harvest & append insights that are HIGHLY UNIQUE, USEFUL, SPECIFIC, and
-DIFFICULT TO UNCOVER and leave all else behind.
+1. An insight we uncovered or researched in this chat that would be hard to
+   rediscover without repeating it.
+2. A belief about the system that changed over the course of this chat, so we
+   now understand it differently than when we began. Give the before and the
+   after.
+3. (Optional) A change made to the code in this chat, with a short explanation
+   of why it was made.
 
-Your final briefing/summary/NewPrompt covering this chat should have two
-sections:
+Leave out anything the project's documentation already covers, if I have shared
+it with you. The goal is to keep only what is unique, useful, specific and hard
+to uncover, and to leave everything else behind. If something matters but was
+never confirmed, include it and mark it as unconfirmed, so a future reader does
+not treat a guess as a fact.
 
-1. An outline in bullet points explaining what we achieved and learned here,
-   including all design constraints or otherwise optimizations uncovered. Use
-   plaintext formatting, and straightforward visual organization for this
-   bullet-pointed outline.
-2. Two paragraphs logically explaining nuances of what we did/learned here,
-   focusing on connecting reasoning logic to resulting actions taken, and
-   justifications for design decisions in the final summary.
+Structure the summary in two sections:
+
+1. A bullet-point outline of what we achieved and learned here, including every
+   design constraint or optimization we uncovered. Use plain text and
+   straightforward visual organization.
+2. Two paragraphs explaining the nuances of what we did and learned, connecting
+   the reasoning to the actions it led to, and justifying the design decisions
+   in the summary.
 
 </AccordionContent>
 </AccordionItem>
@@ -279,62 +281,66 @@ sections:
 <AccordionItem value="summarize-book">
 <AccordionTrigger>Summarize a Book</AccordionTrigger>
 <AccordionContent>
-**Summarize Book (best with self-help, advice, or knowledge-based books.**
+**Summarize Book** (best with self-help, advice, or knowledge-based books)
 
-I have uploaded [XY Author]'s [XY Text]. I need an extracted summary from you
-containing all actionable advice/knowledge within this text. I will never read
-the source text, but I want to enjoy 100% of the academic and experiential
-benefits that reading the text confers. Preserve the tone of the original work
-as much as possible; do not impose your own tone of any kind. Estimate the time
-required for a human to: 1. read the book, 2. take notes on it and, 3. if
-applicable, complete any actionable projects within WITHOUT chatGPT and WITH
-chatGPT. Your output should be in markdown, which should be readable by Anki,
-GitHub, Next.js posts, etc. Format should be maximally universal where possible.
+I have uploaded [XY Author]'s [XY Text]. I want an extracted summary containing
+all of its actionable advice and knowledge. I will never read the source text,
+so I want as much of the academic and experiential benefit of reading it as a
+summary can carry. Preserve the tone of the original work as much as possible
+rather than imposing your own.
 
-The following are tags for the summary:
+Also estimate the time a person would need to: 1. read the book, 2. take notes
+on it, and 3. if applicable, complete its actionable projects, both without AI
+help and with it.
 
-- **PS** = Paraphrased Summary by LLM
-- **DQ** = Direct Quotes, VERBATIM excerpts WITH PAGE NUMBER
+Write in plain markdown that Anki, GitHub and Next.js posts all render, keeping
+the formatting as universal as possible.
+
+Tag the summary's content as follows:
+
+- **PS** = Paraphrased Summary by the LLM
+- **DQ** = Direct Quote: a verbatim excerpt, with its page number
 - **CS/IE** = Case Study or Illustrative Example: a story or narrative the text
-  provides which is intended to evidence a certain argument or point therein.
-  These should typically be paraphrased and marked with a page number for
-  further investigation, but occasionally there are **CS/IE**s which can be
-  entirely contained in a DQ of a few sentences. In these cases DQ is
-  preferable.
+  provides as evidence for a certain argument or point. These should usually be
+  paraphrased and marked with a page number for further investigation, but when
+  a **CS/IE** fits in a **DQ** of a few sentences, the DQ is preferable.
 
-Your summary should have the following 4-part structure:
+Your summary should have this 4-part structure:
 
 - **Five-paragraph overall summary (PS)**
-  - 1 paragraph: intro + roadmap, structure of the text and arguments
-  - 3 paragraphs: three major movements from the work demonstrating its segues
-    between major arguments, & important subpoints in each argument
-  - conclusion, distilled review of overall argument
-- **Ten central case studies (CS/IE)s. (PS)**
-  - Include less than five sentences per **CS/IE** explaining its
-    structure/narrative, showing context in the work, and highlight whether it's
-    referenced multiple times.
-  - Connect CS/IEs to actionable advice by subpoint if possible
-- **Ten bottom-line pieces of concise, actionable advice (DQ preffered, PS ok)**
-  - whether through author's direct recommendation or implicit illustration e.g.
-    "successful/unsuccessful examples have typically included THIS course of
-    action: ..."
-  - Include sub-bullet **CS/IE** here WHENEVER available
-- **Ten of the book's best quotes (DQ), selected on the criteria**:
+  - 1 paragraph: intro and roadmap, the structure of the text and its arguments
+  - 3 paragraphs: three major movements of the work, showing its segues between
+    major arguments and the important subpoints of each
+  - 1 paragraph: conclusion, a distilled review of the overall argument
+- **Ten central case studies (CS/IE), paraphrased (PS)**
+  - Use fewer than five sentences per **CS/IE** to explain its structure or
+    narrative and its context in the work, and note whether the book returns to
+    it more than once.
+  - Connect each CS/IE to actionable advice by subpoint where possible.
+- **Ten bottom-line pieces of concise, actionable advice (DQ preferred, PS ok)**
+  - Whether from the author's direct recommendation or implicit illustration,
+    e.g. "successful examples have typically included this course of action:
+    ..."
+  - Include a sub-bullet **CS/IE** here whenever one is available.
+- **Ten of the book's best quotes (DQ), selected because each one**:
   - 1. communicates a central point of the text concisely
-  - 2. is dramatic, well-written and/or memorable
-  - 3. illustrates author's unique perspective/experience well
+  - 2. is dramatic, well-written or memorable
+  - 3. illustrates the author's unique perspective or experience well
 
-A few final ABSOLUTE RULES:
+Ground rules:
 
-1. CLEARLY mark what is (**DQ),** (**PS) and (CS/IE[either DQ or PS])** for all
-   bullet points of the summary so as to make the summary properly attributable.
-2. If uncertain about any part of the reduction/summarization process, ask me
-   about specifics instead of assuming any particular behavior.
-3. Points which are already too nuanced/concise to be effectively summarized
-   should be marked with page numbers so that I can peruse the book.
-4. After you complete this first response, give a few options for drilldown
-   prompts which would allow me to further investigate the depth of the text
-   using your (the LLM's) help.
+1. Mark every bullet point **DQ**, **PS** or **CS/IE** (noting DQ or PS for each
+   CS/IE), so the summary stays attributable.
+2. A DQ must match the uploaded text word for word, because I will rely on it as
+   the author's own words. If you cannot find a passage exactly, give it as PS
+   instead. If the upload has no page numbers, cite chapter and section, and say
+   so once at the top rather than estimating page numbers.
+3. Mark points that are already too nuanced or concise to summarize well with
+   their page numbers, so I can read them in the book.
+4. If anything about the process is unclear before you start, ask me about it
+   rather than assuming.
+5. After this first response, suggest a few drilldown prompts I could use to
+   explore the text in more depth with your help.
 
 </AccordionContent>
 </AccordionItem>

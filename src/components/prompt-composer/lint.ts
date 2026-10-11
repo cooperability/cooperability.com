@@ -23,7 +23,7 @@ export interface Check {
 }
 
 export interface Warning {
-  id: 'persona' | 'caps' | 'prohibitions' | 'cot-script'
+  id: 'persona' | 'caps' | 'prohibitions' | 'cot-script' | 'tricks'
   message: string
 }
 
@@ -177,12 +177,14 @@ function checkOutput({ fields, selected }: ComposerState): Check {
       dimension: 'output',
       status: 'weak',
       message: 'Add a format or length, so the model does not guess.',
+      fix: { kind: 'field', field: 'constraints' },
     }
   }
   return {
     dimension: 'output',
     status: 'missing',
     message: 'Say what shape the answer should take.',
+    fix: { kind: 'field', field: 'constraints' },
   }
 }
 
@@ -251,11 +253,32 @@ export function warningsFor(text: string): Warning[] {
     })
   }
 
-  if (/\bstep[- ]by[- ]step\b/i.test(text)) {
+  // Only reasoning scripts: "write a step-by-step guide" asks for an output
+  // shape, not for chain of thought.
+  if (
+    /\b(?:think|reason|work)(?:ing)?\b[^.\n]{0,30}\bstep[- ]by[- ]step\b/i.test(
+      text
+    )
+  ) {
     warnings.push({
       id: 'cot-script',
       message:
         'Scripted step-by-step reasoning adds little on reasoning models. "Think first" covers older ones.',
+    })
+  }
+
+  if (
+    /\btake a deep breath\b/i.test(text) ||
+    /\b(?:I'll|I will|I'm going to)\s+tip\b|\btip you\b/i.test(text) ||
+    /\byou(?:'ll| will) be (?:fired|penalized|punished|shut down)\b/i.test(
+      text
+    ) ||
+    /\bmy (?:job|career|life) depends on\b/i.test(text)
+  ) {
+    warnings.push({
+      id: 'tricks',
+      message:
+        'Tips, threats and "take a deep breath" show no reliable benefit on current models. Say what you need and why instead.',
     })
   }
 

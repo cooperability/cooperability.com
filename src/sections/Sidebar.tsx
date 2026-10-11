@@ -11,17 +11,13 @@ import { Button } from '@/components/ui/button'
 interface SidebarProps {
   isOpen: boolean
   toggleSidebar: () => void
-  resumeUrl?: string
   allLinksUrl?: string
-  privacyStatementUrl?: string
-  accessibilityStatementUrl?: string
 }
 
 interface SidebarLinkProps {
   href: string
   children: React.ReactNode
   isActive: boolean
-  external?: boolean
   onClick?: () => void
 }
 
@@ -29,7 +25,6 @@ const SidebarLink: React.FC<SidebarLinkProps> = ({
   href,
   children,
   isActive,
-  external = false,
   onClick,
 }) => {
   const [isHovered, setIsHovered] = useState(false)
@@ -74,16 +69,6 @@ const SidebarLink: React.FC<SidebarLinkProps> = ({
     },
   }
 
-  // Use regular anchor tag for external links
-  if (external) {
-    return (
-      <a href={href} target="_blank" rel="noopener noreferrer" {...commonProps}>
-        {content}
-      </a>
-    )
-  }
-
-  // Use Next.js Link for internal navigation
   return (
     <Link href={href} {...commonProps}>
       {content}
@@ -91,14 +76,7 @@ const SidebarLink: React.FC<SidebarLinkProps> = ({
   )
 }
 
-const Sidebar = ({
-  isOpen,
-  toggleSidebar,
-  resumeUrl,
-  allLinksUrl,
-  privacyStatementUrl,
-  accessibilityStatementUrl,
-}: SidebarProps) => {
+const Sidebar = ({ isOpen, toggleSidebar, allLinksUrl }: SidebarProps) => {
   const isDark = useResolvedTheme() === 'dark'
   const pathname = usePathname() || '/'
 
@@ -114,7 +92,7 @@ const Sidebar = ({
     if (href === '/resources') {
       return pathname === '/resources'
     }
-    // For all other paths (like /resources/PrivacyStatement), use startsWith
+    // For all other paths (like /resources/linktree), use startsWith
     return pathname.startsWith(href)
   }
 
@@ -163,16 +141,6 @@ const Sidebar = ({
 
         <div className={styles.horizLine} />
 
-        {resumeUrl && (
-          <SidebarLink
-            href={resumeUrl}
-            isActive={false}
-            external
-            onClick={toggleSidebar}
-          >
-            <span aria-hidden="true">📄 </span>Resume
-          </SidebarLink>
-        )}
         {allLinksUrl && (
           <SidebarLink
             href={allLinksUrl}
@@ -180,24 +148,6 @@ const Sidebar = ({
             onClick={toggleSidebar}
           >
             <span aria-hidden="true">🔗 </span>Linktree
-          </SidebarLink>
-        )}
-        {privacyStatementUrl && (
-          <SidebarLink
-            href={privacyStatementUrl}
-            isActive={isRouteActive(privacyStatementUrl)}
-            onClick={toggleSidebar}
-          >
-            🔒Privacy
-          </SidebarLink>
-        )}
-        {accessibilityStatementUrl && (
-          <SidebarLink
-            href={accessibilityStatementUrl}
-            isActive={isRouteActive(accessibilityStatementUrl)}
-            onClick={toggleSidebar}
-          >
-            ♿Accessibility
           </SidebarLink>
         )}
       </nav>

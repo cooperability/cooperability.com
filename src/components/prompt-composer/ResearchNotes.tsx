@@ -36,6 +36,13 @@ const REFERENCES: Reference[] = [
     url: 'https://arxiv.org/abs/2506.07142',
   },
   {
+    cite: 'Meincke, L., Mollick, E., Mollick, L., & Shapiro, D. (2025).',
+    title:
+      'Prompting Science Report 3: I’ll pay you or I’ll kill you, but will you care?',
+    venue: 'Wharton Generative AI Labs.',
+    url: 'https://arxiv.org/abs/2508.00614',
+  },
+  {
     cite: 'Anthropic. (2026).',
     title: 'Prompting best practices.',
     venue: 'Claude Platform documentation.',
@@ -130,9 +137,11 @@ export default function ResearchNotes() {
             <h3 className={heading}>Say what to do</h3>
             <p>
               Current models follow instructions closely, so emphatic capitals
-              and long lists of prohibitions tend to over-steer them. The live
-              check flags both, and every template in the catalog is phrased as
-              an instruction to do something.
+              and long lists of prohibitions tend to over-steer them. Older
+              tricks fare no better: the Wharton team found that offering a tip
+              or making a threat had no significant effect on benchmark
+              accuracy. The live check flags all three, and every template in
+              the catalog is phrased as an instruction to do something.
             </p>
           </div>
           <div>

@@ -2,6 +2,7 @@ import fs from 'fs'
 import path from 'path'
 import { cache } from 'react'
 import matter from 'gray-matter'
+import { RESUME_URL } from './links'
 
 const RESOURCES_PATH = path.join(process.cwd(), 'src/resources')
 
@@ -78,5 +79,8 @@ export const getResourceBySlug = cache((slug: string): Resource | null => {
   )
   const { content, data } = matter(fileContents)
 
-  return { content, frontMatter: data as ResourceFrontMatter }
+  return {
+    content: content.replaceAll('RESUME_URL', RESUME_URL),
+    frontMatter: data as ResourceFrontMatter,
+  }
 })

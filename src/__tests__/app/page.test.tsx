@@ -11,10 +11,9 @@ describe('Home page', () => {
 
   it('renders navigation links with correct href attributes', () => {
     render(<Home />)
-    expect(screen.getByRole('link', { name: /tools/i })).toHaveAttribute(
-      'href',
-      '/demos'
-    )
+    expect(
+      screen.getByRole('link', { name: /personal projects/i })
+    ).toHaveAttribute('href', '/demos')
     expect(screen.getByRole('link', { name: /knowledge/i })).toHaveAttribute(
       'href',
       '/resources'

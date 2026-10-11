@@ -31,7 +31,7 @@
 .title {
   font-size: clamp(1.5rem, 5vw, 2rem);
   font-weight: 700;
-  color: #60a5fa;
+  color: #ffffff;
   margin: 0 0 0.5rem 0;
 }
 
@@ -245,7 +245,7 @@
   }
 
   .title {
-    color: #2563eb;
+    color: #1a1a1a;
   }
 
   .subtitle {
