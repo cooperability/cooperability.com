@@ -1,5 +1,11 @@
 # Model Context Protocol (MCP) Integration Guide
 
+> **Aspirational, not implemented.** No MCP server exists in this repo. This
+> guide describes one that was never built, and its code samples predate the
+> App Router (they walk `src/pages`). The Roadmap parks the server under
+> [Parked epics](Roadmap.md#parked-epics). Do not implement from this file
+> without re-scoping it there first.
+
 ## Table of Contents
 
 1. [Introduction to MCP](#introduction-to-mcp)

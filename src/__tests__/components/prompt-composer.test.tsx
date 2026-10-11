@@ -104,6 +104,17 @@ describe('PromptComposer v2', () => {
     await screen.findByRole('button', { name: /review with ai/i })
   })
 
+  it('shows the title with no intro blurb above the tool', async () => {
+    await renderComposer()
+
+    expect(
+      screen.getByRole('heading', { level: 1, name: /prompt composer/i })
+    ).toBeInTheDocument()
+    expect(
+      screen.queryByText(/build prompts from what current models/i)
+    ).not.toBeInTheDocument()
+  })
+
   it('offers no personas', async () => {
     await renderComposer()
 

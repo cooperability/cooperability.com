@@ -58,6 +58,12 @@ export default function Demos() {
                 alt="Vercel logo"
                 size="small"
               />
+              <ActiveIcon
+                href="https://nodejs.org/en"
+                iconName="nodejs"
+                alt="Node.js logo"
+                size="small"
+              />
             </div>
             {/* Sub-projects housed within cooperability.com. Each app is a
                 plain link, so it loads whole. A client-side navigation keeps
@@ -70,20 +76,6 @@ export default function Demos() {
                   <a href="/demos/candlelight">Candlelight[💻📱🎮]</a>
                   <span className={styles.projectStatus}>(Ongoing)</span>
                 </div>
-                <div className={styles.techStackIcons}>
-                  <ActiveIcon
-                    href="https://www.typescriptlang.org/"
-                    iconName="ts"
-                    alt="TypeScript logo"
-                    size="small"
-                  />
-                  <ActiveIcon
-                    href="https://react.dev/"
-                    iconName="react"
-                    alt="React logo"
-                    size="small"
-                  />
-                </div>
               </div>
 
               {/* Prompt Composer */}
@@ -91,26 +83,6 @@ export default function Demos() {
                 <div className={styles.projectInfo}>
                   <a href="/demos/prompt-composer">Prompt Composer[💻📱]</a>
                   <span className={styles.projectStatus}>(Ongoing)</span>
-                </div>
-                <div className={styles.techStackIcons}>
-                  <ActiveIcon
-                    href="https://www.typescriptlang.org/"
-                    iconName="ts"
-                    alt="TypeScript logo"
-                    size="small"
-                  />
-                  <ActiveIcon
-                    href="https://tailwindcss.com/"
-                    iconName="tailwind"
-                    alt="Tailwind CSS logo"
-                    size="small"
-                  />
-                  <ActiveIcon
-                    href="https://ui.shadcn.com/"
-                    imgSrc="/images/shadcn.png"
-                    alt="Shadcn logo"
-                    size="small"
-                  />
                 </div>
               </div>
 
@@ -122,26 +94,6 @@ export default function Demos() {
                   </a>
                   <span className={styles.projectStatus}>(2025)</span>
                 </div>
-                <div className={styles.techStackIcons}>
-                  <ActiveIcon
-                    href="https://www.typescriptlang.org/"
-                    iconName="ts"
-                    alt="TypeScript logo"
-                    size="small"
-                  />
-                  <ActiveIcon
-                    href="https://react.dev/"
-                    iconName="react"
-                    alt="React logo"
-                    size="small"
-                  />
-                  <ActiveIcon
-                    href="https://ui.shadcn.com/"
-                    imgSrc="/images/shadcn.png"
-                    alt="Shadcn logo"
-                    size="small"
-                  />
-                </div>
               </div>
 
               {/* Opioid Converter */}
@@ -150,34 +102,12 @@ export default function Demos() {
                   <a href="/demos/opioid-converter">Opioid Converter[💻📱]</a>
                   <span className={styles.projectStatus}>(2021)</span>
                 </div>
-                <div className={styles.techStackIcons}>
-                  <ActiveIcon
-                    href="https://www.typescriptlang.org/"
-                    iconName="ts"
-                    alt="TypeScript logo"
-                    size="small"
-                  />
-                  <ActiveIcon
-                    href="https://tailwindcss.com/"
-                    iconName="tailwind"
-                    alt="Tailwind CSS logo"
-                    size="small"
-                  />
-                  <ActiveIcon
-                    href="https://nodejs.org/en"
-                    iconName="nodejs"
-                    alt="Node.js logo"
-                    size="small"
-                  />
-                </div>
               </div>
             </div>
           </div>
           <div className={styles.projectItem}>
             <div className={styles.projectInfo}>
-              <a href="https://github.com/cooperability/remediate.app">
-                remediate.app
-              </a>
+              <a href="https://remediate.app">remediate.app</a>
               <span className={styles.projectStatus}>(Ongoing)</span>
             </div>
             <div className={styles.techStackIcons}>

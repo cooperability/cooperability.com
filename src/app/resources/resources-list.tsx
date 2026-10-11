@@ -40,7 +40,7 @@ export default function ResourcesList({ posts }: { posts: ResourceData[] }) {
           {date && (
             <div>
               <small className={styles.lightText}>
-                <DateDisplay dateString={date} />
+                Last updated <DateDisplay dateString={date} />
               </small>
             </div>
           )}

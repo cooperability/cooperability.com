@@ -25,18 +25,17 @@ Shared — **not in this repo.** These install once into your home directory fro
 
 | Skill | Use for |
 |-------|---------|
-| `shepherd-to-pr` | One-shot: scoped idea → graded, reviewed draft PR |
+| `toolkit` | Entry point: standing preferences and which skill serves a request |
+| `one-shot-imp` | One-shot: scoped idea → graded, reviewed draft PR |
 | `plan-feature` | Idea → intent, out-of-scope list, files, test plan |
-| `verified-change-loop` | Gate commits/PRs behind independent graded review |
-| `pr-reviewing` | PR review: casts, inputs, footguns, DevEx |
-| `security-testing` | Repo security audit (no exploit PoCs) |
-| `premerge-cleanup` | Rebase, resolve, squash, gate, confirm merge-ready |
+| `adv-dr` | Adversarial design review, graded, blocks below 90/100 |
+| `adv-ir` | Code review, security audit (`pr-reviewing`, `security-testing` inside), graded gate |
+| `silo-work` | Claim a ticket, fresh worktree, base verified against GitHub |
 | `worktree-feature-pr` | Isolated worktree → branch → PR |
-| `update-branch-from-base` | Sync branch without squash |
-| `git-hygiene` | Repo settings, branches, line endings, secrets, reflog |
+| `git-hygiene` | Rebase, squash, merge-readiness (`premerge-cleanup`, `update-branch-from-base` inside), repo settings, reflog |
 | `compose-pr-description` | Diff → PR/commit title + body |
 | `triage-dependabot` | Clear Dependabot alerts in one bump PR |
-| `integration-hunting` | Mine GitHub stars for useful OSS |
+| `prune` | Delete merged worktrees and branches, rescue the rest into draft PRs |
 | `extract-chat-insights` | Harvest an old chat, then clear it for deletion |
 
 ## Subagents / personas

@@ -144,10 +144,6 @@ const PromptComposer: React.FC<PromptComposerProps> = ({ className }) => {
         <h1 className="mb-2 text-2xl font-bold md:text-3xl">
           🧩 Prompt Composer
         </h1>
-        <p className="text-sm text-gray-600 md:text-base dark:text-gray-400">
-          Build prompts from what current models actually need, check them as
-          you type, and get an AI review when you want one.
-        </p>
       </header>
 
       {/* One column: the site's content well is about 600px wide at every

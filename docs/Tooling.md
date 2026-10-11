@@ -694,10 +694,10 @@ const isDark = theme === 'dark'
 **Solution:** When using `next-mdx-remote`, components must be passed to `<MDXRemote />` via the `components` prop:
 
 ```tsx
-// pages/resources/[slug].tsx
+// src/app/resources/[slug]/page.tsx, with MDXRemote from 'next-mdx-remote/rsc'
 import { CustomComponent } from '@/components/CustomComponent'
 
-;<MDXRemote {...source} components={{ CustomComponent }} />
+;<MDXRemote source={content} components={{ CustomComponent }} />
 ```
 
 ### Date Sorting with ISO 8601
