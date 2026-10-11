@@ -223,3 +223,15 @@
     padding: 0.25rem;
   }
 }
+
+.notice {
+  color: #333;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  margin: 1rem 0 0;
+}
+
+.notice a {
+  color: #800000;
+  text-decoration: underline;
+}
