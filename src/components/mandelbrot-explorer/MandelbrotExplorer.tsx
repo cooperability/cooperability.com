@@ -560,29 +560,33 @@ const MandelbrotExplorer = () => {
 
       <div className={styles.controls}>
         <div className={styles.buttonGroup}>
+          {/* aria-disabled, not disabled: a natively disabled button drops
+              keyboard focus to <body>, and these disable on every press. */}
           <div className={styles.iterationControls}>
             <Button
               onClick={() =>
+                !isRendering &&
                 setMaxIterations((prev) => Math.max(50, prev - 50))
               }
-              disabled={isRendering || maxIterations <= 50}
+              aria-disabled={isRendering || maxIterations <= 50}
               className={styles.button}
             >
               <b>- Iterations</b>
             </Button>
             <Button
               onClick={() =>
+                !isRendering &&
                 setMaxIterations((prev) => Math.min(1000, prev + 50))
               }
-              disabled={isRendering || maxIterations >= 1000}
+              aria-disabled={isRendering || maxIterations >= 1000}
               className={styles.button}
             >
               <b>+ Iterations</b>
             </Button>
           </div>
           <Button
-            onClick={handleReset}
-            disabled={isRendering}
+            onClick={() => !isRendering && handleReset()}
+            aria-disabled={isRendering}
             className={styles.resetButton}
           >
             <b>Reset View</b>
