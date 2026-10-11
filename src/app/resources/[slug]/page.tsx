@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
+import type { ComponentPropsWithoutRef } from 'react'
 import Link from 'next/link'
 import { MDXRemote } from 'next-mdx-remote/rsc'
 import {
@@ -16,6 +17,25 @@ import utilStyles from '../../../styles/utils.module.css'
 // would render unknown slugs on demand and a missing file would 500 rather
 // than 404.
 export const dynamicParams = false
+
+// Opt-in per resource with `structured: true` in the front matter. Tailwind's
+// reset strips heading size, list bullets and paragraph spacing, so a page
+// with sections reads as one block without these. The linktree relies on the
+// reset's tight paragraphs, so it stays opted out.
+const structuredComponents = {
+  h2: (props: ComponentPropsWithoutRef<'h2'>) => (
+    <h2 className="mt-8 mb-2 text-2xl font-bold" {...props} />
+  ),
+  h3: (props: ComponentPropsWithoutRef<'h3'>) => (
+    <h3 className="mt-5 mb-1 text-xl font-semibold" {...props} />
+  ),
+  p: (props: ComponentPropsWithoutRef<'p'>) => (
+    <p className="my-3" {...props} />
+  ),
+  ul: (props: ComponentPropsWithoutRef<'ul'>) => (
+    <ul className="my-3 list-disc space-y-2 pl-6" {...props} />
+  ),
+}
 
 // MDX has no module scope of its own, so anything the content references has
 // to be handed in explicitly. RSC has no Context, so MDXProvider is out.
@@ -73,7 +93,11 @@ export default async function ResourcePage({
       )}
       <MDXRemote
         source={content}
-        components={components}
+        components={
+          frontMatter.structured
+            ? { ...components, ...structuredComponents }
+            : components
+        }
         options={{ mdxOptions: { remarkPlugins: [], rehypePlugins: [] } }}
       />
     </article>

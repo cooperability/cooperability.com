@@ -1,34 +1,45 @@
 ---
 title: 'Accessibility Statement'
-date: '2025-05-18'
+date: '2026-10-11'
+structured: true
 description:
-  My commitment to accessibility and information about Co-Operability.com's
-  conformance.
+  How Co-Operability.com is built and tested for accessibility, what the latest
+  audit found, and how to report a problem.
 ---
 
-I'm committed to making this website accessible to everyone. Rather than just
-checking boxes, I've built accessibility into my development process from the
-ground up—using semantic HTML, ensuring keyboard navigation works throughout the
-site, and testing with both automated tools and manual checks. My goal is to
-meet WCAG 2.1 AA standards, and I've integrated accessibility testing directly
-into my development workflow.
+This site aims to meet WCAG 2.1 Level AA. I test it with automated tools and by
+hand, and I have not had it audited by an outside party. If something blocks
+you, tell me and I will fix it.
 
-The site works across screen readers, supports both light and dark themes with
-proper contrast ratios, and maintains a logical structure that makes sense
-whether you're navigating visually or with assistive technology. I regularly
-audit the site using ESLint accessibility rules, axe-core testing, and
-Lighthouse audits—the detailed reports are saved in my project for ongoing
-improvement.
+## What is in place
 
-**What I've implemented:**
+- Semantic HTML with a logical heading order on every page.
+- Every control works from the keyboard.
+- ARIA attributes where plain HTML does not carry the meaning.
+- Text contrast that meets WCAG AA in both the light and the dark theme.
+- Layouts tested on phone, tablet and desktop screen sizes.
 
-- Semantic HTML5 structure and logical heading hierarchy
-- Full keyboard navigation support
-- ARIA attributes for enhanced screen reader experience
-- Responsive design tested across devices and screen sizes
-- Sufficient color contrast in both light and dark themes
-- Automated testing suite (ESLint jsx-a11y, axe-core, Lighthouse)
-- Manual testing including browser accessibility inspection tools
+## How it is tested
 
-I welcome feedback on accessibility—please reach out if you encounter any
-barriers. Accessibility is an ongoing commitment, not a one-time checkbox.
+- **On every change:** ESLint with the jsx-a11y rules.
+- **On demand:** axe-core and Lighthouse run against the live pages in a
+  browser. I run them by hand, not on a schedule.
+- **By hand:** keyboard navigation and the browser's accessibility inspector.
+
+## Latest audit results
+
+The audit ran on 2026-10-04 against the home page, the demos page and the
+resources page.
+
+- axe-core found 0 violations across WCAG 2.1 A and AA.
+- Lighthouse scored accessibility 1.00, 0.98 and 1.00, one score per page.
+
+Automated tools catch only part of the problems a person can hit. These results
+do not cover every page or every screen reader.
+
+## Report a barrier
+
+Message me on [LinkedIn](https://www.linkedin.com/in/cooper-reed/) or
+[Bluesky](https://bsky.app/profile/cooperability.com). Name the page and what
+got in your way. If you tell me which browser or assistive technology you were
+using, that helps me reproduce it.
