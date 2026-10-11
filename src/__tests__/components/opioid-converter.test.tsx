@@ -17,15 +17,22 @@ function morphineTotal() {
   return screen.getByText(/Morphine Equivalence:/).textContent
 }
 
-function methadoneTotal() {
-  return screen.getByText(/Methadone Equivalence:/).textContent
+// One change event per keystroke, each carrying what the field shows now plus
+// the new character, the way a browser reports typing into a controlled input.
+function typeKeys(input: HTMLElement, keys: string) {
+  for (const key of keys) {
+    fireEvent.change(input, {
+      target: { value: (input as HTMLInputElement).value + key },
+    })
+  }
 }
 
+const SAFE_TOTAL = /^Morphine Equivalence: \d+ mg$/
+
 describe('OpioidConverter', () => {
-  it('starts at zero for both equivalences', () => {
+  it('starts at zero', () => {
     render(<OpioidConverter />)
     expect(morphineTotal()).toBe('Morphine Equivalence: 0 mg')
-    expect(methadoneTotal()).toBe('Methadone Equivalence: 0 mg')
   })
 
   it('applies the conversion factor for a linear opioid', () => {
@@ -35,12 +42,81 @@ describe('OpioidConverter', () => {
     expect(morphineTotal()).toBe('Morphine Equivalence: 30 mg')
   })
 
-  it('squares the methadone dose rather than scaling it linearly', () => {
+  it('converts methadone at the CDC 2022 factor of 4.7', () => {
     render(<OpioidConverter />)
-    // Methadone is deliberately non-linear: 10mg -> 10^2 = 100mg morphine,
-    // and its own toMorphine factor is unused on this path.
-    fireEvent.change(doseInputFor('Methadone'), { target: { value: '10' } })
-    expect(morphineTotal()).toBe('Morphine Equivalence: 100 mg')
+    // CDC 2022 guideline Table: methadone 4.7, so 20 mg/day is 94 MME.
+    fireEvent.change(doseInputFor('Methadone'), { target: { value: '20' } })
+    expect(morphineTotal()).toBe('Morphine Equivalence: 94 mg')
+    fireEvent.change(doseInputFor('Methadone'), { target: { value: '80' } })
+    expect(morphineTotal()).toBe('Morphine Equivalence: 376 mg')
+  })
+
+  it('does not convert a morphine total back into a methadone dose', () => {
+    render(<OpioidConverter />)
+    fireEvent.change(doseInputFor('Morphine'), { target: { value: '30' } })
+    expect(screen.queryByText(/Methadone Equivalence/)).not.toBeInTheDocument()
+  })
+
+  it('keeps a decimal dose typed one keystroke at a time', () => {
+    render(<OpioidConverter />)
+    const input = doseInputFor('Morphine')
+    typeKeys(input, '2.5')
+    expect(input).toHaveValue('2.5')
+    expect(morphineTotal()).toBe('Morphine Equivalence: 3 mg')
+  })
+
+  it('keeps a leading zero before the decimal point', () => {
+    render(<OpioidConverter />)
+    const input = doseInputFor('Morphine')
+    typeKeys(input, '0.5')
+    expect(input).toHaveValue('0.5')
+    expect(morphineTotal()).toBe('Morphine Equivalence: 1 mg')
+  })
+
+  it.each(['abc', '-100', '1e400', '.5'])(
+    'never shows NaN, a negative or Infinity while typing %s',
+    (keys) => {
+      render(<OpioidConverter />)
+      const input = doseInputFor('Morphine')
+      for (const key of keys) {
+        typeKeys(input, key)
+        expect(morphineTotal()).toMatch(SAFE_TOTAL)
+        expect((input as HTMLInputElement).value).toMatch(/^\d*\.?\d*$/)
+      }
+    }
+  )
+
+  it.each([
+    ['abc', 'abc'],
+    ['-100', '-100'],
+    ['1e400', '1e400'],
+    ['400 nines', '9'.repeat(400)],
+  ])('rejects %s pasted in a single change', (_label, pasted) => {
+    render(<OpioidConverter />)
+    fireEvent.change(doseInputFor('Morphine'), { target: { value: pasted } })
+    expect(morphineTotal()).toBe('Morphine Equivalence: 0 mg')
+  })
+
+  it('keeps the total finite when a huge dose meets a large factor', () => {
+    render(<OpioidConverter />)
+    // 308 nines is a finite number near 1e308, but times 7.5 it overflows.
+    fireEvent.change(doseInputFor('Levorphanol'), {
+      target: { value: '9'.repeat(308) },
+    })
+    expect(morphineTotal()).toMatch(SAFE_TOTAL)
+  })
+
+  it('shows the clinical-judgment notice and its source', () => {
+    render(<OpioidConverter />)
+    expect(
+      screen.getByText(/not a substitute for clinical judgment/i)
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('link', { name: /CDC Clinical Practice Guideline/i })
+    ).toHaveAttribute(
+      'href',
+      'https://www.cdc.gov/mmwr/volumes/71/rr/rr7103a1.htm'
+    )
   })
 
   it('sums across multiple medications', () => {
@@ -49,13 +125,6 @@ describe('OpioidConverter', () => {
     fireEvent.change(doseInputFor('Oxycodone'), { target: { value: '20' } })
     // 30*1 + 20*1.5 = 60
     expect(morphineTotal()).toBe('Morphine Equivalence: 60 mg')
-  })
-
-  it('derives methadone equivalence from the unrounded morphine total', () => {
-    render(<OpioidConverter />)
-    fireEvent.change(doseInputFor('Morphine'), { target: { value: '30' } })
-    // sqrt(30 * 4) = 10.954..., rounded once at the end
-    expect(methadoneTotal()).toBe('Methadone Equivalence: 11 mg')
   })
 
   it('steps a dose by the medication increment', () => {
@@ -91,7 +160,6 @@ describe('OpioidConverter', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /clear all/i }))
     expect(morphineTotal()).toBe('Morphine Equivalence: 0 mg')
-    expect(methadoneTotal()).toBe('Methadone Equivalence: 0 mg')
   })
 })
 

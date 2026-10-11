@@ -2,7 +2,7 @@
 
 ## Overview
 
-A medical tool for converting opioid dosages to morphine and methadone equivalents. Designed for healthcare professionals to safely calculate opioid conversions using established medical conversion factors. Built with TypeScript, React, and Next.js.
+A medical tool for converting opioid dosages to a morphine milligram equivalent (MME) total. Designed for healthcare professionals to safely calculate opioid conversions using established medical conversion factors. Built with TypeScript, React, and Next.js.
 
 **Live Demo**: [cooperability.com/demos/opioid-converter](https://cooperability.com/demos/opioid-converter)
 
@@ -31,14 +31,13 @@ opioid-converter/
 
 - State management for medication array and calculated equivalents
 - Input handlers for dose changes and increments
-- Real-time calculation of morphine and methadone equivalents
+- Real-time calculation of the MME total
 - Table-based UI for medication entry
 
 **utils/calculations.ts** - Medical Conversion Logic
 
 - Conversion factors for 14+ opioid medications
 - Morphine equivalence calculations
-- Methadone equivalence calculations (non-linear)
 
 **OpioidConverter.module.css** - Styling
 
@@ -54,7 +53,7 @@ opioid-converter/
 
 - **14+ Opioid Medications**: Butrans, Codeine, Duragesic, Hydrocodone, Hydromorphone, Levorphanol, Meperidine, Methadone, Morphine, Oxycodone, Oxymorphone, Pentazocin, Tapentadol, Tramadol
 - **Morphine Equivalence**: Real-time calculation based on established conversion factors
-- **Methadone Equivalence**: Non-linear calculation (square root formula) for accurate conversion
+- **Methadone**: converts to MME at the CDC 2022 factor of 4.7. The calculator does not convert an MME total back into a methadone dose
 - **Dose Input**: Manual entry or increment/decrement buttons
 - **Clear All**: One-button reset of all medications
 
@@ -107,17 +106,13 @@ The Opioid Converter is loaded using Next.js `dynamic()` import with SSR disable
 | Oxymorphone   | 3.0               | High potency                |
 | Codeine       | 0.15              | Low potency                 |
 | Tramadol      | 0.2               | Weak opioid                 |
-| Methadone     | 0.25              | Non-linear conversion       |
+| Methadone     | 4.7               | CDC 2022 guideline          |
 
 ### Methadone Conversion
 
-Methadone uses a non-linear conversion formula:
+Methadone converts to MME linearly at 4.7, the factor in the Table of the [CDC Clinical Practice Guideline for Prescribing Opioids for Pain, 2022](https://www.cdc.gov/mmwr/volumes/71/rr/rr7103a1.htm) (Dowell et al., MMWR Recomm Rep 2022;71(No. RR-3)).
 
-```
-methadone_equivalent = sqrt(morphine_equivalent × 4)
-```
-
-This accounts for methadone's unique pharmacokinetics and accumulation properties.
+The calculator shows no methadone dose for an MME total. The guideline says not to use a calculated MME dose to convert one opioid to another, because cross-tolerance is incomplete.
 
 ---
 
