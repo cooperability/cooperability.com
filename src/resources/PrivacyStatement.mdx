@@ -1,46 +1,60 @@
 ---
 title: 'Privacy Statement'
-date: '2026-09-25'
+date: '2026-10-11'
+structured: true
 description:
-  My commitment to privacy and information about Co-Operability.com's data
-  handling.
+  What data Co-Operability.com collects, what it never stores, and when your
+  text leaves your browser.
 ---
 
-I believe in transparent, responsible data handling. This website uses Vercel
-Analytics to understand traffic patterns and improve user experience—it's
-privacy-forward by design, focusing on aggregated, anonymous data without
-cookies or cross-site tracking. I also use Google Search Console to monitor
-search performance and optimize content visibility, though it doesn't place any
-tracking scripts on this site.
+This site counts visits and measures page speed without tracking you. Nothing
+you type is stored on a server here. The one time your text leaves your browser
+is when you click **AI review** in Prompt Composer, and that is explained below.
 
-This approach gives me the insights I need to maintain and improve the website
-while respecting your privacy. I've intentionally chosen tools that don't build
-detailed user profiles or require complex consent mechanisms. If you're browsing
-with Safari's Advanced Tracking Protection and see a warning message, that's
-just Safari being extra cautious—the analytics here are genuinely non-invasive.
+## What the site collects
 
-**AI review in Prompt Composer.** Prompt Composer's live check runs entirely in
-your browser and sends nothing anywhere. The optional **AI review** is
-different: only when you click it, the text of your compiled prompt is sent to
-Anthropic's API to be graded, and the review is streamed back to you. This site
-does not store your prompt or the review, and its logs record only token counts,
-cost and timing, never the text. Anthropic processes the request under its
-[commercial terms](https://www.anthropic.com/legal/commercial-terms) and
-[privacy policy](https://www.anthropic.com/legal/privacy). Don't include
-anything in a prompt you review that you wouldn't send to a third party. Your
-composer selections are saved in your own browser's local storage so they
-survive a refresh. Clear removes them.
+- **Vercel Analytics** counts page views in aggregate. It sets no cookies and
+  does not follow you across other sites.
+- **Vercel Speed Insights** records page-load timing and the type of browser and
+  device. Vercel says the data is not tied to an individual visitor or IP
+  address.
+- **Google Search Console** shows me how the site performs in search. It adds no
+  tracking scripts to these pages.
 
-**What I've implemented:**
+I chose these tools because they do not build profiles of visitors, so the site
+has no cookie consent banner.
 
-- Privacy-forward Vercel Analytics (no cookies, anonymized data)
-- Google Search Console integration for search performance
-- AI review that sends a prompt to Anthropic only when you ask for it, and is
-  never stored here
-- HTTPS security and mobile-responsive design
-- 301 redirects from old URLs to maintain SEO without broken links
-- Current XML sitemap submission
+## Saved in your browser
 
-Safari users may occasionally see privacy warnings due to the browser's strict
-heuristics, but this reflects Safari's sensitivity rather than invasive tracking
-on my part.
+The site stores a few preferences in your browser's local storage. They never
+reach a server, and you can erase them in your browser's site settings.
+
+- Your light or dark theme choice.
+- Your Prompt Composer selections, so they survive a refresh. The **Clear**
+  button removes them.
+- The handheld game's control layout, vibration setting and whether you
+  dismissed its install hint.
+
+## Prompt Composer and your text
+
+Prompt Composer has two parts, and they handle your text differently.
+
+### Stays in your browser
+
+The live check runs in your browser and sends nothing anywhere.
+
+### Leaves your browser only when you click AI review
+
+- The button sends the text of your compiled prompt to Anthropic's API, which
+  grades it. The review streams back to you.
+- This site does not store your prompt or the review. Its logs record token
+  counts, cost and timing, never the text.
+- Anthropic handles the request under its
+  [commercial terms](https://www.anthropic.com/legal/commercial-terms) and
+  [privacy policy](https://www.anthropic.com/legal/privacy).
+- Do not put anything in a prompt that you would not send to a third party.
+
+## If Safari shows a tracking warning
+
+Safari's Advanced Tracking Protection sometimes warns about sites that load
+analytics scripts. The Vercel scripts above are the only analytics on this site.
