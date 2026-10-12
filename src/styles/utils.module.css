@@ -3,8 +3,11 @@
 /* Layout & Structure */
 .container {
   max-width: 36rem;
-  padding: 0 1rem;
-  margin: 1rem auto 1rem;
+  /* The top gap is padding, not margin: a margin collapses out of <body> and
+     is painted by <html>, so an html background (a browser extension sets
+     one) showed it as a gray band that read as no gap at all. */
+  padding: 1rem 1rem 0;
+  margin: 0 auto 1rem;
 }
 
 .horizLine {

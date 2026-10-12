@@ -128,7 +128,10 @@
 @layer base {
   body {
     @apply bg-gray-50 text-gray-900 dark:bg-black dark:text-gray-100;
-    @apply min-h-screen;
+    /* The extra 1rem is the old collapsed top margin, now padding inside
+       .container. Without it a short page stops scrolling, loses its
+       scrollbar, and the header shifts sideways against a long page. */
+    min-height: calc(100vh + 1rem);
   }
 
   /* Default link style, assuming color will be specified by theme or inherited */
