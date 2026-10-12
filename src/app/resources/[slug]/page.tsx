@@ -22,18 +22,63 @@ export const dynamicParams = false
 // reset strips heading size, list bullets and paragraph spacing, so a page
 // with sections reads as one block without these. The linktree relies on the
 // reset's tight paragraphs, so it stays opted out.
+//
+// Headings inside an accordion step down to the dropdown's text-sm scale, or
+// a prompt's `##` would outsize the trigger it sits under.
 const structuredComponents = {
+  h1: (props: ComponentPropsWithoutRef<'h1'>) => (
+    <h1
+      className="mt-6 mb-2 border-b pb-1 text-lg font-bold first:mt-0"
+      {...props}
+    />
+  ),
   h2: (props: ComponentPropsWithoutRef<'h2'>) => (
-    <h2 className="mt-8 mb-2 text-2xl font-bold" {...props} />
+    <h2
+      className="mt-8 mb-2 text-2xl font-bold in-data-[slot=accordion-content]:mt-5 in-data-[slot=accordion-content]:text-base in-data-[slot=accordion-content]:font-semibold"
+      {...props}
+    />
   ),
   h3: (props: ComponentPropsWithoutRef<'h3'>) => (
-    <h3 className="mt-5 mb-1 text-xl font-semibold" {...props} />
+    <h3
+      className="mt-5 mb-1 text-xl font-semibold in-data-[slot=accordion-content]:mt-4 in-data-[slot=accordion-content]:text-sm"
+      {...props}
+    />
   ),
   p: (props: ComponentPropsWithoutRef<'p'>) => (
-    <p className="my-3" {...props} />
+    <p className="my-3 first:mt-0 last:mb-0" {...props} />
   ),
   ul: (props: ComponentPropsWithoutRef<'ul'>) => (
-    <ul className="my-3 list-disc space-y-2 pl-6" {...props} />
+    <ul
+      className="my-3 list-disc space-y-2 pl-6 marker:text-gray-500 first:mt-0 last:mb-0 in-[li]:my-2 in-[li]:list-[circle]"
+      {...props}
+    />
+  ),
+  ol: (props: ComponentPropsWithoutRef<'ol'>) => (
+    <ol
+      className="my-3 list-decimal space-y-2 pl-6 marker:font-semibold marker:text-gray-500 first:mt-0 last:mb-0 in-[li]:my-2"
+      {...props}
+    />
+  ),
+  li: (props: ComponentPropsWithoutRef<'li'>) => (
+    <li className="pl-1" {...props} />
+  ),
+  code: (props: ComponentPropsWithoutRef<'code'>) => (
+    <code
+      className="rounded bg-gray-100 px-1 py-0.5 text-[0.9em] dark:bg-gray-800"
+      {...props}
+    />
+  ),
+  // An example outline keeps its long lines unwrapped, so it scrolls instead
+  // of being clipped by the accordion's overflow-hidden. A scroll region has
+  // to be focusable to be scrollable from the keyboard.
+  pre: (props: ComponentPropsWithoutRef<'pre'>) => (
+    <pre
+      role="region"
+      aria-label="Example"
+      tabIndex={0}
+      className="my-3 overflow-x-auto rounded-md bg-gray-100 p-3 leading-snug first:mt-0 last:mb-0 dark:bg-gray-800 [&_code]:p-0"
+      {...props}
+    />
   ),
 }
 

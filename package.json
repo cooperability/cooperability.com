@@ -22,6 +22,8 @@
     "analyze": "cross-env ANALYZE=true next build --webpack",
     "a11y:run-audits": "pnpm lint && node scripts/a11y-audit.mjs",
     "a11y": "cross-env NEXT_PUBLIC_AXE_FORCE_THEME=light start-server-and-test dev http://localhost:3000 a11y:run-audits",
+    "dropdowns:check": "node scripts/dropdown-layout-check.mjs",
+    "dropdowns": "start-server-and-test dev http://localhost:3000 dropdowns:check",
     "audit": "pnpm audit",
     "audit:critical": "pnpm audit --audit-level critical",
     "audit:fix": "pnpm audit --fix",
