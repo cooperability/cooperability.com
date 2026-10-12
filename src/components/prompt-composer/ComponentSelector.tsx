@@ -47,8 +47,8 @@ export const textareaClass =
 
 interface Props {
   state: ComposerState
-  open: string[]
-  onOpenChange: (open: string[]) => void
+  open: string
+  onOpenChange: (open: string) => void
   onField: (id: FieldId, value: string) => void
   onToggle: (id: string) => void
   onGroup: (group: string, id: string | null) => void
@@ -72,8 +72,11 @@ export default function ComponentSelector({
   fieldRefs,
 }: Props) {
   return (
+    // One section open at a time, so the column's height depends on that one
+    // section rather than on how many were left open.
     <Accordion
-      type="multiple"
+      type="single"
+      collapsible
       value={open}
       onValueChange={onOpenChange}
       className="w-full space-y-2"
@@ -94,7 +97,7 @@ export default function ComponentSelector({
             className="border-l-4"
             style={{ borderLeftColor: SECTION_ACCENT[section.id] }}
           >
-            <AccordionTrigger className="py-3 hover:no-underline">
+            <AccordionTrigger className="px-3 py-2.5 hover:no-underline">
               <span className="flex w-full items-center justify-between pr-2">
                 <span className="flex items-center gap-2 text-base font-semibold">
                   <span aria-hidden="true">{section.icon}</span>
@@ -108,7 +111,7 @@ export default function ComponentSelector({
                 )}
               </span>
             </AccordionTrigger>
-            <AccordionContent className="space-y-4">
+            <AccordionContent className="space-y-3 p-3">
               <p className="text-gray-600 dark:text-gray-400">
                 {section.blurb}
               </p>

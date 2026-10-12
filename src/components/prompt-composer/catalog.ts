@@ -56,14 +56,14 @@ export const SECTIONS: PromptSection[] = [
   },
   {
     id: 'context',
-    label: 'Context & audience',
+    label: 'Audience',
     icon: '📋',
     blurb:
       'Why the task matters and who it is for. Explaining the why beats assigning a persona.',
   },
   {
     id: 'input',
-    label: 'Input material',
+    label: 'Sources',
     icon: '📥',
     blurb:
       'Anything the task operates on. It is wrapped in tags and placed before the instructions.',
@@ -83,7 +83,7 @@ export const SECTIONS: PromptSection[] = [
   },
   {
     id: 'quality',
-    label: 'Reasoning & quality',
+    label: 'Reasoning',
     icon: '🔍',
     blurb: 'Grounding, honesty about uncertainty, and a final self-check.',
   },

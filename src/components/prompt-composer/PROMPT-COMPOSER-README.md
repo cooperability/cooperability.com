@@ -59,15 +59,15 @@ confidence, and a final self-check.
 
 ### Sections
 
-| Section             | Kind                          | Contents                                                                                        |
-| ------------------- | ----------------------------- | ----------------------------------------------------------------------------------------------- |
-| Task                | field                         | The instruction                                                                                 |
-| Context & audience  | field + radio                 | Background and purpose; reader: general, practitioner, expert, or "let the model decide"        |
-| Input material      | field                         | Wrapped in `<input>`                                                                            |
-| Examples            | field                         | Split on `---` lines, each in `<example>` inside `<examples>`                                   |
-| Output              | field + 2 radios + checkboxes | Requirements; format; length; answer first, next steps, plain language                          |
-| Reasoning & quality | checkboxes                    | Ground in input, permission to not know, flag confidence, think first, alternatives, self-check |
-| Interaction         | checkboxes                    | Clarify then answer, suggest prompt fixes                                                       |
+| Section     | Kind                          | Contents                                                                                        |
+| ----------- | ----------------------------- | ----------------------------------------------------------------------------------------------- |
+| Task        | field                         | The instruction                                                                                 |
+| Audience    | field + radio                 | Background and purpose; reader: general, practitioner, expert, or "let the model decide"        |
+| Sources     | field                         | Wrapped in `<input>`                                                                            |
+| Examples    | field                         | Split on `---` lines, each in `<example>` inside `<examples>`                                   |
+| Output      | field + 2 radios + checkboxes | Requirements; format; length; answer first, next steps, plain language                          |
+| Reasoning   | checkboxes                    | Ground in input, permission to not know, flag confidence, think first, alternatives, self-check |
+| Interaction | checkboxes                    | Clarify then answer, suggest prompt fixes                                                       |
 
 Every radio group has "Let the model decide", because leaving format or length
 open is often the right call, and v1 had no way back to unset.
@@ -95,8 +95,13 @@ header and footer on purpose.
 - **1280px and up:** a third column takes the scores, so the prompt has the
   centre column to itself.
 
-The side columns are sticky and scroll on their own, so the prompt stays in view
-while a long section is open.
+From 1280px the three columns share one height that ends just above the bottom
+of the viewport, and each scrolls inside itself. The prompt scrolls inside its
+textarea. Because the height is fixed, opening or closing a section never
+changes the layout. Between 1024px and 1280px the components column sticks and
+scrolls on its own instead, and below that the page grows with what is open.
+
+Components is an accordion with one section open at a time at every width.
 
 ### Section colours in the prompt
 
@@ -105,8 +110,9 @@ while a long section is open.
 splits it into coloured runs. A highlight layer behind the transparent textarea
 renders the runs with the same box and type metrics, so each tint sits under its
 own glyphs while the prompt stays directly editable. When the textarea scrolls
-(no `field-sizing` support, or dragged shorter than its text) the layer follows
-its `scrollTop`. Both reserve a scrollbar gutter, so a scrollbar never changes
+(always possible from 1280px, where its height is fixed, and below that when
+`field-sizing` is missing or it is dragged shorter) the layer follows its
+`scrollTop`. Both reserve a scrollbar gutter, so a scrollbar never changes
 where lines wrap.
 
 Hand edits keep the colour of every block that survives verbatim and in its

@@ -145,9 +145,7 @@ describe('PromptComposer v2', () => {
     typeTask('Write a haiku')
     fireEvent.change(compiled(), { target: { value: 'My hand-tuned prompt' } })
 
-    fireEvent.click(
-      screen.getByRole('button', { name: /reasoning & quality/i })
-    )
+    fireEvent.click(screen.getByRole('button', { name: /^reasoning/i }))
     fireEvent.click(screen.getByLabelText(/self-check/i))
 
     // v1 silently overwrote this on every toggle.
@@ -156,6 +154,19 @@ describe('PromptComposer v2', () => {
     fireEvent.click(screen.getByRole('button', { name: /discard edits/i }))
     expect(compiled().value).toContain('Write a haiku')
     expect(compiled().value).toContain('Before finishing, check your response')
+  })
+
+  it('keeps one component section open at a time', async () => {
+    await renderComposer()
+    const section = (name: RegExp) => screen.getByRole('button', { name })
+    expect(section(/^task/i)).toHaveAttribute('aria-expanded', 'true')
+
+    fireEvent.click(section(/^output/i))
+    expect(section(/^output/i)).toHaveAttribute('aria-expanded', 'true')
+    expect(section(/^task/i)).toHaveAttribute('aria-expanded', 'false')
+
+    fireEvent.click(section(/^output/i))
+    expect(section(/^output/i)).toHaveAttribute('aria-expanded', 'false')
   })
 
   it('keeps a radio group exclusive and lets it return to no preference', async () => {
@@ -207,7 +218,7 @@ describe('PromptComposer v2', () => {
   it('colours each block of the prompt by the section it came from', async () => {
     await renderComposer()
     typeTask('Plan a launch')
-    fireEvent.click(screen.getByRole('button', { name: /context & audience/i }))
+    fireEvent.click(screen.getByRole('button', { name: /^audience/i }))
     fireEvent.change(screen.getByLabelText('Background and purpose'), {
       target: { value: 'For the board.' },
     })
@@ -227,7 +238,7 @@ describe('PromptComposer v2', () => {
 
     // 12 characters of task and 12 of context.
     typeTask('Plan a party')
-    fireEvent.click(screen.getByRole('button', { name: /context & audience/i }))
+    fireEvent.click(screen.getByRole('button', { name: /^audience/i }))
     fireEvent.change(screen.getByLabelText('Background and purpose'), {
       target: { value: 'For friends.' },
     })
@@ -235,7 +246,7 @@ describe('PromptComposer v2', () => {
       within(table()).getByRole('row', { name }).lastElementChild?.textContent
 
     // The context block also carries its <context> tags: 33 characters.
-    expect(share(/context & audience/i)).toBe('73%')
+    expect(share(/^audience/i)).toBe('73%')
     expect(share(/^task/i)).toBe('27%')
 
     fireEvent.change(compiled(), {
