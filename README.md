@@ -298,3 +298,7 @@ why, so a reader can tell load-bearing packages from incidental ones.
 | [MCP](docs/MCP.md)                              | Model Context Protocol integration guide. **Aspirational, not implemented**  |
 | [References](docs/References.md)                | Sources this site was built from, and an index of project learnings          |
 | [AGENTS.md](AGENTS.md) / [CLAUDE.md](CLAUDE.md) | Agent skills, subagents and repo conventions                                 |
+
+## License
+
+Copyright 2020-2026 Cooper Reed. Free for noncommercial use under the [PolyForm Noncommercial License 1.0.0](LICENSE). Personal study, hobby projects, noncommercial research, and use by charities, schools, public research bodies and government all qualify. Commercial use needs a separate license: ask through [cooperability.com](https://cooperability.com).
