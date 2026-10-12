@@ -47,8 +47,8 @@ export const textareaClass =
 
 interface Props {
   state: ComposerState
-  open: string[]
-  onOpenChange: (open: string[]) => void
+  open: string
+  onOpenChange: (open: string) => void
   onField: (id: FieldId, value: string) => void
   onToggle: (id: string) => void
   onGroup: (group: string, id: string | null) => void
@@ -73,7 +73,8 @@ export default function ComponentSelector({
 }: Props) {
   return (
     <Accordion
-      type="multiple"
+      type="single"
+      collapsible
       value={open}
       onValueChange={onOpenChange}
       className="w-full space-y-2"
