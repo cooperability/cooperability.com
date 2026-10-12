@@ -9,14 +9,15 @@ const PromptComposer = dynamic(
   () => import('@/src/components/prompt-composer/PromptComposer'),
   {
     loading: () => (
-      <div className="container mx-auto p-4 animate-pulse">
+      <div className="p-4 animate-pulse lg:mx-[calc(50%_-_min(50vw_-_1rem,44rem))]">
         <div className="text-center mb-6">
           <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-64 mx-auto" />
         </div>
-        {/* One column, matching the composer, so nothing jumps on load. */}
-        <div className="flex flex-col gap-3">
+        {/* The composer's columns, so nothing jumps on load. */}
+        <div className="flex flex-col gap-3 lg:grid lg:grid-cols-[17rem_minmax(0,1fr)] xl:grid-cols-[17rem_minmax(0,1fr)_18rem] 2xl:grid-cols-[20rem_minmax(0,1fr)_22rem]">
           <div className="h-96 bg-gray-200 dark:bg-gray-700 rounded-lg" />
           <div className="h-96 bg-gray-200 dark:bg-gray-700 rounded-lg" />
+          <div className="hidden h-96 bg-gray-200 dark:bg-gray-700 rounded-lg xl:block" />
         </div>
       </div>
     ),

@@ -1,4 +1,11 @@
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from '@testing-library/react'
 import { TextDecoder, TextEncoder } from 'util'
 import PromptComposer, {
   STORAGE_KEY,
@@ -195,6 +202,51 @@ describe('PromptComposer v2', () => {
     await waitFor(() =>
       expect(screen.getByLabelText('Material to work from')).toHaveFocus()
     )
+  })
+
+  it('colours each block of the prompt by the section it came from', async () => {
+    await renderComposer()
+    typeTask('Plan a launch')
+    fireEvent.click(screen.getByRole('button', { name: /context & audience/i }))
+    fireEvent.change(screen.getByLabelText('Background and purpose'), {
+      target: { value: 'For the board.' },
+    })
+
+    const task = screen.getByText('Plan a launch', { selector: 'span' })
+    const context = screen.getByText(/For the board\./, { selector: 'span' })
+    // Blue for Task, pink for Context, at a quarter opacity.
+    expect(task.style.backgroundColor).toBe('rgba(59, 130, 246, 0.25)')
+    expect(context.style.backgroundColor).toBe('rgba(236, 72, 153, 0.25)')
+  })
+
+  it('measures each section’s share, and counts what hand edits add', async () => {
+    await renderComposer()
+    const table = () =>
+      screen.getByRole('table', { name: /share of the prompt by section/i })
+    expect(screen.queryByRole('table')).not.toBeInTheDocument()
+
+    // 12 characters of task and 12 of context.
+    typeTask('Plan a party')
+    fireEvent.click(screen.getByRole('button', { name: /context & audience/i }))
+    fireEvent.change(screen.getByLabelText('Background and purpose'), {
+      target: { value: 'For friends.' },
+    })
+    const share = (name: RegExp) =>
+      within(table()).getByRole('row', { name }).lastElementChild?.textContent
+
+    // The context block also carries its <context> tags: 33 characters.
+    expect(share(/context & audience/i)).toBe('73%')
+    expect(share(/^task/i)).toBe('27%')
+
+    fireEvent.change(compiled(), {
+      target: { value: `${compiled().value}\n\nThanks!` },
+    })
+    expect(share(/hand edits/i)).toBe('13%')
+
+    fireEvent.click(screen.getByRole('button', { name: /discard edits/i }))
+    expect(
+      within(table()).queryByRole('row', { name: /hand edits/i })
+    ).not.toBeInTheDocument()
   })
 
   it('flags a persona typed straight into the prompt', async () => {

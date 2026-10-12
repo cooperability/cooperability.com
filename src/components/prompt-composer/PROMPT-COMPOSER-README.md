@@ -12,13 +12,14 @@ documented in [docs/AI-Review.md](../../../docs/AI-Review.md).
 prompt-composer/
 ├── PromptComposer.tsx     Orchestrator: state, persistence, layout
 ├── catalog.ts             Sections, free-text fields, options (pure data; the server imports it)
-├── compile.ts             State → prompt text, in evidence-backed order
+├── compile.ts             State → prompt blocks and text; attributes text back to sections
 ├── lint.ts                The live check: six-dimension rubric + anti-pattern warnings
 ├── review.ts              Validates model output into a render-safe view; overall score
 ├── partial-json.ts        Reads the review's JSON while it is still streaming
 ├── useCritique.ts         Availability probe, streaming POST, cancel, session cache
 ├── ComponentSelector.tsx  The accordion of sections
-├── CompiledPrompt.tsx     Editable output, copy/clear/discard, stats
+├── CompiledPrompt.tsx     Editable output over a section-coloured highlight layer; copy/clear/discard
+├── Composition.tsx        Each section's share of the prompt, plus word and character counts
 ├── LiveCheck.tsx          Renders lint results with one-click fixes
 ├── AiReview.tsx           Renders the streamed review
 ├── ResearchNotes.tsx      The "why" appendix and references
@@ -79,6 +80,42 @@ first and the query last: Anthropic measured up to 30% better responses that
 way on long inputs, and models use the start and end of a context better than
 its middle (Liu et al., TACL 2024). An untouched composer compiles to the empty
 string, so nothing boilerplate is ever copied by accident.
+
+## Layout
+
+Below 1024px the composer is one column, as before: components, prompt,
+composition, live check, AI review.
+
+On desktop it breaks out of the site's 36rem content well to the viewport,
+capped at 88rem (about 1600px on the site's 18px root), so it is wider than the
+header and footer on purpose.
+
+- **1024px and up:** two columns. Components on the left, the prompt on the
+  right, and the scores under the prompt.
+- **1280px and up:** a third column takes the scores, so the prompt has the
+  centre column to itself.
+
+The side columns are sticky and scroll on their own, so the prompt stays in view
+while a long section is open.
+
+### Section colours in the prompt
+
+`compileBlocks` returns the prompt as blocks, each from exactly one section.
+`attribute` finds those blocks in the text actually shown, in compile order, and
+splits it into coloured runs. A highlight layer behind the transparent textarea
+renders the runs with the same box and type metrics, so each tint sits under its
+own glyphs while the prompt stays directly editable. When the textarea scrolls
+(no `field-sizing` support, or dragged shorter than its text) the layer follows
+its `scrollTop`. Both reserve a scrollbar gutter, so a scrollbar never changes
+where lines wrap.
+
+Hand edits keep the colour of every block that survives verbatim and in its
+original order. Moving a block earlier turns it, and every block it jumped over,
+into hand edits: matching in order is what stops the layer repeating text. Any
+other text
+counts as **Hand edits**: it is left untinted and gets its own row in the
+Composition panel. Composition sizes each section by characters, estimates its
+tokens, and draws the prompt top to bottom as one stacked bar.
 
 ## Two graders, one rubric
 
