@@ -29,6 +29,21 @@ pnpm exec jest --bail --findRelatedTests --passWithNoTests --watchAll=false --ci
 pnpm test:ci
 ```
 
+## Rendered dropdown layout (Playwright)
+
+Jest cannot load the ESM MDX pipeline, so the LLM Prompts and Online Tools
+dropdowns are checked in Playwright's Chromium. It opens every dropdown at
+375px and 1280px and fails on clipped text, missing bullets or numbers,
+unindented lists, flat headings and blocks with no space between them.
+
+```bash
+pnpm dropdowns            # starts `pnpm dev`, then runs the check
+pnpm dropdowns:check      # against a server already on :3000 (or BASE_URL)
+```
+
+Needs a free port `3000` for `pnpm dropdowns`. Run it after touching
+`src/resources/*.mdx` or the resource page's MDX components.
+
 ## Human / interactive
 
 ```bash

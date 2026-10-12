@@ -125,6 +125,7 @@ cooperability.com/
 ├── scripts/                    # ✨ Consolidated scripts
 │   ├── build-sw.mjs
 │   ├── a11y-audit.mjs         # axe + Lighthouse for `pnpm a11y`
+│   ├── dropdown-layout-check.mjs # mobile + desktop dropdown layout for `pnpm dropdowns`
 │   └── setup-env.sh           # ✨ Moved from root
 ├── src/                        # Application source
 ├── [config files]              # All configs in root (necessary)
