@@ -1,40 +1,80 @@
 'use client'
 
+import { useEffect } from 'react'
+import * as RadioGroupPrimitive from '@radix-ui/react-radio-group'
 import { useTheme } from 'next-themes'
-import { SunIcon, MoonIcon } from '@heroicons/react/24/solid'
+import {
+  ComputerDesktopIcon,
+  MoonIcon,
+  SunIcon,
+} from '@heroicons/react/24/solid'
 import styles from '../styles/utils.module.css'
 import { useHydrated } from '../hooks/useHydrated'
 
+// Order is the order on the track, so the circle's slot is the index.
+const OPTIONS = [
+  {
+    value: 'light',
+    label: 'Light',
+    Icon: SunIcon,
+    at: styles.themeSwitchAtLight,
+  },
+  {
+    value: 'system',
+    label: 'System',
+    Icon: ComputerDesktopIcon,
+    at: styles.themeSwitchAtSystem,
+  },
+  {
+    value: 'dark',
+    label: 'Dark',
+    Icon: MoonIcon,
+    at: styles.themeSwitchAtDark,
+  },
+] as const
+
 const ThemeSwitch = () => {
-  const { systemTheme, theme, setTheme } = useTheme()
+  const { resolvedTheme, theme, setTheme } = useTheme()
   const hydrated = useHydrated()
+  const match = OPTIONS.find((o) => o.value === theme)
+
+  // next-themes applies any stored value as-is. One no slot matches shows as
+  // System, and a click on the checked slot fires nothing, so repair it here.
+  useEffect(() => {
+    if (hydrated && !match) setTheme('system')
+  }, [hydrated, match, setTheme])
 
   if (!hydrated) return null
 
-  const currentTheme = theme === 'system' ? systemTheme : theme
-  const isDark = currentTheme === 'dark'
-
-  const toggleTheme = () => {
-    setTheme(isDark ? 'light' : 'dark')
-  }
+  // The track and circle follow what is on screen, so "system" looks like the
+  // theme the OS picked; only the circle's slot says which setting is chosen.
+  const isDark = resolvedTheme === 'dark'
+  const chosen = match ?? OPTIONS[1]
 
   return (
-    <button
-      onClick={toggleTheme}
+    <RadioGroupPrimitive.Root
+      aria-label="Theme"
+      value={chosen.value}
+      onValueChange={setTheme}
       className={`${styles.themeToggleBtn} ${styles.themeSwitch} ${isDark ? styles.themeToggleDark : styles.themeToggleLight}`}
-      aria-label={`Switch to ${isDark ? 'light' : 'dark'} theme`}
     >
       {/* Sliding circle */}
       <div
-        className={`${styles.themeSwitchCircle} ${isDark ? styles.themeSwitchCircleDark : styles.themeSwitchCircleLight}`}
-      >
-        {isDark ? (
-          <MoonIcon className={styles.themeSwitchIconDark} />
-        ) : (
-          <SunIcon className={styles.themeSwitchIconLight} />
-        )}
-      </div>
-    </button>
+        aria-hidden="true"
+        className={`${styles.themeSwitchCircle} ${chosen.at} ${isDark ? styles.themeSwitchCircleDark : styles.themeSwitchCircleLight}`}
+      />
+      {OPTIONS.map(({ value, label, Icon }) => (
+        <RadioGroupPrimitive.Item
+          key={value}
+          value={value}
+          aria-label={label}
+          title={label}
+          className={styles.themeSwitchOption}
+        >
+          <Icon aria-hidden="true" />
+        </RadioGroupPrimitive.Item>
+      ))}
+    </RadioGroupPrimitive.Root>
   )
 }
 

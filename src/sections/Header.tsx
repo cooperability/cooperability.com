@@ -11,8 +11,6 @@ import { useResponsive } from '../hooks/useResponsive'
 import { usePathname } from 'next/navigation'
 import ActiveIcon from '../components/ActiveIcon'
 
-const allLinksUrl = '/resources/linktree'
-
 const navLinks = [
   { href: '/', label: 'Home' },
   { href: '/demos', label: 'Demos' },
@@ -81,7 +79,6 @@ const Header = () => {
           size="icon"
           onClick={toggleSidebar}
           aria-label="Open menu"
-          className="border"
         >
           <Bars3Icon className="h-6 w-6" />
         </Button>
@@ -89,7 +86,7 @@ const Header = () => {
     } else {
       return (
         <div className="flex flex-row space-between">
-          <ul className="inline-flex h-9 items-center justify-center rounded-xl border p-1 text-muted-foreground">
+          <ul className="inline-flex h-10 items-center justify-center rounded-xl border-2 border-foreground/50 p-1 text-muted-foreground">
             {navLinks.map(({ href, label }) => (
               <li key={href} className="flex">
                 <NavLink href={href} current={ariaCurrent(href)}>
@@ -114,11 +111,7 @@ const Header = () => {
   return (
     <div suppressHydrationWarning>
       <div className={styles.Header} suppressHydrationWarning>
-        <Sidebar
-          isOpen={isSidebarOpen}
-          toggleSidebar={toggleSidebar}
-          allLinksUrl={isMobile ? allLinksUrl : undefined}
-        />
+        <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
         <ActiveIcon
           href="/"
           imgSrc="/images/operamini.png"

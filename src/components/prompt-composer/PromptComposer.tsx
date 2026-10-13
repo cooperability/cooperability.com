@@ -88,7 +88,7 @@ const PromptComposer: React.FC<PromptComposerProps> = ({ className }) => {
   const [override, setOverride] = useState<string | null>(
     initial?.override ?? null
   )
-  const [open, setOpen] = useState<string[]>(['task'])
+  const [open, setOpen] = useState('task')
   const fieldRefs = useRef<Partial<Record<FieldId, HTMLTextAreaElement>>>({})
   const critique = useCritique()
 
@@ -133,7 +133,7 @@ const PromptComposer: React.FC<PromptComposerProps> = ({ className }) => {
       return
     }
     const section = FIELDS.find((f) => f.id === fix.field)!.section
-    setOpen((o) => (o.includes(section) ? o : [...o, section]))
+    setOpen(section)
     // The field mounts when its section opens, so focus after that paint.
     requestAnimationFrame(() => fieldRefs.current[fix.field]?.focus())
   }
