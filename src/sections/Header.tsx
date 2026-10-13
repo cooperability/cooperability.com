@@ -87,7 +87,7 @@ const Header = () => {
         />
         <nav className={styles.navbar} aria-label="Main navigation">
           <div className="flex flex-row space-between">
-            <ul className="inline-flex h-9 items-center justify-center rounded-xl border p-1 text-muted-foreground">
+            <ul className="inline-flex h-10 items-center justify-center rounded-xl border-2 border-foreground/50 p-1 text-muted-foreground">
               {navLinks.map(({ href, label, icon }) => (
                 <li key={href} className="flex">
                   <NavLink href={href} icon={icon} current={ariaCurrent(href)}>

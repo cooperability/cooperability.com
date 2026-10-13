@@ -6,14 +6,11 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useResolvedTheme } from '../hooks/useResolvedTheme'
 import { XMarkIcon } from '@heroicons/react/24/solid'
-import { LinkIcon } from 'lucide-react'
-import InlineIcon from '../components/InlineIcon'
 import { Button } from '@/components/ui/button'
 
 interface SidebarProps {
   isOpen: boolean
   toggleSidebar: () => void
-  allLinksUrl?: string
 }
 
 interface SidebarLinkProps {
@@ -78,7 +75,7 @@ const SidebarLink: React.FC<SidebarLinkProps> = ({
   )
 }
 
-const Sidebar = ({ isOpen, toggleSidebar, allLinksUrl }: SidebarProps) => {
+const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
   const isDark = useResolvedTheme() === 'dark'
   const pathname = usePathname() || '/'
 
@@ -94,7 +91,7 @@ const Sidebar = ({ isOpen, toggleSidebar, allLinksUrl }: SidebarProps) => {
     if (href === '/resources') {
       return pathname === '/resources'
     }
-    // For all other paths (like /resources/linktree), use startsWith
+    // For all other paths, use startsWith
     return pathname.startsWith(href)
   }
 
@@ -110,9 +107,12 @@ const Sidebar = ({ isOpen, toggleSidebar, allLinksUrl }: SidebarProps) => {
     >
       {isOpen && (
         <Button
+          variant="outline"
           onClick={toggleSidebar}
           aria-label="Close menu"
-          className="absolute top-4 right-3 border rounded-md p-1 bg-transparent"
+          // The sidebar paints its own light and dark panel, so the shadcn
+          // tokens (dark glyph, faint border in dark mode) vanish against it.
+          className="absolute top-4 right-3 rounded-md border-gray-900 bg-transparent p-1 text-gray-900 dark:border-white dark:bg-transparent dark:text-white"
         >
           <XMarkIcon className="h-5 w-5" />
         </Button>
@@ -140,19 +140,6 @@ const Sidebar = ({ isOpen, toggleSidebar, allLinksUrl }: SidebarProps) => {
         >
           | Resources |
         </SidebarLink>
-
-        <div className={styles.horizLine} />
-
-        {allLinksUrl && (
-          <SidebarLink
-            href={allLinksUrl}
-            isActive={isRouteActive(allLinksUrl)}
-            onClick={toggleSidebar}
-          >
-            <InlineIcon icon={LinkIcon} />
-            Linktree
-          </SidebarLink>
-        )}
       </nav>
     </div>
   )

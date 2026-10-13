@@ -23,7 +23,7 @@ const customJestConfig = {
 
   // Sidebar is parked: no layout mounts it, so its suite would only spend CI
   // time. Delete the second entry to run it again.
-  testPathIgnorePatterns: ['/node_modules/', 'sections/sidebar-theme.test'],
+  testPathIgnorePatterns: ['/node_modules/', 'sections/sidebar-'],
 
   // Without this, coverage is reported over only the files some test happened
   // to import -- 14 of 41 source modules -- which flatters the headline number
