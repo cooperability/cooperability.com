@@ -26,29 +26,37 @@ function AccordionItem({
   )
 }
 
+// Radix wraps every trigger in an h3. Pages put an h1 directly above the
+// accordion, so the default is h2 and a caller under an h2 passes 3.
 function AccordionTrigger({
   className,
   children,
+  headingLevel = 2,
   ...props
-}: React.ComponentProps<typeof AccordionPrimitive.Trigger>) {
+}: React.ComponentProps<typeof AccordionPrimitive.Trigger> & {
+  headingLevel?: 2 | 3 | 4
+}) {
   const isDark = useResolvedTheme() === 'dark'
+  const Heading = `h${headingLevel}` as const
 
   return (
-    <AccordionPrimitive.Header className="flex">
-      <AccordionPrimitive.Trigger
-        data-slot="accordion-trigger"
-        className={cn(
-          'focus-visible:border-ring focus-visible:ring-ring/50 flex flex-1 justify-between rounded-md data-[state=open]:rounded-b-none data-[state=open]:rounded-t-md py-4 px-4 text-left text-sm font-medium transition-all outline-hidden hover:underline focus-visible:ring-[3px] disabled:pointer-events-none disabled:opacity-50 [&[data-state=open]>svg]:rotate-180',
-          isDark
-            ? 'bg-gray-800 text-gray-100 hover:bg-gray-700'
-            : 'bg-gray-100 text-gray-900 hover:bg-gray-200',
-          className
-        )}
-        {...props}
-      >
-        {children}
-        <ChevronDownIcon className="text-muted-foreground pointer-events-none size-4 shrink-0 translate-y-0.5 transition-transform duration-200" />
-      </AccordionPrimitive.Trigger>
+    <AccordionPrimitive.Header asChild>
+      <Heading className="flex">
+        <AccordionPrimitive.Trigger
+          data-slot="accordion-trigger"
+          className={cn(
+            'focus-visible:border-ring focus-visible:ring-ring/50 flex flex-1 justify-between rounded-md data-[state=open]:rounded-b-none data-[state=open]:rounded-t-md py-4 px-4 text-left text-sm font-medium transition-all outline-hidden hover:underline focus-visible:ring-[3px] disabled:pointer-events-none disabled:opacity-50 [&[data-state=open]>svg]:rotate-180',
+            isDark
+              ? 'bg-gray-800 text-gray-100 hover:bg-gray-700'
+              : 'bg-gray-100 text-gray-900 hover:bg-gray-200',
+            className
+          )}
+          {...props}
+        >
+          {children}
+          <ChevronDownIcon className="text-muted-foreground pointer-events-none size-4 shrink-0 translate-y-0.5 transition-transform duration-200" />
+        </AccordionPrimitive.Trigger>
+      </Heading>
     </AccordionPrimitive.Header>
   )
 }
