@@ -10,6 +10,7 @@ import {
   AccordionContent,
 } from '@/components/ui/accordion'
 import DateDisplay from '../../../components/date'
+import ResourceIcon from '../../../components/ResourceIcon'
 import { getAllResourcesData, getResourceBySlug } from '../../../lib/resources'
 import utilStyles from '../../../styles/utils.module.css'
 
@@ -130,7 +131,10 @@ export default async function ResourcePage({
 
   return (
     <article>
-      <h1 className={utilStyles.headingXl}>{frontMatter.title}</h1>
+      <h1 className={utilStyles.headingXl}>
+        <ResourceIcon name={frontMatter.icon} />
+        {frontMatter.title}
+      </h1>
       {frontMatter.date && (
         <div className={utilStyles.lightText}>
           Last updated <DateDisplay dateString={frontMatter.date} />

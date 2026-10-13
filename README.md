@@ -96,7 +96,7 @@ because the homepage quote is re-rolled per request, and without that flag it
 prerenders and the quote freezes at build time.
 
 **The layout boundary.** `src/app/layout.tsx` owns everything shared: the theme
-provider (`next-themes`), the header, sidebar and footer from `src/sections/`,
+provider (`next-themes`), the header and footer from `src/sections/`,
 the site metadata, and the analytics and service-worker registrations. Route
 segments below it own only their own content and their own `metadata` export.
 Metadata does not deep-merge, so a child that sets `icons` replaces the
@@ -291,7 +291,7 @@ why, so a reader can tell load-bearing packages from incidental ones.
 | [PWA Suite](docs/PWA.md)                        | Applet architecture, manifests, service worker, install testing              |
 | [Game Rig](docs/Game-Rig.md)                    | The handheld game shell: input, scaling, launch images, offline              |
 | [Candlelight Beta](docs/Candlelight-Beta.md)    | The beta-test playbook for the game: scenarios, browser pass, judgement pass |
-| [Icons and SVG](docs/Icons.md)                  | skillicons.dev, and the SVG security configuration it forces                 |
+| [Icons and SVG](docs/Icons.md)                  | UI icons, skillicons.dev, and the SVG security configuration it forces       |
 | [SEO](docs/SEO.md)                              | Search Console setup and SEO maintenance                                     |
 | [Project Structure](docs/PROJECT-STRUCTURE.md)  | Root layout conventions and the unified link components                      |
 | [MCP](docs/MCP.md)                              | Model Context Protocol integration guide. **Aspirational, not implemented**  |

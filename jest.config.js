@@ -21,6 +21,10 @@ const customJestConfig = {
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   testEnvironment: 'jest-environment-jsdom',
 
+  // Sidebar is parked: no layout mounts it, so its suite would only spend CI
+  // time. Delete the second entry to run it again.
+  testPathIgnorePatterns: ['/node_modules/', 'sections/sidebar-theme.test'],
+
   // Without this, coverage is reported over only the files some test happened
   // to import -- 14 of 41 source modules -- which flatters the headline number
   // and hides untested files entirely instead of showing them at 0%.

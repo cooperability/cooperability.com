@@ -363,7 +363,7 @@ Does this need a mobile/desktop split?
 | Approach               | When to Use                | Example                |
 | ---------------------- | -------------------------- | ---------------------- |
 | **Tailwind classes**   | Layout-only changes        | `flex-col md:flex-row` |
-| **useResponsive hook** | Behavioral/feature changes | Show/hide navigation   |
+| **useResponsive hook** | Behavioral/feature changes | Swap a component       |
 | **Custom breakpoint**  | Component-specific needs   | Matches existing CSS   |
 
 ### Codebase Examples
@@ -377,12 +377,11 @@ Uses Tailwind only. Desktop and mobile show the same six icons, so one
 
 #### Example 2: Header Navigation
 
-**File:** `src/sections/Header.tsx:65,130-154`
+**File:** `src/sections/Header.tsx`
 
-Uses `useResponsive()` for navigation behavior:
-
-- **Desktop:** Horizontal link navigation
-- **Mobile:** Hamburger menu with sidebar
+Uses Tailwind only. Every width gets the same three icon links, and below
+`34rem` an `sr-only` class hides the words and leaves the icons. One markup
+serves the server render and every viewport, so nothing swaps after hydration.
 
 #### Example 3: Pure Tailwind Approach
 

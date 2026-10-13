@@ -1,10 +1,12 @@
 import React from 'react'
+import { Microscope, Smartphone } from 'lucide-react'
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion'
+import InlineIcon from '../InlineIcon'
 
 interface Reference {
   cite: string
@@ -82,7 +84,12 @@ export default function ResearchNotes() {
   return (
     <Accordion type="single" collapsible className="w-full space-y-2">
       <AccordionItem value="research">
-        <AccordionTrigger>🔬 Why v2 is built this way</AccordionTrigger>
+        <AccordionTrigger>
+          <span>
+            <InlineIcon icon={Microscope} />
+            Why v2 is built this way
+          </span>
+        </AccordionTrigger>
         <AccordionContent className="space-y-4 leading-relaxed">
           <div>
             <h3 className={heading}>No personas</h3>
@@ -176,7 +183,10 @@ export default function ResearchNotes() {
       </AccordionItem>
       <AccordionItem value="app-guide">
         <AccordionTrigger>
-          📱 Install Prompt Composer as an app
+          <span>
+            <InlineIcon icon={Smartphone} />
+            Install Prompt Composer as an app
+          </span>
         </AccordionTrigger>
         <AccordionContent className="leading-relaxed">
           <p>

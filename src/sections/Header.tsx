@@ -1,30 +1,27 @@
 'use client'
 import { useState } from 'react'
 import Link from 'next/link'
-import { Bars3Icon } from '@heroicons/react/24/solid'
-import { Button } from '@/components/ui/button'
+import { BookOpen, FlaskConical, House, type LucideIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import styles from '../styles/utils.module.css'
-import Sidebar from './Sidebar'
 import ThemeSwitch from '../components/ThemeSwitch'
-import { useResponsive } from '../hooks/useResponsive'
 import { usePathname } from 'next/navigation'
 import ActiveIcon from '../components/ActiveIcon'
 
-const allLinksUrl = '/resources/linktree'
-
-const navLinks = [
-  { href: '/', label: 'Home' },
-  { href: '/demos', label: 'Demos' },
-  { href: '/resources', label: 'Resources' },
+const navLinks: { href: string; label: string; icon: LucideIcon }[] = [
+  { href: '/', label: 'Home', icon: House },
+  { href: '/demos', label: 'Demos', icon: FlaskConical },
+  { href: '/resources', label: 'Resources', icon: BookOpen },
 ]
 
 const NavLink = ({
   href,
+  icon: Icon,
   current,
   children,
 }: {
   href: string
+  icon: LucideIcon
   current?: 'page' | 'true'
   children: React.ReactNode
 }) => {
@@ -47,22 +44,26 @@ const NavLink = ({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <span className={styles.linkTextWrapper}>
-        {children}
-        <span
-          className={cn(
-            styles.animatedUnderline,
-            isHovered && styles.animatedUnderlineHover
-          )}
-        />
+      <Icon aria-hidden="true" className="size-4 shrink-0" />
+      {/* Icon only below 34rem, where the words no longer fit beside the logo
+          and theme switch. Hidden visually but not from screen readers, which
+          still need the link's name. */}
+      <span className="sr-only min-[34rem]:not-sr-only min-[34rem]:ml-1.5">
+        <span className={styles.linkTextWrapper}>
+          {children}
+          <span
+            className={cn(
+              styles.animatedUnderline,
+              isHovered && styles.animatedUnderlineHover
+            )}
+          />
+        </span>
       </span>
     </Link>
   )
 }
 
 const Header = () => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
-  const { isMobile } = useResponsive()
   // `usePathname` is already query-free, unlike the pages router's `asPath`.
   const currentPath = usePathname() || '/'
   // `page` marks the route itself, `true` its section from a subpage.
@@ -73,52 +74,9 @@ const Header = () => {
         ? 'true'
         : undefined
 
-  const navigator = () => {
-    if (isMobile) {
-      return (
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={toggleSidebar}
-          aria-label="Open menu"
-          className="border"
-        >
-          <Bars3Icon className="h-6 w-6" />
-        </Button>
-      )
-    } else {
-      return (
-        <div className="flex flex-row space-between">
-          <ul className="inline-flex h-9 items-center justify-center rounded-xl border p-1 text-muted-foreground">
-            {navLinks.map(({ href, label }) => (
-              <li key={href} className="flex">
-                <NavLink href={href} current={ariaCurrent(href)}>
-                  {label}
-                </NavLink>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )
-    }
-  }
-
-  const renderThemeChanger = () => {
-    return <ThemeSwitch />
-  }
-
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen)
-  }
-
   return (
-    <div suppressHydrationWarning>
-      <div className={styles.Header} suppressHydrationWarning>
-        <Sidebar
-          isOpen={isSidebarOpen}
-          toggleSidebar={toggleSidebar}
-          allLinksUrl={isMobile ? allLinksUrl : undefined}
-        />
+    <div>
+      <div className={styles.Header}>
         <ActiveIcon
           href="/"
           imgSrc="/images/operamini.png"
@@ -127,31 +85,20 @@ const Header = () => {
           alt="Logo"
           external={false}
         />
-        {isMobile ? (
-          <>
-            <div className="flex flex-row gap-3">
-              {renderThemeChanger()}
-              <nav
-                className={styles.navbar}
-                aria-label="Main navigation"
-                suppressHydrationWarning
-              >
-                {navigator()}
-              </nav>
-            </div>
-          </>
-        ) : (
-          <>
-            <nav
-              className={styles.navbar}
-              aria-label="Main navigation"
-              suppressHydrationWarning
-            >
-              {navigator()}
-            </nav>
-            {renderThemeChanger()}
-          </>
-        )}
+        <nav className={styles.navbar} aria-label="Main navigation">
+          <div className="flex flex-row space-between">
+            <ul className="inline-flex h-9 items-center justify-center rounded-xl border p-1 text-muted-foreground">
+              {navLinks.map(({ href, label, icon }) => (
+                <li key={href} className="flex">
+                  <NavLink href={href} icon={icon} current={ariaCurrent(href)}>
+                    {label}
+                  </NavLink>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </nav>
+        <ThemeSwitch />
       </div>
       <div className={styles.horizLine} />
     </div>

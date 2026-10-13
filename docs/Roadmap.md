@@ -257,21 +257,19 @@ Replace `useResponsive` layout switching with CSS breakpoints.
 `Bug` · P1 · M · Depends on: none
 
 - **Why.** During SSR and hydration the hook returns `isDesktop: true`
-  (`src/hooks/useResponsive.ts:63-72`). `src/sections/Header.tsx:69`
-  therefore server-renders the desktop nav on phones and swaps to the
-  hamburger once JS loads. That is a layout shift on every mobile page load,
-  on every route. `src/app/resources/resources-list.tsx:11` does the same. The Footer
-  used the hook too until #347 (merged 2026-10-11) removed it, which moved
-  the Header line to `:65`.
-- **Do.** Render both layouts and pick with Tailwind breakpoint classes
-  (`md:hidden`, `hidden md:flex`). Make `resources-list.tsx` a server
-  component once it no longer needs the hook. Delete the hook if nothing
-  else imports it, and update the `useResponsive` section of
-  `docs/Performance.md`.
-- **Done when.** The server HTML for `/` contains the mobile nav markup, and
-  a jsdom test with no `window.innerWidth` set renders both nav variants
-  with the right breakpoint classes. That test fails against the current
-  hook.
+  (`src/hooks/useResponsive.ts:63-72`).
+  `src/app/resources/resources-list.tsx:11` therefore server-renders the
+  desktop row layout on phones and swaps to the stacked one once JS loads.
+  That is a layout shift on every mobile load of `/resources`. The Footer
+  used the hook too until #347 (merged 2026-10-11) removed it, and the Header
+  followed when its hamburger and sidebar gave way to icon links.
+- **Do.** Pick the row layout with Tailwind breakpoint classes. Make
+  `resources-list.tsx` a server component once it no longer needs the hook.
+  Delete the hook, which nothing else imports after that, and remove the
+  `useResponsive` section of `docs/Performance.md`.
+- **Done when.** The server HTML for `/resources` carries the breakpoint
+  classes, and a jsdom test with no `window.innerWidth` set sees them on the
+  list. That test fails against the current hook.
 
 ### `candlelight-ios-select`
 

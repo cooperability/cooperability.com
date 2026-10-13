@@ -6,6 +6,8 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useResolvedTheme } from '../hooks/useResolvedTheme'
 import { XMarkIcon } from '@heroicons/react/24/solid'
+import { LinkIcon } from 'lucide-react'
+import InlineIcon from '../components/InlineIcon'
 import { Button } from '@/components/ui/button'
 
 interface SidebarProps {
@@ -147,7 +149,8 @@ const Sidebar = ({ isOpen, toggleSidebar, allLinksUrl }: SidebarProps) => {
             isActive={isRouteActive(allLinksUrl)}
             onClick={toggleSidebar}
           >
-            <span aria-hidden="true">🔗 </span>Linktree
+            <InlineIcon icon={LinkIcon} />
+            Linktree
           </SidebarLink>
         )}
       </nav>

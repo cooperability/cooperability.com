@@ -14,12 +14,14 @@ export interface ResourceData {
   id: string
   date?: string
   title: string
+  icon?: string
 }
 
 export interface ResourceFrontMatter {
   title: string
   date?: string
   description?: string
+  icon?: string
   [key: string]: unknown
 }
 
@@ -48,7 +50,7 @@ export function getAllResourcesData(): ResourceData[] {
     // Combine the data with the id
     return {
       id,
-      ...(data as { date?: string; title: string }),
+      ...(data as { date?: string; title: string; icon?: string }),
     }
   })
 

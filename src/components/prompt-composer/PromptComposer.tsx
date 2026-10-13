@@ -7,7 +7,9 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { Puzzle } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
+import InlineIcon from '../InlineIcon'
 import AiReview from './AiReview'
 import {
   EMPTY_FIELDS,
@@ -142,7 +144,8 @@ const PromptComposer: React.FC<PromptComposerProps> = ({ className }) => {
     <div className={`container mx-auto p-1 ${className ?? ''}`}>
       <header className="mb-4 text-center md:mb-6">
         <h1 className="mb-2 text-2xl font-bold md:text-3xl">
-          🧩 Prompt Composer
+          <InlineIcon icon={Puzzle} />
+          Prompt Composer
         </h1>
       </header>
 

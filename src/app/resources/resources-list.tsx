@@ -1,6 +1,7 @@
 'use client'
 
 import DateDisplay from '../../components/date'
+import ResourceIcon from '../../components/ResourceIcon'
 import { useResponsive } from '../../hooks/useResponsive'
 import type { ResourceData } from '../../lib/resources'
 import styles from '../../styles/utils.module.css'
@@ -12,7 +13,7 @@ export default function ResourcesList({ posts }: { posts: ResourceData[] }) {
 
   return (
     <ul className={styles.list}>
-      {posts.map(({ id, date, title }: ResourceData) => (
+      {posts.map(({ id, date, title, icon }: ResourceData) => (
         <li
           key={id}
           className={styles.listItem}
@@ -35,6 +36,7 @@ export default function ResourcesList({ posts }: { posts: ResourceData[] }) {
                 : { display: 'block', marginBottom: '0.25rem' }
             }
           >
+            <ResourceIcon name={icon} />
             {title}
           </a>
           {date && (

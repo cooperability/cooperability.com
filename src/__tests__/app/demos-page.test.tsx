@@ -24,7 +24,7 @@ describe('Demos page', () => {
         .getByRole('link', { name: new RegExp(name) })
         .closest('.subProjectItem') as HTMLElement
       expect(row).not.toBeNull()
-      expect(within(row).queryAllByRole('img')).toHaveLength(0)
+      expect(row.querySelectorAll('img')).toHaveLength(0)
     }
   })
 
@@ -37,5 +37,15 @@ describe('Demos page', () => {
       .querySelector(':scope > .techStackIcons') as HTMLElement
     expect(within(umbrella).getByAltText('Node.js logo')).toBeInTheDocument()
     expect(within(umbrella).getByAltText('Next.js logo')).toBeInTheDocument()
+  })
+
+  it('names the platforms of a demo for screen readers', () => {
+    render(<Demos />)
+    expect(
+      screen.getByRole('link', { name: 'Candlelight Desktop Mobile Game' })
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('link', { name: 'Personnel Portal Presentation' })
+    ).toBeInTheDocument()
   })
 })
