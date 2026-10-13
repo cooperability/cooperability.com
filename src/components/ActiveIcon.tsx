@@ -6,10 +6,25 @@ import { useTheme } from 'next-themes'
 import styles from '../styles/utils.module.css'
 import { useHydrated } from '../hooks/useHydrated'
 
+// One file per theme in public/icons/stack, downloaded from skillicons.dev.
+export const STACK_ICONS = [
+  'docker',
+  'nextjs',
+  'nodejs',
+  'postgres',
+  'py',
+  'react',
+  'redux',
+  'svelte',
+  'tailwind',
+  'ts',
+  'vercel',
+] as const
+
 export interface ActiveIconProps {
   href: string
   imgSrc?: string
-  iconName?: string
+  iconName?: (typeof STACK_ICONS)[number]
   alt?: string
   variant?: 'default' | 'social'
   size?: 'default' | 'small'
@@ -40,7 +55,7 @@ const ActiveIcon: React.FC<ActiveIconProps> = ({
   if (iconName) {
     // Light is the pre-hydration default, so server and client markup agree.
     const themeParam = hydrated && currentTheme === 'dark' ? 'dark' : 'light'
-    imageSource = `https://skillicons.dev/icons?i=${iconName}&theme=${themeParam}`
+    imageSource = `/icons/stack/${iconName}-${themeParam}.svg`
   }
 
   // Determine alt text
