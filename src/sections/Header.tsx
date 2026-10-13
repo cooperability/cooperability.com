@@ -32,7 +32,7 @@ const NavLink = ({
       href={href}
       aria-current={current}
       className={cn(
-        'inline-flex items-center justify-center whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-medium transition-all focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring/50',
+        'inline-flex items-center justify-center whitespace-nowrap rounded-lg px-2 py-1.5 text-sm min-[23rem]:px-3 font-medium transition-all focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring/50',
         // Opts out of the global blue link color and hover underline, which
         // would double the animated underline below.
         'text-inherit no-underline',
@@ -45,10 +45,11 @@ const NavLink = ({
       onMouseLeave={() => setIsHovered(false)}
     >
       <Icon aria-hidden="true" className="size-4 shrink-0" />
-      {/* Icon only below 34rem, where the words no longer fit beside the logo
+      {/* Icon only below 36rem, where the words no longer fit beside the logo
           and theme switch. Hidden visually but not from screen readers, which
-          still need the link's name. */}
-      <span className="sr-only min-[34rem]:not-sr-only min-[34rem]:ml-1.5">
+          still need the link's name. Below 23rem the links also lose
+          padding, or the pill touches the logo and the three-slot switch. */}
+      <span className="sr-only min-[36rem]:not-sr-only min-[36rem]:ml-1.5">
         <span className={styles.linkTextWrapper}>
           {children}
           <span

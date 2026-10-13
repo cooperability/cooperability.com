@@ -69,7 +69,7 @@ describe('Header navigation', () => {
 })
 
 /**
- * One layout serves every width: the icons always render, and below 34rem
+ * One layout serves every width: the icons always render, and below 36rem
  * Tailwind hides the words. A hamburger and a sidebar would put a JS-driven
  * second layout back, which server-renders the wrong one on phones.
  */
@@ -122,7 +122,7 @@ describe('Header navigation on a phone', () => {
     for (const name of ['Home', 'Demos', 'Resources']) {
       const words = nav.getByRole('link', { name }).querySelector('.sr-only')
       expect(words).toHaveTextContent(name)
-      expect(words).toHaveClass('min-[34rem]:not-sr-only')
+      expect(words).toHaveClass('min-[36rem]:not-sr-only')
     }
   })
 })
