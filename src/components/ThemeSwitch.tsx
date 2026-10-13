@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect } from 'react'
 import * as RadioGroupPrimitive from '@radix-ui/react-radio-group'
 import { useTheme } from 'next-themes'
 import {
@@ -35,13 +36,20 @@ const OPTIONS = [
 const ThemeSwitch = () => {
   const { resolvedTheme, theme, setTheme } = useTheme()
   const hydrated = useHydrated()
+  const match = OPTIONS.find((o) => o.value === theme)
+
+  // next-themes applies any stored value as-is. One no slot matches shows as
+  // System, and a click on the checked slot fires nothing, so repair it here.
+  useEffect(() => {
+    if (hydrated && !match) setTheme('system')
+  }, [hydrated, match, setTheme])
 
   if (!hydrated) return null
 
   // The track and circle follow what is on screen, so "system" looks like the
   // theme the OS picked; only the circle's slot says which setting is chosen.
   const isDark = resolvedTheme === 'dark'
-  const chosen = OPTIONS.find((o) => o.value === theme) ?? OPTIONS[1]
+  const chosen = match ?? OPTIONS[1]
 
   return (
     <RadioGroupPrimitive.Root

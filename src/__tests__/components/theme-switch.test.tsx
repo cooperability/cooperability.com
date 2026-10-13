@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { ThemeProvider } from 'next-themes'
 import ThemeSwitch from '../../components/ThemeSwitch'
 
@@ -92,4 +92,37 @@ describe('ThemeSwitch', () => {
       expect(html()).toHaveClass(expected)
     }
   )
+
+  it('slides the circle to the slot that is chosen', () => {
+    renderSwitch()
+    const circle = () =>
+      screen.getByRole('radiogroup').querySelector(':scope > [aria-hidden]')
+
+    expect(circle()).toHaveClass('themeSwitchAtSystem')
+    fireEvent.click(radio('Dark'))
+    expect(circle()).toHaveClass('themeSwitchAtDark')
+    fireEvent.click(radio('Light'))
+    expect(circle()).toHaveClass('themeSwitchAtLight')
+  })
+
+  it('paints the track for the theme on screen, so System on a dark OS looks dark', () => {
+    systemIsDark = true
+    renderSwitch()
+
+    expect(screen.getByRole('radiogroup')).toHaveClass('themeToggleDark')
+    fireEvent.click(radio('Light'))
+    expect(screen.getByRole('radiogroup')).toHaveClass('themeToggleLight')
+  })
+
+  it('hands a stored theme that matches no slot back to the OS', async () => {
+    // Clicking the already-checked System slot fires nothing, so without the
+    // repair a visitor could not get back to System from here.
+    localStorage.setItem('theme', 'sepia')
+    systemIsDark = true
+    renderSwitch()
+
+    await waitFor(() => expect(localStorage.getItem('theme')).toBe('system'))
+    expect(html()).toHaveClass('dark')
+    expect(radio('System')).toBeChecked()
+  })
 })

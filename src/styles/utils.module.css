@@ -3,11 +3,11 @@
 /* Layout & Structure */
 .container {
   max-width: 36rem;
-  /* The top gap is padding, not margin: a margin collapses out of <body> and
-     is painted by <html>, so an html background (a browser extension sets
-     one) showed it as a gray band that read as no gap at all. */
-  padding: 1rem 1rem 0;
-  margin: 0 auto 1rem;
+  /* The top and bottom gaps are padding, not margin: a margin collapses out of
+     <body> and is painted by <html>, so an html background (a browser
+     extension sets one) showed it as a gray band that read as no gap at all. */
+  padding: 1rem;
+  margin: 0 auto;
 }
 
 .horizLine {
@@ -204,7 +204,9 @@
 
 .themeSwitchCircle {
   position: absolute;
-  top: 0.2rem;
+  /* Centred, not offset: only the light track has a border. */
+  top: 50%;
+  translate: 0 -50%;
   width: 1.6rem;
   height: 1.6rem;
   border-radius: 50%;
@@ -226,7 +228,11 @@
 
 .themeSwitchCircleLight {
   background-color: #ffffff;
-  box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+  /* The circle alone marks the chosen slot, and white on the slate-400 track
+     is 2.63:1, so a slate-800 edge carries it (5.56:1, 3.07:1 on hover). */
+  box-shadow:
+    0 0 0 1px #1d293d,
+    0 0 5px rgba(0, 0, 0, 0.2);
 }
 
 .themeSwitchCircleDark {

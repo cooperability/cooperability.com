@@ -71,6 +71,15 @@ describe('outline buttons', () => {
     )
   })
 
+  it('darkens the outline on keyboard focus instead of fading it', () => {
+    render(<Footer />)
+
+    // The shared ring colour sits at 2.63:1 on white, below the resting border.
+    const more = screen.getByRole('link', { name: 'More links' })
+    expect(more).toHaveClass('focus-visible:border-foreground')
+    expect(more).not.toHaveClass('focus-visible:border-ring')
+  })
+
   it('weighs the outer outline of the desktop nav at 2px', () => {
     renderAt(DESKTOP_WIDTH)
 
