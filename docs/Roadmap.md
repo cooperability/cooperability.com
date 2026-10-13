@@ -75,7 +75,7 @@ new capability.
 | 5   | [`focus-contrast`](#focus-contrast)                   | Bug   | P1  | S      | `theme-tokens`                    | Open                   |
 | 6   | [`responsive-css`](#responsive-css)                   | Bug   | P1  | M      | none                              | Open                   |
 | 7   | [`candlelight-ios-select`](#candlelight-ios-select)   | Bug   | P1  | S      | none                              | Open                   |
-| 8   | [`skillicons-local`](#skillicons-local)               | Bug   | P1  | S      | none                              | Open                   |
+| 8   | [`skillicons-local`](#skillicons-local)               | Bug   | P1  | S      | none                              | Done, #361             |
 | 9   | [`ai-store-guard`](#ai-store-guard)                   | Bug   | P1  | S      | none                              | Open                   |
 | 10  | [`ai-caller-cap`](#ai-caller-cap)                     | Bug   | P1  | M      | none                              | Open                   |
 | 11  | [`ai-go-live`](#ai-go-live)                           | Chore | P1  | S      | `ai-store-guard`, `ai-caller-cap` | Owner only             |

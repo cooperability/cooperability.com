@@ -50,7 +50,7 @@ flowchart TB
 
   ui["shadcn on Radix"]:::built
   sw[["public/sw.js"]]:::built
-  icons{{"skillicons.dev"}}:::built
+  icons[["public/icons/stack/*"]]:::built
   vitals{{"Vercel Analytics"}}:::built
   ai(["/api/ai/critique"]):::built
   anthropic{{"Anthropic API"}}:::built
@@ -75,7 +75,7 @@ flowchart TB
   home -->|per request| quotes
   resdoc -->|"rendered by RSC"| mdx
   applets --> ui
-  demos -->|remote SVG| icons
+  demos -.->|"stack SVGs"| icons
   layout -.-> sw
   layout -.-> vitals
   applets -->|"Prompt Composer review, NDJSON"| ai
@@ -122,10 +122,10 @@ redeploy. It answers 503 until `ANTHROPIC_API_KEY` is set, so an unconfigured
 deploy cannot spend. See [AI Review](docs/AI-Review.md) for operations, cost
 and the threat model.
 
-**The trust boundary.** Four third parties are reached at runtime.
-`skillicons.dev` serves the tech-stack SVGs on `/demos`, which is why
-`next.config.js` sets `dangerouslyAllowSVG` behind a domain allowlist and a
-`script-src 'none'` image CSP ([details](docs/Icons.md)). Vercel Analytics and
+**The trust boundary.** Three third parties are reached at runtime. The
+tech-stack SVGs on `/demos` are files in `public/icons/stack/`, so
+`next.config.js` allows no remote image source ([details](docs/Icons.md)).
+Vercel Analytics and
 Speed Insights collect page metrics without cookies, which is the reason there
 is no Google Analytics on this site. Anthropic's API is reached only from the
 server, only on a request to the AI route above, and the key never reaches the
@@ -232,7 +232,7 @@ Full documentation in **[docs/Tooling.md](docs/Tooling.md)**.
 - **UI components:** shadcn/ui (Tailwind plus Radix primitives)
 - **Bundle analysis:** Webpack Bundle Analyzer
 - **Accessibility:** `@axe-core/playwright` and Lighthouse, run against a live dev server
-- **Icons:** skillicons.dev, sourced from simple-icons.org
+- **Icons:** skillicons.dev SVGs, vendored into `public/icons/stack/`
 
 Pre-push hooks and GitHub Actions block vulnerable code. See
 [docs/Tooling.md#security-auditing](docs/Tooling.md#security-auditing).
@@ -291,7 +291,7 @@ why, so a reader can tell load-bearing packages from incidental ones.
 | [PWA Suite](docs/PWA.md)                        | Applet architecture, manifests, service worker, install testing              |
 | [Game Rig](docs/Game-Rig.md)                    | The handheld game shell: input, scaling, launch images, offline              |
 | [Candlelight Beta](docs/Candlelight-Beta.md)    | The beta-test playbook for the game: scenarios, browser pass, judgement pass |
-| [Icons and SVG](docs/Icons.md)                  | UI icons, skillicons.dev, and the SVG security configuration it forces       |
+| [Icons and SVG](docs/Icons.md)                  | UI icons, the vendored stack icons, and why SVG skips the optimizer          |
 | [SEO](docs/SEO.md)                              | Search Console setup and SEO maintenance                                     |
 | [Project Structure](docs/PROJECT-STRUCTURE.md)  | Root layout conventions and the unified link components                      |
 | [MCP](docs/MCP.md)                              | Model Context Protocol integration guide. **Aspirational, not implemented**  |
