@@ -94,7 +94,10 @@ export default function ComponentSelector({
             className="border-l-4"
             style={{ borderLeftColor: SECTION_ACCENT[section.id] }}
           >
-            <AccordionTrigger className="py-3 hover:no-underline">
+            <AccordionTrigger
+              headingLevel={3}
+              className="py-3 hover:no-underline"
+            >
               <span className="flex w-full items-center justify-between pr-2">
                 <span className="flex items-center gap-2 text-base font-semibold">
                   <span aria-hidden="true">{section.icon}</span>
