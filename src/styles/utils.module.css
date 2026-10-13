@@ -181,6 +181,13 @@
   transition: background-color 0.3s ease;
 }
 
+/* Phones: the header also holds the logo and the current page's name. */
+@media (max-width: 35.99rem) {
+  .themeSwitch {
+    width: 5rem;
+  }
+}
+
 .themeToggleBtn.themeSwitch svg {
   width: 1rem !important;
   height: 1rem !important;

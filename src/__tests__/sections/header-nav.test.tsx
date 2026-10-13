@@ -70,7 +70,7 @@ describe('Header navigation', () => {
 
 /**
  * One layout serves every width: the icons always render, and below 36rem
- * Tailwind hides the words. A hamburger and a sidebar would put a JS-driven
+ * Tailwind draws only the current page's name. A hamburger and a sidebar would put a JS-driven
  * second layout back, which server-renders the wrong one on phones.
  */
 describe('Header navigation on a phone', () => {
@@ -116,13 +116,37 @@ describe('Header navigation on a phone', () => {
     }
   })
 
-  it('keeps each link nameable when the words are hidden', () => {
+  it('draws the name of the current page only, until 36rem', () => {
     const nav = navAt('/demos')
 
+    const words = (name: string) =>
+      nav.getByRole('link', { name }).querySelector('.sr-only')
+
+    // Every link keeps its name as text, so it stays nameable when not drawn.
     for (const name of ['Home', 'Demos', 'Resources']) {
-      const words = nav.getByRole('link', { name }).querySelector('.sr-only')
-      expect(words).toHaveTextContent(name)
-      expect(words).toHaveClass('min-[36rem]:not-sr-only')
+      expect(words(name)).toHaveTextContent(name)
+      expect(words(name)).toHaveClass('min-[36rem]:not-sr-only')
+    }
+    expect(words('Demos')).toHaveClass('min-[22.5rem]:not-sr-only')
+    expect(words('Home')).not.toHaveClass('min-[22.5rem]:not-sr-only')
+    expect(words('Resources')).not.toHaveClass('min-[22.5rem]:not-sr-only')
+  })
+
+  it('keeps the name on the section from one of its subpages', () => {
+    const nav = navAt('/demos/candlelight')
+
+    expect(
+      nav.getByRole('link', { name: 'Demos' }).querySelector('.sr-only')
+    ).toHaveClass('min-[22.5rem]:not-sr-only')
+  })
+
+  it('draws no name when the route is outside the nav', () => {
+    const nav = navAt('/no-such-page')
+
+    for (const link of nav.getAllByRole('link')) {
+      expect(link.querySelector('.sr-only')).not.toHaveClass(
+        'min-[22.5rem]:not-sr-only'
+      )
     }
   })
 })

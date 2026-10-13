@@ -379,9 +379,12 @@ Uses Tailwind only. Desktop and mobile show the same six icons, so one
 
 **File:** `src/sections/Header.tsx`
 
-Uses Tailwind only. Every width gets the same three icon links, and below
-`36rem` an `sr-only` class hides the words and leaves the icons. One markup
-serves the server render and every viewport, so nothing swaps after hydration.
+Uses Tailwind only. Every width gets the same three icon links. Below `36rem`
+only the current page draws its name and the other two show their icon, with
+the name left in the link as `sr-only` text. Below `22.5rem` even the current
+page drops its name, because the logo, three icons and theme switch leave no
+room for it. One markup serves the server render and every viewport, so
+nothing swaps after hydration.
 
 #### Example 3: Pure Tailwind Approach
 

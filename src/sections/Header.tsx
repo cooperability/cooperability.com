@@ -32,7 +32,7 @@ const NavLink = ({
       href={href}
       aria-current={current}
       className={cn(
-        'inline-flex items-center justify-center whitespace-nowrap rounded-lg px-2 py-1.5 text-sm min-[23rem]:px-3 font-medium transition-all focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring/50',
+        'inline-flex items-center justify-center whitespace-nowrap rounded-lg px-2 py-1.5 text-xs min-[36rem]:px-3 min-[36rem]:text-sm font-medium transition-all focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring/50',
         // Opts out of the global blue link color and hover underline, which
         // would double the animated underline below.
         'text-inherit no-underline',
@@ -45,11 +45,16 @@ const NavLink = ({
       onMouseLeave={() => setIsHovered(false)}
     >
       <Icon aria-hidden="true" className="size-4 shrink-0" />
-      {/* Icon only below 36rem, where the words no longer fit beside the logo
-          and theme switch. Hidden visually but not from screen readers, which
-          still need the link's name. Below 23rem the links also lose
-          padding, or the pill touches the logo and the three-slot switch. */}
-      <span className="sr-only min-[36rem]:not-sr-only min-[36rem]:ml-1.5">
+      {/* The current page keeps its name, from 22.5rem up. The others show
+          theirs only from 36rem up, where all three fit beside the logo and
+          theme switch. A name stays in the link as screen-reader text when
+          it is not drawn. */}
+      <span
+        className={cn(
+          'sr-only min-[36rem]:not-sr-only min-[36rem]:ml-1.5',
+          current && 'min-[22.5rem]:not-sr-only min-[22.5rem]:ml-1'
+        )}
+      >
         <span className={styles.linkTextWrapper}>
           {children}
           <span
@@ -78,14 +83,18 @@ const Header = () => {
   return (
     <div>
       <div className={styles.Header}>
-        <ActiveIcon
-          href="/"
-          imgSrc="/images/operamini.png"
-          width={50}
-          height={50}
-          alt="Logo"
-          external={false}
-        />
+        {/* 40px below 36rem: the page name, two icons and the theme switch
+            need the room. */}
+        <div className="shrink-0 [&_img]:size-[40px] min-[36rem]:[&_img]:size-[50px]">
+          <ActiveIcon
+            href="/"
+            imgSrc="/images/operamini.png"
+            width={50}
+            height={50}
+            alt="Logo"
+            external={false}
+          />
+        </div>
         <nav className={styles.navbar} aria-label="Main navigation">
           <div className="flex flex-row space-between">
             <ul className="inline-flex h-10 items-center justify-center rounded-xl border-2 border-foreground/50 p-1 text-muted-foreground">
