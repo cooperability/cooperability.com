@@ -156,19 +156,6 @@ describe('PromptComposer v2', () => {
     expect(compiled().value).toContain('Before finishing, check your response')
   })
 
-  it('keeps one component section open at a time', async () => {
-    await renderComposer()
-    const section = (name: RegExp) => screen.getByRole('button', { name })
-    expect(section(/^task/i)).toHaveAttribute('aria-expanded', 'true')
-
-    fireEvent.click(section(/^output/i))
-    expect(section(/^output/i)).toHaveAttribute('aria-expanded', 'true')
-    expect(section(/^task/i)).toHaveAttribute('aria-expanded', 'false')
-
-    fireEvent.click(section(/^output/i))
-    expect(section(/^output/i)).toHaveAttribute('aria-expanded', 'false')
-  })
-
   it('keeps a radio group exclusive and lets it return to no preference', async () => {
     await renderComposer()
     fireEvent.click(screen.getByRole('button', { name: /^output/i }))
@@ -213,14 +200,11 @@ describe('PromptComposer v2', () => {
     expect(section(/^output/i)).toHaveAttribute('aria-expanded', 'true')
     expect(section(/^task/i)).toHaveAttribute('aria-expanded', 'false')
 
-    fireEvent.click(section(/reasoning & quality/i))
-    expect(section(/reasoning & quality/i)).toHaveAttribute(
-      'aria-expanded',
-      'true'
-    )
+    fireEvent.click(section(/^reasoning/i))
+    expect(section(/^reasoning/i)).toHaveAttribute('aria-expanded', 'true')
     expect(section(/^output/i)).toHaveAttribute('aria-expanded', 'false')
 
-    fireEvent.click(section(/reasoning & quality/i))
+    fireEvent.click(section(/^reasoning/i))
     expect(
       screen
         .queryAllByRole('button', { expanded: true })
@@ -238,7 +222,7 @@ describe('PromptComposer v2', () => {
       expect(screen.getByLabelText('Material to work from')).toHaveFocus()
     )
     // The fix opens its section in place of the one that was open.
-    expect(screen.getByRole('button', { name: /^input/i })).toHaveAttribute(
+    expect(screen.getByRole('button', { name: /^sources/i })).toHaveAttribute(
       'aria-expanded',
       'true'
     )
