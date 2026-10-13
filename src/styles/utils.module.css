@@ -3,8 +3,11 @@
 /* Layout & Structure */
 .container {
   max-width: 36rem;
-  padding: 0 1rem;
-  margin: 1rem auto 1rem;
+  /* The top and bottom gaps are padding, not margin: a margin collapses out of
+     <body> and is painted by <html>, so an html background (a browser
+     extension sets one) showed it as a gray band that read as no gap at all. */
+  padding: 1rem;
+  margin: 0 auto;
 }
 
 .horizLine {
@@ -166,14 +169,15 @@
   @apply bg-slate-100 hover:bg-slate-300 text-black;
 }
 
-/* Theme Switch - Override icon sizing for switch component */
+/* Theme Switch: a three-slot track (light, system, dark) with one circle that
+   slides to the chosen slot. Each slot is a radio; the circle is decoration. */
 .themeSwitch {
-  width: 4rem;
+  width: 6rem;
   height: 2rem;
   position: relative;
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   align-items: center;
-  padding: 0.2rem;
   transition: background-color 0.3s ease;
 }
 
@@ -182,35 +186,75 @@
   height: 1rem !important;
 }
 
-.themeSwitchCircle {
-  position: absolute;
-  left: 0.2rem;
-  width: 1.6rem;
-  height: 1.6rem;
-  border-radius: 50%;
+.themeSwitchOption {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
   justify-content: center;
+  height: 100%;
+  border-radius: 9999px;
+  cursor: pointer;
+}
+
+.themeSwitchOption:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+.themeSwitchCircle {
+  position: absolute;
+  /* Centred, not offset: only the light track has a border. */
+  top: 50%;
+  translate: 0 -50%;
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 50%;
   transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Centred in its third of the track, whatever the border takes off the width. */
+.themeSwitchAtLight {
+  left: calc((100% / 3 - 1.6rem) / 2);
+}
+
+.themeSwitchAtSystem {
+  left: calc(100% / 3 + (100% / 3 - 1.6rem) / 2);
+}
+
+.themeSwitchAtDark {
+  left: calc(200% / 3 + (100% / 3 - 1.6rem) / 2);
 }
 
 .themeSwitchCircleLight {
   background-color: #ffffff;
-  transform: translateX(0rem);
-  box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+  /* The circle alone marks the chosen slot, and white on the slate-400 track
+     is 2.63:1, so a slate-800 edge carries it (5.56:1, 3.07:1 on hover). */
+  box-shadow:
+    0 0 0 1px #1d293d,
+    0 0 5px rgba(0, 0, 0, 0.2);
 }
 
 .themeSwitchCircleDark {
   background-color: #000000;
-  transform: translateX(1.82rem);
   box-shadow: 0 0 5px #fff;
 }
 
-.themeSwitchIconLight {
+/* Icons sit above the circle: the chosen one reads against it, the other two
+   against the track. */
+.themeToggleLight .themeSwitchOption {
+  color: #0f172a;
+}
+
+.themeToggleLight .themeSwitchOption[data-state='checked'] {
   color: #374151;
 }
 
-.themeSwitchIconDark {
+.themeToggleDark .themeSwitchOption {
+  color: #334155;
+}
+
+.themeToggleDark .themeSwitchOption[data-state='checked'] {
   color: #e5e7eb;
 }
 

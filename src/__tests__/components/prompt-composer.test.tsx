@@ -204,6 +204,30 @@ describe('PromptComposer v2', () => {
     expect(compiled().value).toBe('')
   })
 
+  it('keeps one section open at a time, and lets the last one close', async () => {
+    await renderComposer()
+    const section = (name: RegExp) => screen.getByRole('button', { name })
+    expect(section(/^task/i)).toHaveAttribute('aria-expanded', 'true')
+
+    fireEvent.click(section(/^output/i))
+    expect(section(/^output/i)).toHaveAttribute('aria-expanded', 'true')
+    expect(section(/^task/i)).toHaveAttribute('aria-expanded', 'false')
+
+    fireEvent.click(section(/reasoning & quality/i))
+    expect(section(/reasoning & quality/i)).toHaveAttribute(
+      'aria-expanded',
+      'true'
+    )
+    expect(section(/^output/i)).toHaveAttribute('aria-expanded', 'false')
+
+    fireEvent.click(section(/reasoning & quality/i))
+    expect(
+      screen
+        .queryAllByRole('button', { expanded: true })
+        .filter((b) => b.getAttribute('data-slot') === 'accordion-trigger')
+    ).toHaveLength(0)
+  })
+
   it('opens and focuses the field a live-check fix points at', async () => {
     await renderComposer()
     typeTask('Summarize the attached report for the board meeting')
@@ -212,6 +236,15 @@ describe('PromptComposer v2', () => {
 
     await waitFor(() =>
       expect(screen.getByLabelText('Material to work from')).toHaveFocus()
+    )
+    // The fix opens its section in place of the one that was open.
+    expect(screen.getByRole('button', { name: /^input/i })).toHaveAttribute(
+      'aria-expanded',
+      'true'
+    )
+    expect(screen.getByRole('button', { name: /^task/i })).toHaveAttribute(
+      'aria-expanded',
+      'false'
     )
   })
 
