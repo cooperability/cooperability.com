@@ -113,7 +113,7 @@ new capability.
 | 43  | [`rss-feed`](#rss-feed)                               | Epic  | P3  | S      | none                              | Open                   |
 | 44  | [`visual-polish`](#visual-polish)                     | Chore | P3  | S each | `focus-contrast` for some         | Open                   |
 | 45  | [`seo-site-audit`](#seo-site-audit)                   | Chore | P3  | S      | none                              | Owner only             |
-| 46  | [`license`](#license)                                 | Chore | P3  | S      | none                              | Owner only             |
+| 46  | [`license`](#license)                                 | Chore | P3  | S      | none                              | Done, #358             |
 
 ## P0
 
