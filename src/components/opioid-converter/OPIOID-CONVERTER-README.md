@@ -15,8 +15,6 @@ opioid-converter/
 ├── OpioidConverter.tsx          # Main component file
 ├── OpioidConverter.module.css   # Component styling
 ├── types.ts                     # TypeScript interfaces
-├── utils/
-│   └── calculations.ts          # Conversion calculations
 ├── opioid_converter.mdx         # MDX documentation
 └── OPIOID-CONVERTER-README.md   # This file
 ```
@@ -33,11 +31,7 @@ opioid-converter/
 - Input handlers for dose changes and increments
 - Real-time calculation of the MME total
 - Table-based UI for medication entry
-
-**utils/calculations.ts** - Medical Conversion Logic
-
-- Conversion factors for 14+ opioid medications
-- Morphine equivalence calculations
+- Conversion factors for all 14 medications
 
 **OpioidConverter.module.css** - Styling
 
@@ -51,7 +45,7 @@ opioid-converter/
 
 ### Core Functionality ✓
 
-- **14+ Opioid Medications**: Butrans, Codeine, Duragesic, Hydrocodone, Hydromorphone, Levorphanol, Meperidine, Methadone, Morphine, Oxycodone, Oxymorphone, Pentazocin, Tapentadol, Tramadol
+- **14+ Opioid Medications**: Butrans, Codeine, Duragesic, Hydrocodone, Hydromorphone, Levorphanol, Meperidine, Methadone, Morphine, Oxycodone, Oxymorphone, Pentazocine, Tapentadol, Tramadol
 - **Morphine Equivalence**: Real-time calculation based on established conversion factors
 - **Methadone**: converts to MME at the CDC 2022 factor of 4.7. The calculator does not convert an MME total back into a methadone dose
 - **Dose Input**: Manual entry or increment/decrement buttons
@@ -95,18 +89,26 @@ The Opioid Converter is loaded using Next.js `dynamic()` import with SSR disable
 
 ## Medical Conversion Factors
 
-### Standard Conversions (to Morphine)
+Ten factors come from the Table in the [CDC Clinical Practice Guideline for Prescribing Opioids for Pain, 2022](https://www.cdc.gov/mmwr/volumes/71/rr/rr7103a1.htm). That table leaves out four of the converter's medications, so their factors come from the [CMS Opioid Oral MME Conversion Factors, August 2017](https://web.archive.org/web/20170831231127/https://www.cms.gov/Medicare/Prescription-Drug-Coverage/PrescriptionDrugCovContra/Downloads/Opioid-Morphine-EQ-Conversion-Factors-Aug-2017.pdf), and the page marks those rows with an asterisk.
 
-| Medication    | Conversion Factor | Notes                       |
-| ------------- | ----------------- | --------------------------- |
-| Morphine      | 1.0               | Baseline                    |
-| Oxycodone     | 1.5               | Common oral opioid          |
-| Hydrocodone   | 1.0               | Similar potency to morphine |
-| Hydromorphone | 4.0               | High potency                |
-| Oxymorphone   | 3.0               | High potency                |
-| Codeine       | 0.15              | Low potency                 |
-| Tramadol      | 0.2               | Weak opioid                 |
-| Methadone     | 4.7               | CDC 2022 guideline          |
+| Medication              | Factor | Unit | Source   |
+| ----------------------- | ------ | ---- | -------- |
+| Butrans (buprenorphine) | 1.8    | µg/h | CMS 2017 |
+| Codeine                 | 0.15   | mg   | CDC 2022 |
+| Duragesic (fentanyl)    | 2.4    | µg/h | CDC 2022 |
+| Hydrocodone             | 1.0    | mg   | CDC 2022 |
+| Hydromorphone           | 5.0    | mg   | CDC 2022 |
+| Levorphanol             | 11     | mg   | CMS 2017 |
+| Meperidine              | 0.1    | mg   | CMS 2017 |
+| Methadone               | 4.7    | mg   | CDC 2022 |
+| Morphine                | 1.0    | mg   | CDC 2022 |
+| Oxycodone               | 1.5    | mg   | CDC 2022 |
+| Oxymorphone             | 3.0    | mg   | CDC 2022 |
+| Pentazocine             | 0.37   | mg   | CMS 2017 |
+| Tapentadol              | 0.4    | mg   | CDC 2022 |
+| Tramadol                | 0.2    | mg   | CDC 2022 |
+
+CMS lists the buprenorphine patch at 12.6, which assumes one 7-day patch spread over a week of claims data. Its footnote gives the per-day factor as 1.8, and the converter takes a dose per day, so it uses 1.8. The CDC 2022 guideline excludes buprenorphine pain products because, as a partial agonist, their effect has a ceiling.
 
 ### Methadone Conversion
 

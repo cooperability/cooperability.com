@@ -29,6 +29,33 @@ function typeKeys(input: HTMLElement, keys: string) {
 
 const SAFE_TOTAL = /^Morphine Equivalence: \d+ mg$/
 
+const CMS_2017_URL =
+  'https://web.archive.org/web/20170831231127/https://www.cms.gov/Medicare/Prescription-Drug-Coverage/PrescriptionDrugCovContra/Downloads/Opioid-Morphine-EQ-Conversion-Factors-Aug-2017.pdf'
+
+// Typed out from the source tables, not read from the component, so a changed
+// factor fails here. CDC 2022 has no buprenorphine, levorphanol, meperidine or
+// pentazocine, so those four come from the CMS August 2017 table. Its
+// buprenorphine patch row is 12.6 for a 7-day patch, and its footnote gives
+// 1.8 as the per-day factor this page uses.
+const FACTORS: Array<
+  [medication: string, factor: number, source: 'CDC' | 'CMS']
+> = [
+  ['Butrans', 1.8, 'CMS'],
+  ['Codeine', 0.15, 'CDC'],
+  ['Duragesic', 2.4, 'CDC'],
+  ['Hydrocodone', 1, 'CDC'],
+  ['Hydromorphone', 5, 'CDC'],
+  ['Levorphanol', 11, 'CMS'],
+  ['Meperidine', 0.1, 'CMS'],
+  ['Methadone', 4.7, 'CDC'],
+  ['Morphine', 1, 'CDC'],
+  ['Oxycodone', 1.5, 'CDC'],
+  ['Oxymorphone', 3, 'CDC'],
+  ['Pentazocine', 0.37, 'CMS'],
+  ['Tapentadol', 0.4, 'CDC'],
+  ['Tramadol', 0.2, 'CDC'],
+]
+
 describe('OpioidConverter', () => {
   it('starts at zero', () => {
     render(<OpioidConverter />)
@@ -49,6 +76,53 @@ describe('OpioidConverter', () => {
     expect(morphineTotal()).toBe('Morphine Equivalence: 94 mg')
     fireEvent.change(doseInputFor('Methadone'), { target: { value: '80' } })
     expect(morphineTotal()).toBe('Morphine Equivalence: 376 mg')
+  })
+
+  it('lists exactly the cited medications', () => {
+    render(<OpioidConverter />)
+    const rows = screen.getAllByRole('row').slice(1)
+    expect(
+      rows.map((row) => within(row).getAllByRole('cell')[0].textContent)
+    ).toEqual(
+      FACTORS.map(([medication, , source]) =>
+        source === 'CMS' ? `${medication}*` : medication
+      )
+    )
+  })
+
+  // A dose of 1000 turns every factor's third decimal place into a whole MME,
+  // so a changed factor cannot hide inside the page's rounding.
+  it.each(FACTORS)('converts %s at %p (%s)', (medication, factor) => {
+    render(<OpioidConverter />)
+    fireEvent.change(doseInputFor(medication), { target: { value: '1000' } })
+    expect(morphineTotal()).toBe(
+      `Morphine Equivalence: ${Math.round(1000 * factor)} mg`
+    )
+  })
+
+  it('converts hydromorphone at the CDC 2022 factor of 5', () => {
+    render(<OpioidConverter />)
+    fireEvent.change(doseInputFor('Hydromorphone'), { target: { value: '10' } })
+    expect(morphineTotal()).toBe('Morphine Equivalence: 50 mg')
+  })
+
+  it('ties each CMS-sourced row to the footnote naming that table', () => {
+    render(<OpioidConverter />)
+    expect(screen.getByRole('link', { name: /CMS/ })).toHaveAttribute(
+      'href',
+      CMS_2017_URL
+    )
+
+    for (const [medication, , source] of FACTORS) {
+      const input = doseInputFor(medication)
+      if (source === 'CMS') {
+        expect(input).toHaveAccessibleDescription(
+          /Not in the CDC 2022 table.*CMS Opioid Oral MME Conversion Factors/
+        )
+      } else {
+        expect(input).not.toHaveAccessibleDescription()
+      }
+    }
   })
 
   it('does not convert a morphine total back into a methadone dose', () => {
@@ -99,7 +173,7 @@ describe('OpioidConverter', () => {
 
   it('keeps the total finite when a huge dose meets a large factor', () => {
     render(<OpioidConverter />)
-    // 308 nines is a finite number near 1e308, but times 7.5 it overflows.
+    // 308 nines is a finite number near 1e308, but times 11 it overflows.
     fireEvent.change(doseInputFor('Levorphanol'), {
       target: { value: '9'.repeat(308) },
     })
