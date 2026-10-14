@@ -125,6 +125,13 @@ describe('OpioidConverter', () => {
     }
   })
 
+  it('warns that CMS has since withdrawn the Butrans factor', () => {
+    render(<OpioidConverter />)
+    expect(doseInputFor('Butrans')).toHaveAccessibleDescription(
+      /12\.6 for one 7-day patch.*1\.8 per day.*February 2018/
+    )
+  })
+
   it('does not convert a morphine total back into a methadone dose', () => {
     render(<OpioidConverter />)
     fireEvent.change(doseInputFor('Morphine'), { target: { value: '30' } })

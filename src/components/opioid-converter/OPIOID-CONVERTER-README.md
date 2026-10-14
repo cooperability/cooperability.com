@@ -108,7 +108,7 @@ Ten factors come from the Table in the [CDC Clinical Practice Guideline for Pres
 | Tapentadol              | 0.4    | mg   | CDC 2022 |
 | Tramadol                | 0.2    | mg   | CDC 2022 |
 
-CMS lists the buprenorphine patch at 12.6, which assumes one 7-day patch spread over a week of claims data. Its footnote gives the per-day factor as 1.8, and the converter takes a dose per day, so it uses 1.8. The CDC 2022 guideline excludes buprenorphine pain products because, as a partial agonist, their effect has a ceiling.
+CMS lists the buprenorphine patch at 12.6, which assumes one 7-day patch spread over a week of claims data. Its footnote gives the per-day factor as 1.8, and the converter takes a dose per day, so it uses 1.8. The CDC 2022 guideline excludes buprenorphine pain products because, as a partial agonist, their effect has a ceiling. CMS removed every buprenorphine factor in its [February 2018 edition](https://web.archive.org/web/20180802134313/https://www.cms.gov/Medicare/Prescription-Drug-Coverage/PrescriptionDrugCovContra/Downloads/Opioid-Morphine-EQ-Conversion-Factors-vFeb-2018.pdf), which keeps levorphanol, meperidine and pentazocine unchanged. The page says so under the calculator.
 
 ### Methadone Conversion
 

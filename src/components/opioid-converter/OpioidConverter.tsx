@@ -273,6 +273,10 @@ const OpioidConverter = () => {
         </a>
         , which CMS based on CDC&apos;s 2016 compilation. CDC 2022 leaves out
         buprenorphine because, as a partial agonist, its effect has a ceiling.
+        For Butrans, that table lists 12.6 for one 7-day patch, and its footnote
+        gives the 1.8 per day used here. CMS removed every buprenorphine factor
+        in its February 2018 edition, so treat a Butrans total with extra
+        caution.
       </p>
     </div>
   )
