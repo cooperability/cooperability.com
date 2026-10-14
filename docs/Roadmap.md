@@ -70,7 +70,7 @@ new capability.
 | --- | ----------------------------------------------------- | ----- | --- | ------ | --------------------------------- | ---------------------- |
 | 1   | [`opioid-methadone`](#opioid-methadone)               | Bug   | P0  | S      | none                              | In review, #350        |
 | 2   | [`opioid-input`](#opioid-input)                       | Bug   | P0  | S      | none                              | In review, #350        |
-| 3   | [`opioid-factors`](#opioid-factors)                   | Bug   | P1  | M      | `opioid-methadone`                | Open                   |
+| 3   | [`opioid-factors`](#opioid-factors)                   | Bug   | P1  | M      | `opioid-methadone`                | Done, #365             |
 | 4   | [`theme-tokens`](#theme-tokens)                       | Bug   | P1  | S      | none                              | In review, #348        |
 | 5   | [`focus-contrast`](#focus-contrast)                   | Bug   | P1  | S      | `theme-tokens`                    | Open                   |
 | 6   | [`responsive-css`](#responsive-css)                   | Bug   | P1  | M      | none                              | Open                   |

@@ -260,9 +260,8 @@ Fixed in the order the risk demanded: **characterisation tests first, then the
 refactor.** The live arithmetic is still inline in `OpioidConverter.tsx` and
 computes during render with `useMemo` instead of syncing state through an
 effect. Ten tests in `src/__tests__/components/opioid-converter.test.tsx` pin
-that component. `utils/calculations.ts` exports `calculateEquivalent` and is
-not imported by the converter. There is no `calculateTotals` function. Do not
-treat that file as the tested source of truth.
+that component. `utils/calculations.ts`, which the converter never imported,
+has since been deleted. There is no `calculateTotals` function.
 
 The tests were **mutation-checked** rather than merely passing. Flipping the
 Methadone branch from squaring to multiplying turns **1 test red**.
