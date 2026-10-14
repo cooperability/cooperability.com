@@ -412,7 +412,7 @@ export default function MyNewAppletPage() {
 
 **Critical Requirements:**
 
-1. Header, sidebar and footer come from the root layout. Do not wrap the page in a layout component
+1. Header and footer come from the root layout. Do not wrap the page in a layout component
 2. Set `metadata.manifest`. It replaces the root layout's manifest, so there is no conflict to suppress
 3. Set `icons.apple`, and `icons.icon` too: metadata does not deep-merge, so setting one key of `icons` drops the layout's others
 4. Set `appleWebApp.title` and `capable` for Safari's home-screen name

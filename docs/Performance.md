@@ -363,7 +363,7 @@ Does this need a mobile/desktop split?
 | Approach               | When to Use                | Example                |
 | ---------------------- | -------------------------- | ---------------------- |
 | **Tailwind classes**   | Layout-only changes        | `flex-col md:flex-row` |
-| **useResponsive hook** | Behavioral/feature changes | Show/hide navigation   |
+| **useResponsive hook** | Behavioral/feature changes | Swap a component       |
 | **Custom breakpoint**  | Component-specific needs   | Matches existing CSS   |
 
 ### Codebase Examples
@@ -377,12 +377,19 @@ Uses Tailwind only. Desktop and mobile show the same six icons, so one
 
 #### Example 2: Header Navigation
 
-**File:** `src/sections/Header.tsx:65,130-154`
+**File:** `src/sections/Header.tsx`
 
-Uses `useResponsive()` for navigation behavior:
+Uses Tailwind and CSS only. Every width gets the same three icon links, and the
+selector decides what to draw from its own width with container queries, not
+from the viewport. Wide enough for every name, all three show. Wide enough for
+one, only the current page keeps its name and the others show their icon, with
+the name left in the link as `sr-only` text. Narrower than that, icons alone.
 
-- **Desktop:** Horizontal link navigation
-- **Mobile:** Hamburger menu with sidebar
+The logo, selector and theme switch share one height, `--hdr-h`, defined on the
+`.Header` rule in `utils.module.css`. It grows with the viewport from 36px to
+45px, and so does the gap between them, so on the narrowest phone they sit a
+few pixels apart and on a wide one they get room. One markup serves the server
+render and every viewport, so nothing swaps after hydration.
 
 #### Example 3: Pure Tailwind Approach
 

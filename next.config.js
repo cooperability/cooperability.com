@@ -13,8 +13,6 @@ const contentSecurityPolicy = [
   "default-src 'self'",
   "script-src 'self' 'unsafe-inline'",
   "style-src 'self' 'unsafe-inline'",
-  // Remote images are proxied through /_next/image, so they are same-origin
-  // by the time the browser sees them.
   "img-src 'self' data: blob:",
   "font-src 'self' data:",
   "connect-src 'self' https://vitals.vercel-insights.com",
@@ -46,18 +44,6 @@ const securityHeaders = [
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  images: {
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'skillicons.dev',
-        port: '',
-        pathname: '/icons/**',
-      },
-    ],
-    dangerouslyAllowSVG: true,
-    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
-  },
   async headers() {
     return [{ source: '/:path*', headers: securityHeaders }]
   },
@@ -70,7 +56,19 @@ const nextConfig = {
       },
       {
         source: '/prompts',
-        destination: '/resources',
+        destination: '/stash',
+        permanent: true,
+      },
+      // The section was called Resources until 2026-10-13. Old links, shared
+      // URLs and search results keep working, one hop.
+      {
+        source: '/resources',
+        destination: '/stash',
+        permanent: true,
+      },
+      {
+        source: '/resources/:slug*',
+        destination: '/stash/:slug*',
         permanent: true,
       },
       // Redirect old demo paths to new /demos/ structure

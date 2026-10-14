@@ -5,6 +5,7 @@ import {
   AccordionTrigger,
   AccordionContent,
 } from '@/components/ui/accordion'
+import { Clapperboard, Gamepad2, Monitor, Smartphone } from 'lucide-react'
 import ActiveIcon from '../../components/ActiveIcon'
 import styles from '../../styles/utils.module.css'
 
@@ -12,6 +13,32 @@ export const metadata: Metadata = {
   title: 'Demos',
   description: "Cooper Reed's (Co-Operability) coding projects and tech demos.",
   openGraph: { title: 'Demos | Cooper Reed | Co-Operability' },
+}
+
+// Each label is the accessible name, since there are no words beside the icon.
+const PLATFORM = {
+  desktop: { icon: Monitor, label: 'Desktop' },
+  mobile: { icon: Smartphone, label: 'Mobile' },
+  game: { icon: Gamepad2, label: 'Game' },
+  video: { icon: Clapperboard, label: 'Video' },
+}
+
+function Platforms({ of }: { of: (keyof typeof PLATFORM)[] }) {
+  return (
+    <span className="ml-1 inline-flex gap-0.5 align-[-0.125em]">
+      {of.map((key) => {
+        const { icon: Icon, label } = PLATFORM[key]
+        return (
+          <Icon
+            key={key}
+            role="img"
+            aria-label={label}
+            className="size-[1em]"
+          />
+        )
+      })}
+    </span>
+  )
 }
 
 export default function Demos() {
@@ -23,7 +50,8 @@ export default function Demos() {
           <div className={styles.projectItem}>
             <div className={styles.projectInfo}>
               <a href="https://github.com/cooperability/NextTS-Portfolio">
-                cooperability.com[💻📱]
+                cooperability.com
+                <Platforms of={['desktop', 'mobile']} />
               </a>
               <span className={styles.projectStatus}>(Ongoing)</span>
             </div>
@@ -73,7 +101,10 @@ export default function Demos() {
               {/* Candlelight */}
               <div className={styles.subProjectItem}>
                 <div className={styles.projectInfo}>
-                  <a href="/demos/candlelight">Candlelight[💻📱🎮]</a>
+                  <a href="/demos/candlelight">
+                    Candlelight
+                    <Platforms of={['desktop', 'mobile', 'game']} />
+                  </a>
                   <span className={styles.projectStatus}>(Ongoing)</span>
                 </div>
               </div>
@@ -81,7 +112,10 @@ export default function Demos() {
               {/* Prompt Composer */}
               <div className={styles.subProjectItem}>
                 <div className={styles.projectInfo}>
-                  <a href="/demos/prompt-composer">Prompt Composer[💻📱]</a>
+                  <a href="/demos/prompt-composer">
+                    Prompt Composer
+                    <Platforms of={['desktop', 'mobile']} />
+                  </a>
                   <span className={styles.projectStatus}>(Ongoing)</span>
                 </div>
               </div>
@@ -90,7 +124,8 @@ export default function Demos() {
               <div className={styles.subProjectItem}>
                 <div className={styles.projectInfo}>
                   <a href="/demos/mandelbrot-explorer">
-                    Mandelbrot Explorer[💻📱]
+                    Mandelbrot Explorer
+                    <Platforms of={['desktop', 'mobile']} />
                   </a>
                   <span className={styles.projectStatus}>(2025)</span>
                 </div>
@@ -99,7 +134,10 @@ export default function Demos() {
               {/* Opioid Converter */}
               <div className={styles.subProjectItem}>
                 <div className={styles.projectInfo}>
-                  <a href="/demos/opioid-converter">Opioid Converter[💻📱]</a>
+                  <a href="/demos/opioid-converter">
+                    Opioid Converter
+                    <Platforms of={['desktop', 'mobile']} />
+                  </a>
                   <span className={styles.projectStatus}>(2021)</span>
                 </div>
               </div>
@@ -175,7 +213,8 @@ export default function Demos() {
         <div className={styles.projectItem}>
           <div className={styles.projectInfo}>
             <a href="https://drive.google.com/file/d/1oDYsEytMWbKWmyotBZDIMBzoL5DM1tDV/view?usp=sharing">
-              Personnel Portal[📽️]
+              Personnel Portal
+              <Platforms of={['video']} />
             </a>
             <span className={styles.projectStatus}>(2020)</span>
           </div>

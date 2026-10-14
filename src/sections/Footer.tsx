@@ -39,13 +39,14 @@ const Footer = () => {
             variant="social"
           />
           {/* Square, unlike the round socials, to set it apart: it opens
-              everything else, including Resume, Privacy and Accessibility. */}
+              everything else, including Resume, Privacy and Accessibility.
+              Link blue, outline included, like the links on the pages. */}
           <Button
             asChild
             variant="outline"
-            className="size-[50px] text-foreground"
+            className="size-[50px] border-current"
           >
-            <Link href="/resources/linktree" aria-label="More links">
+            <Link href="/stash/linktree" aria-label="More links">
               <EllipsisHorizontalIcon className="size-7" />
             </Link>
           </Button>

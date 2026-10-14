@@ -21,7 +21,7 @@ pnpm format:mdx           # MDX prettier
 # Jest (non-interactive)
 pnpm test
 
-# Full a11y suite: lint + axe (WCAG2 AA) + Lighthouse a11y on /, /demos, /resources
+# Full a11y suite: lint + axe (WCAG2 AA) + Lighthouse a11y on /, /demos, /stash
 pnpm a11y
 ```
 

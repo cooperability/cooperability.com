@@ -12,7 +12,7 @@
   - HTTPS security (standard with Vercel)
   - Mobile-responsive design
   - Site speed optimization (monitored via Vercel Speed Insights)
-  - 301 redirects implemented in `next.config.js` for old URLs (`/skills` → `/demos`, `/prompts` → `/resources`)
+  - 301 redirects implemented in `next.config.js` for old URLs (`/skills` → `/demos`, `/prompts` → `/stash`, and `/resources` and `/resources/*` → `/stash` and `/stash/*` since the section was renamed on 2026-10-13)
 - **✅ Internal Linking:** Strategic cross-page linking for navigation and SEO
 - **✅ Sitemap Submission:** Up-to-date XML sitemap submitted to GSC
 

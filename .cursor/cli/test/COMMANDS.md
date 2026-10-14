@@ -42,7 +42,7 @@ pnpm dropdowns:check      # against a server already on :3000 (or BASE_URL)
 ```
 
 Needs a free port `3000` for `pnpm dropdowns`. Run it after touching
-`src/resources/*.mdx` or the resource page's MDX components.
+`src/stash/*.mdx` or the stash page's MDX components.
 
 ## Human / interactive
 

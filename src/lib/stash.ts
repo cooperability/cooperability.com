@@ -4,39 +4,41 @@ import { cache } from 'react'
 import matter from 'gray-matter'
 import { RESUME_URL } from './links'
 
-const RESOURCES_PATH = path.join(process.cwd(), 'src/resources')
+const STASH_PATH = path.join(process.cwd(), 'src/stash')
 
 // Content files only. `readdirSync` also hands back directories and strays like
 // .DS_Store, and every one of them used to reach `readFileSync` below.
 const CONTENT_FILE = /\.mdx?$/
 
-export interface ResourceData {
+export interface StashData {
   id: string
   date?: string
   title: string
+  icon?: string
 }
 
-export interface ResourceFrontMatter {
+export interface StashFrontMatter {
   title: string
   date?: string
   description?: string
+  icon?: string
   [key: string]: unknown
 }
 
-export interface Resource {
+export interface StashEntry {
   content: string
-  frontMatter: ResourceFrontMatter
+  frontMatter: StashFrontMatter
 }
 
-function resourceFileNames(): string[] {
+function stashFileNames(): string[] {
   return fs
-    .readdirSync(RESOURCES_PATH)
+    .readdirSync(STASH_PATH)
     .filter((fileName) => CONTENT_FILE.test(fileName))
 }
 
-export function getAllResourcesData(): ResourceData[] {
-  const allResourcesData = resourceFileNames().map((fileName) => {
-    const fullPath = path.join(RESOURCES_PATH, fileName)
+export function getAllStashData(): StashData[] {
+  const allStashData = stashFileNames().map((fileName) => {
+    const fullPath = path.join(STASH_PATH, fileName)
     const fileContents = fs.readFileSync(fullPath, 'utf8')
 
     // Use gray-matter to parse the post metadata section
@@ -48,24 +50,24 @@ export function getAllResourcesData(): ResourceData[] {
     // Combine the data with the id
     return {
       id,
-      ...(data as { date?: string; title: string }),
+      ...(data as { date?: string; title: string; icon?: string }),
     }
   })
 
   //sorting will be handled in the component
-  return allResourcesData
+  return allStashData
 }
 
 /**
  * `cache` dedupes the read between `generateMetadata` and the page component,
  * which App Router invokes separately for the same request.
  */
-export const getResourceBySlug = cache((slug: string): Resource | null => {
+export const getStashBySlug = cache((slug: string): StashEntry | null => {
   // Resolve the slug back to a real file name rather than assuming `.mdx`. A
-  // `.md` resource enumerated fine and then threw ENOENT here. Matching against
+  // `.md` entry enumerated fine and then threw ENOENT here. Matching against
   // the enumerated names is also what keeps a raw param out of path.join, which
   // is the traversal guard.
-  const fileName = resourceFileNames().find(
+  const fileName = stashFileNames().find(
     (name) => name.replace(CONTENT_FILE, '') === slug
   )
 
@@ -73,14 +75,11 @@ export const getResourceBySlug = cache((slug: string): Resource | null => {
     return null
   }
 
-  const fileContents = fs.readFileSync(
-    path.join(RESOURCES_PATH, fileName),
-    'utf8'
-  )
+  const fileContents = fs.readFileSync(path.join(STASH_PATH, fileName), 'utf8')
   const { content, data } = matter(fileContents)
 
   return {
     content: content.replaceAll('RESUME_URL', RESUME_URL),
-    frontMatter: data as ResourceFrontMatter,
+    frontMatter: data as StashFrontMatter,
   }
 })

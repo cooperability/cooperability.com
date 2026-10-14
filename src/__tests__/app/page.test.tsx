@@ -16,7 +16,7 @@ describe('Home page', () => {
     ).toHaveAttribute('href', '/demos')
     expect(screen.getByRole('link', { name: /knowledge/i })).toHaveAttribute(
       'href',
-      '/resources'
+      '/stash'
     )
     expect(
       screen.getByRole('link', { name: /Prompt Composer/i })

@@ -106,7 +106,8 @@
   font-weight: bold;
 }
 
-/* Animated Link Components */
+/* Animated Link Components. Dormant: the header nav drew these until
+   2026-10-13. Kept for reuse, so do not delete them as unused. */
 .animatedLink {
   text-decoration: none;
 }
@@ -172,8 +173,13 @@
 /* Theme Switch: a three-slot track (light, system, dark) with one circle that
    slides to the chosen slot. Each slot is a radio; the circle is decoration. */
 .themeSwitch {
-  width: 6rem;
-  height: 2rem;
+  /* The header sets --hdr-h and the width of the box this sits in, so the
+     switch grows and shrinks with the page selector beside it. The circle
+     stays three quarters of the height, which fits its third of the track
+     down to the narrowest width. */
+  --switch-circle: calc(var(--hdr-h, 2rem) * 0.75);
+  width: 100%;
+  height: var(--hdr-h, 2rem);
   position: relative;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -207,23 +213,23 @@
   /* Centred, not offset: only the light track has a border. */
   top: 50%;
   translate: 0 -50%;
-  width: 1.6rem;
-  height: 1.6rem;
+  width: var(--switch-circle);
+  height: var(--switch-circle);
   border-radius: 50%;
   transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Centred in its third of the track, whatever the border takes off the width. */
 .themeSwitchAtLight {
-  left: calc((100% / 3 - 1.6rem) / 2);
+  left: calc((100% / 3 - var(--switch-circle)) / 2);
 }
 
 .themeSwitchAtSystem {
-  left: calc(100% / 3 + (100% / 3 - 1.6rem) / 2);
+  left: calc(100% / 3 + (100% / 3 - var(--switch-circle)) / 2);
 }
 
 .themeSwitchAtDark {
-  left: calc(200% / 3 + (100% / 3 - 1.6rem) / 2);
+  left: calc(200% / 3 + (100% / 3 - var(--switch-circle)) / 2);
 }
 
 .themeSwitchCircleLight {
@@ -314,6 +320,8 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  /* The icons are 25px, and the inherited 1.5 line height made each row 32px. */
+  line-height: 1;
 }
 
 /* For mobile screens */
@@ -345,16 +353,22 @@
 
   .techStackIcons {
     margin-left: 0;
-    margin-top: 0.75rem;
+    margin-top: 0.5rem;
   }
 }
 
 /* Component: Header */
 .Header {
+  /* One height for the logo, page selector and theme switch: 36px up to a
+     360px viewport, growing evenly to 45px at 560px. The gap between them
+     does the same, from 4px at 320px, so the narrowest phones keep only a few
+     pixels of air and a wide one gets room. */
+  --hdr-h: clamp(36px, calc(36px + (100vw - 360px) * 0.045), 45px);
   width: 100%;
-  height: 2.5rem;
   display: flex;
+  align-items: center;
   justify-content: space-between;
+  gap: clamp(4px, calc(4px + (100vw - 320px) * 0.08), 24px);
   margin-bottom: 5px;
 }
 

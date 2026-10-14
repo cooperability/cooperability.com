@@ -26,14 +26,14 @@ flowchart TB
     home(["/"]):::built
     demos(["/demos"]):::built
     applets(["/demos/* (3 applets)"]):::built
-    reslist(["/resources"]):::built
-    resdoc(["/resources/[slug]"]):::built
+    stashlist(["/stash"]):::built
+    stashdoc(["/stash/[slug]"]):::built
   end
 
   subgraph content ["Content at rest"]
     direction TB
     quotes[("src/lib/quotes.ts")]:::built
-    mdx[("src/resources/*.mdx")]:::built
+    mdx[("src/stash/*.mdx")]:::built
   end
 
   subgraph candle ["Candlelight (src/components/game)"]
@@ -50,7 +50,7 @@ flowchart TB
 
   ui["shadcn on Radix"]:::built
   sw[["public/sw.js"]]:::built
-  icons{{"skillicons.dev"}}:::built
+  icons[["public/icons/stack/*"]]:::built
   vitals{{"Vercel Analytics"}}:::built
   ai(["/api/ai/critique"]):::built
   anthropic{{"Anthropic API"}}:::built
@@ -59,7 +59,7 @@ flowchart TB
   visitor --> edge --> layout
   layout --> home
   layout --> demos
-  layout --> reslist
+  layout --> stashlist
   demos --> applets
   demos --> game
   game --> shell
@@ -71,11 +71,11 @@ flowchart TB
   shell -.->|"?qa=1"| qa
   game -.->|"icons, launch images"| gameart
   sw -->|precaches HTML| game
-  reslist --> resdoc
+  stashlist --> stashdoc
   home -->|per request| quotes
-  resdoc -->|"rendered by RSC"| mdx
+  stashdoc -->|"rendered by RSC"| mdx
   applets --> ui
-  demos -->|remote SVG| icons
+  demos -.->|"stack SVGs"| icons
   layout -.-> sw
   layout -.-> vitals
   applets -->|"Prompt Composer review, NDJSON"| ai
@@ -96,15 +96,15 @@ because the homepage quote is re-rolled per request, and without that flag it
 prerenders and the quote freezes at build time.
 
 **The layout boundary.** `src/app/layout.tsx` owns everything shared: the theme
-provider (`next-themes`), the header, sidebar and footer from `src/sections/`,
+provider (`next-themes`), the header and footer from `src/sections/`,
 the site metadata, and the analytics and service-worker registrations. Route
 segments below it own only their own content and their own `metadata` export.
 Metadata does not deep-merge, so a child that sets `icons` replaces the
 layout's whole `icons` object. See [App Router Notes](docs/App-Router.md).
 
 **The content boundary.** Nothing here is a database. Quotes are a TypeScript
-array, and resource pages are MDX files on disk, prerendered at build time by
-`src/lib/resources.ts` with `gray-matter` for front matter and
+array, and stash pages are MDX files on disk, prerendered at build time by
+`src/lib/stash.ts` with `gray-matter` for front matter and
 `next-mdx-remote/rsc` for the body. Because the MDX is compiled on the server,
 no MDX compiler ships to the browser. The loader also fills each `RESUME_URL`
 token from `src/lib/links.ts`, the site's one copy of the resume link, so the
@@ -122,10 +122,10 @@ redeploy. It answers 503 until `ANTHROPIC_API_KEY` is set, so an unconfigured
 deploy cannot spend. See [AI Review](docs/AI-Review.md) for operations, cost
 and the threat model.
 
-**The trust boundary.** Four third parties are reached at runtime.
-`skillicons.dev` serves the tech-stack SVGs on `/demos`, which is why
-`next.config.js` sets `dangerouslyAllowSVG` behind a domain allowlist and a
-`script-src 'none'` image CSP ([details](docs/Icons.md)). Vercel Analytics and
+**The trust boundary.** Three third parties are reached at runtime. The
+tech-stack SVGs on `/demos` are files in `public/icons/stack/`, so
+`next.config.js` allows no remote image source ([details](docs/Icons.md)).
+Vercel Analytics and
 Speed Insights collect page metrics without cookies, which is the reason there
 is no Google Analytics on this site. Anthropic's API is reached only from the
 server, only on a request to the AI route above, and the key never reaches the
@@ -232,7 +232,7 @@ Full documentation in **[docs/Tooling.md](docs/Tooling.md)**.
 - **UI components:** shadcn/ui (Tailwind plus Radix primitives)
 - **Bundle analysis:** Webpack Bundle Analyzer
 - **Accessibility:** `@axe-core/playwright` and Lighthouse, run against a live dev server
-- **Icons:** skillicons.dev, sourced from simple-icons.org
+- **Icons:** skillicons.dev SVGs, vendored into `public/icons/stack/`
 
 Pre-push hooks and GitHub Actions block vulnerable code. See
 [docs/Tooling.md#security-auditing](docs/Tooling.md#security-auditing).
@@ -244,21 +244,21 @@ why, so a reader can tell load-bearing packages from incidental ones.
 
 ### Runtime (`dependencies`)
 
-| Package                                                                                            | Role                                                                                                                                                        |
-| -------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `next`, `react`, `react-dom`                                                                       | The framework and its renderer                                                                                                                              |
-| `tailwindcss`, `@tailwindcss/postcss`, `tailwindcss-animate`                                       | Styling: utility CSS, animation utilities                                                                                                                   |
-| `@radix-ui/react-accordion`, `-checkbox`, `-label`, `-radio-group`, `-slot`, `-switch`, `-tooltip` | Unstyled accessible primitives that shadcn/ui wraps                                                                                                         |
-| `class-variance-authority`, `clsx`, `tailwind-merge`                                               | Variant and className composition the shadcn components rely on                                                                                             |
-| `@heroicons/react`, `lucide-react`                                                                 | Icon sets used in the chrome and the applets                                                                                                                |
-| `@mdx-js/loader`, `@mdx-js/react`, `@next/mdx`, `next-mdx-remote`                                  | MDX. Only `next-mdx-remote/rsc` renders anything (`/resources/[slug]`). `@next/mdx` is wired in `next.config.js` but no route is MDX: Roadmap `mdx-cleanup` |
-| `gray-matter`, `remark`, `remark-html`                                                             | `gray-matter` parses front matter. Nothing imports `remark` or `remark-html`: Roadmap `mdx-cleanup`                                                         |
-| `next-themes`                                                                                      | Light/dark theme, read by the icons and the CSS variables                                                                                                   |
-| `next-sitemap`                                                                                     | Generates `sitemap.xml` and `robots.txt` after the build                                                                                                    |
-| `@vercel/analytics`, `@vercel/speed-insights`                                                      | Cookieless page and Web Vitals metrics                                                                                                                      |
-| `date-fns`                                                                                         | Formats resource dates                                                                                                                                      |
-| `sharp`                                                                                            | Image optimization backend for `next/image`                                                                                                                 |
-| `@anthropic-ai/sdk`                                                                                | Claude API client for `/api/ai/critique`. Server-only                                                                                                       |
+| Package                                                                                            | Role                                                                                                                                                    |
+| -------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `next`, `react`, `react-dom`                                                                       | The framework and its renderer                                                                                                                          |
+| `tailwindcss`, `@tailwindcss/postcss`, `tailwindcss-animate`                                       | Styling: utility CSS, animation utilities                                                                                                               |
+| `@radix-ui/react-accordion`, `-checkbox`, `-label`, `-radio-group`, `-slot`, `-switch`, `-tooltip` | Unstyled accessible primitives that shadcn/ui wraps                                                                                                     |
+| `class-variance-authority`, `clsx`, `tailwind-merge`                                               | Variant and className composition the shadcn components rely on                                                                                         |
+| `@heroicons/react`, `lucide-react`                                                                 | Icon sets used in the chrome and the applets                                                                                                            |
+| `@mdx-js/loader`, `@mdx-js/react`, `@next/mdx`, `next-mdx-remote`                                  | MDX. Only `next-mdx-remote/rsc` renders anything (`/stash/[slug]`). `@next/mdx` is wired in `next.config.js` but no route is MDX: Roadmap `mdx-cleanup` |
+| `gray-matter`, `remark`, `remark-html`                                                             | `gray-matter` parses front matter. Nothing imports `remark` or `remark-html`: Roadmap `mdx-cleanup`                                                     |
+| `next-themes`                                                                                      | Light/dark theme, read by the icons and the CSS variables                                                                                               |
+| `next-sitemap`                                                                                     | Generates `sitemap.xml` and `robots.txt` after the build                                                                                                |
+| `@vercel/analytics`, `@vercel/speed-insights`                                                      | Cookieless page and Web Vitals metrics                                                                                                                  |
+| `date-fns`                                                                                         | Formats stash dates                                                                                                                                     |
+| `sharp`                                                                                            | Image optimization backend for `next/image`                                                                                                             |
+| `@anthropic-ai/sdk`                                                                                | Claude API client for `/api/ai/critique`. Server-only                                                                                                   |
 
 ### Development (`devDependencies`)
 
@@ -291,7 +291,8 @@ why, so a reader can tell load-bearing packages from incidental ones.
 | [PWA Suite](docs/PWA.md)                        | Applet architecture, manifests, service worker, install testing              |
 | [Game Rig](docs/Game-Rig.md)                    | The handheld game shell: input, scaling, launch images, offline              |
 | [Candlelight Beta](docs/Candlelight-Beta.md)    | The beta-test playbook for the game: scenarios, browser pass, judgement pass |
-| [Icons and SVG](docs/Icons.md)                  | skillicons.dev, and the SVG security configuration it forces                 |
+| [Changelog](docs/Changelog.md)                  | What changed on the live site, newest first                                  |
+| [Icons and SVG](docs/Icons.md)                  | UI icons, the vendored stack icons, and why SVG skips the optimizer          |
 | [SEO](docs/SEO.md)                              | Search Console setup and SEO maintenance                                     |
 | [Project Structure](docs/PROJECT-STRUCTURE.md)  | Root layout conventions and the unified link components                      |
 | [MCP](docs/MCP.md)                              | Model Context Protocol integration guide. **Aspirational, not implemented**  |

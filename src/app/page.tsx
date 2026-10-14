@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
+import { Gamepad2, InfinityIcon, Puzzle } from 'lucide-react'
+import InlineIcon from '../components/InlineIcon'
 import { getRandomQuote } from '../lib/quotes'
 import styles from '../styles/utils.module.css'
 import QuoteBox from './quote-box'
@@ -100,14 +102,15 @@ export default function Home() {
           long-term synergy between my ambitions and morals. I&apos;ve spent 5
           years writing software with real-world impact. I open-source my{' '}
           <Link href="/demos">personal projects</Link> and{' '}
-          <Link href="/resources">knowledge</Link>. My{' '}
+          <Link href="/stash">knowledge</Link>. My{' '}
           <a href="https://www.youtube.com/@cooperability">interviews</a> follow
           the same spirit.
         </p>
 
         <a href="/demos/prompt-composer" className={styles.promptComposerLink}>
           <div className={styles.promptComposerWrapper}>
-            🧩 Prompt Composer →
+            <InlineIcon icon={Puzzle} />
+            Prompt Composer →
           </div>
         </a>
         <a
@@ -115,11 +118,15 @@ export default function Home() {
           className={styles.promptComposerLink}
         >
           <div className={styles.promptComposerWrapper}>
-            ♾️ Mandelbrot Explorer →
+            <InlineIcon icon={InfinityIcon} />
+            Mandelbrot Explorer →
           </div>
         </a>
         <a href="/demos/candlelight" className={styles.promptComposerLink}>
-          <div className={styles.promptComposerWrapper}>🎮 Candlelight →</div>
+          <div className={styles.promptComposerWrapper}>
+            <InlineIcon icon={Gamepad2} />
+            Candlelight →
+          </div>
         </a>
 
         <QuoteBox initialQuote={initialQuote} />

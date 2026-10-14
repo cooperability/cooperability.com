@@ -1,4 +1,4 @@
-import { getAllResourcesData, getResourceBySlug } from './resources'
+import { getAllStashData, getStashBySlug } from './stash'
 
 // Format: https://llmstxt.org
 const SITE = 'https://www.cooperability.com'
@@ -32,11 +32,11 @@ export const DEMOS = [
   },
 ]
 
-// Ordered by id, and deliberately unfiltered: src/app/resources/page.tsx
+// Ordered by id, and deliberately unfiltered: src/app/stash/page.tsx
 // sorts by date and hides three statement slugs from its index, but those
 // pages are served and linkable, so the machine-readable copy lists them.
-function sortedResources() {
-  return getAllResourcesData().sort((a, b) => a.id.localeCompare(b.id))
+function sortedStash() {
+  return getAllStashData().sort((a, b) => a.id.localeCompare(b.id))
 }
 
 // No current title or body needs these, but content is added by hand and a
@@ -51,44 +51,43 @@ const attribute = (text: string) =>
     .replaceAll('>', '&gt;')
     .replaceAll('"', '&quot;')
 // Both ends of the wrapper. An opening tag in a body would otherwise read as
-// the start of a new resource, which is the same break as a closing one.
-const blockBody = (text: string) => text.replace(/<(\/?resource\b)/gi, '&lt;$1')
+// the start of a new entry, which is the same break as a closing one.
+const blockBody = (text: string) => text.replace(/<(\/?entry\b)/gi, '&lt;$1')
 
 export function buildLlmsTxt(): string {
   const demos = DEMOS.map(
     (demo) =>
       `- [${linkText(demo.title)}](${SITE}${demo.path}): ${demo.description}`
   )
-  const resources = sortedResources().map(
-    (resource) =>
-      `- [${linkText(resource.title)}](${SITE}/resources/${resource.id})`
+  const stash = sortedStash().map(
+    (entry) => `- [${linkText(entry.title)}](${SITE}/stash/${entry.id})`
   )
 
   return [
     '# Co-Operability',
     '',
-    '> Portfolio of Cooper Reed, a full stack engineer: interactive demos and written resources.',
+    '> Portfolio of Cooper Reed, a full stack engineer: interactive demos and a stash of written work and recommendations.',
     '',
-    `Full text of every resource: ${SITE}/llms-full.txt`,
+    `Full text of every stash entry: ${SITE}/llms-full.txt`,
     '',
     '## Demos',
     '',
     ...demos,
     '',
-    '## Resources',
+    '## Stash',
     '',
-    ...resources,
+    ...stash,
     '',
   ].join('\n')
 }
 
 export function buildLlmsFullTxt(): string {
-  // Resource bodies use every heading level themselves, so a heading cannot
-  // mark where one resource ends. An explicit wrapper can.
-  const sections = sortedResources().map((resource) => {
-    const body = blockBody(getResourceBySlug(resource.id)?.content.trim() ?? '')
-    return `<resource title="${attribute(resource.title)}" source="${SITE}/resources/${resource.id}">\n${body}\n</resource>\n`
+  // Stash bodies use every heading level themselves, so a heading cannot
+  // mark where one entry ends. An explicit wrapper can.
+  const sections = sortedStash().map((entry) => {
+    const body = blockBody(getStashBySlug(entry.id)?.content.trim() ?? '')
+    return `<entry title="${attribute(entry.title)}" source="${SITE}/stash/${entry.id}">\n${body}\n</entry>\n`
   })
 
-  return ['# Co-Operability: full resource text', '', ...sections].join('\n')
+  return ['# Co-Operability: full stash text', '', ...sections].join('\n')
 }

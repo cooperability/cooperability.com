@@ -89,7 +89,11 @@ async function renderComposer() {
 }
 
 function typeTask(value: string) {
-  fireEvent.change(screen.getByLabelText('Task'), { target: { value } })
+  // The Task section's panel is labelled "Task" by its trigger as well, so a
+  // label query alone is ambiguous.
+  fireEvent.change(screen.getByRole('textbox', { name: 'Task' }), {
+    target: { value },
+  })
 }
 
 beforeEach(() => {
