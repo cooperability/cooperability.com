@@ -1,5 +1,4 @@
 'use client'
-import { useState } from 'react'
 import Link from 'next/link'
 import { Backpack, FlaskConical, House, type LucideIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -26,48 +25,32 @@ const NavLink = ({
   current?: 'page' | 'true'
   children: React.ReactNode
 }) => {
-  const [isHovered, setIsHovered] = useState(false)
-
   return (
     <Link
       href={href}
       aria-current={current}
       className={cn(
         'flex h-full w-full min-w-0 items-center justify-center overflow-hidden whitespace-nowrap rounded-lg px-1 text-xs font-medium transition-all focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring/50 @min-[260px]:text-sm',
-        // Opts out of the global blue link color and hover underline, which
-        // would double the animated underline below.
+        // Opts out of the global blue link color and hover underline.
         'text-inherit no-underline',
         // Inverted colors: white bg in dark mode, dark bg in light mode
         current
           ? 'bg-black text-white shadow-xs dark:bg-white dark:text-black'
           : 'hover:bg-accent/50 hover:text-accent-foreground'
       )}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
     >
-      {/* The underline runs under the icon and, when it is drawn, the name,
-          so it shows on every link in the icon-only layouts too. The module's
-          wrapper is inline-block, hence the important flex. */}
-      <span className={cn(styles.linkTextWrapper, 'inline-flex! items-center')}>
-        <Icon aria-hidden="true" className="size-4 shrink-0" />
-        {/* Widths here are the selector's own, not the viewport's. With room for
-            every name they all show. With room for one, only the current page
-            keeps its name. Below that, icons alone. A name stays in the link as
-            screen-reader text when it is not drawn. */}
-        <span
-          className={cn(
-            'sr-only @min-[260px]:not-sr-only @min-[260px]:ml-1.5',
-            current && '@min-[150px]:not-sr-only @min-[150px]:ml-1'
-          )}
-        >
-          {children}
-        </span>
-        <span
-          className={cn(
-            styles.animatedUnderline,
-            isHovered && styles.animatedUnderlineHover
-          )}
-        />
+      <Icon aria-hidden="true" className="size-4 shrink-0" />
+      {/* Widths here are the selector's own, not the viewport's. With room for
+          every name they all show. With room for one, only the current page
+          keeps its name. Below that, icons alone. A name stays in the link as
+          screen-reader text when it is not drawn. */}
+      <span
+        className={cn(
+          'sr-only @min-[260px]:not-sr-only @min-[260px]:ml-1.5',
+          current && '@min-[150px]:not-sr-only @min-[150px]:ml-1'
+        )}
+      >
+        {children}
       </span>
     </Link>
   )
@@ -106,10 +89,11 @@ const Header = () => {
           className="min-w-0 max-w-[336px] flex-1"
           aria-label="Main navigation"
         >
-          {/* Always the same size, whichever page is current. The outline and
-              the other pages take the body's own text colour in each theme, as
-              the rules below do: --foreground in light, gray-100 in dark. */}
-          <ul className="@container flex h-(--hdr-h) w-full items-stretch rounded-xl border-2 border-foreground p-1 text-foreground dark:border-gray-100 dark:text-gray-100">
+          {/* Always the same size, whichever page is current. The outline takes
+              the body's own text colour in each theme, as the rules below do:
+              --foreground in light, gray-100 in dark. The pages inside stay
+              muted. */}
+          <ul className="@container flex h-(--hdr-h) w-full items-stretch rounded-xl border-2 border-foreground p-1 text-muted-foreground dark:border-gray-100">
             {NAV_LINKS.map(({ href, label }) => {
               const current = ariaCurrent(href)
               return (

@@ -1,10 +1,4 @@
-import {
-  cleanup,
-  fireEvent,
-  render,
-  screen,
-  within,
-} from '@testing-library/react'
+import { cleanup, render, screen, within } from '@testing-library/react'
 import { usePathname } from 'next/navigation'
 import Header from '../../sections/Header'
 
@@ -159,26 +153,15 @@ describe('Header navigation layout', () => {
     }
   })
 
-  it.each(['Home', 'Demos', 'Stash'])(
-    'underlines the %s link on hover, whether or not it is the current page',
-    (name) => {
-      const nav = navAt('/demos')
-      const link = nav.getByRole('link', { name })
-      // The underline sits under the icon too, so it shows when only the icon
-      // is drawn, not just under a name that may be hidden.
-      const underline = link.querySelector('[class*="animatedUnderline"]')!
-      const icon = link.querySelector('svg')!
+  it('draws no hover underline on the links', () => {
+    const nav = navAt('/demos')
 
-      expect(underline.parentElement).toBe(icon.parentElement)
-      expect(underline).not.toHaveClass('animatedUnderlineHover')
-
-      fireEvent.mouseEnter(link)
-      expect(underline).toHaveClass('animatedUnderlineHover')
-
-      fireEvent.mouseLeave(link)
-      expect(underline).not.toHaveClass('animatedUnderlineHover')
+    // The animated underline is retired from the nav. Its styles stay in
+    // utils.module.css for reuse.
+    for (const link of nav.getAllByRole('link')) {
+      expect(link.innerHTML).not.toMatch(/Underline|linkTextWrapper/)
     }
-  )
+  })
 
   it('keeps the selector one size whichever page is current', () => {
     const sized = ['/', '/demos', '/stash'].map((path) => {
@@ -191,18 +174,17 @@ describe('Header navigation layout', () => {
     expect(sized[0]).toContain('w-full')
   })
 
-  it('draws the outline and the other pages in the text colour, per theme', () => {
+  it('draws the outline in the text colour per theme, and leaves the pages muted', () => {
     const nav = navAt('/demos')
     const list = nav.getByRole('list')
 
     // The body text's own colour in each theme, which the rules under the
-    // header also draw in, so nothing stays grey when the theme changes.
-    expect(list).toHaveClass('border-foreground', 'text-foreground')
-    expect(list).toHaveClass('dark:border-gray-100', 'dark:text-gray-100')
-    expect(list).not.toHaveClass(
-      'border-foreground/50',
-      'text-muted-foreground'
-    )
+    // header also draw in, so the outline does not stay grey on a theme change.
+    expect(list).toHaveClass('border-foreground', 'dark:border-gray-100')
+    expect(list).not.toHaveClass('border-foreground/50')
+    // The pages inside keep their muted colour.
+    expect(list).toHaveClass('text-muted-foreground')
+    expect(list).not.toHaveClass('text-foreground', 'dark:text-gray-100')
     expect(nav.getByRole('link', { name: 'Home' })).toHaveClass('text-inherit')
   })
 

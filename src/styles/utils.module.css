@@ -106,7 +106,8 @@
   font-weight: bold;
 }
 
-/* Animated Link Components */
+/* Animated Link Components. Dormant: the header nav drew these until
+   2026-10-13. Kept for reuse, so do not delete them as unused. */
 .animatedLink {
   text-decoration: none;
 }

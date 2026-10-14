@@ -33,10 +33,10 @@ pull request, not here.
   the next or previous page. Swipes that start at a screen edge, in a field,
   on a canvas or in a sideways-scrolling block are left alone, and so are the
   pages under Demos and Stash.
-- The selector's outline and its inactive pages follow the theme's text
-  colour, like the rules under the header.
-- Hovering a page link, the current page included, underlines its icon and
-  name, so the underline also shows when only the icon is drawn.
+- The selector's outline follows the theme's text colour, like the rules under
+  the header. The pages inside it stay muted.
+- The animated hover underline on the page links is gone. Its styles stay in
+  the stylesheet, marked dormant, for reuse.
 
 ### Elsewhere
 
