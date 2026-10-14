@@ -33,7 +33,7 @@
     "ai:on": "node --env-file-if-exists=.env.local scripts/ai-switch.mjs on"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "0.131.0",
+    "@anthropic-ai/sdk": "0.133.0",
     "@heroicons/react": "^2.2.0",
     "@mdx-js/loader": "^3.1.1",
     "@mdx-js/react": "^3.1.1",
@@ -52,7 +52,7 @@
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "gray-matter": "^4.0.3",
-    "lucide-react": "^1.52.0",
+    "lucide-react": "^1.55.0",
     "next": "16.4.0",
     "next-mdx-remote": "6.0.0",
     "next-sitemap": "^4.2.3",
