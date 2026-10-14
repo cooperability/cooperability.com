@@ -31,7 +31,7 @@ All pnpm configuration lives in `pnpm-workspace.yaml`. `.npmrc` is auth and regi
 - App routes: `src/app/` (App Router). There is no `src/pages/`
 - Route chrome: `src/sections/` (Header, Footer), composed in `src/app/layout.tsx`. `Sidebar.tsx` is parked: nothing mounts it and its test is ignored in `jest.config.js`
 - UI / demos: `src/components/` (opioid converter, prompt composer, mandelbrot explorer)
-- Content: `src/resources/**/*.mdx`, read by `src/lib/resources.ts`
+- Content: `src/stash/**/*.mdx`, read by `src/lib/stash.ts`
 - Shared libs: `src/lib/`, hooks in `src/hooks/` (also legacy root `components/ui` and `lib/`, but prefer `src/`)
 - Docs: [README.md](README.md) indexes all of `docs/`
 - Agent skills / CLI / subagents: `.claude/` and `.cursor/`

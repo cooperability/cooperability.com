@@ -47,7 +47,7 @@ const TS_RECOMMENDED_RULES = Object.assign(
 // Only MDX that ships as site content. eslint-plugin-mdx defaults to every
 // `**/*.{md,mdx}` in the repo, which drags in README.md and the .claude /
 // .cursor agent docs — prose no lint rule has a useful opinion about.
-const MDX_CONTENT = ['src/resources/**/*.mdx']
+const MDX_CONTENT = ['src/stash/**/*.mdx']
 
 export default defineConfig([
   {

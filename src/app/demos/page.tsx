@@ -5,7 +5,7 @@ import {
   AccordionTrigger,
   AccordionContent,
 } from '@/components/ui/accordion'
-import { Gamepad2, Monitor, Projector, Smartphone } from 'lucide-react'
+import { Clapperboard, Gamepad2, Monitor, Smartphone } from 'lucide-react'
 import ActiveIcon from '../../components/ActiveIcon'
 import styles from '../../styles/utils.module.css'
 
@@ -20,7 +20,7 @@ const PLATFORM = {
   desktop: { icon: Monitor, label: 'Desktop' },
   mobile: { icon: Smartphone, label: 'Mobile' },
   game: { icon: Gamepad2, label: 'Game' },
-  presentation: { icon: Projector, label: 'Presentation' },
+  video: { icon: Clapperboard, label: 'Video' },
 }
 
 function Platforms({ of }: { of: (keyof typeof PLATFORM)[] }) {
@@ -214,7 +214,7 @@ export default function Demos() {
           <div className={styles.projectInfo}>
             <a href="https://drive.google.com/file/d/1oDYsEytMWbKWmyotBZDIMBzoL5DM1tDV/view?usp=sharing">
               Personnel Portal
-              <Platforms of={['presentation']} />
+              <Platforms of={['video']} />
             </a>
             <span className={styles.projectStatus}>(2020)</span>
           </div>

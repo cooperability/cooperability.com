@@ -1,11 +1,11 @@
 import { render, screen } from '@testing-library/react'
-import ResourceIcon, { RESOURCE_ICONS } from '../../components/ResourceIcon'
-import { getAllResourcesData } from '../../lib/resources'
-import ResourcesList from '../../app/resources/resources-list'
+import StashIcon, { STASH_ICONS } from '../../components/StashIcon'
+import { getAllStashData } from '../../lib/stash'
+import StashList from '../../app/stash/stash-list'
 
-describe('resource icons', () => {
-  it('resolves every icon a resource names in its front matter', () => {
-    const named = getAllResourcesData().filter(({ icon }) => icon)
+describe('stash icons', () => {
+  it('resolves every icon an entry names in its front matter', () => {
+    const named = getAllStashData().filter(({ icon }) => icon)
 
     expect(named.map(({ id }) => id).sort()).toEqual([
       'LLMPrompts',
@@ -13,21 +13,21 @@ describe('resource icons', () => {
       'linktree',
     ])
     for (const { icon } of named) {
-      expect(RESOURCE_ICONS).toHaveProperty([icon!])
+      expect(STASH_ICONS).toHaveProperty([icon!])
     }
   })
 
-  it('renders nothing for a resource with no icon, or an unknown one', () => {
-    const { container, rerender } = render(<ResourceIcon />)
+  it('renders nothing for an entry with no icon, or an unknown one', () => {
+    const { container, rerender } = render(<StashIcon />)
     expect(container).toBeEmptyDOMElement()
 
-    rerender(<ResourceIcon name="no-such-icon" />)
+    rerender(<StashIcon name="no-such-icon" />)
     expect(container).toBeEmptyDOMElement()
   })
 
   it('shows the icon beside the title without adding to the link name', () => {
     render(
-      <ResourcesList
+      <StashList
         posts={[{ id: 'tools', title: 'Online Tools', icon: 'wrench' }]}
       />
     )

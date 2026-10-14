@@ -64,8 +64,8 @@ they differ on every device and ignore the theme.
   span, so the link has a name when only the icon shows.
 - **In a shadcn accordion trigger**, wrap the icon in a span. The trigger
   rotates every direct `svg` child when it opens.
-- **A resource** names its icon in front matter (`icon: wrench`), resolved in
-  `RESOURCE_ICONS`. Front matter cannot hold a component.
+- **A stash entry** names its icon in front matter (`icon: wrench`), resolved
+  in `STASH_ICONS`. Front matter cannot hold a component.
 - **Prompt Composer sections** map to icons in `ComponentSelector`, because
   `catalog.ts` is pure data that the server also imports.
 

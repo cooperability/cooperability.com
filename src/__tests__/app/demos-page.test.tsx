@@ -45,7 +45,7 @@ describe('Demos page', () => {
       screen.getByRole('link', { name: 'Candlelight Desktop Mobile Game' })
     ).toBeInTheDocument()
     expect(
-      screen.getByRole('link', { name: 'Personnel Portal Presentation' })
+      screen.getByRole('link', { name: 'Personnel Portal Video' })
     ).toBeInTheDocument()
   })
 })

@@ -12,11 +12,11 @@ const read = (relativePath: string) =>
 
 const SITE = 'https://www.cooperability.com'
 
-const resources = fs
-  .readdirSync(path.join(process.cwd(), 'src/resources'))
+const entries = fs
+  .readdirSync(path.join(process.cwd(), 'src/stash'))
   .filter((name) => /\.mdx?$/.test(name))
   .map((name) => {
-    const raw = read(`src/resources/${name}`)
+    const raw = read(`src/stash/${name}`)
     return {
       id: name.replace(/\.mdx?$/, ''),
       raw,
@@ -59,8 +59,8 @@ describe('buildLlmsTxt', () => {
     expect(summary).toMatch(/^> \S/)
   })
 
-  it('has exactly the Demos and Resources sections, in that order', () => {
-    expect([...parsed.keys()]).toEqual(['Demos', 'Resources'])
+  it('has exactly the Demos and Stash sections, in that order', () => {
+    expect([...parsed.keys()]).toEqual(['Demos', 'Stash'])
   })
 
   it('lists every demo the /demos page links to, with its page description', () => {
@@ -79,17 +79,17 @@ describe('buildLlmsTxt', () => {
     }
   })
 
-  it('lists every resource once, sorted, titled from its front matter', () => {
-    const items = parsed.get('Resources')!.map((line) => {
+  it('lists every entry once, sorted, titled from its front matter', () => {
+    const items = parsed.get('Stash')!.map((line) => {
       const match = line.match(/^- \[(.+)\]\(([^)]+)\)$/)
       expect(match).not.toBeNull()
       return { title: match![1], url: match![2] }
     })
 
     expect(items).toEqual(
-      resources.map((r) => ({
+      entries.map((r) => ({
         title: r.title,
-        url: `${SITE}/resources/${r.id}`,
+        url: `${SITE}/stash/${r.id}`,
       }))
     )
   })
@@ -106,15 +106,15 @@ describe('buildLlmsFullTxt', () => {
   const full = buildLlmsFullTxt()
   const blocks = [
     ...full.matchAll(
-      /^<resource title="([^"]*)" source="([^"]+)">\n([\s\S]*?)\n<\/resource>$/gm
+      /^<entry title="([^"]*)" source="([^"]+)">\n([\s\S]*?)\n<\/entry>$/gm
     ),
   ].map((match) => ({ title: match[1], source: match[2], body: match[3] }))
 
-  it('holds one block per resource, sorted, each body exactly its file body', () => {
+  it('holds one block per entry, sorted, each body exactly its file body', () => {
     expect(blocks).toEqual(
-      resources.map((r) => ({
+      entries.map((r) => ({
         title: r.title,
-        source: `${SITE}/resources/${r.id}`,
+        source: `${SITE}/stash/${r.id}`,
         body: r.body,
       }))
     )
@@ -125,10 +125,10 @@ describe('buildLlmsFullTxt', () => {
     expect(full).not.toMatch(/\bRESUME_URL\b/)
   })
 
-  it.each(resources)('does not leak the front matter of $id', (resource) => {
+  it.each(entries)('does not leak the front matter of $id', (entry) => {
     // Read raw rather than via gray-matter, whose parse cache hands back an
     // empty `.matter` for a string it has already seen.
-    const frontMatter = resource.raw.match(/^---\r?\n([\s\S]*?)\r?\n---/)?.[1]
+    const frontMatter = entry.raw.match(/^---\r?\n([\s\S]*?)\r?\n---/)?.[1]
     expect(frontMatter).toContain('title:')
     expect(full).not.toContain(frontMatter)
   })

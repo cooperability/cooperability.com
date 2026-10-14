@@ -13,7 +13,7 @@ const ROOTS = [
   'src/app',
   'src/components',
   'src/sections',
-  'src/resources',
+  'src/stash',
   'components',
 ]
 const SOURCE = /\.(tsx?|mdx)$/

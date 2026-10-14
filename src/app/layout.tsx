@@ -5,6 +5,7 @@ import Header from '../sections/Header'
 import Footer from '../sections/Footer'
 import Providers from './providers'
 import ServiceWorkerRegistration from './service-worker'
+import SwipeNav from '../components/SwipeNav'
 import styles from '../styles/utils.module.css'
 import '../styles/global.css'
 
@@ -62,6 +63,7 @@ export default function RootLayout({
             <Footer />
           </div>
           <ServiceWorkerRegistration />
+          <SwipeNav />
         </Providers>
         <Analytics />
         <SpeedInsights />

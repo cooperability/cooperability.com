@@ -120,7 +120,7 @@ export default function AiReview({
           Scores the prompt on the same six dimensions as the live check,
           suggests fixes, and drafts a rewrite. Sends the prompt text to
           Anthropic’s API; this site does not store it.{' '}
-          <Link href="/resources/PrivacyStatement" className="underline">
+          <Link href="/stash/PrivacyStatement" className="underline">
             Privacy
           </Link>
         </p>

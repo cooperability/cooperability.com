@@ -27,11 +27,11 @@ describe('outline buttons', () => {
   it('weighs the footer more-links button at 2px', () => {
     render(<Footer />)
 
-    // Weight alone left a 1.25:1 line on white, so the colour moved too.
-    expect(screen.getByRole('link', { name: 'More links' })).toHaveClass(
-      'border-2',
-      'border-foreground/50'
-    )
+    // Weight alone left a 1.25:1 line on white, so the colour moved too: the
+    // link blue, text and outline alike, as on the demos page.
+    const more = screen.getByRole('link', { name: 'More links' })
+    expect(more).toHaveClass('border-2', 'border-current')
+    expect(more).not.toHaveClass('border-foreground/50', 'text-foreground')
   })
 
   it('darkens the outline on keyboard focus instead of fading it', () => {
@@ -52,7 +52,8 @@ describe('outline buttons', () => {
 
       expect(within(nav).getByRole('list')).toHaveClass(
         'border-2',
-        'border-foreground/50'
+        'border-foreground',
+        'dark:border-gray-100'
       )
       expect(within(nav).getByRole('list')).not.toHaveClass('border')
     }

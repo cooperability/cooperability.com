@@ -56,7 +56,19 @@ const nextConfig = {
       },
       {
         source: '/prompts',
-        destination: '/resources',
+        destination: '/stash',
+        permanent: true,
+      },
+      // The section was called Resources until 2026-10-13. Old links, shared
+      // URLs and search results keep working, one hop.
+      {
+        source: '/resources',
+        destination: '/stash',
+        permanent: true,
+      },
+      {
+        source: '/resources/:slug*',
+        destination: '/stash/:slug*',
         permanent: true,
       },
       // Redirect old demo paths to new /demos/ structure

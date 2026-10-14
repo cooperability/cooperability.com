@@ -1,19 +1,19 @@
 'use client'
 
 import DateDisplay from '../../components/date'
-import ResourceIcon from '../../components/ResourceIcon'
+import StashIcon from '../../components/StashIcon'
 import { useResponsive } from '../../hooks/useResponsive'
-import type { ResourceData } from '../../lib/resources'
+import type { StashData } from '../../lib/stash'
 import styles from '../../styles/utils.module.css'
 
 // Client-only because the row layout is driven by `useResponsive`, not CSS.
 // The list data itself is computed on the server and passed in.
-export default function ResourcesList({ posts }: { posts: ResourceData[] }) {
+export default function StashList({ posts }: { posts: StashData[] }) {
   const { isMobile } = useResponsive()
 
   return (
     <ul className={styles.list}>
-      {posts.map(({ id, date, title, icon }: ResourceData) => (
+      {posts.map(({ id, date, title, icon }: StashData) => (
         <li
           key={id}
           className={styles.listItem}
@@ -29,14 +29,14 @@ export default function ResourcesList({ posts }: { posts: ResourceData[] }) {
           }
         >
           <a
-            href={`/resources/${id}`}
+            href={`/stash/${id}`}
             style={
               !isMobile
                 ? { marginRight: '1rem' }
                 : { display: 'block', marginBottom: '0.25rem' }
             }
           >
-            <ResourceIcon name={icon} />
+            <StashIcon name={icon} />
             {title}
           </a>
           {date && (

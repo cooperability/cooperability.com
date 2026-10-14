@@ -6,7 +6,7 @@ import { chromium } from 'playwright'
 // axe and Lighthouse both run on Playwright's Chromium, so the audit needs no
 // system Chrome and no chromedriver matched to one. Expects `pnpm dev` on :3000.
 const BASE = 'http://localhost:3000'
-const PAGES = { home: '/', demos: '/demos', resources: '/resources' }
+const PAGES = { home: '/', demos: '/demos', stash: '/stash' }
 const REPORTS = 'accessibility-reports'
 // WCAG 2.1 A and AA, the site's stated target. `wcag2aa` alone selects 3
 // rules and skips every level-A check.

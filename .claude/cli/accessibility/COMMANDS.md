@@ -26,13 +26,13 @@ Under the hood (`a11y` → `a11y:run-audits`):
 4. **axe-core** (`@axe-core/playwright`) on:
    - `http://localhost:3000`
    - `http://localhost:3000/demos`
-   - `http://localhost:3000/resources`
+   - `http://localhost:3000/stash`
    - tags: `wcag2a`, `wcag2aa`, `wcag21a`, `wcag21aa` → `accessibility-reports/axe-report.json`
    - any violation fails the run here, before Lighthouse
 5. **Lighthouse** (accessibility category only, `CHROME_PATH` set to the same Chromium) on the same three pages →
    - `accessibility-reports/lighthouse-report-home.{json,html}`
    - `accessibility-reports/lighthouse-report-demos.{json,html}`
-   - `accessibility-reports/lighthouse-report-resources.{json,html}`
+   - `accessibility-reports/lighthouse-report-stash.{json,html}`
 
 **Agent notes:** Slow (minutes). Needs Playwright's Chromium (`pnpm exec playwright install chromium`). Needs a free port `3000` (or stop an existing `pnpm dev`). Run when the user asks for a11y / Lighthouse / axe — not on every unit-test pass.
 

@@ -1,4 +1,10 @@
-import { render, screen, within } from '@testing-library/react'
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  within,
+} from '@testing-library/react'
 import { usePathname } from 'next/navigation'
 import Header from '../../sections/Header'
 
@@ -32,14 +38,14 @@ describe('Header navigation', () => {
     ).toEqual([
       ['Home', '/'],
       ['Demos', '/demos'],
-      ['Resources', '/resources'],
+      ['Stash', '/stash'],
     ])
   })
 
   it.each([
     ['/', 'Home'],
     ['/demos', 'Demos'],
-    ['/resources', 'Resources'],
+    ['/stash', 'Stash'],
   ])('marks the link for %s as the current page', (path, name) => {
     const nav = navAt(path)
 
@@ -69,11 +75,12 @@ describe('Header navigation', () => {
 })
 
 /**
- * One layout serves every width: the icons always render, and below 36rem
- * Tailwind draws only the current page's name. A hamburger and a sidebar would put a JS-driven
- * second layout back, which server-renders the wrong one on phones.
+ * One layout serves every width: the icons always render, and the selector's
+ * own width, through container queries, decides which names show. A hamburger
+ * and a sidebar would put a JS-driven second layout back, which server-renders
+ * the wrong one on phones.
  */
-describe('Header navigation on a phone', () => {
+describe('Header navigation layout', () => {
   const originalWidth = window.innerWidth
 
   afterEach(() => {
@@ -88,7 +95,7 @@ describe('Header navigation on a phone', () => {
 
       expect(
         nav.getAllByRole('link').map((link) => link.getAttribute('href'))
-      ).toEqual(['/', '/demos', '/resources'])
+      ).toEqual(['/', '/demos', '/stash'])
       expect(
         screen.queryByRole('button', { name: /menu/i })
       ).not.toBeInTheDocument()
@@ -109,27 +116,29 @@ describe('Header navigation on a phone', () => {
     ).toEqual([
       [expect.stringContaining('lucide-house'), 'true'],
       [expect.stringContaining('lucide-flask-conical'), 'true'],
-      [expect.stringContaining('lucide-book-open'), 'true'],
+      [expect.stringContaining('lucide-backpack'), 'true'],
     ])
     for (const link of nav.getAllByRole('link')) {
-      expect(link.firstElementChild?.tagName.toLowerCase()).toBe('svg')
+      expect(
+        link.querySelector('svg')?.nextElementSibling?.textContent
+      ).toMatch(/^(Home|Demos|Stash)$/)
     }
   })
 
-  it('draws the name of the current page only, until 36rem', () => {
+  it('draws the name of the current page alone while the selector is narrow', () => {
     const nav = navAt('/demos')
 
     const words = (name: string) =>
       nav.getByRole('link', { name }).querySelector('.sr-only')
 
     // Every link keeps its name as text, so it stays nameable when not drawn.
-    for (const name of ['Home', 'Demos', 'Resources']) {
+    for (const name of ['Home', 'Demos', 'Stash']) {
       expect(words(name)).toHaveTextContent(name)
-      expect(words(name)).toHaveClass('min-[36rem]:not-sr-only')
+      expect(words(name)).toHaveClass('@min-[260px]:not-sr-only')
     }
-    expect(words('Demos')).toHaveClass('min-[22.5rem]:not-sr-only')
-    expect(words('Home')).not.toHaveClass('min-[22.5rem]:not-sr-only')
-    expect(words('Resources')).not.toHaveClass('min-[22.5rem]:not-sr-only')
+    expect(words('Demos')).toHaveClass('@min-[150px]:not-sr-only')
+    expect(words('Home')).not.toHaveClass('@min-[150px]:not-sr-only')
+    expect(words('Stash')).not.toHaveClass('@min-[150px]:not-sr-only')
   })
 
   it('keeps the name on the section from one of its subpages', () => {
@@ -137,7 +146,7 @@ describe('Header navigation on a phone', () => {
 
     expect(
       nav.getByRole('link', { name: 'Demos' }).querySelector('.sr-only')
-    ).toHaveClass('min-[22.5rem]:not-sr-only')
+    ).toHaveClass('@min-[150px]:not-sr-only')
   })
 
   it('draws no name when the route is outside the nav', () => {
@@ -145,8 +154,65 @@ describe('Header navigation on a phone', () => {
 
     for (const link of nav.getAllByRole('link')) {
       expect(link.querySelector('.sr-only')).not.toHaveClass(
-        'min-[22.5rem]:not-sr-only'
+        '@min-[150px]:not-sr-only'
       )
     }
+  })
+
+  it.each(['Home', 'Demos', 'Stash'])(
+    'underlines the %s link on hover, whether or not it is the current page',
+    (name) => {
+      const nav = navAt('/demos')
+      const link = nav.getByRole('link', { name })
+      // The underline sits under the icon too, so it shows when only the icon
+      // is drawn, not just under a name that may be hidden.
+      const underline = link.querySelector('[class*="animatedUnderline"]')!
+      const icon = link.querySelector('svg')!
+
+      expect(underline.parentElement).toBe(icon.parentElement)
+      expect(underline).not.toHaveClass('animatedUnderlineHover')
+
+      fireEvent.mouseEnter(link)
+      expect(underline).toHaveClass('animatedUnderlineHover')
+
+      fireEvent.mouseLeave(link)
+      expect(underline).not.toHaveClass('animatedUnderlineHover')
+    }
+  )
+
+  it('keeps the selector one size whichever page is current', () => {
+    const sized = ['/', '/demos', '/stash'].map((path) => {
+      const classes = navAt(path).getByRole('list').className
+      cleanup()
+      return classes
+    })
+
+    expect(new Set(sized).size).toBe(1)
+    expect(sized[0]).toContain('w-full')
+  })
+
+  it('draws the outline and the other pages in the text colour, per theme', () => {
+    const nav = navAt('/demos')
+    const list = nav.getByRole('list')
+
+    // The body text's own colour in each theme, which the rules under the
+    // header also draw in, so nothing stays grey when the theme changes.
+    expect(list).toHaveClass('border-foreground', 'text-foreground')
+    expect(list).toHaveClass('dark:border-gray-100', 'dark:text-gray-100')
+    expect(list).not.toHaveClass(
+      'border-foreground/50',
+      'text-muted-foreground'
+    )
+    expect(nav.getByRole('link', { name: 'Home' })).toHaveClass('text-inherit')
+  })
+
+  it('stays in the viewport on scroll, under the game shell', () => {
+    navAt('/')
+
+    const sticky = screen
+      .getByRole('navigation', { name: 'Main navigation' })
+      .closest('.sticky')
+
+    expect(sticky).toHaveClass('sticky', 'top-0', 'z-40')
   })
 })

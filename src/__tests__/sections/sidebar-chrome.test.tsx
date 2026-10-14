@@ -11,7 +11,7 @@ jest.mock('next/navigation', () => ({ usePathname: jest.fn() }))
 describe('sidebar', () => {
   beforeEach(() => jest.mocked(usePathname).mockReturnValue('/'))
 
-  it('lists Home, Demos and Resources and nothing after them', () => {
+  it('lists Home, Demos and Stash and nothing after them', () => {
     render(<Sidebar isOpen toggleSidebar={() => {}} />)
 
     const nav = screen.getByRole('navigation', { name: /sidebar navigation/i })
@@ -20,7 +20,7 @@ describe('sidebar', () => {
       within(nav)
         .getAllByRole('link')
         .map((link) => link.textContent)
-    ).toEqual(['| Home |', '| Demos |', '| Resources |'])
+    ).toEqual(['| Home |', '| Demos |', '| Stash |'])
     expect(screen.queryByText(/linktree/i)).not.toBeInTheDocument()
     expect(nav.querySelector('.horizLine')).toBeNull()
   })

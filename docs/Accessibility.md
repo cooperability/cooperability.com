@@ -25,7 +25,7 @@ port 3000. axe and Lighthouse run on Playwright's Chromium
       alpha, which measures 1.56:1 on white
       ([#348](https://github.com/cooperability/cooperability.com/pull/348))
 
-**Baseline (2026-10-04):** axe 0 violations on `/`, `/demos` and `/resources`
+**Baseline (2026-10-04):** axe 0 violations on `/`, `/demos` and `/stash` (then named `/resources`)
 across WCAG 2.1 A and AA (`wcag2a`, `wcag2aa`, `wcag21a`, `wcag21aa`), 62
 rules run per page. Lighthouse accessibility 1.00, 0.98 and 1.00. These are
 the first numbers with the light theme actually forced. Before, the variable

@@ -64,7 +64,7 @@ Your portfolio website has a **unique combination of requirements** that make MC
 
 ### 4. **Content Management (MDX + Gray Matter)**
 
-- **Current State**: Manually create and maintain MDX files in `src/resources/`.
+- **Current State**: Manually create and maintain MDX files in `src/stash/`.
 - **MCP Opportunity**: Build an MCP server that understands your MDX structure and frontmatter schema. AI agents can help draft new blog posts, generate accessibility statements, or refactor existing content while respecting your metadata conventions.
 
 ### 5. **Performance & Bundle Optimization**
@@ -611,7 +611,7 @@ Claude → Validates prompt-composer.webmanifest, opioid-converter.webmanifest, 
         type: "object",
         properties: {
           title: { type: "string" },
-          category: { type: "string", enum: ["resources", "demos"] },
+          category: { type: "string", enum: ["stash", "demos"] },
           template: { type: "string", default: "default" }
         }
       }
@@ -621,7 +621,7 @@ Claude → Validates prompt-composer.webmanifest, opioid-converter.webmanifest, 
       inputSchema: {
         type: "object",
         properties: {
-          directory: { type: "string", default: "src/resources" }
+          directory: { type: "string", default: "src/stash" }
         }
       }
     },
@@ -641,7 +641,7 @@ Claude → Validates prompt-composer.webmanifest, opioid-converter.webmanifest, 
 **Implementation Strategy**:
 
 - Use `gray-matter` (already in dependencies) to parse frontmatter
-- Validate against a JSON schema (define schemas for blog posts, resources, etc.)
+- Validate against a JSON schema (define schemas for blog posts, stash entries, etc.)
 - Use `remark` and `remark-html` to analyze content structure
 - Check links with `next-mdx-remote` and `fs` to verify file existence
 
@@ -652,10 +652,10 @@ Claude → Validates prompt-composer.webmanifest, opioid-converter.webmanifest, 
 # Manually create MDX files, copy frontmatter, check links
 
 # With MCP
-Ask Claude: "Create a new resource about MCP best practices"
+Ask Claude: "Create a new stash entry about MCP best practices"
 Claude → Uses content server to:
   1. Generate MDX file with proper frontmatter
-  2. Add to src/resources/
+  2. Add to src/stash/
   3. Update internal navigation links
   4. Suggest meta description based on content analysis
 ```
@@ -2280,7 +2280,7 @@ Track these metrics:
 
 Once you've implemented MCP:
 
-1. Write a blog post (MDX file in `src/resources/`)
+1. Write a blog post (MDX file in `src/stash/`)
 2. Add to your portfolio as a case study
 3. Share on GitHub (open-source your MCP servers if applicable)
 4. Update your accessibility statement to mention AI-assisted testing

@@ -31,7 +31,7 @@ Priority follows this order. An item ranks by which of these it protects.
 4. **Legible to recruiters and to agents.** The AI work is visible and
    running, and the docs describe the code that exists.
 
-**Out of scope here:** writing resource content (`src/resources/*.mdx`),
+**Out of scope here:** writing stash content (`src/stash/*.mdx`),
 weekly Dependabot bumps (the `triage-dependabot` skill batches those), and
 Candlelight game tuning ([Candlelight Beta](Candlelight-Beta.md) owns its
 playtest backlog).
@@ -84,7 +84,7 @@ new capability.
 | 14  | [`candlelight-controls`](#candlelight-controls)       | Bug   | P2  | S      | none                              | Open                   |
 | 15  | [`mandelbrot-fixes`](#mandelbrot-fixes)               | Bug   | P2  | M      | none                              | Open                   |
 | 16  | [`prompt-composer-desktop`](#prompt-composer-desktop) | Epic  | P2  | M      | none                              | Open                   |
-| 17  | [`resources-frontmatter`](#resources-frontmatter)     | Bug   | P2  | S      | none                              | Open                   |
+| 17  | [`stash-frontmatter`](#stash-frontmatter)             | Bug   | P2  | S      | none                              | Open                   |
 | 18  | [`a11y-in-ci`](#a11y-in-ci)                           | Chore | P2  | M      | `theme-tokens`                    | Open                   |
 | 19  | [`ai-switch-failsafe`](#ai-switch-failsafe)           | Bug   | P2  | S      | none                              | Open                   |
 | 20  | [`ai-billing-check`](#ai-billing-check)               | Chore | P2  | S      | none                              | Open                   |
@@ -258,16 +258,16 @@ Replace `useResponsive` layout switching with CSS breakpoints.
 
 - **Why.** During SSR and hydration the hook returns `isDesktop: true`
   (`src/hooks/useResponsive.ts:63-72`).
-  `src/app/resources/resources-list.tsx:11` therefore server-renders the
+  `src/app/stash/stash-list.tsx:11` therefore server-renders the
   desktop row layout on phones and swaps to the stacked one once JS loads.
-  That is a layout shift on every mobile load of `/resources`. The Footer
+  That is a layout shift on every mobile load of `/stash`. The Footer
   used the hook too until #347 (merged 2026-10-11) removed it, and the Header
   followed when its hamburger and sidebar gave way to icon links.
 - **Do.** Pick the row layout with Tailwind breakpoint classes. Make
-  `resources-list.tsx` a server component once it no longer needs the hook.
+  `stash-list.tsx` a server component once it no longer needs the hook.
   Delete the hook, which nothing else imports after that, and remove the
   `useResponsive` section of `docs/Performance.md`.
-- **Done when.** The server HTML for `/resources` carries the breakpoint
+- **Done when.** The server HTML for `/stash` carries the breakpoint
   classes, and a jsdom test with no `window.innerWidth` set sees them on the
   list. That test fails against the current hook.
 
@@ -508,9 +508,9 @@ A desktop layout for Prompt Composer.
   the Components card without scrolling, and at 390 px the order matches
   today. A component test asserts the `lg:` grid classes on the container.
 
-### `resources-frontmatter`
+### `stash-frontmatter`
 
-Validate resource front matter when it loads.
+Validate stash front matter when it loads.
 
 `Bug` · P2 · S · Depends on: none
 
@@ -521,10 +521,10 @@ Validate resource front matter when it loads.
   `parseISO` throws. A missing `title` throws in `src/lib/llms.ts:44,63`
   during the build of `/llms.txt`. All three Confirmed by probe. Every
   current file quotes its dates, so nothing breaks today. The sort in
-  `src/app/resources/page.tsx:27` returns -1 for equal dates in both
+  `src/app/stash/page.tsx:27` returns -1 for equal dates in both
   directions, which is an inconsistent comparator.
 - **Do.** Validate `title` and `date` (a quoted `YYYY-MM-DD` that parses)
-  in `src/lib/resources.ts`, and throw with the file name. Sort with
+  in `src/lib/stash.ts`, and throw with the file name. Sort with
   `b.date.localeCompare(a.date)`.
 - **Done when.** Tests feeding each of the three bad inputs get an error
   naming the file at load time.
@@ -607,7 +607,7 @@ Enforce the CSP that already ships in report-only mode.
   (`next.config.js:43`) with no `report-uri` or `report-to`, so violations
   reach only the console of whoever opens DevTools.
 - **Do.** On a preview deploy, open every route (each applet, Candlelight,
-  a resource page, the 404) with the console open and record any
+  a stash page, the 404) with the console open and record any
   violation. Fix or allow each one. Then rename the header to
   `Content-Security-Policy`, and correct the comment at
   `next.config.js:5-11`, which still says enforcement needs a nonce. A nonce policy that drops `'unsafe-inline'` is
@@ -660,7 +660,7 @@ A "how it's built" page for the AI infrastructure.
 - **Why.** The AI review route (spend ledger, threat model, off switch) is
   the portfolio piece, and nothing on the site explains it to a recruiter.
   It should showcase a feature that is switched on.
-- **Do.** One MDX resource drawing on [AI Review](AI-Review.md) and the
+- **Do.** One MDX stash entry drawing on [AI Review](AI-Review.md) and the
   systems diagram in the README.
 - **Done when.** The page is linked from `/demos` and from the Prompt
   Composer page.
@@ -742,12 +742,12 @@ Remove the MDX pipeline nothing uses.
   `@next/mdx`, `withMDX` and the `md`/`mdx` `pageExtensions`
   (`next.config.js:101-113`) apply to zero routes, since no `.mdx` file sits
   under `src/app`. Dependabot still bumps all of them. Only
-  `next-mdx-remote/rsc` and `gray-matter` render resource pages.
+  `next-mdx-remote/rsc` and `gray-matter` render stash pages.
 - **Do.** Remove `remark`, `remark-html`, `@next/mdx`, `@mdx-js/loader`,
   `@mdx-js/react` and the `withMDX` wrapper. Update the version assertion in
   `src/__tests__/package-manager.test.ts:64` and the README dependency
   table.
-- **Done when.** `pnpm build` passes and every `/resources/*` page renders
+- **Done when.** `pnpm build` passes and every `/stash/*` page renders
   as before.
 
 ### `dead-code`
@@ -761,7 +761,7 @@ Remove code and tracked files nothing uses.
   `@radix-ui/react-tooltip` outside them. `public/workbox-7e7a8aeb.js` is
   tracked although `.gitignore:36` ignores `public/workbox-*.js`, so the
   site still serves a leftover from the `next-pwa` era. Keep
-  `public/oldSite.html`: `src/resources/linktree.mdx:21` links to it.
+  `public/oldSite.html`: `src/stash/linktree.mdx:21` links to it.
 - **Done when.** The files and both packages are gone, the README
   dependency table matches, and `pnpm build` and `pnpm test` pass.
 
@@ -875,7 +875,7 @@ Four Prompt Composer features, each its own PR.
    Context, quality and interaction go to a system pane, input and task to a
    user pane.
 4. **Start from a preset.** Load a prompt from
-   `src/resources/LLMPrompts.mdx` into the composer's fields.
+   `src/stash/LLMPrompts.mdx` into the composer's fields.
 
 - **Done when** (each). The feature has a component test that fails
   without it, and the compiled prompt for an existing preset is unchanged
@@ -929,11 +929,11 @@ Per-applet icons with maskable variants.
 
 ### `rss-feed`
 
-RSS or JSON feed for resources.
+RSS or JSON feed for the stash.
 
 `Epic` · P3 · S · Depends on: none
 
-- **Done when.** `/feed.xml` validates and lists every published resource.
+- **Done when.** `/feed.xml` validates and lists every published stash entry.
 
 ### `visual-polish`
 
@@ -948,7 +948,7 @@ the contrast fix.
    heading separate from the intro.
 2. **One accent colour** beyond link blue, so a primary call to action reads
    differently from an inline link.
-3. **Row hover state** on Demos and Resources list rows.
+3. **Row hover state** on Demos and Stash list rows.
 4. **One card style.** The homepage quote box is bordered and transparent,
    while the Demos accordions are filled navy rectangles.
 5. **Cap the measure** of body copy at about 65 to 75 characters
@@ -957,9 +957,9 @@ the contrast fix.
    Add a tree line or tint.
 7. **Fewer stack icons per row.** Rows with the most icons pack 5 or 6
    badges. Standardize the gap or cap at "+N".
-8. **Dim resource dates** and give them a fixed column. After
+8. **Dim stash dates** and give them a fixed column. After
    `focus-contrast`.
-9. **Balance the Resources page.** The 2026-08-24 screenshot showed 3
+9. **Balance the Stash page.** The 2026-08-24 screenshot showed 3
    entries and a dead zone above the footer. Center the list, add a short
    intro line, or shrink the min-height.
 
@@ -987,7 +987,7 @@ Not planned. Each lists what would bring it back. Do not start one without
 moving it into the ranked list first.
 
 - **RAG or chat over the site's content.** The design was to embed
-  `src/resources/**` and the docs at build time and ship a small static
+  `src/stash/**` and the docs at build time and ship a small static
   index, with no vector DB. It is a second paid AI surface, before the first
   is switched on. `llms-full.txt` already serves agents the same
   content. Revisit after `ai-go-live` has run a month inside budget.
@@ -1052,7 +1052,7 @@ it landed.
 - ~~Replace the hand-rolled `<Head>` in `layout.tsx` with the Metadata API / `generateMetadata`~~ (done: `<html lang="en">` is now real, and every route's tags come from `metadata`/`viewport` exports)
 - ~~Add `_document` equivalents / custom `404` + `500` pages and a top-level error boundary~~ (done: `src/app/not-found.tsx`, `error.tsx`, `global-error.tsx`)
 - ~~Move the inline `dangerouslySetInnerHTML` service-worker registration out of `_app.tsx`~~ (done: it's now `src/app/service-worker.tsx`, a `useEffect` with no inline script. Handing registration to Serwist's own helper is [parked](#parked-epics))
-- ~~Reconsider `next-mdx-remote` vs. compile-time MDX~~ (settled: `/resources/[slug]` uses `next-mdx-remote/rsc`, so no MDX compiler ships to the client. The `@next/mdx` wiring in `next.config.js` turned out to serve no route: see `mdx-cleanup`)
+- ~~Reconsider `next-mdx-remote` vs. compile-time MDX~~ (settled: `/stash/[slug]` uses `next-mdx-remote/rsc`, so no MDX compiler ships to the client. The `@next/mdx` wiring in `next.config.js` turned out to serve no route: see `mdx-cleanup`)
 
 ### CI/CD and quality gates
 

@@ -102,7 +102,7 @@ export default function Home() {
           long-term synergy between my ambitions and morals. I&apos;ve spent 5
           years writing software with real-world impact. I open-source my{' '}
           <Link href="/demos">personal projects</Link> and{' '}
-          <Link href="/resources">knowledge</Link>. My{' '}
+          <Link href="/stash">knowledge</Link>. My{' '}
           <a href="https://www.youtube.com/@cooperability">interviews</a> follow
           the same spirit.
         </p>
