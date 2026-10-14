@@ -21,8 +21,9 @@ import {
   type FieldId,
 } from './catalog'
 import CompiledPrompt from './CompiledPrompt'
-import { compilePrompt } from './compile'
+import { attribute, compileBlocks, joinBlocks } from './compile'
 import ComponentSelector from './ComponentSelector'
+import Composition from './Composition'
 import LiveCheck from './LiveCheck'
 import { lintPrompt, type Fix } from './lint'
 import ResearchNotes from './ResearchNotes'
@@ -98,8 +99,10 @@ const PromptComposer: React.FC<PromptComposerProps> = ({ className }) => {
     () => ({ fields, selected }),
     [fields, selected]
   )
-  const compiled = useMemo(() => compilePrompt(state), [state])
+  const blocks = useMemo(() => compileBlocks(state), [state])
+  const compiled = useMemo(() => joinBlocks(blocks), [blocks])
   const text = override ?? compiled
+  const spans = useMemo(() => attribute(text, blocks), [text, blocks])
   const lint = useMemo(() => lintPrompt(state, text), [state, text])
 
   const pristine =
@@ -141,7 +144,13 @@ const PromptComposer: React.FC<PromptComposerProps> = ({ className }) => {
   }
 
   return (
-    <div className={`container mx-auto p-1 ${className ?? ''}`}>
+    // The site's content well is 36rem at every breakpoint. On desktop the
+    // composer breaks out of it to the viewport, capped at 88rem (about
+    // 1600px on this site's 18px root), so three columns fit. The header and
+    // footer keep the narrower width.
+    <div
+      className={`p-1 lg:mx-[calc(50%_-_min(50vw_-_1rem,44rem))] ${className ?? ''}`}
+    >
       <header className="mb-4 text-center md:mb-6">
         <h1 className="mb-2 text-2xl font-bold md:text-3xl">
           <InlineIcon icon={Puzzle} />
@@ -149,11 +158,15 @@ const PromptComposer: React.FC<PromptComposerProps> = ({ className }) => {
         </h1>
       </header>
 
-      {/* One column: the site's content well is about 600px wide at every
-          breakpoint, and two columns there left each panel too narrow to use. */}
-      <div className="flex flex-col gap-3">
-        <Card className="w-full gap-3 py-4">
-          <CardContent className="px-4">
+      {/* One column below lg. From lg the components sit left of the prompt,
+          with scores under it, and the components column sticks and scrolls
+          on its own. From xl the scores take a third column, and all three
+          columns share one height that ends just above the bottom of the
+          viewport (the columns start about 9rem down). Each scrolls inside
+          itself, so opening or closing a section never changes the layout. */}
+      <div className="flex flex-col gap-3 lg:grid lg:grid-cols-[16rem_minmax(0,1fr)] lg:items-start xl:h-[calc(100dvh-10rem)] xl:min-h-[30rem] xl:grid-cols-[16rem_minmax(0,1fr)_18rem] xl:grid-rows-[minmax(0,1fr)] xl:items-stretch 2xl:grid-cols-[18rem_minmax(0,1fr)_22rem]">
+        <Card className="w-full gap-3 py-4 lg:sticky lg:top-4 lg:row-span-2 lg:max-h-[calc(100dvh-2rem)] lg:overflow-y-auto xl:static xl:row-span-1 xl:max-h-none xl:min-h-0">
+          <CardContent className="px-3">
             <h2 className="mb-3 text-lg font-bold">Components</h2>
             <ComponentSelector
               state={state}
@@ -169,17 +182,24 @@ const PromptComposer: React.FC<PromptComposerProps> = ({ className }) => {
           </CardContent>
         </Card>
 
-        <div className="flex w-full flex-col gap-3">
+        <Card className="w-full py-4 xl:min-h-0">
+          <CardContent className="px-4 xl:flex xl:min-h-0 xl:flex-1 xl:flex-col">
+            <CompiledPrompt
+              text={text}
+              spans={spans}
+              edited={override !== null && override !== compiled}
+              onChange={setOverride}
+              onDiscardEdits={() => setOverride(null)}
+              onClear={clearAll}
+              canClear={!pristine}
+            />
+          </CardContent>
+        </Card>
+
+        <div className="flex w-full flex-col gap-3 xl:col-start-3 xl:row-start-1 xl:min-h-0 xl:overflow-y-auto">
           <Card className="py-4">
             <CardContent className="px-4">
-              <CompiledPrompt
-                text={text}
-                edited={override !== null && override !== compiled}
-                onChange={setOverride}
-                onDiscardEdits={() => setOverride(null)}
-                onClear={clearAll}
-                canClear={!pristine}
-              />
+              <Composition text={text} spans={spans} />
             </CardContent>
           </Card>
           <Card className="py-4">
@@ -204,7 +224,8 @@ const PromptComposer: React.FC<PromptComposerProps> = ({ className }) => {
         </div>
       </div>
 
-      <div className="mt-4">
+      {/* Reading width, not tool width. */}
+      <div className="mx-auto mt-4 max-w-3xl">
         <ResearchNotes />
       </div>
     </div>

@@ -1,4 +1,11 @@
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from '@testing-library/react'
 import { TextDecoder, TextEncoder } from 'util'
 import PromptComposer, {
   STORAGE_KEY,
@@ -142,9 +149,7 @@ describe('PromptComposer v2', () => {
     typeTask('Write a haiku')
     fireEvent.change(compiled(), { target: { value: 'My hand-tuned prompt' } })
 
-    fireEvent.click(
-      screen.getByRole('button', { name: /reasoning & quality/i })
-    )
+    fireEvent.click(screen.getByRole('button', { name: /^reasoning/i }))
     fireEvent.click(screen.getByLabelText(/self-check/i))
 
     // v1 silently overwrote this on every toggle.
@@ -199,14 +204,11 @@ describe('PromptComposer v2', () => {
     expect(section(/^output/i)).toHaveAttribute('aria-expanded', 'true')
     expect(section(/^task/i)).toHaveAttribute('aria-expanded', 'false')
 
-    fireEvent.click(section(/reasoning & quality/i))
-    expect(section(/reasoning & quality/i)).toHaveAttribute(
-      'aria-expanded',
-      'true'
-    )
+    fireEvent.click(section(/^reasoning/i))
+    expect(section(/^reasoning/i)).toHaveAttribute('aria-expanded', 'true')
     expect(section(/^output/i)).toHaveAttribute('aria-expanded', 'false')
 
-    fireEvent.click(section(/reasoning & quality/i))
+    fireEvent.click(section(/^reasoning/i))
     expect(
       screen
         .queryAllByRole('button', { expanded: true })
@@ -224,7 +226,7 @@ describe('PromptComposer v2', () => {
       expect(screen.getByLabelText('Material to work from')).toHaveFocus()
     )
     // The fix opens its section in place of the one that was open.
-    expect(screen.getByRole('button', { name: /^input/i })).toHaveAttribute(
+    expect(screen.getByRole('button', { name: /^sources/i })).toHaveAttribute(
       'aria-expanded',
       'true'
     )
@@ -232,6 +234,51 @@ describe('PromptComposer v2', () => {
       'aria-expanded',
       'false'
     )
+  })
+
+  it('colours each block of the prompt by the section it came from', async () => {
+    await renderComposer()
+    typeTask('Plan a launch')
+    fireEvent.click(screen.getByRole('button', { name: /^audience/i }))
+    fireEvent.change(screen.getByLabelText('Background and purpose'), {
+      target: { value: 'For the board.' },
+    })
+
+    const task = screen.getByText('Plan a launch', { selector: 'span' })
+    const context = screen.getByText(/For the board\./, { selector: 'span' })
+    // Blue for Task, pink for Context, at a quarter opacity.
+    expect(task.style.backgroundColor).toBe('rgba(59, 130, 246, 0.25)')
+    expect(context.style.backgroundColor).toBe('rgba(236, 72, 153, 0.25)')
+  })
+
+  it('measures each section’s share, and counts what hand edits add', async () => {
+    await renderComposer()
+    const table = () =>
+      screen.getByRole('table', { name: /share of the prompt by section/i })
+    expect(screen.queryByRole('table')).not.toBeInTheDocument()
+
+    // 12 characters of task and 12 of context.
+    typeTask('Plan a party')
+    fireEvent.click(screen.getByRole('button', { name: /^audience/i }))
+    fireEvent.change(screen.getByLabelText('Background and purpose'), {
+      target: { value: 'For friends.' },
+    })
+    const share = (name: RegExp) =>
+      within(table()).getByRole('row', { name }).lastElementChild?.textContent
+
+    // The context block also carries its <context> tags: 33 characters.
+    expect(share(/^audience/i)).toBe('73%')
+    expect(share(/^task/i)).toBe('27%')
+
+    fireEvent.change(compiled(), {
+      target: { value: `${compiled().value}\n\nThanks!` },
+    })
+    expect(share(/hand edits/i)).toBe('13%')
+
+    fireEvent.click(screen.getByRole('button', { name: /discard edits/i }))
+    expect(
+      within(table()).queryByRole('row', { name: /hand edits/i })
+    ).not.toBeInTheDocument()
   })
 
   it('flags a persona typed straight into the prompt', async () => {

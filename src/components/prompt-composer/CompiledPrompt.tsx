@@ -3,12 +3,22 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { Check, Copy, RotateCcw, Undo2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { MAX_PROMPT_CHARS } from '@/src/lib/ai/review-schema'
-import { countWords, estimateTokens } from './compile'
-import { textareaClass } from './ComponentSelector'
+import { cn } from '@/lib/utils'
+import type { Span } from './compile'
+import { SECTION_ACCENT, textareaClass } from './ComponentSelector'
+
+// The highlight layer sits behind a transparent textarea and has to wrap
+// glyph for glyph with it, so both take their box and type from here. The
+// textarea scrolls whenever its text outgrows it: always possible from xl,
+// where it has a fixed height, and below that when field-sizing is missing or
+// it is dragged shorter. Its scrollbar would then narrow the text, so both
+// reserve that gutter.
+const metrics =
+  'w-full rounded-md border px-3 py-2 font-mono text-sm leading-relaxed whitespace-pre-wrap wrap-break-word [scrollbar-gutter:stable]'
 
 interface Props {
   text: string
+  spans: Span[]
   edited: boolean
   onChange: (value: string) => void
   onDiscardEdits: () => void
@@ -20,6 +30,7 @@ type Flash = 'copied' | 'copy-failed' | 'cleared' | null
 
 export default function CompiledPrompt({
   text,
+  spans,
   edited,
   onChange,
   onDiscardEdits,
@@ -28,6 +39,7 @@ export default function CompiledPrompt({
 }: Props) {
   const [flash, setFlash] = useState<Flash>(null)
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined)
+  const backdrop = useRef<HTMLDivElement>(null)
 
   useEffect(() => () => clearTimeout(timer.current), [])
 
@@ -48,10 +60,10 @@ export default function CompiledPrompt({
   }
 
   const chars = text.trim().length
-  const overLimit = chars > MAX_PROMPT_CHARS
 
   return (
-    <div className="space-y-3">
+    // From xl the prompt fills its column and scrolls inside the textarea.
+    <div className="space-y-3 xl:flex xl:min-h-0 xl:flex-1 xl:flex-col xl:gap-3 xl:space-y-0">
       {/* First, not last: Tailwind 4's space-y puts margin below every child
           but the last, and this one is out of flow. */}
       <p role="status" className="sr-only">
@@ -95,16 +107,49 @@ export default function CompiledPrompt({
         </div>
       </div>
 
-      <textarea
-        aria-labelledby="pc-compiled-label"
-        aria-describedby="pc-compiled-stats"
-        value={text}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder="Fill in a task above and your prompt assembles here. You can also type or paste a prompt directly."
-        // Grows with its content where field-sizing is supported, so the whole
-        // prompt is visible without scrolling inside the box.
-        className={`${textareaClass} min-h-[240px] font-mono field-sizing-content`}
-      />
+      <div className="relative rounded-md bg-white xl:min-h-0 xl:flex-1 dark:bg-gray-950">
+        <div
+          ref={backdrop}
+          aria-hidden="true"
+          className={`${metrics} absolute inset-0 overflow-hidden border-transparent text-transparent`}
+        >
+          {/* The space after the runs: a trailing newline only takes up a
+              line here if something follows it, as it does in the textarea. */}
+          {spans.map((span, i) =>
+            span.kind && span.kind !== 'edited' ? (
+              <span
+                key={i}
+                className="rounded-sm"
+                style={{ backgroundColor: `${SECTION_ACCENT[span.kind]}40` }}
+              >
+                {span.text}
+              </span>
+            ) : (
+              span.text
+            )
+          )}{' '}
+        </div>
+        <textarea
+          aria-labelledby="pc-compiled-label"
+          aria-describedby="pc-compiled-stats"
+          value={text}
+          onChange={(e) => onChange(e.target.value)}
+          // When the textarea scrolls, the highlights have to scroll with it.
+          onScroll={(e) => {
+            if (backdrop.current)
+              backdrop.current.scrollTop = e.currentTarget.scrollTop
+          }}
+          placeholder="Fill in a task and your prompt assembles here, coloured by section. You can also type or paste a prompt directly."
+          // Below xl it grows with its content where field-sizing is supported,
+          // so the whole prompt shows without scrolling inside the box. From xl
+          // it fills its column instead and scrolls.
+          className={cn(
+            textareaClass,
+            metrics,
+            'relative block min-h-[240px] bg-transparent field-sizing-content lg:min-h-[60dvh] xl:h-full xl:min-h-0 xl:resize-none xl:field-sizing-fixed dark:bg-transparent'
+          )}
+        />
+      </div>
 
       {edited && (
         <p className="text-gray-600 dark:text-gray-400 text-xs">
@@ -112,18 +157,6 @@ export default function CompiledPrompt({
           edits until you discard them.
         </p>
       )}
-
-      <p
-        id="pc-compiled-stats"
-        className="text-gray-600 dark:text-gray-400 flex flex-wrap gap-x-4 text-xs tabular-nums"
-      >
-        <span>{countWords(text)} words</span>
-        <span>~{estimateTokens(text)} tokens</span>
-        <span className={overLimit ? 'font-semibold text-red-600' : undefined}>
-          {chars.toLocaleString()} / {MAX_PROMPT_CHARS.toLocaleString()} chars
-          for AI review
-        </span>
-      </p>
 
       {flash === 'copy-failed' && (
         <p role="alert" className="text-sm text-red-600">

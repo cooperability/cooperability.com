@@ -93,6 +93,8 @@ export default function ComponentSelector({
   fieldRefs,
 }: Props) {
   return (
+    // One section open at a time, so the column's height depends on that one
+    // section rather than on how many were left open.
     <Accordion
       type="single"
       collapsible
@@ -118,7 +120,7 @@ export default function ComponentSelector({
           >
             <AccordionTrigger
               headingLevel={3}
-              className="py-3 hover:no-underline"
+              className="px-3 py-2.5 hover:no-underline"
             >
               <span className="flex w-full items-center justify-between pr-2">
                 <span className="flex items-center gap-2 text-base font-semibold">
@@ -136,7 +138,7 @@ export default function ComponentSelector({
                 )}
               </span>
             </AccordionTrigger>
-            <AccordionContent className="space-y-4">
+            <AccordionContent className="space-y-3 p-3">
               <p className="text-gray-600 dark:text-gray-400">
                 {section.blurb}
               </p>

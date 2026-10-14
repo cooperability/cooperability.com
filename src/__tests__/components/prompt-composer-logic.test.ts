@@ -7,7 +7,10 @@ import {
   type ComposerState,
 } from '../../components/prompt-composer/catalog'
 import {
+  attribute,
+  compileBlocks,
   compilePrompt,
+  composition,
   countWords,
   estimateTokens,
   splitExamples,
@@ -122,6 +125,92 @@ describe('compilePrompt', () => {
     expect(out).toBe(
       '- Cite figures\n- Keep names\n- Keep the response under about 150 words.'
     )
+  })
+})
+
+describe('attribute', () => {
+  const full = state(
+    {
+      task: 'Summarize the report.',
+      context: 'For the board.',
+      input: 'Q3 revenue rose 4%.',
+    },
+    ['format-prose', 'quality-grounding']
+  )
+  const blocks = compileBlocks(full)
+  const text = compilePrompt(full)
+  const kinds = (spans: ReturnType<typeof attribute>) =>
+    spans.flatMap((s) => (s.kind ? [s.kind] : []))
+
+  it('colours every block of an untouched prompt by its section, in order', () => {
+    const spans = attribute(text, blocks)
+
+    expect(spans.map((s) => s.text).join('')).toBe(text)
+    expect(kinds(spans)).toEqual([
+      'context',
+      'input',
+      'task',
+      'output',
+      'quality',
+    ])
+  })
+
+  it('keeps the colour of blocks a hand edit leaves intact', () => {
+    const edited = text
+      .replace('Summarize the report.', 'Summarise it in three bullets.')
+      .concat('\n\nThanks!')
+    const spans = attribute(edited, blocks)
+
+    expect(spans.map((s) => s.text).join('')).toBe(edited)
+    expect(kinds(spans)).toEqual([
+      'context',
+      'input',
+      'edited',
+      'output',
+      'quality',
+      'edited',
+    ])
+    expect(spans.find((s) => s.kind === 'edited')?.text).toContain(
+      'Summarise it in three bullets.'
+    )
+  })
+
+  // The highlight layer renders the spans in place of the text, so a span
+  // twice over would push every later highlight off its words.
+  it('never repeats text when a hand edit moves a block', () => {
+    const moved = `Summarize the report.\n\n${text.replace('\n\nSummarize the report.', '')}`
+    const spans = attribute(moved, blocks)
+
+    expect(spans.map((s) => s.text).join('')).toBe(moved)
+    expect(kinds(spans)).toEqual([
+      'edited',
+      'context',
+      'input',
+      'output',
+      'quality',
+    ])
+  })
+
+  it('treats a pasted prompt as one hand edit', () => {
+    expect(attribute('Write me a haiku.', [])).toEqual([
+      { kind: 'edited', text: 'Write me a haiku.' },
+    ])
+  })
+})
+
+describe('composition', () => {
+  it('sums each section once, ignoring the space between blocks', () => {
+    const shares = composition([
+      { kind: 'task', text: 'abcdefgh' },
+      { kind: null, text: '\n\n' },
+      { kind: 'edited', text: ' xyz ' },
+      { kind: 'task', text: 'ij' },
+    ])
+
+    expect(shares).toEqual([
+      { kind: 'task', chars: 10, tokens: 3 },
+      { kind: 'edited', chars: 3, tokens: 1 },
+    ])
   })
 })
 
