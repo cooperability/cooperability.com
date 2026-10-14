@@ -87,9 +87,9 @@ const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
     if (href === '/') {
       return pathname === href
     }
-    // For /resources parent page, only match exactly (not sub-pages)
-    if (href === '/resources') {
-      return pathname === '/resources'
+    // For /stash parent page, only match exactly (not sub-pages)
+    if (href === '/stash') {
+      return pathname === '/stash'
     }
     // For all other paths, use startsWith
     return pathname.startsWith(href)
@@ -134,11 +134,11 @@ const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
           | Demos |
         </SidebarLink>
         <SidebarLink
-          href="/resources"
-          isActive={isRouteActive('/resources')}
+          href="/stash"
+          isActive={isRouteActive('/stash')}
           onClick={toggleSidebar}
         >
-          | Resources |
+          | Stash |
         </SidebarLink>
       </nav>
     </div>

@@ -29,9 +29,9 @@ All pnpm configuration lives in `pnpm-workspace.yaml`. `.npmrc` is auth and regi
 ## Architecture (quick)
 
 - App routes: `src/app/` (App Router). There is no `src/pages/`
-- Route chrome: `src/sections/` (Header, Sidebar, Footer), composed in `src/app/layout.tsx`
+- Route chrome: `src/sections/` (Header, Footer), composed in `src/app/layout.tsx`. `Sidebar.tsx` is parked: nothing mounts it and its test is ignored in `jest.config.js`
 - UI / demos: `src/components/` (opioid converter, prompt composer, mandelbrot explorer)
-- Content: `src/resources/**/*.mdx`, read by `src/lib/resources.ts`
+- Content: `src/stash/**/*.mdx`, read by `src/lib/stash.ts`
 - Shared libs: `src/lib/`, hooks in `src/hooks/` (also legacy root `components/ui` and `lib/`, but prefer `src/`)
 - Docs: [README.md](README.md) indexes all of `docs/`
 - Agent skills / CLI / subagents: `.claude/` and `.cursor/`
@@ -41,6 +41,7 @@ App Router has sharp edges this repo has already hit (metadata does not deep-mer
 ## Conventions
 
 - Match existing TypeScript, Tailwind, and shadcn/Radix patterns
+- Icons come from `lucide-react`. No emoji in rendered source: `src/__tests__/lib/no-emoji.test.ts` fails on one. See [docs/Icons.md](docs/Icons.md)
 - Prefer semantic queries in tests (`getByRole`, etc.)
 - No drive-by refactors, and no new deps without asking
 - Do not commit secrets, and do not weaken CI/tests to go green

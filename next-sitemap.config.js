@@ -8,6 +8,6 @@ module.exports = {
   additionalPaths: async (config) => [await config.transform(config, '/')],
   // force-static route handlers land in the prerender manifest, so these are
   // picked up as pages. Submitting llms-full.txt for indexing would publish
-  // every resource body at a second URL, competing with /resources/*.
+  // every stash body at a second URL, competing with /stash/*.
   exclude: ['/llms.txt', '/llms-full.txt'],
 }

@@ -1,5 +1,5 @@
 ---
-description: MDX authoring and lint pitfalls for resources and posts
+description: MDX authoring and lint pitfalls for stash entries and posts
 globs: "**/*.{mdx,md}"
 alwaysApply: false
 ---

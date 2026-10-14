@@ -1,4 +1,4 @@
-import { getResourceBySlug } from '../../lib/resources'
+import { getStashBySlug } from '../../lib/stash'
 
 /**
  * Jest cannot load the ESM-only MDX pipeline, so the rendered dropdowns are
@@ -9,12 +9,12 @@ import { getResourceBySlug } from '../../lib/resources'
 const DROPDOWN_PAGES = ['LLMPrompts', 'OnlineTools']
 
 function content(slug: string) {
-  const resource = getResourceBySlug(slug)
-  if (!resource) throw new Error(`missing resource ${slug}`)
-  return resource
+  const entry = getStashBySlug(slug)
+  if (!entry) throw new Error(`missing stash entry ${slug}`)
+  return entry
 }
 
-describe('Resource pages built from dropdowns', () => {
+describe('Stash pages built from dropdowns', () => {
   it.each(DROPDOWN_PAGES)(
     '%s opts into structured rendering, without which lists lose their bullets',
     (slug) => {

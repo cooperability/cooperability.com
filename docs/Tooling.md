@@ -251,8 +251,8 @@ pnpm audit:fix          # Attempt automatic fixes
 Keep urgent security PRs focused: do not bundle unrelated Dependabot upgrades,
 because they increase the regression surface and make the patch harder to review.
 
-**MDX trust boundary:** `src/app/resources/[slug]/page.tsx` reads MDX only from
-version-controlled files under `src/resources` during static generation. That
+**MDX trust boundary:** `src/app/stash/[slug]/page.tsx` reads MDX only from
+version-controlled files under `src/stash` during static generation. That
 reduces exposure to vulnerabilities requiring untrusted MDX, but does not replace
 upgrading affected processors. Do not pass user-controlled content to
 `next-mdx-remote`.
@@ -345,7 +345,7 @@ Three complementary tools ensure WCAG 2.1 AA compliance:
 
 - **Type:** Comprehensive accessibility audits
 - **What it catches:** Performance impact on accessibility, best practices, SEO
-- **Runs on:** Home page, demos page, resources page
+- **Runs on:** Home page, demos page, stash page
 
 ### Running Accessibility Audits
 
@@ -370,7 +370,7 @@ This command:
 - `accessibility-reports/lighthouse-report-*.html` - Lighthouse audits
 
 **After Reviewing:**
-Update `src/resources/AccessibilityStatement.mdx` with findings and remediation plans.
+Update `src/stash/AccessibilityStatement.mdx` with findings and remediation plans.
 
 ### Known Testing Limitations
 
@@ -694,7 +694,7 @@ const isDark = theme === 'dark'
 **Solution:** When using `next-mdx-remote`, components must be passed to `<MDXRemote />` via the `components` prop:
 
 ```tsx
-// src/app/resources/[slug]/page.tsx, with MDXRemote from 'next-mdx-remote/rsc'
+// src/app/stash/[slug]/page.tsx, with MDXRemote from 'next-mdx-remote/rsc'
 import { CustomComponent } from '@/components/CustomComponent'
 
 ;<MDXRemote source={content} components={{ CustomComponent }} />

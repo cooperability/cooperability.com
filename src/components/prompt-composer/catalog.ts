@@ -43,7 +43,6 @@ export interface PromptOption {
 export interface PromptSection {
   id: SectionId
   label: string
-  icon: string
   blurb: string
 }
 
@@ -51,46 +50,39 @@ export const SECTIONS: PromptSection[] = [
   {
     id: 'task',
     label: 'Task',
-    icon: '🎯',
     blurb: 'The instruction itself. Be explicit about what done looks like.',
   },
   {
     id: 'context',
     label: 'Context & audience',
-    icon: '📋',
     blurb:
       'Why the task matters and who it is for. Explaining the why beats assigning a persona.',
   },
   {
     id: 'input',
     label: 'Input material',
-    icon: '📥',
     blurb:
       'Anything the task operates on. It is wrapped in tags and placed before the instructions.',
   },
   {
     id: 'examples',
     label: 'Examples',
-    icon: '🧪',
     blurb:
       'Three to five varied examples are the most reliable way to fix format and tone.',
   },
   {
     id: 'output',
     label: 'Output',
-    icon: '📄',
     blurb: 'Format, length and requirements, stated as what to do.',
   },
   {
     id: 'quality',
     label: 'Reasoning & quality',
-    icon: '🔍',
     blurb: 'Grounding, honesty about uncertainty, and a final self-check.',
   },
   {
     id: 'interaction',
     label: 'Interaction',
-    icon: '💬',
     blurb: 'How the model should handle ambiguity and follow-up.',
   },
 ]

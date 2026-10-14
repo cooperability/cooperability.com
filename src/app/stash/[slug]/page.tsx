@@ -10,7 +10,8 @@ import {
   AccordionContent,
 } from '@/components/ui/accordion'
 import DateDisplay from '../../../components/date'
-import { getAllResourcesData, getResourceBySlug } from '../../../lib/resources'
+import StashIcon from '../../../components/StashIcon'
+import { getAllStashData, getStashBySlug } from '../../../lib/stash'
 import utilStyles from '../../../styles/utils.module.css'
 
 // The pages-router equivalent was `fallback: false`. Without this, App Router
@@ -18,7 +19,7 @@ import utilStyles from '../../../styles/utils.module.css'
 // than 404.
 export const dynamicParams = false
 
-// Opt-in per resource with `structured: true` in the front matter. Tailwind's
+// Opt-in per entry with `structured: true` in the front matter. Tailwind's
 // reset strips heading size, list bullets and paragraph spacing, so a page
 // with sections reads as one block without these. The linktree relies on the
 // reset's tight paragraphs, so it stays opted out.
@@ -93,7 +94,7 @@ const components = {
 }
 
 export function generateStaticParams() {
-  return getAllResourcesData().map(({ id }) => ({ slug: id }))
+  return getAllStashData().map(({ id }) => ({ slug: id }))
 }
 
 export async function generateMetadata({
@@ -102,35 +103,38 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>
 }): Promise<Metadata> {
   const { slug } = await params
-  const resource = getResourceBySlug(slug)
-  if (!resource) return {}
+  const entry = getStashBySlug(slug)
+  if (!entry) return {}
 
   return {
-    title: resource.frontMatter.title,
-    description: resource.frontMatter.description,
+    title: entry.frontMatter.title,
+    description: entry.frontMatter.description,
     // Not inferred from `title` — without this the share card would show the
-    // root layout's site title instead of the resource's.
+    // root layout's site title instead of the entry's.
     openGraph: {
-      title: `${resource.frontMatter.title} | Cooper Reed | Co-Operability`,
-      description: resource.frontMatter.description,
+      title: `${entry.frontMatter.title} | Cooper Reed | Co-Operability`,
+      description: entry.frontMatter.description,
     },
   }
 }
 
-export default async function ResourcePage({
+export default async function StashEntryPage({
   params,
 }: {
   params: Promise<{ slug: string }>
 }) {
   const { slug } = await params
-  const resource = getResourceBySlug(slug)
-  if (!resource) notFound()
+  const entry = getStashBySlug(slug)
+  if (!entry) notFound()
 
-  const { content, frontMatter } = resource
+  const { content, frontMatter } = entry
 
   return (
     <article>
-      <h1 className={utilStyles.headingXl}>{frontMatter.title}</h1>
+      <h1 className={utilStyles.headingXl}>
+        <StashIcon name={frontMatter.icon} />
+        {frontMatter.title}
+      </h1>
       {frontMatter.date && (
         <div className={utilStyles.lightText}>
           Last updated <DateDisplay dateString={frontMatter.date} />

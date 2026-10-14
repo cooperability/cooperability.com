@@ -1,13 +1,13 @@
 import { existsSync } from 'node:fs'
 import { chromium } from 'playwright'
 
-// Opens every dropdown on the resource pages that are built from accordions,
+// Opens every dropdown on the stash pages that are built from accordions,
 // at a phone and a desktop width, and checks that the text inside renders as
 // structured, readable blocks. Jest cannot run the MDX pipeline, so this is
 // the only check that sees the real rendered lists. Expects `pnpm dev` on
 // :3000, or a BASE_URL.
 const BASE = process.env.BASE_URL ?? 'http://localhost:3000'
-const PAGES = ['/resources/LLMPrompts', '/resources/OnlineTools']
+const PAGES = ['/stash/LLMPrompts', '/stash/OnlineTools']
 const VIEWPORTS = {
   mobile: { width: 375, height: 812 },
   desktop: { width: 1280, height: 900 },

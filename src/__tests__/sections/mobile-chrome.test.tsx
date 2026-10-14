@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, within } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import { usePathname } from 'next/navigation'
 import Header from '../../sections/Header'
 import Footer from '../../sections/Footer'
@@ -6,10 +6,10 @@ import Footer from '../../sections/Footer'
 jest.mock('next/navigation', () => ({ usePathname: jest.fn() }))
 
 /**
- * Mobile is a JS breakpoint (useResponsive), so these drive the real Header at
- * a phone width. jsdom applies no stylesheet, so colour and weight are checked
- * as the utility classes that carry them; the computed result was checked in a
- * browser.
+ * The header is one layout at every width, so these drive it at a phone width
+ * and a desktop one. jsdom applies no stylesheet, so colour and weight are
+ * checked as the utility classes that carry them; the computed result was
+ * checked in a browser.
  */
 const DESKTOP_WIDTH = window.innerWidth
 
@@ -23,52 +23,15 @@ afterEach(() => {
   window.innerWidth = DESKTOP_WIDTH
 })
 
-describe('mobile sidebar', () => {
-  it('lists Home, Demos and Resources and nothing after them', () => {
-    renderAt(400)
-
-    const nav = screen.getByRole('navigation', { name: /sidebar navigation/i })
-
-    expect(
-      within(nav)
-        .getAllByRole('link')
-        .map((link) => link.textContent)
-    ).toEqual(['| Home |', '| Demos |', '| Resources |'])
-    expect(screen.queryByText(/linktree/i)).not.toBeInTheDocument()
-    expect(nav.querySelector('.horizLine')).toBeNull()
-  })
-
-  it('draws its close button in a colour that shows on the panel, in both themes', () => {
-    renderAt(400)
-    fireEvent.click(screen.getByRole('button', { name: 'Open menu' }))
-
-    const close = screen.getByRole('button', { name: 'Close menu' })
-
-    // The shadcn tokens gave a dark glyph and a faint border on the dark panel.
-    expect(close).toHaveClass('dark:text-white', 'dark:border-white')
-    expect(close).toHaveClass('text-gray-900', 'border-gray-900')
-    expect(close).toHaveClass('border-2')
-  })
-})
-
 describe('outline buttons', () => {
-  it('weighs the mobile menu button at 2px, not the 1px a className once forced', () => {
-    renderAt(400)
-
-    const open = screen.getByRole('button', { name: 'Open menu' })
-
-    expect(open).toHaveClass('border-2')
-    expect(open).not.toHaveClass('border')
-  })
-
   it('weighs the footer more-links button at 2px', () => {
     render(<Footer />)
 
-    // Weight alone left a 1.25:1 line on white, so the colour moved too.
-    expect(screen.getByRole('link', { name: 'More links' })).toHaveClass(
-      'border-2',
-      'border-foreground/50'
-    )
+    // Weight alone left a 1.25:1 line on white, so the colour moved too: the
+    // link blue, text and outline alike, as on the demos page.
+    const more = screen.getByRole('link', { name: 'More links' })
+    expect(more).toHaveClass('border-2', 'border-current')
+    expect(more).not.toHaveClass('border-foreground/50', 'text-foreground')
   })
 
   it('darkens the outline on keyboard focus instead of fading it', () => {
@@ -80,15 +43,19 @@ describe('outline buttons', () => {
     expect(more).not.toHaveClass('focus-visible:border-ring')
   })
 
-  it('weighs the outer outline of the desktop nav at 2px', () => {
-    renderAt(DESKTOP_WIDTH)
+  it.each([400, DESKTOP_WIDTH])(
+    'weighs the outer outline of the nav at 2px at %ipx wide',
+    (width) => {
+      renderAt(width)
 
-    const nav = screen.getByRole('navigation', { name: 'Main navigation' })
+      const nav = screen.getByRole('navigation', { name: 'Main navigation' })
 
-    expect(within(nav).getByRole('list')).toHaveClass(
-      'border-2',
-      'border-foreground/50'
-    )
-    expect(within(nav).getByRole('list')).not.toHaveClass('border')
-  })
+      expect(within(nav).getByRole('list')).toHaveClass(
+        'border-2',
+        'border-foreground',
+        'dark:border-gray-100'
+      )
+      expect(within(nav).getByRole('list')).not.toHaveClass('border')
+    }
+  )
 })

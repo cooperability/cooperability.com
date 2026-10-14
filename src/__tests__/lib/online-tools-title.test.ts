@@ -1,9 +1,9 @@
-import { getResourceBySlug } from '../../lib/resources'
+import { getStashBySlug } from '../../lib/stash'
 
-describe('OnlineTools resource', () => {
+describe('OnlineTools entry', () => {
   it('is titled "Online Tools" under its original slug', () => {
-    expect(getResourceBySlug('OnlineTools')?.frontMatter.title).toBe(
-      '🛠️Online Tools'
+    expect(getStashBySlug('OnlineTools')?.frontMatter.title).toBe(
+      'Online Tools'
     )
   })
 })

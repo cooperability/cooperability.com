@@ -8,7 +8,7 @@ import {
 } from '@/components/ui/accordion'
 
 /**
- * The accordion is server-rendered on /demos and /resources/[slug], and it
+ * The accordion is server-rendered on /demos and /stash/[slug], and it
  * branches on the theme for its background and text colours. Same invariant as
  * the Sidebar: the server cannot know the theme, so its markup must not depend
  * on one.

@@ -2,6 +2,16 @@
 
 import React from 'react'
 import {
+  ClipboardList,
+  FileText,
+  Inbox,
+  MessageCircle,
+  ScanSearch,
+  Target,
+  TestTube,
+  type LucideIcon,
+} from 'lucide-react'
+import {
   Accordion,
   AccordionContent,
   AccordionItem,
@@ -10,6 +20,7 @@ import {
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import InlineIcon from '../InlineIcon'
 import {
   FIELDS,
   OPTIONS,
@@ -28,6 +39,16 @@ export const SECTION_ACCENT: Record<SectionId, string> = {
   output: '#f97316',
   quality: '#a855f7',
   interaction: '#06b6d4',
+}
+
+const SECTION_ICON: Record<SectionId, LucideIcon> = {
+  task: Target,
+  context: ClipboardList,
+  input: Inbox,
+  examples: TestTube,
+  output: FileText,
+  quality: ScanSearch,
+  interaction: MessageCircle,
 }
 
 const GROUP_LABELS: Record<string, string> = {
@@ -101,7 +122,10 @@ export default function ComponentSelector({
             >
               <span className="flex w-full items-center justify-between pr-2">
                 <span className="flex items-center gap-2 text-base font-semibold">
-                  <span aria-hidden="true">{section.icon}</span>
+                  <InlineIcon
+                    icon={SECTION_ICON[section.id]}
+                    className="mr-0"
+                  />
                   {section.label}
                 </span>
                 {count > 0 && (

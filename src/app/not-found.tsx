@@ -12,8 +12,7 @@ export default function NotFound() {
       <h1 className={styles.headingXl}>404 — page not found</h1>
       <p>
         That URL doesn&apos;t exist. Try the <Link href="/">homepage</Link>,{' '}
-        <Link href="/demos">demos</Link>, or{' '}
-        <Link href="/resources">resources</Link>.
+        <Link href="/demos">demos</Link>, or <Link href="/stash">stash</Link>.
       </p>
     </section>
   )

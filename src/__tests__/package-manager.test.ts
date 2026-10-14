@@ -191,7 +191,7 @@ describe('pnpm 11 contract', () => {
   it('does not instruct yarn as the live package manager in setup or shipped prompts', () => {
     const live = [
       'scripts/setup-env.sh',
-      'src/resources/LLMPrompts.mdx',
+      'src/stash/LLMPrompts.mdx',
       'docs/PROJECT-STRUCTURE.md',
       'docs/PWA.md',
       'docs/Performance.md',

@@ -1,12 +1,13 @@
 import type { Metadata } from 'next'
-import { getAllResourcesData, ResourceData } from '../../lib/resources'
+import { getAllStashData, StashData } from '../../lib/stash'
 import styles from '../../styles/utils.module.css'
-import ResourcesList from './resources-list'
+import StashList from './stash-list'
 
 export const metadata: Metadata = {
-  title: 'Resources',
-  description: "Cooper Reed's (Co-Operability) published resources.",
-  openGraph: { title: 'Resources | Cooper Reed | Co-Operability' },
+  title: 'Stash',
+  description:
+    "Cooper Reed's (Co-Operability) stash of published work, recommendations and links.",
+  openGraph: { title: 'Stash | Cooper Reed | Co-Operability' },
 }
 
 const statementSlugsToExclude = [
@@ -15,10 +16,10 @@ const statementSlugsToExclude = [
   'PriorInventions',
 ]
 
-export default function Resources() {
-  const displayedPosts = getAllResourcesData()
+export default function Stash() {
+  const displayedPosts = getAllStashData()
     .filter((post) => !statementSlugsToExclude.includes(post.id))
-    .sort((a: ResourceData, b: ResourceData) => {
+    .sort((a: StashData, b: StashData) => {
       // Posts without dates go to the end
       if (!a.date && !b.date) return 0
       if (!a.date) return 1
@@ -33,9 +34,9 @@ export default function Resources() {
 
   return (
     <>
-      <h1 className="visually-hidden">Resources</h1>
+      <h1 className="visually-hidden">Stash</h1>
       <section className={`${styles.headingMd} ${styles.padding1px}`}>
-        <ResourcesList posts={displayedPosts} />
+        <StashList posts={displayedPosts} />
       </section>
     </>
   )

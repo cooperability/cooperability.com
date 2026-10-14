@@ -1,66 +1,62 @@
 'use client'
-import { useState } from 'react'
 import Link from 'next/link'
-import { Bars3Icon } from '@heroicons/react/24/solid'
-import { Button } from '@/components/ui/button'
+import { Backpack, FlaskConical, House, type LucideIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { NAV_LINKS, type NavPath } from '../lib/nav'
 import styles from '../styles/utils.module.css'
-import Sidebar from './Sidebar'
 import ThemeSwitch from '../components/ThemeSwitch'
-import { useResponsive } from '../hooks/useResponsive'
 import { usePathname } from 'next/navigation'
 import ActiveIcon from '../components/ActiveIcon'
 
-const navLinks = [
-  { href: '/', label: 'Home' },
-  { href: '/demos', label: 'Demos' },
-  { href: '/resources', label: 'Resources' },
-]
+const NAV_ICONS: Record<NavPath, LucideIcon> = {
+  '/': House,
+  '/demos': FlaskConical,
+  '/stash': Backpack,
+}
 
 const NavLink = ({
   href,
+  icon: Icon,
   current,
   children,
 }: {
   href: string
+  icon: LucideIcon
   current?: 'page' | 'true'
   children: React.ReactNode
 }) => {
-  const [isHovered, setIsHovered] = useState(false)
-
   return (
     <Link
       href={href}
       aria-current={current}
       className={cn(
-        'inline-flex items-center justify-center whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-medium transition-all focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring/50',
-        // Opts out of the global blue link color and hover underline, which
-        // would double the animated underline below.
+        'flex h-full w-full min-w-0 items-center justify-center overflow-hidden whitespace-nowrap rounded-lg px-1 text-xs font-medium transition-all focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring/50 @min-[260px]:text-sm',
+        // Opts out of the global blue link color and hover underline.
         'text-inherit no-underline',
         // Inverted colors: white bg in dark mode, dark bg in light mode
         current
           ? 'bg-black text-white shadow-xs dark:bg-white dark:text-black'
           : 'hover:bg-accent/50 hover:text-accent-foreground'
       )}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
     >
-      <span className={styles.linkTextWrapper}>
+      <Icon aria-hidden="true" className="size-4 shrink-0" />
+      {/* Widths here are the selector's own, not the viewport's. With room for
+          every name they all show. With room for one, only the current page
+          keeps its name. Below that, icons alone. A name stays in the link as
+          screen-reader text when it is not drawn. */}
+      <span
+        className={cn(
+          'sr-only @min-[260px]:not-sr-only @min-[260px]:ml-1.5',
+          current && '@min-[150px]:not-sr-only @min-[150px]:ml-1'
+        )}
+      >
         {children}
-        <span
-          className={cn(
-            styles.animatedUnderline,
-            isHovered && styles.animatedUnderlineHover
-          )}
-        />
       </span>
     </Link>
   )
 }
 
 const Header = () => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
-  const { isMobile } = useResponsive()
   // `usePathname` is already query-free, unlike the pages router's `asPath`.
   const currentPath = usePathname() || '/'
   // `page` marks the route itself, `true` its section from a subpage.
@@ -71,80 +67,55 @@ const Header = () => {
         ? 'true'
         : undefined
 
-  const navigator = () => {
-    if (isMobile) {
-      return (
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={toggleSidebar}
-          aria-label="Open menu"
-        >
-          <Bars3Icon className="h-6 w-6" />
-        </Button>
-      )
-    } else {
-      return (
-        <div className="flex flex-row space-between">
-          <ul className="inline-flex h-10 items-center justify-center rounded-xl border-2 border-foreground/50 p-1 text-muted-foreground">
-            {navLinks.map(({ href, label }) => (
-              <li key={href} className="flex">
-                <NavLink href={href} current={ariaCurrent(href)}>
-                  {label}
-                </NavLink>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )
-    }
-  }
-
-  const renderThemeChanger = () => {
-    return <ThemeSwitch />
-  }
-
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen)
-  }
-
   return (
-    <div suppressHydrationWarning>
-      <div className={styles.Header} suppressHydrationWarning>
-        <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
-        <ActiveIcon
-          href="/"
-          imgSrc="/images/operamini.png"
-          width={50}
-          height={50}
-          alt="Logo"
-          external={false}
-        />
-        {isMobile ? (
-          <>
-            <div className="flex flex-row gap-3">
-              {renderThemeChanger()}
-              <nav
-                className={styles.navbar}
-                aria-label="Main navigation"
-                suppressHydrationWarning
-              >
-                {navigator()}
-              </nav>
-            </div>
-          </>
-        ) : (
-          <>
-            <nav
-              className={styles.navbar}
-              aria-label="Main navigation"
-              suppressHydrationWarning
-            >
-              {navigator()}
-            </nav>
-            {renderThemeChanger()}
-          </>
-        )}
+    // Sticky, on the page's own background so content passes underneath. The
+    // top padding and its matching negative margin leave the unscrolled layout
+    // where it was. Below the game's z-50 shell, which covers the viewport.
+    <div className="sticky top-0 z-40 -mt-2 bg-background pt-2 pb-px dark:bg-black">
+      {/* Logo, selector and theme switch share one height, --hdr-h, which the
+          .Header rule grows with the viewport. */}
+      <div className={styles.Header}>
+        <div className="flex-none [&_img]:size-[calc(var(--hdr-h)_+_5px)]">
+          <ActiveIcon
+            href="/"
+            imgSrc="/images/operamini.png"
+            width={50}
+            height={50}
+            alt="Logo"
+            external={false}
+          />
+        </div>
+        <nav
+          className="min-w-0 max-w-[336px] flex-1"
+          aria-label="Main navigation"
+        >
+          {/* Always the same size, whichever page is current. The outline takes
+              the body's own text colour in each theme, as the rules below do:
+              --foreground in light, gray-100 in dark. The pages inside stay
+              muted. */}
+          <ul className="@container flex h-(--hdr-h) w-full items-stretch rounded-xl border-2 border-foreground p-1 text-muted-foreground dark:border-gray-100">
+            {NAV_LINKS.map(({ href, label }) => {
+              const current = ariaCurrent(href)
+              return (
+                <li
+                  key={href}
+                  className={cn(
+                    'flex min-w-0 flex-[1_1_0] transition-[flex-grow] duration-200',
+                    current &&
+                      '@min-[150px]:flex-[2.1_1_0] @min-[260px]:flex-[1_1_0]'
+                  )}
+                >
+                  <NavLink href={href} icon={NAV_ICONS[href]} current={current}>
+                    {label}
+                  </NavLink>
+                </li>
+              )
+            })}
+          </ul>
+        </nav>
+        <div className="flex-none w-[calc(var(--hdr-h)_*_2.5)]">
+          <ThemeSwitch />
+        </div>
       </div>
       <div className={styles.horizLine} />
     </div>

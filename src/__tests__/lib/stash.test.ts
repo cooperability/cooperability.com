@@ -1,13 +1,13 @@
 import fs from 'fs'
-import { getAllResourcesData, getResourceBySlug } from '../../lib/resources'
+import { getAllStashData, getStashBySlug } from '../../lib/stash'
 import { RESUME_URL } from '../../lib/links'
 
 jest.mock('fs')
 const mockedFs = jest.mocked(fs)
 
 /**
- * The loader enumerated every entry in src/resources and stripped `.mdx?` for
- * the id, then looked the file back up as `${slug}.mdx`. A `.md` resource
+ * The loader enumerated every entry in src/stash and stripped `.mdx?` for
+ * the id, then looked the file back up as `${slug}.mdx`. A `.md` entry
  * listed fine and then threw ENOENT at read time, and a stray non-content file
  * threw during enumeration. Both are build-time crashes on a static route.
  */
@@ -42,46 +42,46 @@ beforeEach(() => {
   })
 })
 
-describe('getAllResourcesData', () => {
+describe('getAllStashData', () => {
   it('enumerates .md alongside .mdx', () => {
-    const ids = getAllResourcesData().map((resource) => resource.id)
+    const ids = getAllStashData().map((entry) => entry.id)
     expect(ids.sort()).toEqual(['alpha', 'beta'])
   })
 
   it('never opens a file that is not .md or .mdx', () => {
-    getAllResourcesData()
+    getAllStashData()
     expect(openedPaths().some((p) => p.endsWith('notes.txt'))).toBe(false)
     expect(openedPaths().some((p) => p.endsWith('.DS_Store'))).toBe(false)
   })
 })
 
-describe('getResourceBySlug', () => {
-  it('reads a .md resource at its real extension', () => {
+describe('getStashBySlug', () => {
+  it('reads a .md entry at its real extension', () => {
     // The whole finding: this used to build the path as `beta.mdx`.
-    expect(getResourceBySlug('beta')?.content.trim()).toBe('beta body')
+    expect(getStashBySlug('beta')?.content.trim()).toBe('beta body')
   })
 
-  it('still reads a .mdx resource', () => {
-    expect(getResourceBySlug('alpha')?.content.trim()).toBe('alpha body')
+  it('still reads a .mdx entry', () => {
+    expect(getStashBySlug('alpha')?.content.trim()).toBe('alpha body')
   })
 
   it('fills in the canonical resume link', () => {
     mockedFs.readFileSync.mockReturnValueOnce(
       '---\ntitle: Alpha\n---\n[Resume](RESUME_URL)' as never
     )
-    expect(getResourceBySlug('alpha')?.content.trim()).toBe(
+    expect(getStashBySlug('alpha')?.content.trim()).toBe(
       `[Resume](${RESUME_URL})`
     )
   })
 
   it('returns null for an unknown slug without touching the disk', () => {
-    expect(getResourceBySlug('nope')).toBeNull()
+    expect(getStashBySlug('nope')).toBeNull()
     expect(mockedFs.readFileSync).not.toHaveBeenCalled()
   })
 
   it('returns null for a traversal attempt', () => {
-    expect(getResourceBySlug('../../../package')).toBeNull()
-    expect(getResourceBySlug('../secrets')).toBeNull()
+    expect(getStashBySlug('../../../package')).toBeNull()
+    expect(getStashBySlug('../secrets')).toBeNull()
     expect(mockedFs.readFileSync).not.toHaveBeenCalled()
   })
 })
