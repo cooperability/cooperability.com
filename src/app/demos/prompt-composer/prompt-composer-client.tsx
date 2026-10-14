@@ -14,7 +14,7 @@ const PromptComposer = dynamic(
           <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-64 mx-auto" />
         </div>
         {/* The composer's columns, so nothing jumps on load. */}
-        <div className="flex flex-col gap-3 lg:grid lg:grid-cols-[16rem_minmax(0,1fr)] xl:h-[calc(100dvh-9.75rem)] xl:min-h-[30rem] xl:grid-cols-[16rem_minmax(0,1fr)_18rem] 2xl:grid-cols-[18rem_minmax(0,1fr)_22rem]">
+        <div className="flex flex-col gap-3 lg:grid lg:grid-cols-[16rem_minmax(0,1fr)] xl:h-[calc(100dvh-10rem)] xl:min-h-[30rem] xl:grid-cols-[16rem_minmax(0,1fr)_18rem] 2xl:grid-cols-[18rem_minmax(0,1fr)_22rem]">
           <div className="h-96 bg-gray-200 dark:bg-gray-700 rounded-lg xl:h-auto" />
           <div className="h-96 bg-gray-200 dark:bg-gray-700 rounded-lg xl:h-auto" />
           <div className="hidden h-96 bg-gray-200 dark:bg-gray-700 rounded-lg xl:block xl:h-auto" />

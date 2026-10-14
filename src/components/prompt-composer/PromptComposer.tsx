@@ -162,9 +162,9 @@ const PromptComposer: React.FC<PromptComposerProps> = ({ className }) => {
           with scores under it, and the components column sticks and scrolls
           on its own. From xl the scores take a third column, and all three
           columns share one height that ends just above the bottom of the
-          viewport (the columns start about 8.7rem down). Each scrolls inside
+          viewport (the columns start about 9rem down). Each scrolls inside
           itself, so opening or closing a section never changes the layout. */}
-      <div className="flex flex-col gap-3 lg:grid lg:grid-cols-[16rem_minmax(0,1fr)] lg:items-start xl:h-[calc(100dvh-9.75rem)] xl:min-h-[30rem] xl:grid-cols-[16rem_minmax(0,1fr)_18rem] xl:grid-rows-[minmax(0,1fr)] xl:items-stretch 2xl:grid-cols-[18rem_minmax(0,1fr)_22rem]">
+      <div className="flex flex-col gap-3 lg:grid lg:grid-cols-[16rem_minmax(0,1fr)] lg:items-start xl:h-[calc(100dvh-10rem)] xl:min-h-[30rem] xl:grid-cols-[16rem_minmax(0,1fr)_18rem] xl:grid-rows-[minmax(0,1fr)] xl:items-stretch 2xl:grid-cols-[18rem_minmax(0,1fr)_22rem]">
         <Card className="w-full gap-3 py-4 lg:sticky lg:top-4 lg:row-span-2 lg:max-h-[calc(100dvh-2rem)] lg:overflow-y-auto xl:static xl:row-span-1 xl:max-h-none xl:min-h-0">
           <CardContent className="px-3">
             <h2 className="mb-3 text-lg font-bold">Components</h2>
