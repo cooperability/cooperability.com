@@ -126,28 +126,13 @@ loading: () => (
 3. Inject ads or dynamic content without reserved space
 4. Use spinners without reserving layout space
 
-### SSR Hydration Mismatch Prevention
+### Pick Layouts in CSS, Not JavaScript
 
-When using responsive hooks, SSR can cause hydration mismatches if initial state differs from client state.
-
-**Reference Implementation:** `src/hooks/useResponsive.ts:66-77`
-
-```tsx
-// Return safe defaults during SSR/hydration
-if (!mounted) {
-  return {
-    isMobile: false,
-    isDesktop: true, // Default to desktop for SSR
-    // ...
-  }
-}
-```
-
-**Key insight:** Default to desktop during SSR because:
-
-- Desktop layouts typically have more content
-- Prevents content from appearing then disappearing
-- Most crawlers render at desktop widths
+The server has no viewport. A layout chosen from `window.innerWidth` has to
+guess one for the server render, and every visitor whose screen disagrees
+watches the layout swap once JavaScript loads. `/stash` did this on every
+phone until the `useResponsive` hook was removed. Use breakpoint classes
+instead, so one markup serves the server render and every viewport.
 
 ---
 
@@ -158,8 +143,6 @@ if (!mounted) {
 Debouncing delays function execution until a pause in rapid events (like window resize). This prevents performance degradation from hundreds of function calls per second.
 
 ### Implementation Pattern
-
-**Reference Implementation:** `src/hooks/useResponsive.ts:52-63`
 
 ```tsx
 useEffect(() => {
@@ -290,31 +273,10 @@ h1 {
 
 ### Our Breakpoint Strategy
 
-#### Primary: useResponsive Hook
+#### Why 525px for the Stash list?
 
-**Implementation:** `src/hooks/useResponsive.ts`
-
-The hook provides SSR-safe, debounced breakpoint detection with Tailwind-aligned values:
-
-| Property         | Threshold  | Use Case                    |
-| ---------------- | ---------- | --------------------------- |
-| `isMobile`       | ≤525px     | Legacy mobile detection     |
-| `isSmall`        | <640px     | Small screens (Tailwind sm) |
-| `isMedium`       | 640-767px  | Mid-range screens           |
-| `isTablet`       | 768-1023px | Tablet detection            |
-| `isDesktop`      | ≥1024px    | Desktop layouts             |
-| `isLargeDesktop` | ≥1280px    | Wide screen features        |
-| `width`          | number     | Current viewport width      |
-
-**Usage:**
-
-```tsx
-import { useResponsive } from '@/src/hooks/useResponsive'
-
-const { isMobile, isDesktop } = useResponsive()
-```
-
-#### Why 525px for `isMobile`?
+The list in `src/app/stash/stash-list.tsx` stacks each title above its date
+at 525px and below, and puts them on one row from `min-[526px]:`.
 
 - Sits between phone (<480px) and small tablet (600px+)
 - Captures most smartphones in portrait mode
@@ -345,26 +307,21 @@ const { isMobile, isDesktop } = useResponsive()
 ```
 Does this need a mobile/desktop split?
     │
-    ├─ YES → Does it affect general page layout/navigation?
+    ├─ YES → Does the component have CSS media queries?
     │         │
-    │         ├─ YES → Use useResponsive hook
+    │         ├─ YES → Match that breakpoint
     │         │
-    │         └─ NO → Does the component have CSS media queries?
-    │                   │
-    │                   ├─ YES → Match that breakpoint in React
-    │                   │
-    │                   └─ NO → Use Tailwind responsive classes
+    │         └─ NO → Use Tailwind responsive classes
     │
     └─ NO → Use Tailwind responsive classes directly
 ```
 
 ### When to Use Each Approach
 
-| Approach               | When to Use                | Example                |
-| ---------------------- | -------------------------- | ---------------------- |
-| **Tailwind classes**   | Layout-only changes        | `flex-col md:flex-row` |
-| **useResponsive hook** | Behavioral/feature changes | Swap a component       |
-| **Custom breakpoint**  | Component-specific needs   | Matches existing CSS   |
+| Approach              | When to Use              | Example                |
+| --------------------- | ------------------------ | ---------------------- |
+| **Tailwind classes**  | Layout-only changes      | `flex-col md:flex-row` |
+| **Custom breakpoint** | Component-specific needs | Matches existing CSS   |
 
 ### Codebase Examples
 
@@ -415,29 +372,20 @@ Uses 375px breakpoint for iteration controls—matches the smallest modern phone
 ### ✅ DO
 
 1. **Start with Tailwind classes** for layout-only responsive changes
-2. **Use `useResponsive`** for behavioral changes at the site level
-3. **Match CSS breakpoints** in React when they exist
-4. **Document custom breakpoints** with clear rationale
-5. **Test on real devices** - simulators don't catch everything
-6. **Use semantic names** - `isMobile`, `isDesktop` (not `is525`)
-7. **Use flexible layouts** - flexbox, grid, clamp() over fixed breakpoints
+2. **Match CSS breakpoints** in React when they exist
+3. **Document custom breakpoints** with clear rationale
+4. **Test on real devices** - simulators don't catch everything
+5. **Use semantic names** - `isMobile`, `isDesktop` (not `is525`)
+6. **Use flexible layouts** - flexbox, grid, clamp() over fixed breakpoints
 
 ### ❌ DON'T
 
 1. Create breakpoints for device names ("iPhone 12 width")
-2. Proliferate custom hooks - reuse `useResponsive` when possible
+2. Read the viewport in JavaScript to pick a layout
 3. Hardcode pixel values in multiple places
 4. Ignore the "in-between" - test tablet sizes (600-900px)
 5. Forget landscape orientation - phones can be 812px wide
 6. Rely solely on breakpoints - use flexible layouts
-
-### Performance Considerations
-
-The `useResponsive` hook includes:
-
-- **Debounced resize handling** (100ms) - prevents excessive re-renders
-- **SSR-safe defaults** - prevents hydration mismatch
-- **Single event listener** - centralized for all consumers
 
 ---
 
@@ -456,7 +404,7 @@ If 525px is needed frequently in Tailwind classes:
 ```css
 /* src/styles/global.css */
 @theme {
-  --breakpoint-xs: 525px; /* Matches useResponsive threshold */
+  --breakpoint-xs: 525px; /* Matches the Stash list threshold */
 }
 ```
 
@@ -510,15 +458,15 @@ pnpm analyze  # Runs next build with ANALYZE=true
 
 ### Responsive Testing
 
-| Width  | Device Category      | Tailwind | useResponsive       |
-| ------ | -------------------- | -------- | ------------------- |
-| 320px  | Small phone          | -        | `isSmall`           |
-| 375px  | Standard phone       | -        | `isSmall`           |
-| 525px  | Our mobile threshold | -        | `isMobile` boundary |
-| 640px  | Tailwind sm          | `sm:`    | `isMedium`          |
-| 768px  | Tablet               | `md:`    | `isTablet`          |
-| 1024px | Desktop              | `lg:`    | `isDesktop`         |
-| 1280px | Large desktop        | `xl:`    | `isLargeDesktop`    |
+| Width  | Device Category      | Tailwind       |
+| ------ | -------------------- | -------------- |
+| 320px  | Small phone          | -              |
+| 375px  | Standard phone       | -              |
+| 525px  | Stash list threshold | `min-[526px]:` |
+| 640px  | Tailwind sm          | `sm:`          |
+| 768px  | Tablet               | `md:`          |
+| 1024px | Desktop              | `lg:`          |
+| 1280px | Large desktop        | `xl:`          |
 
 **Browser DevTools:** Chrome/Edge/Firefox all have device emulation presets.
 
@@ -534,23 +482,20 @@ pnpm analyze  # Runs next build with ANALYZE=true
 | ----------------- | ------------------------------------- | --------------------------- |
 | Dynamic Imports   | `next/dynamic` with `ssr: false`      | ~85KB bundle reduction      |
 | Loading Skeletons | Tailwind `animate-pulse` placeholders | CLS prevention              |
-| Debounced Resize  | 100ms setTimeout pattern              | Smooth resize handling      |
 | Fluid Spacing     | `clamp()` CSS function                | Eliminates breakpoint jumps |
-| SSR Defaults      | Desktop-first hydration               | Prevents layout shift       |
 
 ### Breakpoint Summary
 
-| Breakpoint      | Value  | Implementation                                  |
-| --------------- | ------ | ----------------------------------------------- |
-| Mobile (legacy) | 525px  | `useResponsive().isMobile`                      |
-| Tailwind sm     | 640px  | `sm:` classes, `useResponsive().isSmall`        |
-| Tailwind md     | 768px  | `md:` classes, `useResponsive().isTablet`       |
-| Tailwind lg     | 1024px | `lg:` classes, `useResponsive().isDesktop`      |
-| Tailwind xl     | 1280px | `xl:` classes, `useResponsive().isLargeDesktop` |
+| Breakpoint  | Value  | Implementation         |
+| ----------- | ------ | ---------------------- |
+| Stash list  | 525px  | `min-[526px]:` classes |
+| Tailwind sm | 640px  | `sm:` classes          |
+| Tailwind md | 768px  | `md:` classes          |
+| Tailwind lg | 1024px | `lg:` classes          |
+| Tailwind xl | 1280px | `xl:` classes          |
 
 ### Source of Truth
 
-- `src/hooks/useResponsive.ts` - JavaScript breakpoint detection
 - `src/styles/global.css` - CSS custom properties
 - `src/styles/global.css` `@theme` block - Tailwind breakpoints (defaults, none overridden)
 - This document - Patterns and best practices

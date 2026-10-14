@@ -4,6 +4,13 @@ What changed on the live site, newest first. Each entry is dated and links
 the pull request that made it. Changes only a developer sees belong in the
 pull request, not here.
 
+## 2026-10-14: Stash list holds its layout on phones ([#368](https://github.com/cooperability/cooperability.com/pull/368))
+
+- On a phone, `/stash` used to arrive with each title and date laid out as a
+  desktop row, then restack once JavaScript loaded. CSS now picks the layout,
+  so the page arrives in its final shape: title above date at 525px wide and
+  below, one row above that.
+
 ## 2026-10-13: Stash, and a new header ([#359](https://github.com/cooperability/cooperability.com/pull/359))
 
 ### Renamed: Resources is now Stash

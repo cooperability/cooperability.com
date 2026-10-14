@@ -9,7 +9,7 @@ const customJestConfig = {
   // next/jest does NOT translate tsconfig "paths" into a Jest mapper. Runtime
   // resolution survives via the SWC transform, but Jest's STATIC dependency
   // graph does not -- so `jest --findRelatedTests <file>` returned zero matches
-  // for modules imported via `@/` (for example `src/hooks/useResponsive.ts`).
+  // for modules imported via `@/` (for example `src/lib/ai/budget.ts`).
   //
   // That matters because .husky/pre-commit runs, through lint-staged:
   //   jest --bail --findRelatedTests --passWithNoTests <staged files>
