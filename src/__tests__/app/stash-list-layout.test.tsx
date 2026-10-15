@@ -34,8 +34,21 @@ describe('Stash list layout', () => {
     const host = document.createElement('div')
     host.innerHTML = renderToString(<StashList posts={posts} />)
     const item = host.querySelector('li')!
+    const link = item.querySelector('a')!
 
-    expect(item.className).toContain('min-[526px]:flex')
+    expect(new Set(item.classList)).toEqual(
+      new Set([
+        expect.stringMatching(/listItem/),
+        'min-[526px]:flex',
+        'min-[526px]:flex-wrap',
+        'min-[526px]:items-center',
+        'min-[526px]:justify-between',
+      ])
+    )
+    expect(new Set(link.classList)).toEqual(
+      new Set(['block', 'mb-1', 'min-[526px]:mr-4', 'min-[526px]:mb-0'])
+    )
     expect(item.getAttribute('style')).toBeNull()
+    expect(link.getAttribute('style')).toBeNull()
   })
 })
