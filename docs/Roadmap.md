@@ -73,7 +73,7 @@ new capability.
 | 3   | [`opioid-factors`](#opioid-factors)                   | Bug   | P1  | M      | `opioid-methadone`                | Done, #365             |
 | 4   | [`theme-tokens`](#theme-tokens)                       | Bug   | P1  | S      | none                              | In review, #348        |
 | 5   | [`focus-contrast`](#focus-contrast)                   | Bug   | P1  | S      | `theme-tokens`                    | Open                   |
-| 6   | [`responsive-css`](#responsive-css)                   | Bug   | P1  | M      | none                              | Open                   |
+| 6   | [`responsive-css`](#responsive-css)                   | Bug   | P1  | M      | none                              | Done, #368             |
 | 7   | [`candlelight-ios-select`](#candlelight-ios-select)   | Bug   | P1  | S      | none                              | Open                   |
 | 8   | [`skillicons-local`](#skillicons-local)               | Bug   | P1  | S      | none                              | Done, #361             |
 | 9   | [`ai-store-guard`](#ai-store-guard)                   | Bug   | P1  | S      | none                              | Open                   |
