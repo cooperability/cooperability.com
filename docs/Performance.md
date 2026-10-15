@@ -5,7 +5,6 @@
 - [Overview](#overview)
 - [Dynamic Imports & Code Splitting](#dynamic-imports--code-splitting)
 - [Cumulative Layout Shift (CLS) Reduction](#cumulative-layout-shift-cls-reduction)
-- [Debounced Event Handling](#debounced-event-handling)
 - [Fluid Spacing with CSS clamp()](#fluid-spacing-with-css-clamp)
 - [Responsive Design Strategy](#responsive-design-strategy)
 - [Breakpoint Implementation](#breakpoint-implementation)
@@ -133,57 +132,6 @@ guess one for the server render, and every visitor whose screen disagrees
 watches the layout swap once JavaScript loads. `/stash` did this on every
 phone until the `useResponsive` hook was removed. Use breakpoint classes
 instead, so one markup serves the server render and every viewport.
-
----
-
-## Debounced Event Handling
-
-### What It Is
-
-Debouncing delays function execution until a pause in rapid events (like window resize). This prevents performance degradation from hundreds of function calls per second.
-
-### Implementation Pattern
-
-```tsx
-useEffect(() => {
-  setMounted(true)
-  setWidth(window.innerWidth)
-
-  // Debounce resize events
-  let timeoutId: ReturnType<typeof setTimeout>
-  const debouncedResize = () => {
-    clearTimeout(timeoutId)
-    timeoutId = setTimeout(handleResize, 100)
-  }
-
-  window.addEventListener('resize', debouncedResize)
-  return () => {
-    clearTimeout(timeoutId)
-    window.removeEventListener('resize', debouncedResize)
-  }
-}, [handleResize])
-```
-
-### Why 100ms Delay?
-
-- **Imperceptible to users**: 100ms feels instant
-- **Significant performance gain**: Reduces calls from 60+/second to ~10/second during resize
-- **Responsive enough**: Layout updates within acceptable delay
-
-### When to Debounce
-
-| Event Type          | Debounce? | Delay                  |
-| ------------------- | --------- | ---------------------- |
-| Window resize       | Yes       | 100-150ms              |
-| Scroll position     | Depends   | 16ms (RAF) or 50-100ms |
-| Text input (search) | Yes       | 300-500ms              |
-| Mouse move          | Rarely    | Use throttle instead   |
-| Click/tap           | No        | Immediate              |
-
-### Debounce vs. Throttle
-
-- **Debounce**: Waits for pause, then executes once (resize, search)
-- **Throttle**: Executes at regular intervals during activity (scroll animations)
 
 ---
 
@@ -372,11 +320,9 @@ Uses 375px breakpoint for iteration controls—matches the smallest modern phone
 ### ✅ DO
 
 1. **Start with Tailwind classes** for layout-only responsive changes
-2. **Match CSS breakpoints** in React when they exist
-3. **Document custom breakpoints** with clear rationale
-4. **Test on real devices** - simulators don't catch everything
-5. **Use semantic names** - `isMobile`, `isDesktop` (not `is525`)
-6. **Use flexible layouts** - flexbox, grid, clamp() over fixed breakpoints
+2. **Document custom breakpoints** with clear rationale
+3. **Test on real devices** - simulators don't catch everything
+4. **Use flexible layouts** - flexbox, grid, clamp() over fixed breakpoints
 
 ### ❌ DON'T
 
