@@ -344,7 +344,7 @@ Uses Tailwind's default breakpoints: `sm: 640px`, `md: 768px`, `lg: 1024px`, `xl
 
 ### Optional: Add Custom Breakpoint
 
-If 525px is needed frequently in Tailwind classes:
+If the Stash list breakpoint is needed frequently in Tailwind classes:
 
 ```css
 /* src/styles/global.css */
@@ -433,7 +433,7 @@ pnpm analyze  # Runs next build with ANALYZE=true
 
 | Breakpoint  | Value  | Implementation         |
 | ----------- | ------ | ---------------------- |
-| Stash list  | 525px  | `min-[526px]:` classes |
+| Stash list  | 526px  | `min-[526px]:` classes |
 | Tailwind sm | 640px  | `sm:` classes          |
 | Tailwind md | 768px  | `md:` classes          |
 | Tailwind lg | 1024px | `lg:` classes          |
