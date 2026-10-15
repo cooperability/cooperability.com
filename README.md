@@ -286,7 +286,7 @@ why, so a reader can tell load-bearing packages from incidental ones.
 | [PNPM Migration](docs/PNPM-MIGRATION.md)        | Yarn 4 PnP to pnpm 11: what changed, what it exposed, what it did not fix    |
 | [Lint Gate](docs/Lint-Gate.md)                  | Why ESLint stays on 10, and the config work that came with it                |
 | [Tooling](docs/Tooling.md)                      | Linting, formatting, testing, hooks, security auditing, bundle analysis      |
-| [Performance](docs/Performance.md)              | Code splitting, CLS, debouncing, `clamp()` spacing, breakpoint strategy      |
+| [Performance](docs/Performance.md)              | Code splitting, CLS, `clamp()` spacing, breakpoint strategy                  |
 | [Accessibility](docs/Accessibility.md)          | WCAG 2.1 AA posture and what is automated                                    |
 | [PWA Suite](docs/PWA.md)                        | Applet architecture, manifests, service worker, install testing              |
 | [Game Rig](docs/Game-Rig.md)                    | The handheld game shell: input, scaling, launch images, offline              |
