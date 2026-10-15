@@ -350,7 +350,7 @@ If 525px is needed frequently in Tailwind classes:
 ```css
 /* src/styles/global.css */
 @theme {
-  --breakpoint-xs: 525px; /* Matches the Stash list threshold */
+  --breakpoint-xs: 526px; /* Same as min-[526px]: on the Stash list */
 }
 ```
 
