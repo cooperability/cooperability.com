@@ -221,7 +221,7 @@ h1 {
 
 ### Our Breakpoint Strategy
 
-#### Why 525px for the Stash list?
+#### Why 526px for the Stash list?
 
 The list in `src/app/stash/stash-list.tsx` stacks each title above its date
 at 525px and below, and puts them on one row from `min-[526px]:`.
@@ -403,15 +403,15 @@ pnpm analyze  # Runs next build with ANALYZE=true
 
 ### Responsive Testing
 
-| Width  | Device Category      | Tailwind       |
-| ------ | -------------------- | -------------- |
-| 320px  | Small phone          | -              |
-| 375px  | Standard phone       | -              |
-| 525px  | Stash list threshold | `min-[526px]:` |
-| 640px  | Tailwind sm          | `sm:`          |
-| 768px  | Tablet               | `md:`          |
-| 1024px | Desktop              | `lg:`          |
-| 1280px | Large desktop        | `xl:`          |
+| Width  | Device Category       | Tailwind       |
+| ------ | --------------------- | -------------- |
+| 320px  | Small phone           | -              |
+| 375px  | Standard phone        | -              |
+| 526px  | Stash list row starts | `min-[526px]:` |
+| 640px  | Tailwind sm           | `sm:`          |
+| 768px  | Tablet                | `md:`          |
+| 1024px | Desktop               | `lg:`          |
+| 1280px | Large desktop         | `xl:`          |
 
 **Browser DevTools:** Chrome/Edge/Firefox all have device emulation presets.
 
