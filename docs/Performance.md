@@ -326,7 +326,7 @@ Uses 375px breakpoint for iteration controls—matches the smallest modern phone
 ### ❌ DON'T
 
 1. Create breakpoints for device names ("iPhone 12 width")
-2. Read the viewport in JavaScript to pick a layout
+2. Read the viewport in JavaScript to pick a layout the server also renders
 3. Hardcode pixel values in multiple places
 4. Ignore the "in-between" - test tablet sizes (600-900px)
 5. Forget landscape orientation - phones can be 812px wide
