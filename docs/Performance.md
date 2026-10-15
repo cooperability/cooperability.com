@@ -229,7 +229,6 @@ at 525px and below, and puts them on one row from `min-[526px]:`.
 - Sits between phone (<480px) and small tablet (600px+)
 - Captures most smartphones in portrait mode
 - Provides breathing room above standard phone widths
-- Aligns with content layout requirements across most pages
 
 #### CSS Custom Properties
 
