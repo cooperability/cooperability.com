@@ -12,7 +12,7 @@ Focus:
 - Correct Next.js patterns for the **App Router** (`src/app`). There is no `src/pages`, so flag any Pages Router API (`_app`, `next/head`, `getServerSideProps`). Read `docs/App-Router.md` for the traps this repo has hit
 - Tailwind + existing design tokens; avoid generic AI purple/cream aesthetic clashes with the live site
 - shadcn/Radix usage consistency; prefer `src/components` over legacy root `components/`
-- Responsive behavior (`useResponsive` / 525px content breakpoint where relevant)
+- Responsive behavior (CSS breakpoint classes, never a JS viewport check)
 - Perf: avoid unnecessary client bundles; respect dynamic import patterns already in the repo
 - MDX content pitfalls (blank lines around JSX, list/`<br />` issues)
 
