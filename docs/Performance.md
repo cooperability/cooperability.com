@@ -249,20 +249,6 @@ at 525px and below, and puts them on one row from `min-[526px]:`.
 
 ## Breakpoint Implementation
 
-### Decision Tree
-
-```
-Does this need a mobile/desktop split?
-    │
-    ├─ YES → Does the component have CSS media queries?
-    │         │
-    │         ├─ YES → Match that breakpoint
-    │         │
-    │         └─ NO → Use Tailwind responsive classes
-    │
-    └─ NO → Use Tailwind responsive classes directly
-```
-
 ### When to Use Each Approach
 
 | Approach              | When to Use              | Example                |
