@@ -27,9 +27,14 @@ beforeEach(() => {
 afterEach(() => jest.restoreAllMocks())
 
 function pickFeatures(eyes: string, skin: string, hair: string) {
-  fireEvent.change(screen.getByLabelText('Eyes'), { target: { value: eyes } })
-  fireEvent.change(screen.getByLabelText('Skin'), { target: { value: skin } })
-  fireEvent.change(screen.getByLabelText('Hair'), { target: { value: hair } })
+  for (const [label, name] of [
+    ['Eyes', eyes],
+    ['Skin', skin],
+    ['Hair', hair],
+  ]) {
+    fireEvent.click(screen.getByRole('combobox', { name: label }))
+    fireEvent.click(screen.getByRole('option', { name }))
+  }
 }
 
 describe('SwatchGenerator', () => {

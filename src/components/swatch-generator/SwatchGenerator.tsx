@@ -5,6 +5,7 @@ import { FileDown, ImageDown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
+import ColorSelect from './ColorSelect'
 import { drawCard, type Card } from './draw'
 import {
   AESTHETICS,
@@ -159,33 +160,15 @@ export default function SwatchGenerator() {
         <div className="flex flex-col gap-6">
           <fieldset className="flex flex-col gap-4">
             <legend className="mb-3 font-semibold">Your features</legend>
-            {FEATURES.map((f) => {
-              const hex = f.options.find((o) => o.name === picked[f.key])!.hex
-              return (
-                <div key={f.key} className="flex flex-col gap-1.5">
-                  <Label htmlFor={`swatch-${f.key}`}>{f.label}</Label>
-                  <div className="flex items-center gap-2">
-                    <span
-                      aria-hidden="true"
-                      className="size-9 shrink-0 rounded-full border border-foreground/50"
-                      style={{ background: hex }}
-                    />
-                    <select
-                      id={`swatch-${f.key}`}
-                      className={selectClass}
-                      value={picked[f.key]}
-                      onChange={(e) =>
-                        setPicked((p) => ({ ...p, [f.key]: e.target.value }))
-                      }
-                    >
-                      {f.options.map((o) => (
-                        <option key={o.name}>{o.name}</option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-              )
-            })}
+            {FEATURES.map((f) => (
+              <ColorSelect
+                key={f.key}
+                label={f.label}
+                options={f.options}
+                value={picked[f.key]}
+                onChange={(name) => setPicked((p) => ({ ...p, [f.key]: name }))}
+              />
+            ))}
           </fieldset>
 
           <div aria-live="polite" className="rounded-lg border p-4">
