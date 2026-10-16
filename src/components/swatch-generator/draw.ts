@@ -21,9 +21,6 @@ export type Card = {
 // 288 dpi on its 7.5-inch-wide page.
 const W = 1080
 const SCALE = 2
-// Tallest card (every section on) is about 2200. iOS Safari blanks any canvas
-// over 16.7M pixels, and 2160 x 5200 stays under it.
-const MAX_H = 2600
 const M = 72
 const GAP = 20
 const INK = '#1F1B18'
@@ -118,7 +115,7 @@ function chips(
 
 function layout(ctx: Ctx, card: Card) {
   ctx.fillStyle = PAPER
-  ctx.fillRect(0, 0, W, MAX_H)
+  ctx.fillRect(0, 0, W, ctx.canvas.height / SCALE)
   ctx.textBaseline = 'alphabetic'
 
   ctx.letterSpacing = '4px'
@@ -242,18 +239,18 @@ function layout(ctx: Ctx, card: Card) {
   return y + 44 + M - 20
 }
 
-// Draws on an oversized scratch canvas, then crops to the height the enabled
-// sections actually used.
+let measurer: Ctx | null | undefined
+
+// A first pass on a 1x1 canvas finds the height the enabled sections use, so
+// the only full-size bitmap is the target. iOS Safari caps total canvas
+// memory, and a second full-size scratch per redraw could exhaust it.
 export function drawCard(target: HTMLCanvasElement, card: Card) {
-  const scratch = document.createElement('canvas')
-  scratch.width = W * SCALE
-  scratch.height = MAX_H * SCALE
-  const ctx = scratch.getContext('2d')
+  measurer ??= document.createElement('canvas').getContext('2d')
   const out = target.getContext('2d')
-  if (!ctx || !out) return
-  ctx.scale(SCALE, SCALE)
-  const h = Math.ceil(layout(ctx, card) * SCALE)
+  if (!measurer || !out) return
+  const h = layout(measurer, card)
   target.width = W * SCALE
-  target.height = h
-  out.drawImage(scratch, 0, 0)
+  target.height = Math.ceil(h * SCALE)
+  out.scale(SCALE, SCALE)
+  layout(out, card)
 }

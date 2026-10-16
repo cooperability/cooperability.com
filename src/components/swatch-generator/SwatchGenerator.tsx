@@ -88,38 +88,44 @@ export default function SwatchGenerator() {
     }
   }, [eyes, skin, hair, on, aestheticName])
 
-  useEffect(() => {
-    if (canvasRef.current) drawCard(canvasRef.current, card)
-  }, [card])
+  // Both files are encoded ahead of the tap. Safari only honors a download
+  // click made synchronously inside the user's gesture, not after an await.
+  const [files, setFiles] = useState<{ card: Card; jpg: Blob; pdf: Blob }>()
+  const ready = files?.card === card ? files : undefined
 
-  async function save(kind: 'jpg' | 'pdf') {
+  useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
-    const jpeg = await new Promise<Blob | null>((resolve) =>
-      canvas.toBlob(resolve, 'image/jpeg', 0.92)
+    drawCard(canvas, card)
+    let stale = false
+    canvas.toBlob(
+      async (jpg) => {
+        if (!jpg || stale) return
+        const bytes = new Uint8Array(await jpg.arrayBuffer())
+        const pdf = new Blob([jpegToPdf(bytes, canvas.width, canvas.height)], {
+          type: 'application/pdf',
+        })
+        if (!stale) setFiles({ card, jpg, pdf })
+      },
+      'image/jpeg',
+      0.92
     )
-    if (!jpeg) return
-    const file =
-      kind === 'jpg'
-        ? jpeg
-        : new Blob(
-            [
-              jpegToPdf(
-                new Uint8Array(await jpeg.arrayBuffer()),
-                canvas.width,
-                canvas.height
-              ),
-            ],
-            { type: 'application/pdf' }
-          )
-    const url = URL.createObjectURL(file)
+    return () => {
+      stale = true
+    }
+  }, [card])
+
+  function save(kind: 'jpg' | 'pdf') {
+    if (!ready) return
+    const url = URL.createObjectURL(ready[kind])
     const a = document.createElement('a')
     a.href = url
     a.download = `personal-swatch-${card.season.toLowerCase().replace(' ', '-')}.${kind}`
     document.body.append(a)
     a.click()
     a.remove()
-    setTimeout(() => URL.revokeObjectURL(url), 1000)
+    // iOS reads the URL only after the user confirms its download sheet.
+    setTimeout(() => URL.revokeObjectURL(url), 60_000)
   }
 
   const sections = [
@@ -197,8 +203,10 @@ export default function SwatchGenerator() {
               <div key={t.key} className="flex flex-col gap-2">
                 <div className="flex items-center justify-between gap-3">
                   <Label htmlFor={`swatch-toggle-${t.key}`}>{t.label}</Label>
+                  {/* The default off track measures 1.23:1 on white. */}
                   <Switch
                     id={`swatch-toggle-${t.key}`}
+                    className="data-[state=unchecked]:bg-foreground/50"
                     checked={on[t.key]}
                     onCheckedChange={(checked) =>
                       setOn((o) => ({ ...o, [t.key]: checked }))
@@ -227,30 +235,43 @@ export default function SwatchGenerator() {
             ref={canvasRef}
             role="img"
             aria-label={`Personal color swatch: ${card.season}`}
+            aria-describedby="swatch-palette-text"
             className="mx-auto h-auto w-full max-w-[34rem] rounded-lg border shadow"
           />
           <div className="mx-auto flex w-full max-w-[34rem] gap-3">
-            <Button size="lg" className="flex-1" onClick={() => save('jpg')}>
+            <Button
+              size="lg"
+              className="flex-1"
+              disabled={!ready}
+              onClick={() => save('jpg')}
+            >
               <ImageDown aria-hidden="true" /> Save JPG
             </Button>
-            <Button size="lg" className="flex-1" onClick={() => save('pdf')}>
+            <Button
+              size="lg"
+              className="flex-1"
+              disabled={!ready}
+              onClick={() => save('pdf')}
+            >
               <FileDown aria-hidden="true" /> Save PDF
             </Button>
           </div>
           <details className="mx-auto w-full max-w-[34rem]">
             <summary className="cursor-pointer">Palette as text</summary>
-            {sections.map((sec) => (
-              <section key={sec.title} className="mt-3">
-                <h2 className="text-base font-semibold">{sec.title}</h2>
-                <ul className="text-sm">
-                  {sec.swatches.map((sw) => (
-                    <li key={sw.name}>
-                      {sw.name} {sw.hex}
-                    </li>
-                  ))}
-                </ul>
-              </section>
-            ))}
+            <div id="swatch-palette-text">
+              {sections.map((sec) => (
+                <section key={sec.title} className="mt-3">
+                  <h2 className="text-base font-semibold">{sec.title}</h2>
+                  <ul className="text-sm">
+                    {sec.swatches.map((sw) => (
+                      <li key={sw.name}>
+                        {sw.name} {sw.hex}
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              ))}
+            </div>
           </details>
         </div>
       </div>

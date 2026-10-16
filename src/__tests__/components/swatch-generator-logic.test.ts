@@ -23,8 +23,10 @@ const pick = <T extends { name: string }>(list: T[], name: string) => {
 const seasonOf = (eyes: string, skin: string, hair: string) =>
   classify(analyze(pick(EYES, eyes), pick(SKIN, skin), pick(HAIR, hair)))
 
-// Textbook examples from seasonal color analysis, not this classifier's
-// output: each is the combination stylists use to illustrate the season.
+// Textbook examples from seasonal color analysis: each is the combination
+// stylists use to illustrate the season. The scales in analyze() were fit to
+// these cases, so they guard against regressions rather than prove the
+// calibration independently.
 describe('classify', () => {
   it.each<[string, string, string, SeasonKey]>([
     ['Light blue', 'Fair, pink undertone', 'Ash blonde', 'lightSummer'],

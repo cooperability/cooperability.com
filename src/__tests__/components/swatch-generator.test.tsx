@@ -21,6 +21,7 @@ beforeAll(() => {
 beforeEach(() => {
   // jsdom has no canvas backend. A null context makes the renderer bail early.
   jest.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(null)
+  jest.spyOn(HTMLCanvasElement.prototype, 'toBlob').mockImplementation(() => {})
 })
 
 afterEach(() => jest.restoreAllMocks())
@@ -96,9 +97,12 @@ describe('SwatchGenerator', () => {
 
       render(<SwatchGenerator />)
       pickFeatures('Bright blue', 'Porcelain, cool', 'Blue-black')
-      fireEvent.click(screen.getByRole('button', { name: button }))
+      const save = screen.getByRole('button', { name: button })
+      await waitFor(() => expect(save).toBeEnabled())
+      fireEvent.click(save)
 
-      await waitFor(() => expect(clicked).toEqual([name]))
+      // Synchronous, inside the click: Safari drops a download started later.
+      expect(clicked).toEqual([name])
       expect(made[0].type).toBe(type)
       const head = new Uint8Array(await made[0].arrayBuffer()).slice(0, 2)
       expect([...head].map((b) => b.toString(16)).join(' ')).toBe(magic)
