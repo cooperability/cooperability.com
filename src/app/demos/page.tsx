@@ -109,6 +109,17 @@ export default function Demos() {
                 </div>
               </div>
 
+              {/* Personal Swatch Generator */}
+              <div className={styles.subProjectItem}>
+                <div className={styles.projectInfo}>
+                  <a href="/demos/swatch-generator">
+                    Personal Swatch Generator
+                    <Platforms of={['desktop', 'mobile']} />
+                  </a>
+                  <span className={styles.projectStatus}>(2026)</span>
+                </div>
+              </div>
+
               {/* Prompt Composer */}
               <div className={styles.subProjectItem}>
                 <div className={styles.projectInfo}>
