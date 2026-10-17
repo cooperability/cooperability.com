@@ -52,6 +52,53 @@ describe('classify', () => {
   })
 })
 
+// Style-guide principles for deep skin: season follows undertone and
+// softness, not depth alone. Soft Summer runs from fair to deep, and a
+// tan-skinned person with ashy brown hair and gray-green eyes can be a Summer.
+// Each case accepts every season the principle allows.
+describe('classify deep and tan skin', () => {
+  it.each<[string, string, string, SeasonKey[]]>([
+    [
+      'Gray-green',
+      'Tan, cool',
+      'Light brown, ash',
+      ['softSummer', 'coolSummer'],
+    ],
+    ['Gray-green', 'Deep, cool', 'Dark brown, ash', ['softSummer']],
+    [
+      'Gray',
+      'Very deep, cool',
+      'Salt and pepper',
+      ['softSummer', 'coolSummer'],
+    ],
+    ['Hazel', 'Deep, warm', 'Medium brown', ['softAutumn', 'warmAutumn']],
+    ['Amber', 'Very deep, warm', 'Chestnut', ['warmAutumn', 'deepAutumn']],
+  ])('%s eyes, %s skin, %s hair is one of %j', (eyes, skin, hair, seasons) => {
+    expect(seasons).toContain(seasonOf(eyes, skin, hair))
+  })
+
+  const deepSkins = SKIN.filter(
+    (s) => s.name.startsWith('Deep') || s.name.startsWith('Very deep')
+  )
+  const seasonsFor = (skin: (typeof SKIN)[number]) =>
+    EYES.flatMap((e) => HAIR.map((h) => classify(analyze(e, skin, h))))
+
+  it.each(deepSkins.map((s) => [s.name, s] as const))(
+    '%s skin lands in a Deep season for at most half its combinations',
+    (_, skin) => {
+      const all = seasonsFor(skin)
+      const deep = all.filter((k) => k.startsWith('deep')).length
+      expect(deep).toBeLessThanOrEqual(all.length / 2)
+    }
+  )
+
+  it.each(
+    deepSkins.filter((s) => s.warmth < 0).map((s) => [s.name, s] as const)
+  )('%s skin can reach a Summer season', (_, skin) => {
+    expect(seasonsFor(skin).some((k) => k.endsWith('Summer'))).toBe(true)
+  })
+})
+
 describe('season data', () => {
   it.each(Object.entries(SEASONS))(
     '%s has complete, valid swatches',

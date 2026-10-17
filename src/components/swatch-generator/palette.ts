@@ -530,11 +530,11 @@ const clamp = (v: number, lo = -1, hi = 1) => Math.min(hi, Math.max(lo, v))
 
 export function analyze(eyes: ClearFeature, skin: Feature, hair: ClearFeature) {
   const [le, ls, lh] = [eyes, skin, hair].map((f) => lightness(f.hex))
-  // The scales below were grid-searched: of the sets that classify every
-  // textbook case in the logic test, this one spreads all dropdown
-  // combinations most evenly across the 12 seasons.
+  // The scales below were grid-searched against every case in the logic test.
+  // Skin is a quarter of depth, so deep skin alone does not force a Deep
+  // season. Hair and eyes set the overall value.
   const warmth = (1.2 * (2 * skin.warmth + hair.warmth + eyes.warmth)) / 4
-  const depth = clamp((54 - (0.5 * ls + 0.35 * lh + 0.15 * le)) / 35)
+  const depth = clamp((50 - (0.25 * ls + 0.45 * lh + 0.3 * le)) / 35)
   const contrast = (0.6 * Math.abs(ls - lh) + 0.4 * Math.abs(ls - le)) / 60
   const clarity = clamp(
     contrast - 0.6 + 0.75 * ((eyes.clarity + hair.clarity) / 2)
