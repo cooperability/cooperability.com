@@ -10,7 +10,7 @@ export const DEMOS = [
     path: '/demos/swatch-generator',
     title: 'Personal Swatch Generator',
     description:
-      'Pick your eye, skin and hair colors to build a seasonal color palette, then save it as a JPG or PDF.',
+      'Pick your eye, skin and hair colors to build a color palette, with optional seasonal analysis, then save it as a JPG or PDF.',
   },
   {
     path: '/demos/prompt-composer',

@@ -273,6 +273,7 @@ describe('SwatchGenerator', () => {
     // Past the encode delay, so the files for the empty card are ready.
     await act(() => new Promise((r) => setTimeout(r, 300)))
     expect(save).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Save PDF' })).toBeDisabled()
   })
 
   it.each([

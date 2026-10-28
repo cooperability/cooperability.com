@@ -90,7 +90,8 @@ function chips(
     box(ctx, x, top, w, h)
     ctx.fillStyle = sw.hex
     ctx.fill()
-    ctx.strokeStyle = LINE
+    // LINE measures about 1.4:1 on the paper, so white chips would vanish.
+    ctx.strokeStyle = MUTED
     ctx.lineWidth = 1.5
     ctx.stroke()
     if (struck) {
@@ -254,7 +255,7 @@ function layout(ctx: Ctx, card: Card) {
 
 let measurer: Ctx | null | undefined
 
-// A first pass on a 1x1 canvas finds the height the enabled sections use, so
+// A first pass on a small scratch canvas finds the height the enabled sections use, so
 // the only full-size bitmap is the target. iOS Safari caps total canvas
 // memory, and a second full-size scratch per redraw could exhaust it.
 export function drawCard(target: HTMLCanvasElement, card: Card) {
