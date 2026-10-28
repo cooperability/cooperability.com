@@ -4,6 +4,7 @@ import {
   HAIR,
   SEASONS,
   SKIN,
+  UNDERTONES,
   analyze,
   applyAesthetic,
   classify,
@@ -20,34 +21,50 @@ const pick = <T extends { name: string }>(list: T[], name: string) => {
   return found
 }
 
-const seasonOf = (eyes: string, skin: string, hair: string) =>
-  classify(analyze(pick(EYES, eyes), pick(SKIN, skin), pick(HAIR, hair)))
+const seasonOf = (
+  eyes: string,
+  skin: string,
+  undertone: string,
+  hair: string
+) =>
+  classify(
+    analyze(
+      pick(EYES, eyes),
+      pick(SKIN, skin),
+      pick(UNDERTONES, undertone),
+      pick(HAIR, hair)
+    )
+  )
 
 // Textbook examples from seasonal color analysis: each is the combination
 // stylists use to illustrate the season. The scales in analyze() were fit to
 // these cases, so they guard against regressions rather than prove the
 // calibration independently.
 describe('classify', () => {
-  it.each<[string, string, string, SeasonKey]>([
-    ['Light blue', 'Fair, pink undertone', 'Ash blonde', 'lightSummer'],
-    ['Light blue', 'Fair, peach undertone', 'Golden blonde', 'lightSpring'],
-    ['Black-brown', 'Very deep, cool', 'Blue-black', 'deepWinter'],
-    ['Dark brown', 'Deep, warm', 'Dark brown, warm', 'deepAutumn'],
-    ['Hazel', 'Medium, golden', 'Auburn', 'warmAutumn'],
-    ['Bright blue', 'Porcelain, cool', 'Blue-black', 'brightWinter'],
-    ['Gray-green', 'Light, cool beige', 'Light brown, ash', 'softSummer'],
-    ['Hazel', 'Light olive', 'Medium brown', 'softAutumn'],
-    ['Blue-gray', 'Fair, pink undertone', 'Salt and pepper', 'coolSummer'],
-    ['Turquoise', 'Fair, peach undertone', 'Copper red', 'warmSpring'],
-  ])('%s eyes, %s skin, %s hair is %s', (eyes, skin, hair, season) => {
-    expect(seasonOf(eyes, skin, hair)).toBe(season)
-  })
+  it.each<[string, string, string, string, SeasonKey]>([
+    ['Light blue', 'Monk 2', 'Cool', 'Ash blonde', 'lightSummer'],
+    ['Light blue', 'Monk 3', 'Warm', 'Golden blonde', 'lightSpring'],
+    ['Black-brown', 'Monk 10 (deepest)', 'Cool', 'Blue-black', 'deepWinter'],
+    ['Dark brown', 'Monk 8', 'Warm', 'Dark brown, warm', 'deepAutumn'],
+    ['Hazel', 'Monk 6', 'Warm', 'Auburn', 'warmAutumn'],
+    ['Bright blue', 'Monk 1 (lightest)', 'Cool', 'Blue-black', 'brightWinter'],
+    ['Gray-green', 'Monk 4', 'Cool', 'Light brown, ash', 'softSummer'],
+    ['Hazel', 'Monk 4', 'Olive', 'Medium brown', 'softAutumn'],
+    ['Blue-gray', 'Monk 2', 'Cool', 'Salt and pepper', 'coolSummer'],
+    ['Blue-green', 'Monk 3', 'Warm', 'Copper red', 'warmSpring'],
+  ])(
+    '%s eyes, %s %s skin, %s hair is %s',
+    (eyes, skin, undertone, hair, season) => {
+      expect(seasonOf(eyes, skin, undertone, hair)).toBe(season)
+    }
+  )
 
   it('reaches every season from some combination of the dropdowns', () => {
     const reached = new Set<SeasonKey>()
     for (const e of EYES)
       for (const sk of SKIN)
-        for (const h of HAIR) reached.add(classify(analyze(e, sk, h)))
+        for (const u of UNDERTONES)
+          for (const h of HAIR) reached.add(classify(analyze(e, sk, u, h)))
     expect([...reached].sort()).toEqual(Object.keys(SEASONS).sort())
   })
 })
@@ -57,45 +74,97 @@ describe('classify', () => {
 // tan-skinned person with ashy brown hair and gray-green eyes can be a Summer.
 // Each case accepts every season the principle allows.
 describe('classify deep and tan skin', () => {
-  it.each<[string, string, string, SeasonKey[]]>([
+  it.each<[string, string, string, string, SeasonKey[]]>([
     [
       'Gray-green',
-      'Tan, cool',
+      'Monk 7',
+      'Cool',
       'Light brown, ash',
       ['softSummer', 'coolSummer'],
     ],
-    ['Gray-green', 'Deep, cool', 'Dark brown, ash', ['softSummer']],
+    ['Gray-green', 'Monk 8', 'Cool', 'Dark brown, ash', ['softSummer']],
     [
       'Gray',
-      'Very deep, cool',
+      'Monk 10 (deepest)',
+      'Cool',
       'Salt and pepper',
       ['softSummer', 'coolSummer'],
     ],
-    ['Hazel', 'Deep, warm', 'Medium brown', ['softAutumn', 'warmAutumn']],
-    ['Amber', 'Very deep, warm', 'Chestnut', ['warmAutumn', 'deepAutumn']],
-  ])('%s eyes, %s skin, %s hair is one of %j', (eyes, skin, hair, seasons) => {
-    expect(seasons).toContain(seasonOf(eyes, skin, hair))
-  })
-
-  const deepSkins = SKIN.filter(
-    (s) => s.name.startsWith('Deep') || s.name.startsWith('Very deep')
+    ['Hazel', 'Monk 8', 'Warm', 'Medium brown', ['softAutumn', 'warmAutumn']],
+    ['Amber', 'Monk 10 (deepest)', 'Warm', 'Chestnut', ['warmAutumn', 'deepAutumn']],
+  ])(
+    '%s eyes, %s %s skin, %s hair is one of %j',
+    (eyes, skin, undertone, hair, seasons) => {
+      expect(seasons).toContain(seasonOf(eyes, skin, undertone, hair))
+    }
   )
-  const seasonsFor = (skin: (typeof SKIN)[number]) =>
-    EYES.flatMap((e) => HAIR.map((h) => classify(analyze(e, skin, h))))
 
-  it.each(deepSkins.map((s) => [s.name, s] as const))(
+  // Monk 8 to 10 are the deep end of the scale.
+  const deepSkins = SKIN.slice(7).flatMap((s) =>
+    UNDERTONES.map((u) => [`${s.name} ${u.name}`, s, u] as const)
+  )
+  const seasonsFor = (
+    skin: (typeof SKIN)[number],
+    undertone: (typeof UNDERTONES)[number]
+  ) =>
+    EYES.flatMap((e) =>
+      HAIR.map((h) => classify(analyze(e, skin, undertone, h)))
+    )
+
+  it.each(deepSkins)(
     '%s skin lands in a Deep season for at most half its combinations',
-    (_, skin) => {
-      const all = seasonsFor(skin)
+    (_, skin, undertone) => {
+      const all = seasonsFor(skin, undertone)
       const deep = all.filter((k) => k.startsWith('deep')).length
       expect(deep).toBeLessThanOrEqual(all.length / 2)
     }
   )
 
-  it.each(
-    deepSkins.filter((s) => s.warmth < 0).map((s) => [s.name, s] as const)
-  )('%s skin can reach a Summer season', (_, skin) => {
-    expect(seasonsFor(skin).some((k) => k.endsWith('Summer'))).toBe(true)
+  it.each(deepSkins.filter(([, , u]) => u.name === 'Cool'))(
+    '%s skin can reach a Summer season',
+    (_, skin, undertone) => {
+      expect(
+        seasonsFor(skin, undertone).some((k) => k.endsWith('Summer'))
+      ).toBe(true)
+    }
+  )
+})
+
+describe('skin inputs', () => {
+  // Published at skintone.google, lightest to deepest.
+  it('uses the ten Monk Skin Tone Scale values', () => {
+    expect(SKIN.map((s) => s.hex.toLowerCase())).toEqual([
+      '#f6ede4',
+      '#f3e7db',
+      '#f7ead0',
+      '#eadaba',
+      '#d7bd96',
+      '#a07e56',
+      '#825c43',
+      '#604134',
+      '#3a312a',
+      '#292420',
+    ])
+  })
+
+  it('reads olive skin as softer than neutral skin with the same features', () => {
+    const [e, s, h] = [
+      pick(EYES, 'Hazel'),
+      pick(SKIN, 'Monk 5'),
+      pick(HAIR, 'Medium brown'),
+    ]
+    const olive = analyze(e, s, pick(UNDERTONES, 'Olive'), h)
+    const neutral = analyze(e, s, pick(UNDERTONES, 'Neutral'), h)
+    expect(olive.clarity).toBeLessThan(neutral.clarity)
+  })
+
+  it('moves the season from Summer to Spring when only the undertone warms', () => {
+    expect(seasonOf('Light blue', 'Monk 2', 'Cool', 'Medium brown')).toMatch(
+      /Summer$/
+    )
+    expect(seasonOf('Light blue', 'Monk 2', 'Warm', 'Medium brown')).toMatch(
+      /Spring$/
+    )
   })
 })
 
@@ -158,7 +227,8 @@ describe('harmonies', () => {
   it('pairs brown eyes with a blue "eye pop"', () => {
     const [, pop] = harmonies(
       pick(EYES, 'Medium brown'),
-      pick(SKIN, 'Medium, neutral'),
+      pick(SKIN, 'Monk 6'),
+      pick(UNDERTONES, 'Neutral'),
       pick(HAIR, 'Medium brown')
     )
     const [h] = hexToHsl(pop.hex)
@@ -169,10 +239,29 @@ describe('harmonies', () => {
   it('keeps gray hair gray instead of inventing a hue', () => {
     const [, , hairEcho] = harmonies(
       pick(EYES, 'Gray'),
-      pick(SKIN, 'Fair, neutral'),
+      pick(SKIN, 'Monk 3'),
+      pick(UNDERTONES, 'Neutral'),
       pick(HAIR, 'Salt and pepper')
     )
     expect(hexToHsl(hairEcho.hex)[1]).toBeLessThan(0.08)
+  })
+
+  // Makeup guides pair cool undertones with pink and berry blush and warm
+  // ones with peach and coral.
+  it('turns the flush rosier for cool skin than for warm skin', () => {
+    const flushHue = (undertone: string) => {
+      const [h] = hexToHsl(
+        harmonies(
+          pick(EYES, 'Hazel'),
+          pick(SKIN, 'Monk 5'),
+          pick(UNDERTONES, undertone),
+          pick(HAIR, 'Medium brown')
+        )[4].hex
+      )
+      return h > 180 ? h - 360 : h
+    }
+    expect(flushHue('Cool')).toBeLessThan(-10)
+    expect(flushHue('Warm')).toBeGreaterThan(0)
   })
 
   it('round-trips hsl conversion', () => {

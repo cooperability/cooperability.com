@@ -16,7 +16,7 @@ export const EYES: ClearFeature[] = [
   { name: 'Green', hex: '#4F7D4A', warmth: 0.2, clarity: 0.2 },
   { name: 'Emerald green', hex: '#2E8B57', warmth: 0, clarity: 0.7 },
   { name: 'Gray-green', hex: '#7C8C7A', warmth: -0.2, clarity: -0.7 },
-  { name: 'Turquoise', hex: '#4AA3A0', warmth: 0.2, clarity: 0.6 },
+  { name: 'Blue-green', hex: '#4AA3A0', warmth: 0.2, clarity: 0.6 },
   { name: 'Bright blue', hex: '#2F6FD1', warmth: -0.6, clarity: 0.9 },
   { name: 'Medium blue', hex: '#4F7AB5', warmth: -0.5, clarity: 0.2 },
   { name: 'Light blue', hex: '#8DB3D9', warmth: -0.4, clarity: 0.1 },
@@ -24,26 +24,71 @@ export const EYES: ClearFeature[] = [
   { name: 'Gray', hex: '#8A8F95', warmth: -0.4, clarity: -0.4 },
 ]
 
-export const SKIN: Feature[] = [
-  { name: 'Porcelain, cool', hex: '#F6E3DC', warmth: -0.8 },
-  { name: 'Fair, pink undertone', hex: '#F1D0C4', warmth: -0.6 },
-  { name: 'Fair, neutral', hex: '#F0D5BE', warmth: 0 },
-  { name: 'Fair, peach undertone', hex: '#F3D2B0', warmth: 0.6 },
-  { name: 'Light, cool beige', hex: '#E3BFA8', warmth: -0.4 },
-  { name: 'Light, warm golden', hex: '#E6BE95', warmth: 0.7 },
-  { name: 'Light olive', hex: '#D8B994', warmth: 0 },
-  { name: 'Medium, neutral', hex: '#C99C77', warmth: 0 },
-  { name: 'Medium, golden', hex: '#C8955F', warmth: 0.7 },
-  { name: 'Medium olive', hex: '#B88D63', warmth: 0 },
-  { name: 'Medium, cool rosy', hex: '#C4917F', warmth: -0.5 },
-  { name: 'Tan, warm', hex: '#A8724A', warmth: 0.6 },
-  { name: 'Tan, cool', hex: '#9E6E5A', warmth: -0.4 },
-  { name: 'Deep, warm', hex: '#7D4B2C', warmth: 0.5 },
-  { name: 'Deep, neutral', hex: '#6E4630', warmth: 0 },
-  { name: 'Deep, cool', hex: '#5C3A2E', warmth: -0.6 },
-  { name: 'Very deep, warm', hex: '#4A2C1C', warmth: 0.4 },
-  { name: 'Very deep, cool', hex: '#3A2620', warmth: -0.5 },
-]
+// Skin depth is the Monk Skin Tone Scale (Ellis Monk and Google, CC BY 4.0),
+// ten published tones from lightest to deepest. Undertone is a separate pick
+// because the scale leaves it out.
+export const SKIN: Swatch[] = [
+  '#F6EDE4',
+  '#F3E7DB',
+  '#F7EAD0',
+  '#EADABA',
+  '#D7BD96',
+  '#A07E56',
+  '#825C43',
+  '#604134',
+  '#3A312A',
+  '#292420',
+].map((hex, i) => ({
+  name: `Monk ${i + 1}${i === 0 ? ' (lightest)' : i === 9 ? ' (deepest)' : ''}`,
+  hex,
+}))
+
+// Cool, neutral and warm are the undertones foundation ranges sort by. Olive
+// is a common fourth: a green-gray cast that reads muted. Metals and blush
+// hue follow the usual makeup-counter advice for each.
+export const UNDERTONES = [
+  {
+    name: 'Cool',
+    hint: 'Pink, red or bluish',
+    warmth: -0.5,
+    clarity: 0,
+    metals: ['Silver', 'Platinum'],
+    blush: 340,
+  },
+  {
+    name: 'Neutral',
+    hint: 'A mix of cool and warm',
+    warmth: 0,
+    clarity: 0,
+    metals: ['Gold', 'Silver'],
+    blush: 352,
+  },
+  {
+    name: 'Warm',
+    hint: 'Golden, peach or yellow',
+    warmth: 0.5,
+    clarity: 0,
+    metals: ['Gold', 'Brass'],
+    blush: 12,
+  },
+  {
+    name: 'Olive',
+    hint: 'Green-gray cast',
+    warmth: 0.1,
+    clarity: -0.4,
+    metals: ['Gold', 'Rose gold'],
+    blush: 6,
+  },
+] as const satisfies {
+  name: string
+  hint: string
+  warmth: number
+  clarity: number
+  metals: Metal[]
+  blush: number
+}[]
+
+export type Undertone = (typeof UNDERTONES)[number]
 
 export const HAIR: ClearFeature[] = [
   { name: 'Platinum blonde', hex: '#E8E0CE', warmth: -0.6, clarity: 0.2 },
@@ -82,6 +127,8 @@ export const METALS: Record<Metal, [string, string]> = {
 
 export type Season = {
   name: string
+  // Another common name for the season, where one exists.
+  aka?: string
   summary: string
   best: Swatch[]
   neutrals: Swatch[]
@@ -124,6 +171,7 @@ export const SEASONS = {
   },
   warmSpring: {
     name: 'Warm Spring',
+    aka: 'True Spring',
     summary: 'Warm first, then clear. Sunny, golden brights.',
     best: [
       s('Golden yellow', '#F9C23C'),
@@ -154,6 +202,7 @@ export const SEASONS = {
   },
   brightSpring: {
     name: 'Bright Spring',
+    aka: 'Clear Spring',
     summary: 'Clear first, then warm. Saturated, high-energy color.',
     best: [
       s('Poppy red', '#E8382F'),
@@ -214,6 +263,7 @@ export const SEASONS = {
   },
   coolSummer: {
     name: 'Cool Summer',
+    aka: 'True Summer',
     summary: 'Cool first, then soft. Blue-based, gentle mid-tones.',
     best: [
       s('Rose pink', '#D9788E'),
@@ -304,6 +354,7 @@ export const SEASONS = {
   },
   warmAutumn: {
     name: 'Warm Autumn',
+    aka: 'True Autumn',
     summary: 'Warm first, then soft. Rich spice and harvest tones.',
     best: [
       s('Rust', '#B5481E'),
@@ -334,6 +385,7 @@ export const SEASONS = {
   },
   deepAutumn: {
     name: 'Deep Autumn',
+    aka: 'Dark Autumn',
     summary: 'Deep first, then warm. Dark, rich, saturated earth.',
     best: [
       s('Burnt orange', '#C0561A'),
@@ -364,6 +416,7 @@ export const SEASONS = {
   },
   deepWinter: {
     name: 'Deep Winter',
+    aka: 'Dark Winter',
     summary: 'Deep first, then cool. Dark, dramatic jewel tones.',
     best: [
       s('True red', '#C8102E'),
@@ -394,6 +447,7 @@ export const SEASONS = {
   },
   coolWinter: {
     name: 'Cool Winter',
+    aka: 'True Winter',
     summary: 'Cool first, then clear. Icy and vivid blue-based color.',
     best: [
       s('Blue red', '#C21E3A'),
@@ -424,6 +478,7 @@ export const SEASONS = {
   },
   brightWinter: {
     name: 'Bright Winter',
+    aka: 'Clear Winter',
     summary: 'Clear first, then cool. High contrast, electric color.',
     best: [
       s('Cherry red', '#E3002C'),
@@ -528,16 +583,23 @@ export type Axes = { warmth: number; depth: number; clarity: number }
 
 const clamp = (v: number, lo = -1, hi = 1) => Math.min(hi, Math.max(lo, v))
 
-export function analyze(eyes: ClearFeature, skin: Feature, hair: ClearFeature) {
+export function analyze(
+  eyes: ClearFeature,
+  skin: Swatch,
+  undertone: Undertone,
+  hair: ClearFeature
+) {
   const [le, ls, lh] = [eyes, skin, hair].map((f) => lightness(f.hex))
   // The scales below were grid-searched against every case in the logic test.
   // Skin is a quarter of depth, so deep skin alone does not force a Deep
   // season. Hair and eyes set the overall value.
-  const warmth = (1.2 * (2 * skin.warmth + hair.warmth + eyes.warmth)) / 4
+  const warmth = (1.2 * (2 * undertone.warmth + hair.warmth + eyes.warmth)) / 4
   const depth = clamp((50 - (0.25 * ls + 0.45 * lh + 0.3 * le)) / 35)
   const contrast = (0.6 * Math.abs(ls - lh) + 0.4 * Math.abs(ls - le)) / 60
   const clarity = clamp(
-    contrast - 0.6 + 0.75 * ((eyes.clarity + hair.clarity) / 2)
+    contrast -
+      0.6 +
+      0.75 * ((eyes.clarity + hair.clarity + undertone.clarity) / 2)
   )
   return { warmth: clamp(warmth), depth, clarity }
 }
@@ -571,7 +633,9 @@ export function describeAxes({ warmth, depth, clarity }: Axes) {
   const pick = (v: number, neg: string, mid: string, pos: string) =>
     v > 0.15 ? pos : v < -0.15 ? neg : mid
   return [
-    { label: 'Undertone', value: pick(warmth, 'Cool', 'Neutral', 'Warm') },
+    // Warmth blends skin undertone with hair and eyes, so it can differ from
+    // the undertone picked.
+    { label: 'Warmth', value: pick(warmth, 'Cool', 'Neutral', 'Warm') },
     { label: 'Depth', value: pick(depth, 'Light', 'Medium', 'Deep') },
     { label: 'Chroma', value: pick(clarity, 'Soft', 'Balanced', 'Clear') },
   ]
@@ -672,9 +736,10 @@ export function applyAesthetic(season: Season, aesthetic: Aesthetic) {
 // ---- harmonies built from the picked colors ----
 
 export function harmonies(
-  eyes: Feature,
-  skin: Feature,
-  hair: Feature
+  eyes: Swatch,
+  skin: Swatch,
+  undertone: Undertone,
+  hair: Swatch
 ): Swatch[] {
   const [eh, es] = hexToHsl(eyes.hex)
   const [hh, hs, hl] = hexToHsl(hair.hex)
@@ -689,8 +754,7 @@ export function harmonies(
       'Your nude',
       hslToHex(sh, Math.min(ss + 0.05, 0.6), clamp(sl - 0.12, 0.2, 0.8))
     ),
-    // Skin hues sit near 15 to 35 degrees. Turning 40 back lands on rose,
-    // kept near the skin's own depth so deep skin gets berry, not pastel.
-    s('Flush', hslToHex(sh - 40, 0.6, clamp(sl + 0.05, 0.35, 0.65))),
+    // Kept near the skin's own depth so deep skin gets berry, not pastel.
+    s('Flush', hslToHex(undertone.blush, 0.6, clamp(sl + 0.05, 0.35, 0.65))),
   ]
 }

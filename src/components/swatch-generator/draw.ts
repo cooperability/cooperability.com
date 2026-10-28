@@ -1,18 +1,21 @@
 import { METALS, type Metal, type Swatch } from './palette'
 
 export type Card = {
-  season: string
+  // Undefined when seasonal analysis is switched off.
+  season?: string
+  title: string
+  aka?: string
   summary: string
   traits: { label: string; value: string }[]
   features: { label: string; name: string; hex: string }[]
-  best: Swatch[]
+  best?: Swatch[]
   aesthetic?: {
     name: string
     blurb: string
     featured: Swatch[]
     ratio: readonly [Swatch, Swatch, Swatch]
   }
-  neutrals?: { swatches: Swatch[]; metals: Metal[] }
+  neutrals?: { swatches: Swatch[]; metals: readonly Metal[] }
   avoid?: Swatch[]
   harmonies?: Swatch[]
 }
@@ -124,12 +127,15 @@ function layout(ctx: Ctx, card: Card) {
     weight: 600,
   })
   ctx.letterSpacing = '0px'
-  text(ctx, card.season, M, M + 112, 84, {
+  text(ctx, card.title, M, M + 112, 84, {
     weight: 700,
     font: SERIF,
     maxWidth: W - 2 * M,
   })
-  text(ctx, card.summary, M, M + 166, 30, { color: MUTED, maxWidth: W - 2 * M })
+  const summary = card.aka
+    ? `${card.summary} Also called ${card.aka}.`
+    : card.summary
+  text(ctx, summary, M, M + 166, 30, { color: MUTED, maxWidth: W - 2 * M })
   text(
     ctx,
     card.traits.map((t) => `${t.label}: ${t.value}`).join('     '),
@@ -164,8 +170,10 @@ function layout(ctx: Ctx, card: Card) {
   })
   y += 128
 
-  y = heading(ctx, 'Best colors', y)
-  y = chips(ctx, card.best, y, { cols: 5, h: 130 }) + 24
+  if (card.best) {
+    y = heading(ctx, 'Best colors', y)
+    y = chips(ctx, card.best, y, { cols: 5, h: 130 }) + 24
+  }
 
   if (card.aesthetic) {
     const a = card.aesthetic
@@ -202,9 +210,15 @@ function layout(ctx: Ctx, card: Card) {
     y += 128
   }
 
+  if (card.harmonies) {
+    y = heading(ctx, 'Harmonies from your features', y)
+    y = chips(ctx, card.harmonies, y, { h: 100 }) + 24
+  }
+
   if (card.neutrals) {
-    y = heading(ctx, 'Neutrals and metals', y)
-    y = chips(ctx, card.neutrals.swatches, y, { h: 100 })
+    const { swatches } = card.neutrals
+    y = heading(ctx, swatches.length ? 'Neutrals and metals' : 'Metals', y)
+    if (swatches.length) y = chips(ctx, swatches, y, { h: 100 })
     card.neutrals.metals.forEach((metal, i) => {
       const cx = M + 36 + i * 300
       const [dark, light] = METALS[metal]
@@ -216,6 +230,10 @@ function layout(ctx: Ctx, card: Card) {
       ctx.arc(cx, y + 36, 36, 0, Math.PI * 2)
       ctx.fillStyle = g
       ctx.fill()
+      // Platinum's highlight nearly matches the paper without an outline.
+      ctx.strokeStyle = MUTED
+      ctx.lineWidth = 1.5
+      ctx.stroke()
       text(ctx, metal, cx + 52, y + 45, 24, { weight: 600 })
     })
     y += 120
@@ -224,11 +242,6 @@ function layout(ctx: Ctx, card: Card) {
   if (card.avoid) {
     y = heading(ctx, 'Colors to avoid', y)
     y = chips(ctx, card.avoid, y, { h: 90, hex: false, struck: true }) + 24
-  }
-
-  if (card.harmonies) {
-    y = heading(ctx, 'From your features', y)
-    y = chips(ctx, card.harmonies, y, { h: 100 }) + 24
   }
 
   ctx.fillStyle = LINE
