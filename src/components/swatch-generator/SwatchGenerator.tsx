@@ -40,6 +40,7 @@ import {
   type Swatch,
 } from './palette'
 import { jpegToPdf } from './pdf'
+import SwatchNotes from './SwatchNotes'
 
 const FEATURES = [
   { key: 'eyes', label: 'Eyes', options: EYES, initial: 'Hazel' },
@@ -425,6 +426,11 @@ export default function SwatchGenerator() {
         ). Seasonal color analysis is a styling convention with little published
         testing.
       </p>
+
+      {/* Reading width, not tool width. */}
+      <div className="mx-auto mt-4 max-w-3xl">
+        <SwatchNotes />
+      </div>
     </div>
   )
 }

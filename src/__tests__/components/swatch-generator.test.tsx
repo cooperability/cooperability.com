@@ -73,7 +73,11 @@ function pickFeatures(
   choose('Hair', hair)
 }
 
-const season = () => screen.getByRole('heading', { level: 2 })
+const season = () =>
+  within(document.querySelector<HTMLElement>('[data-slot="card"]')!).getByRole(
+    'heading',
+    { level: 2 }
+  )
 const section = (title: string) =>
   screen.queryByRole('heading', { level: 3, name: title })?.closest('section')
 
@@ -116,6 +120,30 @@ describe('SwatchGenerator', () => {
       'https://creativecommons.org/licenses/by/4.0/'
     )
     expect(screen.getByText(/little published testing/)).toBeInTheDocument()
+  })
+
+  it('opens a wiki whose sources link to their DOIs', () => {
+    render(<SwatchGenerator />)
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Why it is built this way' })
+    )
+    const dois = screen
+      .getAllByRole('link')
+      .map((link) => link.getAttribute('href')!)
+      .filter((href) => href.startsWith('https://doi.org/'))
+    expect(dois).toEqual(
+      expect.arrayContaining([
+        'https://doi.org/10.1145/3632120',
+        'https://doi.org/10.1177/20416695211053361',
+        'https://doi.org/10.2466/pms.1990.71.1.151',
+      ])
+    )
+    fireEvent.click(
+      screen.getByRole('button', {
+        name: 'Where seasonal color analysis comes from',
+      })
+    )
+    expect(screen.getByText('The Art of Color')).toBeInTheDocument()
   })
 
   it('keeps an undertone picked when its button is pressed again', () => {
