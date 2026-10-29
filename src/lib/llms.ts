@@ -7,6 +7,12 @@ const SITE = 'https://www.cooperability.com'
 // src/__tests__/lib/llms.test.ts checks each entry against its page instead.
 export const DEMOS = [
   {
+    path: '/demos/swatch-generator',
+    title: 'Personal Swatch Generator',
+    description:
+      'Pick your eye, skin and hair colors to build a color palette, with optional seasonal analysis, then save it as a JPG or PDF.',
+  },
+  {
     path: '/demos/prompt-composer',
     title: 'Prompt Composer',
     description:
