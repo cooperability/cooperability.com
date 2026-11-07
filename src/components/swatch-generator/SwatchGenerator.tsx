@@ -159,7 +159,7 @@ export default function SwatchGenerator() {
     const url = URL.createObjectURL(ready[kind])
     const a = document.createElement('a')
     a.href = url
-    a.download = `personal-swatch-${card.title.toLowerCase().replace(' ', '-')}.${kind}`
+    a.download = `swatch-card-${card.title.toLowerCase().replace(' ', '-')}.${kind}`
     document.body.append(a)
     a.click()
     a.remove()
@@ -175,7 +175,7 @@ export default function SwatchGenerator() {
         </h1>
         <p className="hidden text-center text-sm sm:block">
           Pick your eye, hair and skin colors to get a palette, then save it as
-          a JPG or PDF.
+          a swatch card in JPG or PDF.
         </p>
       </div>
 
@@ -267,7 +267,7 @@ export default function SwatchGenerator() {
           </div>
 
           <div className="col-span-2 flex flex-col gap-1.5 lg:col-span-1">
-            <Label id="swatch-sections">On the swatch</Label>
+            <Label id="swatch-sections">On the swatch card</Label>
             <ToggleGroup
               type="multiple"
               aria-labelledby="swatch-sections"
@@ -339,7 +339,7 @@ export default function SwatchGenerator() {
 
           {empty && (
             <p className="text-sm">
-              Switch on a section under &ldquo;On the swatch&rdquo; to add
+              Switch on a section under &ldquo;On the swatch card&rdquo; to add
               colors.
             </p>
           )}

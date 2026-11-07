@@ -149,8 +149,8 @@ export default function SwatchNotes() {
             <em>Color Me Beautiful</em>, both in 1980. Twelve-season systems
             such as Sci\ART later split each season in three, giving names like
             Dark Winter. In-person analysts send clients home with a fan or
-            wallet of fabric swatches. This page is a quick, self-reported
-            version of that fan.
+            wallet of fabric swatches. The swatch card here is a quick,
+            self-reported version of that fan.
           </p>
         </AccordionContent>
       </AccordionItem>

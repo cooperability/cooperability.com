@@ -38,7 +38,7 @@ beforeEach(() => {
           : key === 'fillText'
             ? // Each layout pass starts with this label, so keep the last one.
               (str: string) =>
-                str === 'PERSONAL COLOR SWATCH'
+                str === 'PERSONAL SWATCH CARD'
                   ? (drawn = [str])
                   : drawn.push(str)
             : key === 'createLinearGradient'
@@ -210,7 +210,7 @@ describe('SwatchGenerator', () => {
       const drawnHeadings = drawn.filter(
         (str) =>
           /^[A-Z][A-Z :,]+$/.test(str) &&
-          !['PERSONAL COLOR SWATCH', 'EYES', 'SKIN', 'HAIR'].includes(str)
+          !['PERSONAL SWATCH CARD', 'EYES', 'SKIN', 'HAIR'].includes(str)
       )
       expect(drawnHeadings).toEqual(headings)
 
@@ -305,13 +305,8 @@ describe('SwatchGenerator', () => {
   })
 
   it.each([
-    ['Save JPG', 'image/jpeg', 'personal-swatch-bright-winter.jpg', 'ff d8'],
-    [
-      'Save PDF',
-      'application/pdf',
-      'personal-swatch-bright-winter.pdf',
-      '25 50',
-    ],
+    ['Save JPG', 'image/jpeg', 'swatch-card-bright-winter.jpg', 'ff d8'],
+    ['Save PDF', 'application/pdf', 'swatch-card-bright-winter.pdf', '25 50'],
   ])(
     '%s downloads a %s named after the season',
     async (button, type, name, magic) => {

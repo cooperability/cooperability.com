@@ -123,7 +123,7 @@ function layout(ctx: Ctx, card: Card) {
   ctx.textBaseline = 'alphabetic'
 
   ctx.letterSpacing = '4px'
-  text(ctx, 'PERSONAL COLOR SWATCH', M, M + 20, 22, {
+  text(ctx, 'PERSONAL SWATCH CARD', M, M + 20, 22, {
     color: MUTED,
     weight: 600,
   })
