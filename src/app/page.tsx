@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Gamepad2, InfinityIcon, Puzzle } from 'lucide-react'
+import { Gamepad2, InfinityIcon, Palette, Puzzle } from 'lucide-react'
 import InlineIcon from '../components/InlineIcon'
 import { getRandomQuote } from '../lib/quotes'
 import styles from '../styles/utils.module.css'
@@ -126,6 +126,12 @@ export default function Home() {
           <div className={styles.promptComposerWrapper}>
             <InlineIcon icon={Gamepad2} />
             Candlelight →
+          </div>
+        </a>
+        <a href="/demos/personal-palette" className={styles.promptComposerLink}>
+          <div className={styles.promptComposerWrapper}>
+            <InlineIcon icon={Palette} />
+            Personal Palette →
           </div>
         </a>
 

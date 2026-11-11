@@ -109,6 +109,17 @@ export default function Demos() {
                 </div>
               </div>
 
+              {/* Personal Palette */}
+              <div className={styles.subProjectItem}>
+                <div className={styles.projectInfo}>
+                  <a href="/demos/personal-palette">
+                    Personal Palette
+                    <Platforms of={['desktop', 'mobile']} />
+                  </a>
+                  <span className={styles.projectStatus}>(2026)</span>
+                </div>
+              </div>
+
               {/* Prompt Composer */}
               <div className={styles.subProjectItem}>
                 <div className={styles.projectInfo}>
