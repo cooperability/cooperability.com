@@ -1,7 +1,7 @@
 import { fireEvent, render, screen, within } from '@testing-library/react'
 import { useState } from 'react'
-import ColorSelect from '../../components/swatch-generator/ColorSelect'
-import { EYES } from '../../components/swatch-generator/palette'
+import ColorSelect from '../../components/personal-palette/ColorSelect'
+import { EYES } from '../../components/personal-palette/palette'
 
 // Radix Select calls these, and jsdom does not implement them.
 beforeAll(() => {

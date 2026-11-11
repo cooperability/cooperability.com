@@ -28,6 +28,9 @@ describe('Home page', () => {
       'href',
       '/demos/candlelight'
     )
+    expect(
+      screen.getByRole('link', { name: /Personal Palette/i })
+    ).toHaveAttribute('href', '/demos/personal-palette')
   })
 
   it('renders the profile image with correct alt text', () => {

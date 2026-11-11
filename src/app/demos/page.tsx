@@ -109,11 +109,11 @@ export default function Demos() {
                 </div>
               </div>
 
-              {/* Personal Swatch Generator */}
+              {/* Personal Palette */}
               <div className={styles.subProjectItem}>
                 <div className={styles.projectInfo}>
-                  <a href="/demos/swatch-generator">
-                    Personal Swatch Generator
+                  <a href="/demos/personal-palette">
+                    Personal Palette
                     <Platforms of={['desktop', 'mobile']} />
                   </a>
                   <span className={styles.projectStatus}>(2026)</span>

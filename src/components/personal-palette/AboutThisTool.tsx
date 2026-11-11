@@ -1,4 +1,4 @@
-import { History, Microscope } from 'lucide-react'
+import { Info } from 'lucide-react'
 import {
   Accordion,
   AccordionContent,
@@ -65,41 +65,75 @@ const REFERENCES: Reference[] = [
 
 const heading = 'mb-2 font-semibold text-gray-900 dark:text-gray-100'
 
-export default function SwatchNotes() {
+const link = 'text-blue-600 underline hover:text-blue-800 dark:text-blue-400'
+
+export default function AboutThisTool() {
   return (
-    <Accordion type="single" collapsible className="w-full space-y-2">
-      <AccordionItem value="research">
+    <Accordion type="single" collapsible className="w-full">
+      <AccordionItem value="about">
         <AccordionTrigger>
           <span>
-            <InlineIcon icon={Microscope} />
-            Why it is built this way
+            <InlineIcon icon={Info} />
+            About this Tool
           </span>
         </AccordionTrigger>
         <AccordionContent className="space-y-4 leading-relaxed">
+          <p>
+            Personal Palette builds a color palette from your eye, hair and skin
+            colors and saves it as a swatch card. In-person analysts send
+            clients home with a fan or wallet of fabric swatches. The swatch
+            card is a quick, self-reported version of that fan.
+          </p>
           <div>
             <h3 className={heading}>Skin is depth plus undertone</h3>
             <p>
-              Depth uses the Monk Skin Tone Scale, ten tones from sociologist
-              Ellis Monk that Google released openly in 2022. In a survey of
-              2,214 people in the US, respondents rated it no less inclusive
-              than Fenty Beauty’s 40-shade range and more inclusive than the
-              six-type Fitzpatrick scale (Heldreth et al.). The scale records
-              depth only, not undertone, so undertone is its own pick, in the
-              cool, neutral and warm terms undertone guides use, plus olive, a
-              common fourth.
+              Depth uses the{' '}
+              <a className={link} href="https://skintone.google/">
+                Monk Skin Tone Scale
+              </a>
+              , ten tones from sociologist Ellis Monk that Google released
+              openly in 2022 under{' '}
+              <a
+                className={link}
+                href="https://creativecommons.org/licenses/by/4.0/"
+              >
+                CC BY 4.0
+              </a>
+              . In a survey of 2,214 people in the US, respondents rated it no
+              less inclusive than Fenty Beauty’s 40-shade range and more
+              inclusive than the six-type Fitzpatrick scale (Heldreth et al.).
+              The scale records depth only, not undertone, so undertone is its
+              own pick, in the cool, neutral and warm terms undertone guides
+              use, plus olive, a common fourth.
             </p>
           </div>
           <div>
-            <h3 className={heading}>Seasons are a switch</h3>
+            <h3 className={heading}>*Seasonal analysis (beta)</h3>
             <p>
-              The evidence for seasonal analysis is thin. Radeloff’s 276
-              observers agreed with experts’ recommended colors in five of six
-              photo sets. In a 2020 Chulalongkorn student project with 35
-              subjects, observers’ season picks matched the researcher’s 40% of
-              the time. A narrower result holds up better: on White women’s
-              faces, Perrett and Sprengelmeyer’s observers chose cool blues for
-              fair skin and warm orange-reds for tanned skin. So the season is
-              an option, and the page works without it.
+              Seasonal color analysis is a styling convention with little
+              published testing. Bauhaus teacher Johannes Itten tied people’s
+              preferred colors to the four seasons in <em>The Art of Color</em>{' '}
+              (1961). Bernice Kentner’s <em>Color Me a Season</em> (1978)
+              followed, then Suzanne Caygill’s{' '}
+              <em>Color: The Essence of You</em> and Carole Jackson’s{' '}
+              <em>Color Me Beautiful</em>, both in 1980. Twelve-season systems
+              such as Sci\ART later split each season in three, giving names
+              like Dark Winter.
+            </p>
+            <p className="mt-2">
+              The evidence is thin. Radeloff’s 276 observers agreed with
+              experts’ recommended colors in five of six photo sets. In a 2020
+              Chulalongkorn student project with 35 subjects, observers’ season
+              picks matched the researcher’s 40% of the time. A narrower result
+              holds up better: on White women’s faces, Perrett and
+              Sprengelmeyer’s observers chose cool blues for fair skin and warm
+              orange-reds for tanned skin. So the season is an option, and the
+              page works without it.
+            </p>
+            <p className="mt-2">
+              The twelve seasons have no neutral one. Neutral skin takes its
+              lean from your eyes and hair, and when those cancel out, from how
+              clear and how deep your coloring is.
             </p>
           </div>
           <div>
@@ -123,7 +157,7 @@ export default function SwatchNotes() {
                     href={r.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="break-all text-blue-600 underline hover:text-blue-800 dark:text-blue-400"
+                    className={`break-all ${link}`}
                   >
                     {r.url}
                   </a>
@@ -131,27 +165,6 @@ export default function SwatchNotes() {
               ))}
             </ul>
           </div>
-        </AccordionContent>
-      </AccordionItem>
-      <AccordionItem value="history">
-        <AccordionTrigger>
-          <span>
-            <InlineIcon icon={History} />
-            Where seasonal color analysis comes from
-          </span>
-        </AccordionTrigger>
-        <AccordionContent className="leading-relaxed">
-          <p>
-            Bauhaus teacher Johannes Itten tied people’s preferred colors to the
-            four seasons in <em>The Art of Color</em> (1961). Bernice Kentner’s{' '}
-            <em>Color Me a Season</em> (1978) followed, then Suzanne Caygill’s{' '}
-            <em>Color: The Essence of You</em> and Carole Jackson’s{' '}
-            <em>Color Me Beautiful</em>, both in 1980. Twelve-season systems
-            such as Sci\ART later split each season in three, giving names like
-            Dark Winter. In-person analysts send clients home with a fan or
-            wallet of fabric swatches. The swatch card here is a quick,
-            self-reported version of that fan.
-          </p>
         </AccordionContent>
       </AccordionItem>
     </Accordion>

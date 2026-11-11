@@ -39,7 +39,7 @@ export const SKIN: Swatch[] = [
   '#3A312A',
   '#292420',
 ].map((hex, i) => ({
-  name: `Monk ${i + 1}${i === 0 ? ' (lightest)' : i === 9 ? ' (deepest)' : ''}`,
+  name: `Monk ${i + 1}`,
   hex,
 }))
 
@@ -106,7 +106,7 @@ export const HAIR: ClearFeature[] = [
   { name: 'Dark brown, ash', hex: '#3D2E26', warmth: -0.4, clarity: -0.2 },
   { name: 'Dark brown, warm', hex: '#4A2E1E', warmth: 0.3, clarity: 0 },
   { name: 'Soft black', hex: '#2A2522', warmth: -0.1, clarity: 0.2 },
-  { name: 'Blue-black', hex: '#121216', warmth: -0.8, clarity: 0.6 },
+  { name: 'Black', hex: '#121216', warmth: -0.8, clarity: 0.6 },
   { name: 'Salt and pepper', hex: '#8E8B87', warmth: -0.5, clarity: -0.4 },
   { name: 'Silver', hex: '#D8D8D8', warmth: -0.7, clarity: 0.2 },
 ]
@@ -579,7 +579,13 @@ export function hslToHex(h: number, sat: number, l: number) {
 
 // ---- classification ----
 
-export type Axes = { warmth: number; depth: number; clarity: number }
+export type Axes = {
+  warmth: number
+  depth: number
+  clarity: number
+  // Set when the picked undertone is Neutral, see classify.
+  neutralSkin?: boolean
+}
 
 const clamp = (v: number, lo = -1, hi = 1) => Math.min(hi, Math.max(lo, v))
 
@@ -592,8 +598,11 @@ export function analyze(
   const [le, ls, lh] = [eyes, skin, hair].map((f) => lightness(f.hex))
   // The scales below were grid-searched against every case in the logic test.
   // Skin is a quarter of depth, so deep skin alone does not force a Deep
-  // season. Hair and eyes set the overall value.
-  const warmth = (1.2 * (2 * undertone.warmth + hair.warmth + eyes.warmth)) / 4
+  // season. Hair and eyes set the overall value. For warmth, eyes and hair
+  // weigh a little less than the skin's undertone, because most browns are
+  // coded warm and otherwise pulled Neutral skin into warm seasons.
+  const warmth =
+    (1.25 * (2 * undertone.warmth + 0.9 * (hair.warmth + eyes.warmth))) / 3.8
   const depth = clamp((50 - (0.25 * ls + 0.45 * lh + 0.3 * le)) / 35)
   const contrast = (0.6 * Math.abs(ls - lh) + 0.4 * Math.abs(ls - le)) / 60
   const clarity = clamp(
@@ -601,12 +610,27 @@ export function analyze(
       0.6 +
       0.75 * ((eyes.clarity + hair.clarity + undertone.clarity) / 2)
   )
-  return { warmth: clamp(warmth), depth, clarity }
+  return {
+    warmth: clamp(warmth),
+    depth,
+    clarity,
+    neutralSkin: undertone.name === 'Neutral',
+  }
 }
 
 // The axis furthest from neutral names the season's family. The second
 // characteristic picks which of the two seasons sharing that trait fits.
-export function classify({ warmth, depth, clarity }: Axes): SeasonKey {
+export function classify({
+  warmth,
+  depth,
+  clarity,
+  neutralSkin,
+}: Axes): SeasonKey {
+  // Twelve-season systems have no neutral season. For Neutral skin whose
+  // overall warmth is near zero, the sibling seasons' other difference picks
+  // instead: Winter and Spring are the clearer siblings of Autumn and Summer,
+  // and Bright Winter and Soft Autumn are the deeper ones.
+  const tie = neutralSkin && Math.abs(warmth) <= 0.1
   const warm = warmth >= 0
   const dominant = [
     ['warmth', Math.abs(warmth)],
@@ -615,12 +639,14 @@ export function classify({ warmth, depth, clarity }: Axes): SeasonKey {
   ].sort((a, b) => (b[1] as number) - (a[1] as number))[0][0]
 
   if (dominant === 'depth') {
-    if (depth > 0) return warm ? 'deepAutumn' : 'deepWinter'
-    return warm ? 'lightSpring' : 'lightSummer'
+    if (depth > 0)
+      return (tie ? clarity <= 0 : warm) ? 'deepAutumn' : 'deepWinter'
+    return (tie ? clarity > 0 : warm) ? 'lightSpring' : 'lightSummer'
   }
   if (dominant === 'clarity') {
-    if (clarity > 0) return warm ? 'brightSpring' : 'brightWinter'
-    return warm ? 'softAutumn' : 'softSummer'
+    if (clarity > 0)
+      return (tie ? depth <= 0 : warm) ? 'brightSpring' : 'brightWinter'
+    return (tie ? depth > 0 : warm) ? 'softAutumn' : 'softSummer'
   }
   // Spring is the light, clear side of warm. Winter is the deep, clear side
   // of cool.

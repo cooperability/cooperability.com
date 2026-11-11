@@ -40,7 +40,7 @@ import {
   type Swatch,
 } from './palette'
 import { jpegToPdf } from './pdf'
-import SwatchNotes from './SwatchNotes'
+import AboutThisTool from './AboutThisTool'
 
 const FEATURES = [
   { key: 'eyes', label: 'Eyes', options: EYES, initial: 'Hazel' },
@@ -59,7 +59,7 @@ const NO_AESTHETIC = 'None'
 type FeatureKey = (typeof FEATURES)[number]['key']
 type SectionKey = (typeof SECTIONS)[number]['key']
 
-export default function SwatchGenerator() {
+export default function PersonalPalette() {
   const [picked, setPicked] = useState<Record<FeatureKey, string>>(
     () =>
       Object.fromEntries(FEATURES.map((f) => [f.key, f.initial])) as Record<
@@ -171,7 +171,7 @@ export default function SwatchGenerator() {
     <div className="lg:mx-[calc(50%_-_min(50vw_-_1rem,40rem))]">
       <div className="mb-3 flex flex-col items-center lg:flex-row lg:items-baseline lg:gap-3">
         <h1 className="text-center text-xl font-bold sm:text-2xl">
-          Personal Swatch Generator
+          Personal Palette
         </h1>
         <p className="hidden text-center text-sm sm:block">
           Pick your eye, hair and skin colors to get a palette, then save it as
@@ -224,7 +224,13 @@ export default function SwatchGenerator() {
           </div>
 
           <div className="flex items-center justify-between gap-3 self-end rounded-md border border-foreground/50 px-3 py-2 lg:self-auto">
-            <Label htmlFor="swatch-seasonal">Seasonal analysis</Label>
+            <Label htmlFor="swatch-seasonal">
+              {/* The asterisk points to "*Seasonal analysis (beta)" in About
+                  this Tool, so a screen reader skips it. */}
+              <span>
+                Seasonal Analysis (beta)<span aria-hidden="true">*</span>
+              </span>
+            </Label>
             {/* The default off track measures 1.23:1 on white. */}
             <Switch
               id="swatch-seasonal"
@@ -411,25 +417,9 @@ export default function SwatchGenerator() {
         </Panel>
       </div>
 
-      <p className="mt-3 text-xs text-muted-foreground">
-        Skin tones come from the{' '}
-        <a className="underline" href="https://skintone.google/">
-          Monk Skin Tone Scale
-        </a>{' '}
-        (Ellis Monk and Google,{' '}
-        <a
-          className="underline"
-          href="https://creativecommons.org/licenses/by/4.0/"
-        >
-          CC BY 4.0
-        </a>
-        ). Seasonal color analysis is a styling convention with little published
-        testing.
-      </p>
-
       {/* Reading width, not tool width. */}
       <div className="mx-auto mt-4 max-w-3xl">
-        <SwatchNotes />
+        <AboutThisTool />
       </div>
     </div>
   )

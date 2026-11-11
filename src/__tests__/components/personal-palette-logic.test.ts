@@ -12,8 +12,8 @@ import {
   hexToHsl,
   hslToHex,
   type SeasonKey,
-} from '../../components/swatch-generator/palette'
-import { jpegToPdf } from '../../components/swatch-generator/pdf'
+} from '../../components/personal-palette/palette'
+import { jpegToPdf } from '../../components/personal-palette/pdf'
 
 const pick = <T extends { name: string }>(list: T[], name: string) => {
   const found = list.find((f) => f.name === name)
@@ -44,10 +44,10 @@ describe('classify', () => {
   it.each<[string, string, string, string, SeasonKey]>([
     ['Light blue', 'Monk 2', 'Cool', 'Ash blonde', 'lightSummer'],
     ['Light blue', 'Monk 3', 'Warm', 'Golden blonde', 'lightSpring'],
-    ['Black-brown', 'Monk 10 (deepest)', 'Cool', 'Blue-black', 'deepWinter'],
+    ['Black-brown', 'Monk 10', 'Cool', 'Black', 'deepWinter'],
     ['Dark brown', 'Monk 8', 'Warm', 'Dark brown, warm', 'deepAutumn'],
     ['Hazel', 'Monk 6', 'Warm', 'Auburn', 'warmAutumn'],
-    ['Bright blue', 'Monk 1 (lightest)', 'Cool', 'Blue-black', 'brightWinter'],
+    ['Bright blue', 'Monk 1', 'Cool', 'Black', 'brightWinter'],
     ['Gray-green', 'Monk 4', 'Cool', 'Light brown, ash', 'softSummer'],
     ['Hazel', 'Monk 4', 'Olive', 'Medium brown', 'softAutumn'],
     ['Blue-gray', 'Monk 2', 'Cool', 'Salt and pepper', 'coolSummer'],
@@ -85,13 +85,13 @@ describe('classify deep and tan skin', () => {
     ['Gray-green', 'Monk 8', 'Cool', 'Dark brown, ash', ['softSummer']],
     [
       'Gray',
-      'Monk 10 (deepest)',
+      'Monk 10',
       'Cool',
       'Salt and pepper',
       ['softSummer', 'coolSummer'],
     ],
     ['Hazel', 'Monk 8', 'Warm', 'Medium brown', ['softAutumn', 'warmAutumn']],
-    ['Amber', 'Monk 10 (deepest)', 'Warm', 'Chestnut', ['warmAutumn', 'deepAutumn']],
+    ['Amber', 'Monk 10', 'Warm', 'Chestnut', ['warmAutumn', 'deepAutumn']],
   ])(
     '%s eyes, %s %s skin, %s hair is one of %j',
     (eyes, skin, undertone, hair, seasons) => {
@@ -156,6 +156,37 @@ describe('skin inputs', () => {
     const olive = analyze(e, s, pick(UNDERTONES, 'Olive'), h)
     const neutral = analyze(e, s, pick(UNDERTONES, 'Neutral'), h)
     expect(olive.clarity).toBeLessThan(neutral.clarity)
+  })
+
+  // Warm-coded brown eyes and hair used to pull Neutral skin into the warm
+  // sibling almost every time. Twelve seasons have no neutral one, so a
+  // Neutral pick now splits between the siblings by clarity and depth.
+  it('lets Neutral skin with brown features land in a cool season', () => {
+    expect(seasonOf('Dark brown', 'Monk 2', 'Neutral', 'Medium brown')).toBe(
+      'brightWinter'
+    )
+    expect(seasonOf('Dark brown', 'Monk 2', 'Warm', 'Medium brown')).toBe(
+      'brightSpring'
+    )
+  })
+
+  it('keeps Neutral apart from Warm and Warm apart from Cool', () => {
+    let neutralIsWarm = 0
+    let warmIsCool = 0
+    let n = 0
+    for (const e of EYES)
+      for (const sk of SKIN)
+        for (const h of HAIR) {
+          const [neutral, warm, cool] = ['Neutral', 'Warm', 'Cool'].map((u) =>
+            classify(analyze(e, sk, pick(UNDERTONES, u), h))
+          )
+          n++
+          if (neutral === warm) neutralIsWarm++
+          if (warm === cool) warmIsCool++
+        }
+    // Before the fix: 39% and 5%.
+    expect(neutralIsWarm / n).toBeLessThan(0.35)
+    expect(warmIsCool / n).toBeLessThan(0.03)
   })
 
   it('moves the season from Summer to Spring when only the undertone warms', () => {

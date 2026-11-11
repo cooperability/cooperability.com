@@ -247,7 +247,7 @@ function layout(ctx: Ctx, card: Card) {
 
   ctx.fillStyle = LINE
   ctx.fillRect(M, y, W - 2 * M, 2)
-  text(ctx, 'cooperability.com/demos/swatch-generator', M, y + 44, 20, {
+  text(ctx, 'cooperability.com/demos/personal-palette', M, y + 44, 20, {
     color: MUTED,
   })
   return y + 44 + M - 20

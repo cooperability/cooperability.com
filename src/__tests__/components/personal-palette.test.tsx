@@ -6,8 +6,8 @@ import {
   waitFor,
   within,
 } from '@testing-library/react'
-import SwatchGenerator from '../../components/swatch-generator/SwatchGenerator'
-import { AESTHETICS } from '../../components/swatch-generator/palette'
+import PersonalPalette from '../../components/personal-palette/PersonalPalette'
+import { AESTHETICS } from '../../components/personal-palette/palette'
 
 beforeAll(() => {
   // jsdom's Blob lacks arrayBuffer(), which every target browser has.
@@ -81,10 +81,10 @@ const season = () =>
 const section = (title: string) =>
   screen.queryByRole('heading', { level: 3, name: title })?.closest('section')
 
-describe('SwatchGenerator', () => {
+describe('PersonalPalette', () => {
   it('reclassifies the season when the features change', () => {
-    render(<SwatchGenerator />)
-    pickFeatures('Bright blue', 'Monk 1 (lightest)', 'Cool', 'Blue-black')
+    render(<PersonalPalette />)
+    pickFeatures('Bright blue', 'Monk 1', 'Cool', 'Black')
     expect(season()).toHaveTextContent('Bright Winter')
     expect(season()).toHaveTextContent('also called Clear Winter')
     pickFeatures('Dark brown', 'Monk 8', 'Warm', 'Dark brown, warm')
@@ -92,7 +92,7 @@ describe('SwatchGenerator', () => {
   })
 
   it('selects an undertone with the arrow keys', async () => {
-    render(<SwatchGenerator />)
+    render(<PersonalPalette />)
     const neutral = screen.getByRole('radio', { name: 'Neutral' })
     act(() => neutral.focus())
     fireEvent.keyDown(neutral, { key: 'ArrowRight' })
@@ -103,15 +103,18 @@ describe('SwatchGenerator', () => {
   })
 
   it('announces the result and labels warmth as a blend of features', () => {
-    render(<SwatchGenerator />)
+    render(<PersonalPalette />)
     const live = document.querySelector('[aria-live="polite"]')!
     expect(live).toHaveTextContent(/^Soft Autumn\. Warmth: \w+, Depth/)
-    fireEvent.click(screen.getByRole('switch', { name: 'Seasonal analysis' }))
+    fireEvent.click(
+      screen.getByRole('switch', { name: 'Seasonal Analysis (beta)' })
+    )
     expect(live).toHaveTextContent(/^Your colors\. Warmth:/)
   })
 
   it('credits the Monk scale under its license and states the caveat', () => {
-    render(<SwatchGenerator />)
+    render(<PersonalPalette />)
+    fireEvent.click(screen.getByRole('button', { name: 'About this Tool' }))
     expect(
       screen.getByRole('link', { name: 'Monk Skin Tone Scale' })
     ).toHaveAttribute('href', 'https://skintone.google/')
@@ -122,11 +125,12 @@ describe('SwatchGenerator', () => {
     expect(screen.getByText(/little published testing/)).toBeInTheDocument()
   })
 
-  it('opens a wiki whose sources link to their DOIs', () => {
-    render(<SwatchGenerator />)
-    fireEvent.click(
-      screen.getByRole('button', { name: 'Why it is built this way' })
-    )
+  it('keeps sources and history in one About this Tool section', () => {
+    render(<PersonalPalette />)
+    expect(
+      screen.getAllByRole('button', { name: /About this Tool/ })
+    ).toHaveLength(1)
+    fireEvent.click(screen.getByRole('button', { name: 'About this Tool' }))
     const dois = screen
       .getAllByRole('link')
       .map((link) => link.getAttribute('href')!)
@@ -138,16 +142,12 @@ describe('SwatchGenerator', () => {
         'https://doi.org/10.2466/pms.1990.71.1.151',
       ])
     )
-    fireEvent.click(
-      screen.getByRole('button', {
-        name: 'Where seasonal color analysis comes from',
-      })
-    )
     expect(screen.getByText('The Art of Color')).toBeInTheDocument()
+    expect(screen.getByText('*Seasonal analysis (beta)')).toBeInTheDocument()
   })
 
   it('keeps an undertone picked when its button is pressed again', () => {
-    render(<SwatchGenerator />)
+    render(<PersonalPalette />)
     const warm = screen.getByRole('radio', { name: 'Warm' })
     fireEvent.click(warm)
     fireEvent.click(warm)
@@ -156,7 +156,7 @@ describe('SwatchGenerator', () => {
   })
 
   it('drops a section from the swatch when its toggle is switched off', () => {
-    render(<SwatchGenerator />)
+    render(<PersonalPalette />)
     expect(section('Colors to avoid')).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Avoid' }))
     expect(section('Colors to avoid')).toBeUndefined()
@@ -166,15 +166,17 @@ describe('SwatchGenerator', () => {
   })
 
   it('features the chosen aesthetic', () => {
-    render(<SwatchGenerator />)
+    render(<PersonalPalette />)
     choose('Aesthetic', 'Romantic')
     expect(section('Aesthetic: Romantic')).toBeInTheDocument()
   })
 
   it('works without seasonal analysis', () => {
-    render(<SwatchGenerator />)
+    render(<PersonalPalette />)
     fireEvent.click(screen.getByRole('radio', { name: 'Cool' }))
-    fireEvent.click(screen.getByRole('switch', { name: 'Seasonal analysis' }))
+    fireEvent.click(
+      screen.getByRole('switch', { name: 'Seasonal Analysis (beta)' })
+    )
 
     expect(season()).toHaveTextContent('Your colors')
     expect(section('Best colors')).toBeUndefined()
@@ -194,14 +196,14 @@ describe('SwatchGenerator', () => {
   ])(
     'exports the sections and swatches the preview shows, %s seasons',
     async (_, seasonsOff) => {
-      render(<SwatchGenerator />)
+      render(<PersonalPalette />)
       if (seasonsOff)
         fireEvent.click(
-          screen.getByRole('switch', { name: 'Seasonal analysis' })
+          screen.getByRole('switch', { name: 'Seasonal Analysis (beta)' })
         )
       else choose('Aesthetic', 'Bold')
       await waitFor(() =>
-        expect(drawn).toContain('cooperability.com/demos/swatch-generator')
+        expect(drawn).toContain('cooperability.com/demos/personal-palette')
       )
 
       const headings = screen
@@ -256,7 +258,7 @@ describe('SwatchGenerator', () => {
     jest.useFakeTimers()
     try {
       const toBlob = jest.spyOn(HTMLCanvasElement.prototype, 'toBlob')
-      render(<SwatchGenerator />)
+      render(<PersonalPalette />)
       act(() => jest.advanceTimersByTime(200))
       toBlob.mockClear()
       for (const name of ['Cool', 'Warm', 'Olive'])
@@ -271,16 +273,20 @@ describe('SwatchGenerator', () => {
   })
 
   it('shows Avoid as off, and says why, while seasons are off', () => {
-    render(<SwatchGenerator />)
+    render(<PersonalPalette />)
     const avoid = screen.getByRole('button', { name: 'Avoid' })
     expect(avoid).toHaveAttribute('aria-pressed', 'true')
-    fireEvent.click(screen.getByRole('switch', { name: 'Seasonal analysis' }))
+    fireEvent.click(
+      screen.getByRole('switch', { name: 'Seasonal Analysis (beta)' })
+    )
     expect(avoid).toHaveAttribute('aria-pressed', 'false')
     expect(avoid).toHaveAccessibleDescription(/need seasonal analysis/)
 
     // Toggling another section keeps Avoid's own setting for later.
     fireEvent.click(screen.getByRole('button', { name: 'Neutrals' }))
-    fireEvent.click(screen.getByRole('switch', { name: 'Seasonal analysis' }))
+    fireEvent.click(
+      screen.getByRole('switch', { name: 'Seasonal Analysis (beta)' })
+    )
     expect(avoid).toHaveAttribute('aria-pressed', 'true')
     expect(section('Colors to avoid')).toBeInTheDocument()
   })
@@ -290,11 +296,13 @@ describe('SwatchGenerator', () => {
     jest
       .spyOn(HTMLCanvasElement.prototype, 'toBlob')
       .mockImplementation((cb) => cb(jpeg))
-    render(<SwatchGenerator />)
+    render(<PersonalPalette />)
     const save = screen.getByRole('button', { name: 'Save JPG' })
     await waitFor(() => expect(save).toBeEnabled())
 
-    fireEvent.click(screen.getByRole('switch', { name: 'Seasonal analysis' }))
+    fireEvent.click(
+      screen.getByRole('switch', { name: 'Seasonal Analysis (beta)' })
+    )
     fireEvent.click(screen.getByRole('button', { name: 'Neutrals' }))
     fireEvent.click(screen.getByRole('button', { name: 'Harmonies' }))
     expect(screen.getByText(/Switch on a section/)).toBeInTheDocument()
@@ -326,8 +334,8 @@ describe('SwatchGenerator', () => {
           clicked.push(this.download)
         })
 
-      render(<SwatchGenerator />)
-      pickFeatures('Bright blue', 'Monk 1 (lightest)', 'Cool', 'Blue-black')
+      render(<PersonalPalette />)
+      pickFeatures('Bright blue', 'Monk 1', 'Cool', 'Black')
       const save = screen.getByRole('button', { name: button })
       await waitFor(() => expect(save).toBeEnabled())
       fireEvent.click(save)
