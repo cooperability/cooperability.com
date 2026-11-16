@@ -2,21 +2,28 @@
 
 Everything outstanding on cooperability.com, ranked by priority as task cards
 an agent can pick up cold. It covers bugs, chores and new epics in one list.
-Ranked 2026-10-11 from an adversarial design review of this plan and an
-adversarial implementation review of the code (security, correctness, tests),
-each by a reviewer that had not written what it graded. File and line
-citations are as of commit `bf86ddb`. Re-check a line before editing it.
 
-**State on 2026-10-11:** two P0s, both in the Opioid Converter, a public
-medical calculator. It overstates methadone's morphine equivalence about
-4x at 20 mg/day, and it turns a typed decimal dose into ten times the dose.
-AI review is switched off in production (the status endpoint answers
-`{"enabled":false,"reason":"unconfigured"}`), which is why the AI spend
-findings sit at P1 and not P0. Draft PR
-[#348](https://github.com/cooperability/cooperability.com/pull/348) fixes
-`theme-tokens`. Draft PR [#347](https://github.com/cooperability/cooperability.com/pull/347)
-proposes the Prompt Composer and Mandelbrot items carried here as
-`prompt-composer-v3` and `mandelbrot-theme`.
+**Reworked 2026-11-16** around one question: does this card help the site
+make the case for hiring Cooper into the work he wants next? Nine career
+cards are new, three existing cards moved up, and a cut line now holds the
+polish tier back. The reasoning is in [Who the site is for](#who-the-site-is-for).
+
+The engineering ranking underneath is unchanged. It dates from 2026-10-11,
+from an adversarial design review of this plan and an adversarial
+implementation review of the code (security, correctness, tests), each by a
+reviewer that had not written what it graded. File and line citations in
+cards from that date are as of commit `bf86ddb`. Citations in the nine new
+cards are as of `670ef6e`. Re-check a line before editing it.
+
+**State on 2026-11-16:** no open P0. Both Opioid Converter P0s merged in
+[#350](https://github.com/cooperability/cooperability.com/pull/350) and
+`theme-tokens` merged in
+[#348](https://github.com/cooperability/cooperability.com/pull/348), both on
+2026-10-11. The index below had still listed them as in review. AI review is
+still recorded as switched off in production (not re-checked today), which is why
+the AI spend findings sit at P1 and not P0. The top of the list is now the
+home page: it states Cooper's experience three different ways, its three
+links go to small demos, and it does not mention remediate.app.
 
 ## What the site must do
 
@@ -26,15 +33,50 @@ Priority follows this order. An item ranks by which of these it protects.
    either theme, with a keyboard or a screen reader.
 2. **Bounded in cost.** Nothing spends past `AI_BUDGET_USD`, and no single
    visitor can take a feature offline for everyone else.
-3. **Cheap to leave unattended.** A failure shows up somewhere the owner will
+3. **Makes the case in one screen.** A reader with one minute learns what
+   Cooper builds, sees proof they can check, and can reach him in one tap.
+4. **Cheap to leave unattended.** A failure shows up somewhere the owner will
    look, and every switch has an undo.
-4. **Legible to recruiters and to agents.** The AI work is visible and
-   running, and the docs describe the code that exists.
+5. **Slim.** Every route, dependency and doc earns its place. A card that
+   adds one names what it removes.
 
-**Out of scope here:** writing stash content (`src/stash/*.mdx`),
-weekly Dependabot bumps (the `triage-dependabot` skill batches those), and
-Candlelight game tuning ([Candlelight Beta](Candlelight-Beta.md) owns its
-playtest backlog).
+Item 3 replaces the old "legible to recruiters and to agents" and moves up
+two places. Item 5 is new.
+
+**Out of scope here:** weekly Dependabot bumps (the `triage-dependabot`
+skill batches those), and Candlelight game tuning
+([Candlelight Beta](Candlelight-Beta.md) owns its playtest backlog).
+
+**Cooper writes the words.** Every sentence a visitor reads about Cooper is
+his. A card marked **Owner writes** carries structure, wiring and tests. The
+agent leaves a clearly marked placeholder where the words go and never
+invents a claim, a number or a tagline.
+
+## Who the site is for
+
+Added 2026-11-16. One reader matters more than the rest: an engineer or
+hiring manager in one of four fields, who gives the site about a minute.
+These are the fields in Cooper's career plan, and each has a card that
+speaks to it.
+
+| Field                             | What that reader looks for                  | Cards that show it                     |
+| --------------------------------- | ------------------------------------------- | -------------------------------------- |
+| AI evaluation and safety          | Can he measure whether a model behaves?     | `ai-evals`, `evals-page`, `case-study` |
+| Software for science and medicine | Is he careful where a wrong number hurts?   | `case-study-opioid`                    |
+| Learning tools                    | Has he shipped something people study with? | `flagship-projects`                    |
+| Climate and energy software       | Can he own a system from end to end?        | `flagship-projects`, `case-study`      |
+
+**The date that sets the order is 2027-03-29.** Cooper returns to Stanford
+that day and starts meeting people in these fields. Each of them will look
+him up. The P1 career cards (`home-proof`, `contact-one-tap`,
+`flagship-projects`, `ai-evals`, `case-study`) should be done before then.
+
+**Slim, in rules an agent can check:**
+
+- The home page fits one phone screen above the footer.
+- The demo shelf holds four ([`demo-shelf`](#demo-shelf)).
+- No career card adds a dependency.
+- A card that adds a route or a doc names the one it removes.
 
 ## How to pick up an item
 
@@ -58,6 +100,11 @@ visitors hit today, an accessibility failure, or a blocker for another P1.
 P2: a clear improvement with a named payoff. P3: polish, hygiene, optional.
 Within a tier, cards are in pick order.
 
+**The cut line.** Until every P1 and P2 career card is done, do not start a
+P3 card unless its diff deletes more lines than it adds. `small-fixes` to a
+file a card already has open are the one exception. The P3 tier is real
+work, and none of it changes what a reader decides in their first minute.
+
 **Effort.** S: one PR, a few source files plus their tests. M: one PR with a new test
 harness or many files. L: several PRs.
 
@@ -66,60 +113,69 @@ new capability.
 
 ## Ranked index
 
-| #   | Id                                                    | Kind  | Pri | Effort | Depends on                        | Status                 |
-| --- | ----------------------------------------------------- | ----- | --- | ------ | --------------------------------- | ---------------------- |
-| 1   | [`opioid-methadone`](#opioid-methadone)               | Bug   | P0  | S      | none                              | In review, #350        |
-| 2   | [`opioid-input`](#opioid-input)                       | Bug   | P0  | S      | none                              | In review, #350        |
-| 3   | [`opioid-factors`](#opioid-factors)                   | Bug   | P1  | M      | `opioid-methadone`                | Done, #365             |
-| 4   | [`theme-tokens`](#theme-tokens)                       | Bug   | P1  | S      | none                              | In review, #348        |
-| 5   | [`focus-contrast`](#focus-contrast)                   | Bug   | P1  | S      | `theme-tokens`                    | Open                   |
-| 6   | [`responsive-css`](#responsive-css)                   | Bug   | P1  | M      | none                              | Done, #368             |
-| 7   | [`candlelight-ios-select`](#candlelight-ios-select)   | Bug   | P1  | S      | none                              | Open                   |
-| 8   | [`skillicons-local`](#skillicons-local)               | Bug   | P1  | S      | none                              | Done, #361             |
-| 9   | [`ai-store-guard`](#ai-store-guard)                   | Bug   | P1  | S      | none                              | Open                   |
-| 10  | [`ai-caller-cap`](#ai-caller-cap)                     | Bug   | P1  | M      | none                              | Open                   |
-| 11  | [`ai-go-live`](#ai-go-live)                           | Chore | P1  | S      | `ai-store-guard`, `ai-caller-cap` | Owner only             |
-| 12  | [`offline-applets`](#offline-applets)                 | Bug   | P2  | S      | none                              | Open                   |
-| 13  | [`mandelbrot-theme`](#mandelbrot-theme)               | Bug   | P2  | S      | none                              | Open                   |
-| 14  | [`candlelight-controls`](#candlelight-controls)       | Bug   | P2  | S      | none                              | Open                   |
-| 15  | [`mandelbrot-fixes`](#mandelbrot-fixes)               | Bug   | P2  | M      | none                              | Open                   |
-| 16  | [`prompt-composer-desktop`](#prompt-composer-desktop) | Epic  | P2  | M      | none                              | Open                   |
-| 17  | [`stash-frontmatter`](#stash-frontmatter)             | Bug   | P2  | S      | none                              | Open                   |
-| 18  | [`a11y-in-ci`](#a11y-in-ci)                           | Chore | P2  | M      | `theme-tokens`                    | Open                   |
-| 19  | [`ai-switch-failsafe`](#ai-switch-failsafe)           | Bug   | P2  | S      | none                              | Open                   |
-| 20  | [`ai-billing-check`](#ai-billing-check)               | Chore | P2  | S      | none                              | Open                   |
-| 21  | [`error-tracking`](#error-tracking)                   | Epic  | P2  | M      | none                              | Open                   |
-| 22  | [`csp-enforce`](#csp-enforce)                         | Chore | P2  | S      | `error-tracking`                  | Open                   |
-| 23  | [`ai-evals`](#ai-evals)                               | Epic  | P2  | M      | none                              | Open                   |
-| 24  | [`json-ld-demos`](#json-ld-demos)                     | Epic  | P2  | S      | none                              | Open                   |
-| 25  | [`case-study`](#case-study)                           | Epic  | P2  | M      | `ai-go-live`                      | Open                   |
-| 26  | [`ai-fence-escape`](#ai-fence-escape)                 | Chore | P3  | S      | none                              | Open                   |
-| 27  | [`ai-reservation-margin`](#ai-reservation-margin)     | Chore | P3  | S      | none                              | Open                   |
-| 28  | [`audit-workflow`](#audit-workflow)                   | Chore | P3  | S      | none                              | Open                   |
-| 29  | [`pnpm-integrity`](#pnpm-integrity)                   | Chore | P3  | S      | none                              | Open                   |
-| 30  | [`mdx-cleanup`](#mdx-cleanup)                         | Chore | P3  | S      | none                              | Open                   |
-| 31  | [`dead-code`](#dead-code)                             | Chore | P3  | S      | none                              | Open                   |
-| 32  | [`src-tree-merge`](#src-tree-merge)                   | Chore | P3  | M      | `dead-code`                       | Open                   |
-| 33  | [`swc-gitignore`](#swc-gitignore)                     | Chore | P3  | S      | none                              | Open                   |
-| 34  | [`sw-kill-switch`](#sw-kill-switch)                   | Chore | P3  | S      | none                              | Open                   |
-| 35  | [`offline-fallback`](#offline-fallback)               | Epic  | P3  | S      | `offline-applets`                 | Open                   |
-| 36  | [`tw-animate-css`](#tw-animate-css)                   | Chore | P3  | S      | none                              | Open                   |
-| 37  | [`small-fixes`](#small-fixes)                         | Bug   | P3  | S each | none                              | Open                   |
-| 38  | [`prompt-composer-v3`](#prompt-composer-v3)           | Epic  | P3  | M      | none                              | Open, proposed in #347 |
-| 39  | [`ai-cost-dashboard`](#ai-cost-dashboard)             | Epic  | P3  | S      | `ai-go-live`                      | Open                   |
-| 40  | [`ai-haiku-fallback`](#ai-haiku-fallback)             | Epic  | P3  | S      | `ai-evals`                        | Open                   |
-| 41  | [`og-images`](#og-images)                             | Epic  | P3  | M      | none                              | Open                   |
-| 42  | [`applet-icons`](#applet-icons)                       | Epic  | P3  | S      | none                              | Open                   |
-| 43  | [`rss-feed`](#rss-feed)                               | Epic  | P3  | S      | none                              | Open                   |
-| 44  | [`visual-polish`](#visual-polish)                     | Chore | P3  | S each | `focus-contrast` for some         | Open                   |
-| 45  | [`seo-site-audit`](#seo-site-audit)                   | Chore | P3  | S      | none                              | Owner only             |
-| 46  | [`license`](#license)                                 | Chore | P3  | S      | none                              | Done, #358             |
+| #   | Id                                                    | Kind  | Pri | Effort | Depends on                        | Status                       |
+| --- | ----------------------------------------------------- | ----- | --- | ------ | --------------------------------- | ---------------------------- |
+| 1   | [`opioid-methadone`](#opioid-methadone)               | Bug   | P0  | S      | none                              | Done, #350                   |
+| 2   | [`opioid-input`](#opioid-input)                       | Bug   | P0  | S      | none                              | Done, #350                   |
+| 3   | [`home-proof`](#home-proof)                           | Bug   | P1  | S      | none                              | Open, owner writes           |
+| 4   | [`contact-one-tap`](#contact-one-tap)                 | Epic  | P1  | S      | none                              | Open                         |
+| 5   | [`flagship-projects`](#flagship-projects)             | Epic  | P1  | M      | `home-proof`                      | Open, owner writes           |
+| 6   | [`opioid-factors`](#opioid-factors)                   | Bug   | P1  | M      | `opioid-methadone`                | Done, #365                   |
+| 7   | [`theme-tokens`](#theme-tokens)                       | Bug   | P1  | S      | none                              | Done, #348                   |
+| 8   | [`focus-contrast`](#focus-contrast)                   | Bug   | P1  | S      | `theme-tokens`                    | Open                         |
+| 9   | [`responsive-css`](#responsive-css)                   | Bug   | P1  | M      | none                              | Done, #368                   |
+| 10  | [`candlelight-ios-select`](#candlelight-ios-select)   | Bug   | P1  | S      | none                              | Open                         |
+| 11  | [`skillicons-local`](#skillicons-local)               | Bug   | P1  | S      | none                              | Done, #361                   |
+| 12  | [`ai-store-guard`](#ai-store-guard)                   | Bug   | P1  | S      | none                              | Open                         |
+| 13  | [`ai-caller-cap`](#ai-caller-cap)                     | Bug   | P1  | M      | none                              | Open                         |
+| 14  | [`ai-go-live`](#ai-go-live)                           | Chore | P1  | S      | `ai-store-guard`, `ai-caller-cap` | Owner only                   |
+| 15  | [`ai-evals`](#ai-evals)                               | Epic  | P1  | M      | none                              | Open                         |
+| 16  | [`case-study`](#case-study)                           | Epic  | P1  | M      | `ai-go-live`                      | Open                         |
+| 17  | [`home-static`](#home-static)                         | Chore | P2  | S      | none                              | Open                         |
+| 18  | [`og-images`](#og-images)                             | Epic  | P2  | M      | none                              | Open                         |
+| 19  | [`evals-page`](#evals-page)                           | Epic  | P2  | S      | `ai-evals`                        | Open                         |
+| 20  | [`case-study-opioid`](#case-study-opioid)             | Epic  | P2  | S      | none                              | Open, owner writes           |
+| 21  | [`docs-slim`](#docs-slim)                             | Chore | P2  | S      | none                              | Open                         |
+| 22  | [`demo-shelf`](#demo-shelf)                           | Chore | P2  | S      | none                              | Owner only                   |
+| 23  | [`degree-line`](#degree-line)                         | Chore | P2  | S      | none                              | Owner only, after 2027-06-13 |
+| 24  | [`offline-applets`](#offline-applets)                 | Bug   | P2  | S      | none                              | Open                         |
+| 25  | [`mandelbrot-theme`](#mandelbrot-theme)               | Bug   | P2  | S      | none                              | Open                         |
+| 26  | [`candlelight-controls`](#candlelight-controls)       | Bug   | P2  | S      | none                              | Open                         |
+| 27  | [`mandelbrot-fixes`](#mandelbrot-fixes)               | Bug   | P2  | M      | none                              | Open                         |
+| 28  | [`prompt-composer-desktop`](#prompt-composer-desktop) | Epic  | P2  | M      | none                              | Open                         |
+| 29  | [`stash-frontmatter`](#stash-frontmatter)             | Bug   | P2  | S      | none                              | Open                         |
+| 30  | [`a11y-in-ci`](#a11y-in-ci)                           | Chore | P2  | M      | `theme-tokens`                    | Open                         |
+| 31  | [`ai-switch-failsafe`](#ai-switch-failsafe)           | Bug   | P2  | S      | none                              | Open                         |
+| 32  | [`ai-billing-check`](#ai-billing-check)               | Chore | P2  | S      | none                              | Open                         |
+| 33  | [`error-tracking`](#error-tracking)                   | Epic  | P2  | M      | none                              | Open                         |
+| 34  | [`csp-enforce`](#csp-enforce)                         | Chore | P2  | S      | `error-tracking`                  | Open                         |
+| 35  | [`json-ld-demos`](#json-ld-demos)                     | Epic  | P2  | S      | none                              | Open                         |
+| 36  | [`ai-fence-escape`](#ai-fence-escape)                 | Chore | P3  | S      | none                              | Open                         |
+| 37  | [`ai-reservation-margin`](#ai-reservation-margin)     | Chore | P3  | S      | none                              | Open                         |
+| 38  | [`audit-workflow`](#audit-workflow)                   | Chore | P3  | S      | none                              | Open                         |
+| 39  | [`pnpm-integrity`](#pnpm-integrity)                   | Chore | P3  | S      | none                              | Open                         |
+| 40  | [`mdx-cleanup`](#mdx-cleanup)                         | Chore | P3  | S      | none                              | Open                         |
+| 41  | [`dead-code`](#dead-code)                             | Chore | P3  | S      | none                              | Open                         |
+| 42  | [`src-tree-merge`](#src-tree-merge)                   | Chore | P3  | M      | `dead-code`                       | Open                         |
+| 43  | [`swc-gitignore`](#swc-gitignore)                     | Chore | P3  | S      | none                              | Open                         |
+| 44  | [`sw-kill-switch`](#sw-kill-switch)                   | Chore | P3  | S      | none                              | Open                         |
+| 45  | [`offline-fallback`](#offline-fallback)               | Epic  | P3  | S      | `offline-applets`                 | Open                         |
+| 46  | [`tw-animate-css`](#tw-animate-css)                   | Chore | P3  | S      | none                              | Open                         |
+| 47  | [`small-fixes`](#small-fixes)                         | Bug   | P3  | S each | none                              | Open                         |
+| 48  | [`prompt-composer-v3`](#prompt-composer-v3)           | Epic  | P3  | M      | none                              | Open, proposed in #347       |
+| 49  | [`ai-cost-dashboard`](#ai-cost-dashboard)             | Epic  | P3  | S      | `ai-go-live`                      | Open                         |
+| 50  | [`ai-haiku-fallback`](#ai-haiku-fallback)             | Epic  | P3  | S      | `ai-evals`                        | Open                         |
+| 51  | [`applet-icons`](#applet-icons)                       | Epic  | P3  | S      | none                              | Open                         |
+| 52  | [`rss-feed`](#rss-feed)                               | Epic  | P3  | S      | none                              | Open                         |
+| 53  | [`visual-polish`](#visual-polish)                     | Chore | P3  | S each | `focus-contrast` for some         | Open                         |
+| 54  | [`seo-site-audit`](#seo-site-audit)                   | Chore | P3  | S      | none                              | Owner only                   |
+| 55  | [`license`](#license)                                 | Chore | P3  | S      | none                              | Done, #358                   |
 
 ## P0
 
 `ai-store-guard` also becomes P0 the moment `ANTHROPIC_API_KEY` is set in
-production before it lands. Until both opioid cards land, the owner may want
-to take `/demos/opioid-converter` down or put a warning on it.
+production before it lands. Both opioid cards below landed in #350 and
+stay here until the owner moves them to the [Done log](#done-log).
 
 ### `opioid-methadone`
 
@@ -182,6 +238,69 @@ A typed decimal dose becomes ten times the dose.
   "-100" never show NaN or a negative total. Each fails on today's code.
 
 ## P1
+
+### `home-proof`
+
+One claim about Cooper, stated the same way in every place.
+
+`Bug` · P1 · S · Depends on: none · **Owner writes**
+
+- **Why.** The home page gives three lengths of experience. The page
+  description and the Open Graph description say "5+ years"
+  (`src/app/page.tsx:17`, `:35`). The visible paragraph says "5 years". The
+  Twitter card and the `Person` block say "7+ years" (`:43`, `:70`). The
+  title says "Full Stack Engineer" and the structured data says "Full Stack
+  Developer". A reader who notices one mismatch discounts everything near it.
+  None of the five places names the work Cooper wants next.
+- **Do.** Put the headline, the one-sentence description, the years figure
+  and the job title in one module. Read all five places from it: page
+  metadata, Open Graph, Twitter card, the `Person` block and the visible
+  paragraph. Cooper supplies the words. Update `knowsAbout` in the `Person`
+  block to match.
+- **Done when.** A test fails if any of the five places disagrees with the
+  module, and `grep -n "years" src/app/page.tsx` finds no literal figure.
+
+### `contact-one-tap`
+
+The résumé and a way to reach Cooper, one tap from any page.
+
+`Epic` · P1 · S · Depends on: none
+
+- **Why.** The résumé is two taps away. The footer's square button opens
+  `/stash/linktree`, and the résumé link is on that page
+  (`src/sections/Footer.tsx`, `src/stash/linktree.mdx`). Neither the header,
+  the footer nor the home page has a contact link other than the social
+  icons, so a reader who wants to reply has to leave for LinkedIn first.
+- **Do.** Add a résumé link and one contact link to the footer row that
+  renders on every page. The contact link is a `mailto:` or a LinkedIn
+  message URL, and Cooper picks which. No form, no backend, no dependency.
+- **Done when.** A footer test finds a link named "Resume" and a link named
+  "Contact" by role, and both work with JavaScript off.
+
+### `flagship-projects`
+
+Three flagship projects on the home page, each with one fact a reader can
+check.
+
+`Epic` · P1 · M · Depends on: `home-proof` · **Owner writes**
+
+- **Why.** The home page's three links go to Prompt Composer, Mandelbrot
+  Explorer and Candlelight (`src/app/page.tsx`). remediate.app appears only
+  on `/demos` (`src/app/demos/page.tsx:148`). The home page does not mention
+  claugmentations or the AI review route's spend ledger. The first screen
+  shows the smallest work.
+- **Do.** One typed array in `src/lib/projects.ts`: name, one line on what
+  it is, one measured fact, the link and the stack. The home page renders
+  the first three. `/demos` reads the same array in place of its hand-written
+  JSX, so this card should delete more markup than it adds. A fact is a
+  number with a source, for example a test count or a days-active figure,
+  never an adjective. Candidates for Cooper to confirm and order:
+  remediate.app, the AI review route (after `ai-go-live`), claugmentations
+  (if its repository goes public), and the Rust project once it has a
+  release. The small demos stay on `/demos`.
+- **Done when.** The home page renders three entries from the array,
+  `/demos` has no project markup of its own, and each fact names its source
+  in a comment beside it.
 
 ### `opioid-factors`
 
@@ -398,7 +517,154 @@ only** (spends money)
 - **Done when.** `GET /api/ai/critique` reports enabled with
   `store: "upstash"`, and one review completes from the live page.
 
+### `ai-evals`
+
+Catch reviewer-prompt and schema regressions.
+
+`Epic` · P1 · M · Depends on: none
+
+- **Why now.** Raised from P2 on 2026-11-16. Evaluation is the first of the
+  four fields in [Who the site is for](#who-the-site-is-for), and a running
+  eval is the proof.
+- **Why.** Nothing stops a prompt or schema change from silently degrading
+  reviews. The old plan ran a live model on every PR. That spends outside
+  the ledger, flakes on score ranges, and fails on Dependabot and fork PRs,
+  which get no repository secrets.
+- **Do.** Two layers. Every PR: deterministic Jest checks of the schema,
+  fence escaping and output validation, no network. On demand: a live eval
+  of fixture prompts against expected score ranges and suggested
+  components, run only on `workflow_dispatch` or changes under
+  `src/lib/ai/**`, with its own Console workspace and limit. Include hostile
+  fixtures that ask the reviewer to do the task instead
+  ([threat #5](AI-Review.md#threat-model)).
+- **Done when.** Breaking the response schema fails the Jest layer, and the
+  live layer runs green once against the current prompt.
+
+### `case-study`
+
+A "how it's built" page for the AI infrastructure.
+
+`Epic` · P1 · M · Depends on: `ai-go-live` · **Owner writes**
+
+- **Why.** The AI review route (spend ledger, threat model, off switch) is
+  the portfolio piece, and nothing on the site explains it to a recruiter.
+  It should showcase a feature that is switched on.
+- **Do.** One MDX stash entry drawing on [AI Review](AI-Review.md) and the
+  systems diagram in the README.
+- **Done when.** The page is linked from `/demos` and from the Prompt
+  Composer page.
+
 ## P2
+
+### `home-static`
+
+Stop server-rendering the home page on every visit for one quote.
+
+`Chore` · P2 · S · Depends on: none
+
+- **Why.** `src/app/page.tsx:12` sets `dynamic = 'force-dynamic'` so the
+  quote re-rolls per request. The page every reader lands on is the only
+  one that cannot be served from the edge cache. `QuoteBox` is already a
+  client component with its own re-roll button (`src/app/quote-box.tsx`).
+- **Do.** Remove `force-dynamic`. Render one quote at build time and pick a
+  new one in an effect after hydration, so the server and client markup
+  agree on first paint.
+- **Done when.** `pnpm build` lists `/` as static, the button still changes
+  the quote, and the console shows no hydration warning.
+
+### `og-images`
+
+Generated Open Graph images per page and demo.
+
+`Epic` · P2 · M · Depends on: none
+
+- **Why.** Raised from P3 on 2026-11-16. A link pasted into a message or a
+  LinkedIn post is how most readers first see the site, and no demo URL has an image
+  of its own.
+- **Do.** `opengraph-image.tsx` per route with `next/og`.
+- **Done when.** Each demo URL unfurls with its own image in a link preview.
+
+### `evals-page`
+
+Show the eval results to a visitor.
+
+`Epic` · P2 · S · Depends on: `ai-evals`
+
+- **Why.** An eval that runs in CI proves nothing to a reader who cannot
+  see it. This is the page a reader from the AI evaluation field opens.
+- **Do.** The on-demand eval in `ai-evals` writes one small JSON file: the
+  date, the model, the fixture count, the pass count and a pass or fail per
+  fixture name. Commit it. One static page renders it and links to the
+  fixtures and to the case study. No client JavaScript, no chart library,
+  no prompt text in the file.
+- **Done when.** The page shows the date and pass count of the last run,
+  builds as static, and marks a run older than 90 days as stale.
+
+### `case-study-opioid`
+
+Write up the dosing fix.
+
+`Epic` · P2 · S · Depends on: none · **Owner writes**
+
+- **Why.** The converter overstated methadone's morphine equivalence about
+  4x at 20 mg/day and turned a typed decimal dose into ten times the dose.
+  Both were found by review and fixed in #350, and #365 cited every
+  conversion factor to its source table. A found and fixed dosing error in a public medical
+  calculator, with a cited source and tests, is the strongest correctness
+  story on the site. It is the one aimed at software for science and
+  medicine.
+- **Do.** One short MDX stash entry: what was wrong, how it was found, the
+  source for the corrected factor, and the tests that now hold it. Link it
+  from `/demos/opioid-converter`.
+- **Done when.** The converter page links to the entry, and the entry names
+  the source and the two pull requests.
+
+### `docs-slim`
+
+Delete the doc for a server that was never built.
+
+`Chore` · P2 · S · Depends on: none
+
+- **Why.** `docs/` holds 313,661 bytes in 17 files (2026-11-16). `MCP.md`
+  is 69,186 of them and describes an MCP server that was never built, as
+  [Parked epics](#parked-epics) says. An agent that loads it spends context
+  on a design that does not exist.
+- **Do.** Delete `docs/MCP.md`. Git history keeps it. Remove its row from
+  the README index (`README.md:298`) and from `docs/PROJECT-STRUCTURE.md:121`,
+  and drop the link from the parked MCP epic so the entry stands alone.
+- **Done when.** `grep -rn "MCP.md" README.md docs` finds nothing, and
+  `wc -c docs/*.md` totals under 260,000.
+
+### `demo-shelf`
+
+Decide how many demos the site carries.
+
+`Chore` · P2 · S · Depends on: none · **Owner only**
+
+- **Why.** `/demos` lists four demos, and draft
+  [#369](https://github.com/cooperability/cooperability.com/pull/369) adds a
+  fifth. Each demo is a route to keep correct in two themes, on phones, with
+  a keyboard. Eight open cards in this index are upkeep on the four that
+  exist (`candlelight-ios-select`, `offline-applets`, `mandelbrot-theme`,
+  `candlelight-controls`, `mandelbrot-fixes`, `prompt-composer-desktop`,
+  `prompt-composer-v3`, `applet-icons`).
+- **Do.** Cooper sets a shelf size and a rule. The default is four, and a
+  new demo replaces one. Decide #369 against the rule.
+- **Done when.** The rule is written in this card, and #369 is merged with a
+  removal or closed.
+
+### `degree-line`
+
+Add the degree when it is conferred.
+
+`Chore` · P2 · S · Depends on: none · **Owner only**
+
+- **Why.** Stanford's Commencement is 2027-06-13. The `Person` block has no
+  `alumniOf` today.
+- **Do.** After the degree is conferred, add `alumniOf` to the `Person`
+  block and one visible line through the `home-proof` module. Not before.
+- **Done when.** Google's Rich Results Test parses the block with the new
+  field.
 
 ### `offline-applets`
 
@@ -615,26 +881,6 @@ Enforce the CSP that already ships in report-only mode.
 - **Done when.** Production sends an enforced `Content-Security-Policy` and
   a preview walk-through records zero violations.
 
-### `ai-evals`
-
-Catch reviewer-prompt and schema regressions.
-
-`Epic` · P2 · M · Depends on: none
-
-- **Why.** Nothing stops a prompt or schema change from silently degrading
-  reviews. The old plan ran a live model on every PR. That spends outside
-  the ledger, flakes on score ranges, and fails on Dependabot and fork PRs,
-  which get no repository secrets.
-- **Do.** Two layers. Every PR: deterministic Jest checks of the schema,
-  fence escaping and output validation, no network. On demand: a live eval
-  of fixture prompts against expected score ranges and suggested
-  components, run only on `workflow_dispatch` or changes under
-  `src/lib/ai/**`, with its own Console workspace and limit. Include hostile
-  fixtures that ask the reviewer to do the task instead
-  ([threat #5](AI-Review.md#threat-model)).
-- **Done when.** Breaking the response schema fails the Jest layer, and the
-  live layer runs green once against the current prompt.
-
 ### `json-ld-demos`
 
 Structured data for each demo.
@@ -650,20 +896,6 @@ Structured data for each demo.
   block too.
 - **Done when.** Google's Rich Results Test parses each demo page, and a test
   with `</script>` in a field shows no raw closing tag.
-
-### `case-study`
-
-A "how it's built" page for the AI infrastructure.
-
-`Epic` · P2 · M · Depends on: `ai-go-live`
-
-- **Why.** The AI review route (spend ledger, threat model, off switch) is
-  the portfolio piece, and nothing on the site explains it to a recruiter.
-  It should showcase a feature that is switched on.
-- **Do.** One MDX stash entry drawing on [AI Review](AI-Review.md) and the
-  systems diagram in the README.
-- **Done when.** The page is linked from `/demos` and from the Prompt
-  Composer page.
 
 ## P3
 
@@ -905,15 +1137,6 @@ A cheaper model for AI review.
   note in `src/lib/ai/pricing.ts`.
 - **Done when.** The live eval passes on the fallback model, and the model
   choice is one constant.
-
-### `og-images`
-
-Generated Open Graph images per page and demo.
-
-`Epic` · P3 · M · Depends on: none
-
-- **Do.** `opengraph-image.tsx` per route with `next/og`.
-- **Done when.** Each demo URL unfurls with its own image in a link preview.
 
 ### `applet-icons`
 
