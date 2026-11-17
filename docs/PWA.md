@@ -337,15 +337,15 @@ navigator.serviceWorker.register('/sw.js')
 
 ### Step 1: Create a New Manifest File
 
-**File:** `public/icons/my-new-applet.webmanifest`
+**File:** `public/icons/<applet-slug>.webmanifest`
 
 ```json
 {
   "name": "My New Applet",
   "short_name": "Applet",
   "description": "Description of what this tool does",
-  "start_url": "/my-new-applet",
-  "scope": "/my-new-applet",
+  "start_url": "/demos/<applet-slug>",
+  "scope": "/demos/<applet-slug>",
   "display": "standalone",
   "theme_color": "#8b5cf6",
   "background_color": "#ffffff",
@@ -375,19 +375,19 @@ navigator.serviceWorker.register('/sw.js')
 
 ### Step 2: Create the Page Component
 
-**File:** `src/app/demos/my-new-applet/page.tsx`, a server component. Put the
-interactive part in a sibling `my-new-applet-client.tsx` marked `'use client'`,
+**File:** `src/app/demos/<applet-slug>/page.tsx`, a server component. Put the
+interactive part in a sibling `<applet-slug>-client.tsx` marked `'use client'`,
 as the other applets do.
 
 ```tsx
 import type { Metadata, Viewport } from 'next'
 import HardLoad from '@/src/components/HardLoad'
-import MyNewAppletClient from './my-new-applet-client'
+import MyNewAppletClient from './<applet-slug>-client'
 
 export const metadata: Metadata = {
   title: { absolute: 'My New Applet' },
   description: 'Description of what this tool does',
-  manifest: '/icons/my-new-applet.webmanifest',
+  manifest: '/icons/<applet-slug>.webmanifest',
   icons: { icon: '/icon.ico', apple: '/icons/apple-touch-icon.png' },
   appleWebApp: {
     capable: true,
@@ -438,7 +438,7 @@ export default function MyNewAppletPage() {
     },
     {
       "name": "My New Applet", // Add your new applet here
-      "url": "/my-new-applet"
+      "url": "/demos/<applet-slug>"
     }
   ]
 }
@@ -457,7 +457,7 @@ export default function MyNewAppletPage() {
 pnpm dev
 
 # Navigate to applet URL
-open http://localhost:3000/my-new-applet
+open http://localhost:3000/demos/<applet-slug>
 
 # Open Chrome DevTools
 # 1. Press F12
@@ -465,7 +465,7 @@ open http://localhost:3000/my-new-applet
 # 3. Click Manifest in sidebar
 # 4. Verify:
 #    - Name: "My New Applet"
-#    - Start URL: "/my-new-applet"
+#    - Start URL: "/demos/<applet-slug>"
 #    - Theme color: your chosen color
 #    - Icons: 4 icons visible (192x192, 512x512, etc.)
 ```
@@ -481,13 +481,13 @@ git push origin main  # Triggers Vercel deployment
 
 # Test on iPhone (REQUIRED - simulators don't work for PWA testing)
 # 1. Open Safari on iPhone
-# 2. Navigate to: https://cooperability.com/my-new-applet
+# 2. Navigate to: https://www.cooperability.com/demos/<applet-slug>
 # 3. Tap Share button
 # 4. Tap "Add to Home Screen"
 # 5. Verify name shows "My New Applet" (not "Co-Operability")
 # 6. Tap Add
 # 7. Launch from home screen
-# 8. Verify opens to /my-new-applet in standalone mode
+# 8. Verify opens to /demos/<applet-slug> in standalone mode
 ```
 
 ---
